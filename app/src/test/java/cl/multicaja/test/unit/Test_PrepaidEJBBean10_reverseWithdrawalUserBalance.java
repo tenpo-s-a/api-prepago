@@ -285,14 +285,12 @@ public class Test_PrepaidEJBBean10_reverseWithdrawalUserBalance {
     PrepaidCard10 prepaidCard10 = new PrepaidCard10();
     prepaidCard10.setId(Long.MAX_VALUE);
     prepaidCard10.setStatus(PrepaidCardStatus.ACTIVE);
-    prepaidCard10.setProcessorUserId("1");
     prepaidCard10.setEncryptedPan("1234567890");
     prepaidCard10.setPan("1234567890");
 
     PrepaidMovement10 originalWithdraw = new PrepaidMovement10();
     originalWithdraw.setMonto(BigDecimal.TEN);
     originalWithdraw.setFechaCreacion(Timestamp.from(ZonedDateTime.now().toInstant()));
-    originalWithdraw.setIdPrepaidUser(Long.MAX_VALUE);
     originalWithdraw.setIdTxExterno("0987654321");
 
     PrepaidMovement10 reverse = new PrepaidMovement10();
@@ -349,7 +347,6 @@ public class Test_PrepaidEJBBean10_reverseWithdrawalUserBalance {
     PrepaidCard10 prepaidCard10 = new PrepaidCard10();
     prepaidCard10.setId(Long.MAX_VALUE);
     prepaidCard10.setStatus(PrepaidCardStatus.ACTIVE);
-    prepaidCard10.setProcessorUserId("1");
     prepaidCard10.setEncryptedPan("1234567890");
     prepaidCard10.setPan("1234567890");
 
@@ -417,7 +414,6 @@ public class Test_PrepaidEJBBean10_reverseWithdrawalUserBalance {
     PrepaidCard10 prepaidCard10 = new PrepaidCard10();
     prepaidCard10.setId(Long.MAX_VALUE);
     prepaidCard10.setStatus(PrepaidCardStatus.ACTIVE);
-    prepaidCard10.setProcessorUserId("1");
     prepaidCard10.setEncryptedPan("1234567890");
     prepaidCard10.setPan("1234567890");
 
@@ -490,7 +486,6 @@ public class Test_PrepaidEJBBean10_reverseWithdrawalUserBalance {
     PrepaidCard10 prepaidCard10 = new PrepaidCard10();
     prepaidCard10.setId(Long.MAX_VALUE);
     prepaidCard10.setStatus(PrepaidCardStatus.ACTIVE);
-    prepaidCard10.setProcessorUserId("1");
     prepaidCard10.setEncryptedPan("1234567890");
     prepaidCard10.setPan("1234567890");
 
@@ -556,7 +551,6 @@ public class Test_PrepaidEJBBean10_reverseWithdrawalUserBalance {
     PrepaidCard10 prepaidCard10 = new PrepaidCard10();
     prepaidCard10.setId(Long.MAX_VALUE);
     prepaidCard10.setStatus(PrepaidCardStatus.ACTIVE);
-    prepaidCard10.setProcessorUserId("1");
     prepaidCard10.setEncryptedPan("1234567890");
     prepaidCard10.setPan("1234567890");
 

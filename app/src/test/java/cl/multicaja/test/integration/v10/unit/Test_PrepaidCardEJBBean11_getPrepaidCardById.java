@@ -42,7 +42,7 @@ public class Test_PrepaidCardEJBBean11_getPrepaidCardById extends TestBaseUnit {
   @Test
   public void getPrepaidCardById() throws Exception {
     PrepaidCard10 card = buildPrepaidCard10();
-    card = createPrepaidCard10(card);
+    card = createPrepaidCardV2(card);
 
     PrepaidCard10 dbCard = getPrepaidCardEJBBean11().getPrepaidCardById(null, card.getId());
 

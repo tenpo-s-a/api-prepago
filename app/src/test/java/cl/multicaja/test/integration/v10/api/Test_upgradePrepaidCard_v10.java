@@ -83,7 +83,7 @@ public class Test_upgradePrepaidCard_v10 extends TestBaseUnitApi {
     prepaidUser10 = createPrepaidUserV2(prepaidUser10);
 
     PrepaidCard10 prepaidCard10 = buildPrepaidCard10(prepaidUser10);
-    prepaidCard10 = createPrepaidCard10(prepaidCard10);
+    prepaidCard10 = createPrepaidCardV2(prepaidCard10);
 
     HttpResponse resp = upgradePrepaidCard(prepaidUser10.getUuid(), getRandomNumericString(10));
 

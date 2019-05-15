@@ -14,8 +14,9 @@ public class Test_PrepaidUserEJBBean10_createPrepaidUser extends TestBaseUnit {
 
   @Test
   public void createPrepaidUser_ok() throws Exception {
-    PrepaidUser10 user = buildPrepaidUser10();
-    createPrepaidUser10(user);
+    PrepaidUser10 user = buildPrepaidUserv2();
+    user = createPrepaidUserV2(user);
+    Assert.assertNotNull("Debe existir",user);
   }
 
   @Test
@@ -25,8 +26,8 @@ public class Test_PrepaidUserEJBBean10_createPrepaidUser extends TestBaseUnit {
      * Caso de registro de un nuevo usuario, pero que luego se intenta registrar el mismo y deberia fallar
      */
 
-    PrepaidUser10 user = buildPrepaidUser10();
-    user = createPrepaidUser10(user);
+    PrepaidUser10 user = buildPrepaidUserv2();
+    user = createPrepaidUserV2(user);
 
     //se intenta registrar exactamente el mismo usuario
     try {

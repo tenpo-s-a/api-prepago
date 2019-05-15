@@ -57,12 +57,11 @@ public class PrepaidUserEJBBean10 extends PrepaidBaseEJBBean10 implements Prepai
   private TecnocomService tecnocomService;
 
   private static final String INSERT_USER = String.format("INSERT INTO prepago.prp_usuario(\n" +
-    "            id_usuario_mc, rut, estado, saldo_info, saldo_expiracion, \n" +
-    "            intentos_validacion, fecha_creacion, fecha_actualizacion, nombre, \n" +
+    "            estado, fecha_creacion, fecha_actualizacion, nombre, \n" +
     "            apellido, numero_documento, tipo_documento, nivel, uuid,plan)\n" +
     "    VALUES (?, ?, ?, ?, ?, \n" +
     "            ?, ?, ?, ?, \n" +
-    "            ?, ?, ?, ?, ?,?);\n", getSchema());
+    "            ?);\n", getSchema());
 
   private static final String FIND_USER_BY_ID_EXT = String.format("SELECT * FROM %s.prp_usuario WHERE uuid = ?", getSchema());
   private static final String FIND_USER_BY_ID = String.format("SELECT * FROM %s.prp_usuario WHERE id = ?", getSchema());
@@ -125,21 +124,16 @@ public class PrepaidUserEJBBean10 extends PrepaidBaseEJBBean10 implements Prepai
     log.info(user);
     getDbUtils().getJdbcTemplate().update(connection -> {
       PreparedStatement ps = connection.prepareStatement(INSERT_USER, new String[] {"id"});
-      ps.setLong(1, user.getUserIdMc());
-      ps.setLong(2, user.getRut());
-      ps.setString(3, user.getStatus().name());
-      ps.setString(4, "");
-      ps.setLong(5, 0L);
-      ps.setLong(6, 0L);
-      ps.setTimestamp(7, Timestamp.valueOf(LocalDateTime.ofInstant(Instant.now(), ZoneId.of("UTC"))));
-      ps.setTimestamp(8, Timestamp.valueOf(LocalDateTime.ofInstant(Instant.now(), ZoneId.of("UTC"))));
-      ps.setString(9,user.getName());
-      ps.setString(10,user.getLastName());
-      ps.setString(11,user.getDocumentNumber());
-      ps.setString(12,user.getDocumentType().name());
-      ps.setString(13,user.getUserLevel().name());
-      ps.setString(14,user.getUuid());
-      ps.setString(15,user.getUserPlan().name());
+      ps.setString(1, user.getStatus().name());
+      ps.setTimestamp(2, Timestamp.valueOf(LocalDateTime.ofInstant(Instant.now(), ZoneId.of("UTC"))));
+      ps.setTimestamp(3, Timestamp.valueOf(LocalDateTime.ofInstant(Instant.now(), ZoneId.of("UTC"))));
+      ps.setString(4,user.getName());
+      ps.setString(5,user.getLastName());
+      ps.setString(6,user.getDocumentNumber());
+      ps.setString(7,user.getDocumentType().name());
+      ps.setString(8,user.getUserLevel().name());
+      ps.setString(9,user.getUuid());
+      ps.setString(10,user.getUserPlan().name());
       return ps;
     }, keyHolder);
 
@@ -196,21 +190,11 @@ public class PrepaidUserEJBBean10 extends PrepaidBaseEJBBean10 implements Prepai
       throw new BadRequestException(PARAMETRO_FALTANTE_$VALUE).setData(new KeyValue("value", "prepaidUser"));
     }
 
-    if(prepaidUser.getUserIdMc() == null){
-      throw new BadRequestException(PARAMETRO_FALTANTE_$VALUE).setData(new KeyValue("value", "idUserMc"));
-    }
-
-    if(prepaidUser.getRut() == null){
-      throw new BadRequestException(PARAMETRO_FALTANTE_$VALUE).setData(new KeyValue("value", "rut"));
-    }
-
     if(prepaidUser.getStatus() == null){
       throw new BadRequestException(PARAMETRO_FALTANTE_$VALUE).setData(new KeyValue("value", "status"));
     }
 
     Object[] params = {
-      prepaidUser.getUserIdMc(),
-      prepaidUser.getRut(),
       prepaidUser.getStatus().toString(),
       new OutParam("_r_id", Types.BIGINT),
       new OutParam("_error_code", Types.VARCHAR),
@@ -241,15 +225,11 @@ public class PrepaidUserEJBBean10 extends PrepaidBaseEJBBean10 implements Prepai
     RowMapper rm = (Map<String, Object> row) -> {
       PrepaidUser10 u = new PrepaidUser10();
       u.setId(getNumberUtils().toLong(row.get("_id"), null));
-      u.setUserIdMc(getNumberUtils().toLong(row.get("_id_usuario_mc"), null));
-      u.setRut(getNumberUtils().toInteger(row.get("_rut"), null));
       u.setStatus(PrepaidUserStatus.valueOfEnum(row.get("_estado").toString().trim()));
-      u.setBalanceExpiration(0L);
       try {
         String saldo = String.valueOf(row.get("_saldo_info"));
         if (StringUtils.isNotBlank(saldo)) {
           u.setBalance(JsonUtils.getJsonParser().fromJson(saldo, PrepaidBalanceInfo10.class));
-          u.setBalanceExpiration(getNumberUtils().toLong(row.get("_saldo_expiracion")));
         }
       } catch(Exception ex) {
         log.error("Error al convertir el saldo del usuario", ex);
@@ -258,7 +238,6 @@ public class PrepaidUserEJBBean10 extends PrepaidBaseEJBBean10 implements Prepai
       timestamps.setCreatedAt(LocalDateTime.ofInstant(((Timestamp) row.get("_fecha_creacion")).toInstant(), ZoneOffset.ofHours(0)));
       timestamps.setUpdatedAt(LocalDateTime.ofInstant(((Timestamp) row.get("_fecha_actualizacion")).toInstant(), ZoneOffset.ofHours(0)));
       u.setTimestamps(timestamps);
-      u.setIdentityVerificationAttempts(getNumberUtils().toInteger(row.get("_intentos_validacion")));
       return u;
     };
 
@@ -307,20 +286,10 @@ public class PrepaidUserEJBBean10 extends PrepaidBaseEJBBean10 implements Prepai
     if(status == null){
       throw new BadRequestException(PARAMETRO_FALTANTE_$VALUE).setData(new KeyValue("value", "status"));
     }
+    PrepaidUser10 prepaidUser10 = findById(headers,userId);
+    prepaidUser10.setStatus(status);
+    updatePrepaidUser(headers,prepaidUser10);
 
-    Object[] params = {
-      userId, //id
-      status.toString(), //estado
-      new OutParam("_error_code", Types.VARCHAR),
-      new OutParam("_error_msg", Types.VARCHAR)
-    };
-
-    Map<String, Object> resp = getDbUtils().execute(getSchema() + ".mc_prp_actualizar_estado_usuario_v10", params);
-
-    if (!"0".equals(resp.get("_error_code"))) {
-      log.error("updatePrepaidUserStatus resp: " + resp);
-      throw new BaseException(ERROR_DE_COMUNICACION_CON_BBDD);
-    }
   }
 
 
@@ -347,8 +316,6 @@ public class PrepaidUserEJBBean10 extends PrepaidBaseEJBBean10 implements Prepai
     }
   }
 
-  //TODO: eliminar procedimiento mc_prp_incrementa_intento_validacion_v10
-
   @Override
   public PrepaidUser10 updatePrepaidUser(Map<String, Object> headers, PrepaidUser10 user) throws Exception {
 
@@ -358,18 +325,13 @@ public class PrepaidUserEJBBean10 extends PrepaidBaseEJBBean10 implements Prepai
 
     log.info(user);
     getDbUtils().getJdbcTemplate().update(connection -> {
-      //PreparedStatement ps = connection
-      //  .prepareStatement(UPDATE_USER, new String[] {"id"});
-
       PreparedStatement ps = connection.prepareStatement(UPDATE_USER);
-
       ps.setString(1,user.getName());
       ps.setString(2,user.getLastName());
       ps.setString(3,user.getStatus().toString());
       ps.setString(4,user.getUserLevel().toString());
       ps.setTimestamp(5,Timestamp.valueOf(LocalDateTime.ofInstant(Instant.now(), ZoneId.of("UTC"))));
       ps.setString(6,user.getUuid());
-
       return ps;
     });
 
@@ -381,7 +343,6 @@ public class PrepaidUserEJBBean10 extends PrepaidBaseEJBBean10 implements Prepai
     return (ResultSet rs, int rowNum) -> {
       PrepaidUser10 u = new PrepaidUser10();
       u.setId(rs.getLong("id"));
-      u.setUserIdMc(rs.getLong("id_usuario_mc"));
       u.setStatus(PrepaidUserStatus.valueOfEnum(rs.getString("estado")));
       u.setName(rs.getString("nombre"));
       u.setLastName(rs.getString("apellido"));
@@ -389,7 +350,6 @@ public class PrepaidUserEJBBean10 extends PrepaidBaseEJBBean10 implements Prepai
       u.setDocumentType(DocumentType.valueOfEnum(rs.getString("tipo_documento")));
       u.setUserLevel(PrepaidUserLevel.valueOfEnum(rs.getString("nivel")));
       u.setUuid(rs.getString("uuid"));
-      u.setRut(rs.getInt("rut"));
       u.setUserPlan(UserPlanType.valueOfEnum(rs.getString("plan")));
 
       Timestamps timestamps = new Timestamps();

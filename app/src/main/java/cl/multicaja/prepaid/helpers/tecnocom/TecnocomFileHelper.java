@@ -276,7 +276,6 @@ public class TecnocomFileHelper {
     PrepaidMovement10 prepaidMovement = new PrepaidMovement10();
 
     prepaidMovement.setIdMovimientoRef(null);
-    prepaidMovement.setIdPrepaidUser(userId);
     prepaidMovement.setIdTxExterno(null);
     prepaidMovement.setTipoMovimiento(batchTrx.getMovementType());
     prepaidMovement.setMonto(batchTrx.getImpFac().getValue());

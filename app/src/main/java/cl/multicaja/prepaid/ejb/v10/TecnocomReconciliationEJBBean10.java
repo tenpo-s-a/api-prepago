@@ -310,7 +310,7 @@ public class TecnocomReconciliationEJBBean10 extends PrepaidBaseEJBBean10 implem
 
         if(originalMovement == null) {
           // Movimiento original no existe.
-          PrepaidMovement10 movement10 = TecnocomFileHelper.getInstance().buildMovement(prepaidCard10.getIdUser(), pan, trx);
+          PrepaidMovement10 movement10 = TecnocomFileHelper.getInstance().buildMovement(account.getUserId(), pan, trx);
           movement10.setConTecnocom(ReconciliationStatusType.RECONCILED);
           movement10.setConSwitch(ReconciliationStatusType.PENDING);
           movement10.setOriginType(MovementOriginType.SAT);
@@ -322,8 +322,8 @@ public class TecnocomReconciliationEJBBean10 extends PrepaidBaseEJBBean10 implem
           // Expira cache del saldo de la cuenta
           //getAccountEJBBean10().expireBalanceCache(account.getId());
 
-          String msg = String.format("Error processing transaction - Transaction not found in database with userId = [%s], tipofac= [%s], indnorcor = [%s], numaut = [%s], fecfac = [%s], amount = [%s]",
-            prepaidCard10.getIdUser(), trx.getTipoFac().getCode(), trx.getTipoFac().getCorrector(),  trx.getNumAut(), trx.getFecFac(), trx.getImpFac());
+          String msg = String.format("Error processing transaction - Transaction not found in database with  tipofac= [%s], indnorcor = [%s], numaut = [%s], fecfac = [%s], amount = [%s]",
+          trx.getTipoFac().getCode(), trx.getTipoFac().getCorrector(),  trx.getNumAut(), trx.getFecFac(), trx.getImpFac());
           log.error(msg);
           trx.setHasError(Boolean.TRUE);
           trx.setErrorDetails(msg);
@@ -403,7 +403,7 @@ public class TecnocomReconciliationEJBBean10 extends PrepaidBaseEJBBean10 implem
           if(originalMovement == null) {
             TipoFactura tipofac = trx.getTipoFac();
             String msg = String.format("Error processing transaction - Transaction not found in database with userId = [%s], tipofac= [%s], indnorcor = [%s], numaut = [%s], fecfac = [%s], amount = [%s]",
-              prepaidCard10.getIdUser(), trx.getTipoFac().getCode(), trx.getIndNorCor(),  trx.getNumAut(), trx.getFecFac(), trx.getImpFac().getValue());
+              account.getUserId(), trx.getTipoFac().getCode(), trx.getIndNorCor(),  trx.getNumAut(), trx.getFecFac(), trx.getImpFac().getValue());
             log.error(msg);
             trx.setHasError(Boolean.TRUE);
             trx.setErrorDetails(msg);
@@ -483,7 +483,7 @@ public class TecnocomReconciliationEJBBean10 extends PrepaidBaseEJBBean10 implem
             continue;
           }
           // Build Movement
-          PrepaidMovement10 prepaidMovement10 =buildMovementAut(prepaidCard10.getIdUser(),prepaidCard10.getPan(),trx);
+          PrepaidMovement10 prepaidMovement10 =buildMovementAut(account.getUserId(),prepaidCard10.getPan(),trx);
 
           getPrepaidMovementEJBBean10().addPrepaidMovement(null,prepaidMovement10);
 
@@ -530,7 +530,6 @@ public class TecnocomReconciliationEJBBean10 extends PrepaidBaseEJBBean10 implem
     PrepaidMovement10 prepaidMovement = new PrepaidMovement10();
 
     prepaidMovement.setIdMovimientoRef(0L);
-    prepaidMovement.setIdPrepaidUser(userId);
     prepaidMovement.setIdTxExterno(batchTrx.getNumAut());
     prepaidMovement.setTipoMovimiento(batchTrx.getMovementType());
     prepaidMovement.setMonto(batchTrx.getImpFac().getValue());

@@ -45,12 +45,10 @@ public class Test_getPrepaidCard_v10 extends TestBaseUnitApi {
     PrepaidCard10 card1 = resp.toObject(PrepaidCard10.class);
 
     Assert.assertEquals("debe ser la misma tarjeta", prepaidCard10.getId(), card1.getId());
-    Assert.assertEquals("debe ser la misma tarjeta", prepaidCard10.getProcessorUserId(), card1.getProcessorUserId());
     Assert.assertEquals("debe ser la misma tarjeta", prepaidCard10.getPan(), card1.getPan());
     Assert.assertEquals("debe ser la misma tarjeta", prepaidCard10.getExpiration(), card1.getExpiration());
     Assert.assertEquals("debe ser la misma tarjeta", PrepaidCardStatus.ACTIVE, card1.getStatus());
     Assert.assertEquals("debe ser la misma tarjeta", prepaidCard10.getNameOnCard(), card1.getNameOnCard());
-    Assert.assertNull("no debe tener idUser", card1.getIdUser());
     Assert.assertNull("no debe tener encryptedPan", card1.getEncryptedPan());
     Assert.assertNull("no debe tener producto", card1.getProducto());
     Assert.assertNull("no debe tener numeroUnico", card1.getNumeroUnico());
@@ -65,12 +63,12 @@ public class Test_getPrepaidCard_v10 extends TestBaseUnitApi {
   public void shouldReturn200_PrepaidCardLocked() throws Exception {
 
     PrepaidUser10 prepaidUser10 = buildPrepaidUserv2();
-    prepaidUser10 = createPrepaidUser10(prepaidUser10);
+    prepaidUser10 = createPrepaidUserV2(prepaidUser10);
 
     PrepaidCard10 prepaidCard10 = buildPrepaidCard10(prepaidUser10);
     prepaidCard10.setStatus(PrepaidCardStatus.LOCKED);
 
-    prepaidCard10 = createPrepaidCard10(prepaidCard10);
+    prepaidCard10 = createPrepaidCardV2(prepaidCard10);
 
     HttpResponse resp = getPrepaidCard(prepaidUser10.getId());
 
@@ -79,12 +77,10 @@ public class Test_getPrepaidCard_v10 extends TestBaseUnitApi {
     PrepaidCard10 card1 = resp.toObject(PrepaidCard10.class);
 
     Assert.assertEquals("debe ser la misma tarjeta", prepaidCard10.getId(), card1.getId());
-    Assert.assertEquals("debe ser la misma tarjeta", prepaidCard10.getProcessorUserId(), card1.getProcessorUserId());
     Assert.assertEquals("debe ser la misma tarjeta", prepaidCard10.getPan(), card1.getPan());
     Assert.assertEquals("debe ser la misma tarjeta", prepaidCard10.getExpiration(), card1.getExpiration());
     Assert.assertEquals("debe ser la misma tarjeta", PrepaidCardStatus.LOCKED, card1.getStatus());
     Assert.assertEquals("debe ser la misma tarjeta", prepaidCard10.getNameOnCard(), card1.getNameOnCard());
-    Assert.assertNull("no debe tener idUser", card1.getIdUser());
     Assert.assertNull("no debe tener encryptedPan", card1.getEncryptedPan());
     Assert.assertNull("no debe tener producto", card1.getProducto());
     Assert.assertNull("no debe tener numeroUnico", card1.getNumeroUnico());
@@ -104,7 +100,7 @@ public class Test_getPrepaidCard_v10 extends TestBaseUnitApi {
     PrepaidCard10 prepaidCard10 = buildPrepaidCard10(prepaidUser10);
     prepaidCard10.setStatus(PrepaidCardStatus.LOCKED_HARD);
 
-    prepaidCard10 = createPrepaidCard10(prepaidCard10);
+    prepaidCard10 = createPrepaidCardV2(prepaidCard10);
 
     HttpResponse resp = getPrepaidCard(prepaidUser10.getId());
 
@@ -113,12 +109,10 @@ public class Test_getPrepaidCard_v10 extends TestBaseUnitApi {
     PrepaidCard10 card1 = resp.toObject(PrepaidCard10.class);
 
     Assert.assertEquals("debe ser la misma tarjeta", prepaidCard10.getId(), card1.getId());
-    Assert.assertEquals("debe ser la misma tarjeta", prepaidCard10.getProcessorUserId(), card1.getProcessorUserId());
     Assert.assertEquals("debe ser la misma tarjeta", prepaidCard10.getPan(), card1.getPan());
     Assert.assertEquals("debe ser la misma tarjeta", prepaidCard10.getExpiration(), card1.getExpiration());
     Assert.assertEquals("debe ser la misma tarjeta", PrepaidCardStatus.LOCKED_HARD, card1.getStatus());
     Assert.assertEquals("debe ser la misma tarjeta", prepaidCard10.getNameOnCard(), card1.getNameOnCard());
-    Assert.assertNull("no debe tener idUser", card1.getIdUser());
     Assert.assertNull("no debe tener encryptedPan", card1.getEncryptedPan());
     Assert.assertNull("no debe tener producto", card1.getProducto());
     Assert.assertNull("no debe tener numeroUnico", card1.getNumeroUnico());
@@ -138,7 +132,7 @@ public class Test_getPrepaidCard_v10 extends TestBaseUnitApi {
     PrepaidCard10 prepaidCard10 = buildPrepaidCard10(prepaidUser10);
     prepaidCard10.setStatus(PrepaidCardStatus.EXPIRED);
 
-    prepaidCard10 = createPrepaidCard10(prepaidCard10);
+    prepaidCard10 = createPrepaidCardV2(prepaidCard10);
 
     HttpResponse resp = getPrepaidCard(prepaidUser10.getId());
 
@@ -147,12 +141,10 @@ public class Test_getPrepaidCard_v10 extends TestBaseUnitApi {
     PrepaidCard10 card1 = resp.toObject(PrepaidCard10.class);
 
     Assert.assertEquals("debe ser la misma tarjeta", prepaidCard10.getId(), card1.getId());
-    Assert.assertEquals("debe ser la misma tarjeta", prepaidCard10.getProcessorUserId(), card1.getProcessorUserId());
     Assert.assertEquals("debe ser la misma tarjeta", prepaidCard10.getPan(), card1.getPan());
     Assert.assertEquals("debe ser la misma tarjeta", prepaidCard10.getExpiration(), card1.getExpiration());
     Assert.assertEquals("debe ser la misma tarjeta", PrepaidCardStatus.EXPIRED, card1.getStatus());
     Assert.assertEquals("debe ser la misma tarjeta", prepaidCard10.getNameOnCard(), card1.getNameOnCard());
-    Assert.assertNull("no debe tener idUser", card1.getIdUser());
     Assert.assertNull("no debe tener encryptedPan", card1.getEncryptedPan());
     Assert.assertNull("no debe tener producto", card1.getProducto());
     Assert.assertNull("no debe tener numeroUnico", card1.getNumeroUnico());
@@ -186,7 +178,7 @@ public class Test_getPrepaidCard_v10 extends TestBaseUnitApi {
 
     PrepaidCard10 prepaidCard10 = buildPrepaidCard10(prepaidUser10);
 
-    prepaidCard10 = createPrepaidCard10(prepaidCard10);
+    prepaidCard10 = createPrepaidCardV2(prepaidCard10);
 
     HttpResponse resp = getPrepaidCard(prepaidUser10.getId());
 
@@ -220,7 +212,7 @@ public class Test_getPrepaidCard_v10 extends TestBaseUnitApi {
     PrepaidCard10 prepaidCard10 = buildPrepaidCard10(prepaidUser10);
     prepaidCard10.setStatus(PrepaidCardStatus.PENDING);
 
-    prepaidCard10 = createPrepaidCard10(prepaidCard10);
+    prepaidCard10 = createPrepaidCardV2(prepaidCard10);
 
     HttpResponse resp = getPrepaidCard(prepaidUser10.getId());
 

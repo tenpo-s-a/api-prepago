@@ -49,8 +49,8 @@ public class Test_createTicketFreshDesckErrorQueue10 extends TestBaseUnitAsync {
     tc.getTecnocomService().setRetorno(null);
 
     // SE CREA USUARIO PREPAGO
-    PrepaidUser10 prepaidUser = buildPrepaidUser10();
-    prepaidUser = createPrepaidUser10(prepaidUser);
+    PrepaidUser10 prepaidUser = buildPrepaidUserv2();
+    prepaidUser = createPrepaidUserV2(prepaidUser);
 
     //SE CREA CUENTA
     Account account = buildAccountFromTecnocom(prepaidUser);
@@ -58,7 +58,7 @@ public class Test_createTicketFreshDesckErrorQueue10 extends TestBaseUnitAsync {
 
     //SE CREA TARJETA
     PrepaidCard10 prepaidCard = buildPrepaidCardWithTecnocomData(prepaidUser, account);
-    prepaidCard = createPrepaidCard10(prepaidCard);
+    prepaidCard = createPrepaidCardV2(prepaidCard);
 
     PrepaidTopup10 prepaidTopup = buildPrepaidTopup10();
     prepaidTopup.setFee(new NewAmountAndCurrency10(BigDecimal.ZERO));
@@ -88,8 +88,8 @@ public class Test_createTicketFreshDesckErrorQueue10 extends TestBaseUnitAsync {
     tc.getTecnocomService().setAutomaticError(false);
     tc.getTecnocomService().setRetorno(null);
 
-    PrepaidUser10 prepaidUser = buildPrepaidUser10();
-    prepaidUser = createPrepaidUser10(prepaidUser);
+    PrepaidUser10 prepaidUser = buildPrepaidUserv2();
+    prepaidUser = createPrepaidUserV2(prepaidUser);
 
     PrepaidTopup10 prepaidTopup = buildPrepaidTopup10();
 
@@ -116,8 +116,8 @@ public class Test_createTicketFreshDesckErrorQueue10 extends TestBaseUnitAsync {
     tc.getTecnocomService().setRetorno(CodigoRetorno._1010);
 
 
-    PrepaidUser10 prepaidUser = buildPrepaidUser10();
-    prepaidUser = createPrepaidUser10(prepaidUser);
+    PrepaidUser10 prepaidUser = buildPrepaidUserv2();
+    prepaidUser = createPrepaidUserV2(prepaidUser);
 
     PrepaidTopup10 prepaidTopup = buildPrepaidTopup10();
 
@@ -130,10 +130,8 @@ public class Test_createTicketFreshDesckErrorQueue10 extends TestBaseUnitAsync {
     TipoAlta tipoAlta = prepaidUser.getUserLevel() == PrepaidUserLevel.LEVEL_2 ? TipoAlta.NIVEL2 : TipoAlta.NIVEL1;
     AltaClienteDTO altaClienteDTO = getTecnocomService().altaClientes(prepaidUser.getName(), prepaidUser.getLastName(), "",prepaidUser.getDocumentNumber(), TipoDocumento.RUT, tipoAlta);
     PrepaidCard10 prepaidCard10 = new PrepaidCard10();
-    prepaidCard10.setProcessorUserId(altaClienteDTO.getContrato());
-    prepaidCard10.setIdUser(prepaidUser.getId());
     prepaidCard10.setStatus(PrepaidCardStatus.PENDING);
-    prepaidCard10 = createPrepaidCard10(prepaidCard10);
+    prepaidCard10 = createPrepaidCardV2(prepaidCard10);
 
     Account account = getAccountEJBBean10().insertAccount(prepaidUser.getId(), getRandomString(15));
 
@@ -142,40 +140,6 @@ public class Test_createTicketFreshDesckErrorQueue10 extends TestBaseUnitAsync {
 
     String messageId = sendPendingCreateCard(prepaidTopup,prepaidUser, prepaidCard10, cdtTransaction, prepaidMovement, account, 2);
     Thread.sleep(2000);
-    System.out.println("TICKET CREADO");
-  }
-
-  //Verificado envia todos los dastos
-  @Ignore
-  @Test
-  public void testReinjectSendMailCard() throws Exception {
-
-    tc.getTecnocomService().setAutomaticError(false);
-    tc.getTecnocomService().setRetorno(null);
-
-    PrepaidUser10 prepaidUser = buildPrepaidUserv2();
-    prepaidUser = createPrepaidUserV2(prepaidUser);
-
-    System.out.println("User Rut: "+prepaidUser.getRut());
-
-    TipoAlta tipoAlta = prepaidUser.getUserLevel() == PrepaidUserLevel.LEVEL_2 ? TipoAlta.NIVEL2 : TipoAlta.NIVEL1;
-    AltaClienteDTO altaClienteDTO = getTecnocomService().altaClientes(prepaidUser.getName(), prepaidUser.getLastName(), "", prepaidUser.getDocumentNumber(), TipoDocumento.RUT, tipoAlta);
-    PrepaidCard10 prepaidCard10 = new PrepaidCard10();
-    prepaidCard10.setProcessorUserId(altaClienteDTO.getContrato());
-    prepaidCard10.setIdUser(prepaidUser.getId());
-    prepaidCard10.setStatus(PrepaidCardStatus.PENDING);
-
-    DatosTarjetaDTO datosTarjetaDTO = getTecnocomService().datosTarjeta(prepaidCard10.getProcessorUserId());
-    prepaidCard10.setPan(Utils.replacePan(datosTarjetaDTO.getPan()));
-    prepaidCard10.setEncryptedPan(encryptUtil.encrypt(datosTarjetaDTO.getPan()));
-    prepaidCard10 = createPrepaidCard10(prepaidCard10);
-
-    PrepaidTopup10 topup = buildPrepaidTopup10();
-    topup.setTotal(new NewAmountAndCurrency10(BigDecimal.ZERO));
-
-    tc.getTecnocomService().setAutomaticError(true);
-    tc.getTecnocomService().setRetorno(CodigoRetorno._1010);
-
     System.out.println("TICKET CREADO");
   }
 
@@ -269,24 +233,17 @@ public class Test_createTicketFreshDesckErrorQueue10 extends TestBaseUnitAsync {
     tc.getTecnocomService().setAutomaticError(false);
     tc.getTecnocomService().setRetorno(null);
 
-    PrepaidUser10 prepaidUser = buildPrepaidUser10();
-    prepaidUser = createPrepaidUser10(prepaidUser);
+    PrepaidUser10 prepaidUser = buildPrepaidUserv2();
+    prepaidUser = createPrepaidUserV2(prepaidUser);
     System.out.println("prepaidUser: " + prepaidUser);
 
-    Account account = createRandomAccount(prepaidUser);
-    PrepaidCard10 prepaidCard = buildPrepaidCard10(prepaidUser,account.getId());
+    Account account = buildAccountFromTecnocom(prepaidUser);
+    account = createAccount(account.getUserId(),account.getAccountNumber());
 
-    TipoAlta tipoAlta = prepaidUser.getUserLevel() == PrepaidUserLevel.LEVEL_2 ? TipoAlta.NIVEL2 : TipoAlta.NIVEL1;
-    AltaClienteDTO altaClienteDTO = getTecnocomService().altaClientes(prepaidUser.getName(), prepaidUser.getLastName(), prepaidUser.getLastName(), prepaidUser.getDocumentNumber(), TipoDocumento.RUT, tipoAlta);
-    prepaidCard.setProcessorUserId(altaClienteDTO.getContrato());
+    PrepaidCard10 prepaidCard = buildPrepaidCardWithTecnocomData(prepaidUser, account);
+    prepaidCard = createPrepaidCardV2(prepaidCard);
 
-    DatosTarjetaDTO datosTarjetaDTO = getTecnocomService().datosTarjeta(prepaidCard.getProcessorUserId());
-    prepaidCard.setPan(datosTarjetaDTO.getPan());
-    prepaidCard.setExpiration(datosTarjetaDTO.getFeccadtar());
-    prepaidCard.setEncryptedPan(EncryptUtil.getInstance().encrypt(prepaidCard.getPan()));
-    prepaidCard.setStatus(PrepaidCardStatus.PENDING);
-
-    prepaidCard = createPrepaidCard10(prepaidCard);
+    prepaidCard = createPrepaidCardV2(prepaidCard);
     System.out.println("prepaidCard: " + prepaidCard);
 
     PrepaidTopup10 prepaidTopup = buildPrepaidTopup10();
@@ -297,8 +254,8 @@ public class Test_createTicketFreshDesckErrorQueue10 extends TestBaseUnitAsync {
     getPrepaidMovementEJBBean10().updatePrepaidMovement(null,
       prepaidMovement.getId(),
       prepaidCard.getPan(),
-      prepaidCard.getProcessorUserId().substring(4, 8),
-      prepaidCard.getProcessorUserId().substring(12),
+      account.getAccountNumber().substring(4, 8),
+      account.getAccountNumber().substring(12),
       123,
       123,
       152,

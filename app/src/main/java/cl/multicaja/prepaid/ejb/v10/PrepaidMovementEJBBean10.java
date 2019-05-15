@@ -22,6 +22,7 @@ import cl.multicaja.prepaid.ejb.v11.PrepaidCardEJBBean11;
 import cl.multicaja.prepaid.helpers.freshdesk.model.v10.*;
 import cl.multicaja.prepaid.helpers.mcRed.McRedReconciliationFileDetail;
 import cl.multicaja.prepaid.model.v10.*;
+import cl.multicaja.prepaid.model.v11.Account;
 import cl.multicaja.prepaid.utils.TemplateUtils;
 import cl.multicaja.tecnocom.constants.*;
 import com.fasterxml.jackson.core.JsonProcessingException;
@@ -63,13 +64,6 @@ public class PrepaidMovementEJBBean10 extends PrepaidBaseEJBBean10 implements Pr
 
   private static final String FIND_MOVEMENT_BY_ID_SQL = String.format("SELECT * FROM %s.prp_movimiento WHERE id = ?", getSchema());
 
-  private static final String INSERT_MOVEMENT_SQL
-    = String.format("INSERT INTO %s.prp_movimiento (id_movimiento_ref, id_usuario, id_tx_externo, tipo_movimiento, monto, " +
-    "estado, estado_de_negocio, estado_con_switch,estado_con_tecnocom,origen_movimiento,fecha_creacion,fecha_actualizacion," +
-    "codent,centalta,cuenta,clamon,indnorcor,tipofac,fecfac,numreffac,pan,clamondiv,impdiv,impfac,cmbapli,numaut,indproaje," +
-    "codcom,codact,impliq,clamonliq,codpais,nompob,numextcta,nummovext,clamone,tipolin,linref,numbencta,numplastico,nomcomred) " +
-    "VALUES(?, ?, ?, ?, ?, ?, ?, ?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?);", getSchema());
-
   @Inject
   private PrepaidTopupDelegate10 delegate;
 
@@ -105,6 +99,9 @@ public class PrepaidMovementEJBBean10 extends PrepaidBaseEJBBean10 implements Pr
 
   @EJB
   private ReconciliationFilesEJBBean10 reconciliationFilesEJBBean10;
+
+  @EJB
+  private AccountEJBBean10 accountEJBBean10;
 
   private ResearchMovementInformationFiles researchMovementInformationFiles;
 
@@ -208,6 +205,14 @@ public class PrepaidMovementEJBBean10 extends PrepaidBaseEJBBean10 implements Pr
     this.prepaidAccountingEJB10 = prepaidAccountingEJB10;
   }
 
+  public AccountEJBBean10 getAccountEJBBean10() {
+    return accountEJBBean10;
+  }
+
+  public void setAccountEJBBean10(AccountEJBBean10 accountEJBBean10) {
+    this.accountEJBBean10 = accountEJBBean10;
+  }
+
   public MailDelegate10 getMailDelegate() {
     return mailDelegate;
   }
@@ -224,62 +229,7 @@ public class PrepaidMovementEJBBean10 extends PrepaidBaseEJBBean10 implements Pr
 
   @Override
   public PrepaidMovement10 addPrepaidMovement(Map<String, Object> header, PrepaidMovement10 data) throws Exception {
-
-    Object[] params = {
-      new InParam(data.getIdMovimientoRef(), Types.NUMERIC), //_id_mov_ref NUMERIC
-      new InParam(data.getIdPrepaidUser(), Types.NUMERIC), //_id_usuario NUMERIC
-      data.getIdTxExterno(), //_id_tx_externo VARCHAR
-      data.getTipoMovimiento().toString(), //_tipo_movimiento VARCHAR
-      new InParam(data.getMonto(), Types.NUMERIC), //_monto NUMERIC
-      data.getEstado().toString(), //_estado VARCHAR
-      data.getEstadoNegocio().getValue(), // _estado_de_negocio VARCHAR
-      data.getConSwitch().getValue(), //_estado_con_switch VARCHAR
-      data.getConTecnocom().getValue(), //_estado_con_tecnocom VARCHAR
-      data.getOriginType().getValue(), //_origen_movimiento VARCHAR
-      data.getCodent(),//_codent VARCHAR
-      data.getCentalta(),//_centalta VARCHAR
-      data.getCuenta(),//_cuenta VARCHAR
-      new InParam(data.getClamon().getValue(), Types.NUMERIC),//_clamon NUMERIC
-      new InParam(data.getIndnorcor().getValue(), Types.NUMERIC),//_indnorcor NUMERIC
-      new InParam(data.getTipofac().getCode(), Types.NUMERIC),//_tipofac NUMERIC
-      new Date(data.getFecfac().getTime()),//_fecfac DATE
-      data.getNumreffac(),//_numreffac VARCHAR
-      data.getPan(),// _pan VARCHAR
-      new InParam(data.getClamondiv(), Types.NUMERIC),//_clamondiv NUMERIC
-      new InParam(data.getImpdiv(), Types.NUMERIC),//_impdiv NUMERIC
-      new InParam(data.getImpfac(), Types.NUMERIC),//_impfac NUMERIC
-      new InParam(data.getCmbapli(), Types.NUMERIC),//_cmbapli NUMERIC
-      !StringUtils.isBlank(data.getNumaut()) ? data.getNumaut() : "",//_numaut    VARCHAR
-      data.getIndproaje().getValue(),//_indproaje VARCHAR
-      data.getCodcom(),//_codcom VARCHAR
-      data.getCodact(),//_codact VARCHAR
-      new InParam(data.getImpliq(), Types.NUMERIC),//_impliq NUMERIC
-      new InParam(data.getClamonliq(), Types.NUMERIC), //_clamonliq NUMERIC
-      new InParam(data.getCodpais().getValue(), Types.NUMERIC), //_codpais NUMERIC
-      data.getNompob(),//_nompob VARCHAR
-      new InParam(data.getNumextcta(), Types.NUMERIC),//_numextcta NUMERIC
-      new InParam(data.getNummovext(), Types.NUMERIC),//_nummovext NUMERIC
-      new InParam(data.getClamone(), Types.NUMERIC),// _clamone NUMERIC
-      data.getTipolin(),//_tipolin VARCHAR
-      new InParam(data.getLinref(), Types.NUMERIC),//_linref NUMERIC
-      new InParam(data.getNumbencta(), Types.NUMERIC),//_numbencta NUMERIC
-      new InParam(data.getNumplastico(), Types.NUMERIC),//_numplastico NUMERIC
-      new InParam(data.getNomcomred(), Types.VARCHAR),
-      new InParam(data.getFechaCreacion(), Types.TIMESTAMP),// Nuevo dato entrada Fecha para movimiento compra
-      new OutParam("_r_id", Types.NUMERIC),
-      new OutParam("_error_code", Types.VARCHAR),
-      new OutParam("_error_msg", Types.VARCHAR)
-    };
-
-    Map<String, Object> resp = getDbUtils().execute(getSchema() + ".mc_prp_crea_movimiento_v11", params);
-
-    if ("0".equals(resp.get("_error_code"))) {
-      data.setId(getNumberUtils().toLong(resp.get("_r_id")));
-      return this.getPrepaidMovementById(data.getId());
-    } else {
-      log.error("addPrepaidMovement resp: " + resp);
-      throw new BaseException(ERROR_DE_COMUNICACION_CON_BBDD);
-    }
+    throw new IllegalArgumentException();
   }
 
   @Override
@@ -530,7 +480,6 @@ public class PrepaidMovementEJBBean10 extends PrepaidBaseEJBBean10 implements Pr
         PrepaidMovement10 p = new PrepaidMovement10();
         p.setId(getNumberUtils().toLong(row.get("_id")));
         p.setIdMovimientoRef(getNumberUtils().toLong(row.get("_id_movimiento_ref")));
-        p.setIdPrepaidUser(getNumberUtils().toLong(row.get("_id_usuario")));
         p.setIdTxExterno(String.valueOf(row.get("_id_tx_externo")));
         p.setTipoMovimiento(PrepaidMovementType.valueOfEnum(String.valueOf(row.get("_tipo_movimiento"))));
         p.setMonto(getNumberUtils().toBigDecimal(row.get("_monto")));
@@ -860,7 +809,19 @@ public class PrepaidMovementEJBBean10 extends PrepaidBaseEJBBean10 implements Pr
     }
 
     if (insertTecnocomFile) {
-      PrepaidCard10 prepaidCard10 = getPrepaidCardEJB11().getPrepaidCardByPanAndUserId(prepaidMovement.getPan(), prepaidMovement.getIdPrepaidUser());
+
+      PrepaidCard10 prepaidCard = getPrepaidCardEJB11().getPrepaidCardById(null,prepaidMovement.getCardId());
+      if(prepaidCard == null){
+        log.error("[createResearchMovement] Error tarjeta no encontrada");
+        throw new ValidationException();
+      }
+
+      Account account = getAccountEJBBean10().findById(prepaidCard.getAccountId());
+      if(account == null){
+        log.error("[createResearchMovement] Error cuenta no encontrada");
+        throw new ValidationException();
+      }
+      PrepaidCard10 prepaidCard10 = getPrepaidCardEJB11().getPrepaidCardByPanAndUserId(prepaidMovement.getPan(), account.getUserId());
       List<MovimientoTecnocom10> movimientoTecnocom10List = getTecnocomReconciliationEJBBean().buscaMovimientosTecnocomHist(null, null, prepaidCard10.getEncryptedPan(), prepaidMovement.getIndnorcor(), prepaidMovement.getTipofac(), new java.sql.Date(prepaidMovement.getFecfac().getTime()), prepaidMovement.getNumaut());
 
       ResearchMovementInformationFiles researchMovementInformationFiles = new ResearchMovementInformationFiles();
@@ -960,11 +921,19 @@ public class PrepaidMovementEJBBean10 extends PrepaidBaseEJBBean10 implements Pr
       log.info("XLS ID 2");
       log.info("Get Prepaid by ID: " + mov.getId());
       PrepaidMovement10 movFull = getPrepaidMovementById(mov.getId());
-      log.info(movFull);
+      PrepaidCard10 prepaidCard = getPrepaidCardEJB11().getPrepaidCardById(null,movFull.getCardId());
+      if(prepaidCard == null){
+        log.error("[createResearchMovement] Error tarjeta no encontrada");
+        throw new ValidationException();
+      }
 
-      //Se busca usuario prepago para obtener user
-      //PrepaidUser10 prepaidUser10 = getPrepaidUserEJB10().getPrepaidUserById(null,movFull.getIdPrepaidUser());
-      PrepaidUser10 prepaidUser10 = getPrepaidUserEJB10().findById(null, movFull.getIdPrepaidUser());
+      Account account = getAccountEJBBean10().findById(prepaidCard.getAccountId());
+      if(account == null){
+        log.error("[createResearchMovement] Error cuenta no encontrada");
+        throw new ValidationException();
+      }
+
+      PrepaidUser10 prepaidUser10 = getPrepaidUserEJB10().findById(null, account.getUserId());
 
       if (prepaidUser10 == null) {
         log.info("prepaidTopup10 null");
@@ -1137,7 +1106,18 @@ public class PrepaidMovementEJBBean10 extends PrepaidBaseEJBBean10 implements Pr
       } else {
         // Si el movimiento es una reversa, debe actualizar el status de negocio del movimiento original a REVERSED
         PrepaidMovement10 movFull = getPrepaidMovementById(mov.getId());
-        PrepaidMovement10 originalMovement = getPrepaidMovementForReverse(movFull.getIdPrepaidUser(), movFull.getIdTxExterno(), movFull.getTipoMovimiento(), TipoFactura.valueOfEnumByCodeAndCorrector(movFull.getTipofac().getCode(), IndicadorNormalCorrector.NORMAL.getValue()));
+        PrepaidCard10 prepaidCard = getPrepaidCardEJB11().getPrepaidCardById(null,movFull.getCardId());
+        if(prepaidCard == null){
+          log.error("[createResearchMovement] Error tarjeta no encontrada");
+          throw new ValidationException();
+        }
+
+        Account account = getAccountEJBBean10().findById(prepaidCard.getAccountId());
+        if(account == null){
+          log.error("[createResearchMovement] Error cuenta no encontrada");
+          throw new ValidationException();
+        }
+        PrepaidMovement10 originalMovement = getPrepaidMovementForReverse(account.getUserId(), movFull.getIdTxExterno(), movFull.getTipoMovimiento(), TipoFactura.valueOfEnumByCodeAndCorrector(movFull.getTipofac().getCode(), IndicadorNormalCorrector.NORMAL.getValue()));
         updatePrepaidBusinessStatus(null, originalMovement.getId(), BusinessStatusType.REVERSED);
       }
     }
@@ -1158,10 +1138,18 @@ public class PrepaidMovementEJBBean10 extends PrepaidBaseEJBBean10 implements Pr
       // Se obtiene el movimiento completo.--
       PrepaidMovement10 movFull = getPrepaidMovementById(mov.getId());
 
-      //TODO: Cambio para buscar usuario con datos nuevos.
-      //Se busca usuario prepago para obtener user
-      //PrepaidUser10 prepaidUser10 = getPrepaidUserEJB10().getPrepaidUserById(null,movFull.getIdPrepaidUser());
-      PrepaidUser10 prepaidUser10 = getPrepaidUserEJB10().findById(null, movFull.getIdPrepaidUser());
+      PrepaidCard10 prepaidCard = getPrepaidCardEJB11().getPrepaidCardById(null,movFull.getCardId());
+      if(prepaidCard == null){
+        log.error("[createResearchMovement] Error tarjeta no encontrada");
+        throw new ValidationException();
+      }
+
+      Account account = getAccountEJBBean10().findById(prepaidCard.getAccountId());
+      if(account == null){
+        log.error("[createResearchMovement] Error cuenta no encontrada");
+        throw new ValidationException();
+      }
+      PrepaidUser10 prepaidUser10 = getPrepaidUserEJB10().findById(null, account.getUserId());
       log.info(prepaidUser10);
       if (prepaidUser10 == null) {
         log.info("prepaidTopup10 null");
@@ -1246,8 +1234,18 @@ public class PrepaidMovementEJBBean10 extends PrepaidBaseEJBBean10 implements Pr
       PrepaidMovement10 movFull = getPrepaidMovementById(mov.getId());
 
       //Se busca usuario prepago para obtener user
-      log.error("ID: " + movFull.getIdPrepaidUser());
-      PrepaidUser10 prepaidUser10 = getPrepaidUserEJB10().findById(null, movFull.getIdPrepaidUser());
+      PrepaidCard10 prepaidCard = getPrepaidCardEJB11().getPrepaidCardById(null,movFull.getCardId());
+      if(prepaidCard == null){
+        log.error("[createResearchMovement] Error tarjeta no encontrada");
+        throw new ValidationException();
+      }
+
+      Account account = getAccountEJBBean10().findById(prepaidCard.getAccountId());
+      if(account == null){
+        log.error("[createResearchMovement] Error cuenta no encontrada");
+        throw new ValidationException();
+      }
+      PrepaidUser10 prepaidUser10 = getPrepaidUserEJB10().findById(null, account.getUserId());
 
       if (prepaidUser10 == null) {
         log.info("prepaidTopup10 null");
@@ -1325,9 +1323,18 @@ public class PrepaidMovementEJBBean10 extends PrepaidBaseEJBBean10 implements Pr
       log.debug("XLS ID 9");
       PrepaidMovement10 movFull = getPrepaidMovementById(mov.getId());
 
-      //Se busca usuario prepago para obtener user
-      //PrepaidUser10 prepaidUser10 = getPrepaidUserEJB10().getPrepaidUserById(null,movFull.getIdPrepaidUser());
-      PrepaidUser10 prepaidUser10 = getPrepaidUserEJB10().findById(null, movFull.getIdPrepaidUser());
+      PrepaidCard10 prepaidCard = getPrepaidCardEJB11().getPrepaidCardById(null,movFull.getCardId());
+      if(prepaidCard == null){
+        log.error("[createResearchMovement] Error tarjeta no encontrada");
+        throw new ValidationException();
+      }
+
+      Account account = getAccountEJBBean10().findById(prepaidCard.getAccountId());
+      if(account == null){
+        log.error("[createResearchMovement] Error cuenta no encontrada");
+        throw new ValidationException();
+      }
+      PrepaidUser10 prepaidUser10 = getPrepaidUserEJB10().findById(null, account.getUserId());
 
       if (prepaidUser10 == null) {
         log.info("prepaidTopup10 null");
@@ -1456,10 +1463,18 @@ public class PrepaidMovementEJBBean10 extends PrepaidBaseEJBBean10 implements Pr
       log.debug("XLS ID 13");
       PrepaidMovement10 movFull = getPrepaidMovementById(mov.getId());
 
-      // Refund
-      //Se busca usuario prepago para obtener user
-      //PrepaidUser10 prepaidUser10 = getPrepaidUserEJB10().getPrepaidUserById(null, movFull.getIdPrepaidUser());
-      PrepaidUser10 prepaidUser10 = getPrepaidUserEJB10().findById(null, movFull.getIdPrepaidUser());
+      PrepaidCard10 prepaidCard = getPrepaidCardEJB11().getPrepaidCardById(null,movFull.getCardId());
+      if(prepaidCard == null){
+        log.error("[createResearchMovement] Error tarjeta no encontrada");
+        throw new ValidationException();
+      }
+
+      Account account = getAccountEJBBean10().findById(prepaidCard.getAccountId());
+      if(account == null){
+        log.error("[createResearchMovement] Error cuenta no encontrada");
+        throw new ValidationException();
+      }
+      PrepaidUser10 prepaidUser10 = getPrepaidUserEJB10().findById(null, account.getUserId());
 
       if (prepaidUser10 == null) {
         log.info("prepaidTopup10 null");

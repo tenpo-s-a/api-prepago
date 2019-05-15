@@ -16,21 +16,20 @@ public class Test_PrepaidCardEJBBean10_getLastPrepaidCard extends TestBaseUnit {
   public void getLastPrepaidCardByUserIdAndOneOfStatus() throws Exception {
 
     {
-      PrepaidUser10 prepaidUser = buildPrepaidUser10();
-
-      prepaidUser = createPrepaidUser10(prepaidUser);
+      PrepaidUser10 prepaidUser = buildPrepaidUserv2();
+      prepaidUser = createPrepaidUserV2(prepaidUser);
 
       PrepaidCard10 card1 = buildPrepaidCard10(prepaidUser);
       card1.setStatus(PrepaidCardStatus.PENDING);
-      createPrepaidCard10(card1);
+      createPrepaidCardV2(card1);
 
       PrepaidCard10 card2 = buildPrepaidCard10(prepaidUser);
       card2.setStatus(PrepaidCardStatus.LOCKED);
-      createPrepaidCard10(card2);
+      createPrepaidCardV2(card2);
 
       PrepaidCard10 card3 = buildPrepaidCard10(prepaidUser);
       card3.setStatus(PrepaidCardStatus.ACTIVE);
-      createPrepaidCard10(card3);
+      createPrepaidCardV2(card3);
 
       PrepaidCard10 prepaidCard = getPrepaidCardEJBBean10().getLastPrepaidCardByUserIdAndOneOfStatus(null, prepaidUser.getId(),
         PrepaidCardStatus.ACTIVE,
@@ -42,21 +41,21 @@ public class Test_PrepaidCardEJBBean10_getLastPrepaidCard extends TestBaseUnit {
     }
 
     {
-      PrepaidUser10 prepaidUser = buildPrepaidUser10();
 
-      prepaidUser = createPrepaidUser10(prepaidUser);
+      PrepaidUser10 prepaidUser = buildPrepaidUserv2();
+      prepaidUser = createPrepaidUserV2(prepaidUser);
 
       PrepaidCard10 card1 = buildPrepaidCard10(prepaidUser);
       card1.setStatus(PrepaidCardStatus.ACTIVE);
-      createPrepaidCard10(card1);
+      createPrepaidCardV2(card1);
 
       PrepaidCard10 card2 = buildPrepaidCard10(prepaidUser);
       card2.setStatus(PrepaidCardStatus.LOCKED);
-      createPrepaidCard10(card2);
+      createPrepaidCardV2(card2);
 
       PrepaidCard10 card3 = buildPrepaidCard10(prepaidUser);
       card3.setStatus(PrepaidCardStatus.PENDING);
-      createPrepaidCard10(card3);
+      createPrepaidCardV2(card3);
 
       PrepaidCard10 prepaidCard = getPrepaidCardEJBBean10().getLastPrepaidCardByUserIdAndOneOfStatus(null, prepaidUser.getId(),
         PrepaidCardStatus.ACTIVE,
@@ -68,21 +67,21 @@ public class Test_PrepaidCardEJBBean10_getLastPrepaidCard extends TestBaseUnit {
     }
 
     {
-      PrepaidUser10 prepaidUser = buildPrepaidUser10();
+      PrepaidUser10 prepaidUser = buildPrepaidUserv2();
 
-      prepaidUser = createPrepaidUser10(prepaidUser);
+      prepaidUser = createPrepaidUserV2(prepaidUser);
 
       PrepaidCard10 card1 = buildPrepaidCard10(prepaidUser);
       card1.setStatus(PrepaidCardStatus.ACTIVE);
-      createPrepaidCard10(card1);
+      createPrepaidCardV2(card1);
 
       PrepaidCard10 card2 = buildPrepaidCard10(prepaidUser);
       card2.setStatus(PrepaidCardStatus.PENDING);
-      createPrepaidCard10(card2);
+      createPrepaidCardV2(card2);
 
       PrepaidCard10 card3 = buildPrepaidCard10(prepaidUser);
       card3.setStatus(PrepaidCardStatus.LOCKED);
-      createPrepaidCard10(card3);
+      createPrepaidCardV2(card3);
 
       PrepaidCard10 prepaidCard = getPrepaidCardEJBBean10().getLastPrepaidCardByUserIdAndOneOfStatus(null, prepaidUser.getId(),
         PrepaidCardStatus.ACTIVE,
@@ -97,21 +96,20 @@ public class Test_PrepaidCardEJBBean10_getLastPrepaidCard extends TestBaseUnit {
   @Test
   public void getLastPrepaidCardByUserId() throws Exception {
 
-    PrepaidUser10 prepaidUser = buildPrepaidUser10();
-
-    prepaidUser = createPrepaidUser10(prepaidUser);
+    PrepaidUser10 prepaidUser = buildPrepaidUserv2();
+    prepaidUser = createPrepaidUserV2(prepaidUser);
 
     PrepaidCard10 card1 = buildPrepaidCard10(prepaidUser);
     card1.setStatus(PrepaidCardStatus.PENDING);
-    createPrepaidCard10(card1);
+    createPrepaidCardV2(card1);
 
     PrepaidCard10 card2 = buildPrepaidCard10(prepaidUser);
     card2.setStatus(PrepaidCardStatus.LOCKED);
-    createPrepaidCard10(card2);
+    createPrepaidCardV2(card2);
 
     PrepaidCard10 card3 = buildPrepaidCard10(prepaidUser);
     card3.setStatus(PrepaidCardStatus.ACTIVE);
-    createPrepaidCard10(card3);
+    createPrepaidCardV2(card3);
 
     PrepaidCard10 prepaidCard = getPrepaidCardEJBBean10().getLastPrepaidCardByUserId(null, prepaidUser.getId());
 
@@ -122,7 +120,7 @@ public class Test_PrepaidCardEJBBean10_getLastPrepaidCard extends TestBaseUnit {
   @Test
   public void checkFormattedExpiration() throws Exception {
 
-    PrepaidUser10 prepaidUser = buildPrepaidUser10();
+    PrepaidUser10 prepaidUser = buildPrepaidUserv2();
 
     PrepaidCard10 card1 = buildPrepaidCard10(prepaidUser);
 

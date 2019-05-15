@@ -66,7 +66,7 @@ public class Test_PrepaidCardEJBBean11_publishCardEvent extends TestBaseUnitAsyn
     card = getPrepaidCardEJBBean11().getPrepaidCardById(null, card.getId());
 
     // Revisar que envia a tarjeta creada
-    getPrepaidCardEJBBean11().publishCardEvent(prepaidUser10.getUserIdMc().toString(), account.getUuid(), card.getId(), KafkaEventsRoute10.SEDA_CARD_CREATED_EVENT);
+    getPrepaidCardEJBBean11().publishCardEvent(prepaidUser10.getUuid(), account.getUuid(), card.getId(), KafkaEventsRoute10.SEDA_CARD_CREATED_EVENT);
 
     Queue qResp = camelFactory.createJMSQueue(KafkaEventsRoute10.CARD_CREATED_TOPIC);
     ExchangeData<String> event = (ExchangeData<String>) camelFactory.createJMSMessenger(30000, 60000)
@@ -79,7 +79,7 @@ public class Test_PrepaidCardEJBBean11_publishCardEvent extends TestBaseUnitAsyn
 
     Assert.assertEquals("Debe tener el mismo id", card.getUuid(), cardEvent.getCard().getId());
     Assert.assertEquals("Debe tener el mismo accountId", account.getUuid(), cardEvent.getAccountId());
-    Assert.assertEquals("Debe tener el mismo userId", prepaidUser10.getUserIdMc().toString(), cardEvent.getUserId());
+    Assert.assertEquals("Debe tener el mismo userId", prepaidUser10.getUuid(), cardEvent.getUserId());
     Assert.assertEquals("Debe tener el mismo pan", card.getPan(), cardEvent.getCard().getPan());
   }
 
@@ -120,7 +120,7 @@ public class Test_PrepaidCardEJBBean11_publishCardEvent extends TestBaseUnitAsyn
     card = getPrepaidCardEJBBean11().getPrepaidCardById(null, card.getId());
 
     // Revisar que envia a tarjeta cerrada
-    getPrepaidCardEJBBean11().publishCardEvent(prepaidUser10.getUserIdMc().toString(), account.getUuid(), card.getId(), KafkaEventsRoute10.SEDA_CARD_CLOSED_EVENT);
+    getPrepaidCardEJBBean11().publishCardEvent(prepaidUser10.getUuid(), account.getUuid(), card.getId(), KafkaEventsRoute10.SEDA_CARD_CLOSED_EVENT);
 
     Queue qResp = camelFactory.createJMSQueue(KafkaEventsRoute10.CARD_CLOSED_TOPIC);
     ExchangeData<String> event = (ExchangeData<String>) camelFactory.createJMSMessenger(30000, 60000)
@@ -133,7 +133,7 @@ public class Test_PrepaidCardEJBBean11_publishCardEvent extends TestBaseUnitAsyn
 
     Assert.assertEquals("Debe tener el mismo id", card.getUuid(), cardEvent.getCard().getId());
     Assert.assertEquals("Debe tener el mismo accountId", account.getUuid(), cardEvent.getAccountId());
-    Assert.assertEquals("Debe tener el mismo userId", prepaidUser10.getUserIdMc().toString(), cardEvent.getUserId());
+    Assert.assertEquals("Debe tener el mismo userId", prepaidUser10.getUuid(), cardEvent.getUserId());
     Assert.assertEquals("Debe tener el mismo pan", card.getPan(), cardEvent.getCard().getPan());
   }
 

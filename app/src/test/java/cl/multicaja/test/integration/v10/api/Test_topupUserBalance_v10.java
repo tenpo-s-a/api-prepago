@@ -17,8 +17,8 @@ import static cl.multicaja.core.model.Errors.TRANSACCION_ERROR_GENERICO_$VALUE;
 
 public class Test_topupUserBalance_v10 extends TestBaseUnitApi {
 
-  private HttpResponse topupUserBalanceLocal(NewPrepaidTopup10 newPrepaidTopup10) {
-    HttpResponse respHttp = apiPOST("/1.0/prepaid/topup", toJson(newPrepaidTopup10));
+  private HttpResponse topupUserBalanceLocal(NewPrepaidTopup10 newPrepaidTopup10,String userUuid) {
+    HttpResponse respHttp = apiPOST(String.format("/1.0/prepaid/%s/cash_in",userUuid), toJson(newPrepaidTopup10));
     return respHttp;
   }
 
@@ -38,10 +38,9 @@ public class Test_topupUserBalance_v10 extends TestBaseUnitApi {
     prepaidUser = createPrepaidUserV2(prepaidUser);
 
     NewPrepaidTopup10 prepaidTopup = buildNewPrepaidTopup10();
-    prepaidTopup.setRut(prepaidUser.getRut());
     prepaidTopup.setMerchantCode(NewPrepaidBaseTransaction10.WEB_MERCHANT_CODE);
 
-    HttpResponse resp = topupUserBalanceLocal(prepaidTopup);
+    HttpResponse resp = topupUserBalanceLocal(prepaidTopup,prepaidUser.getUuid());
 
     Assert.assertEquals("status 201", 201, resp.getStatus());
 
@@ -76,8 +75,6 @@ public class Test_topupUserBalance_v10 extends TestBaseUnitApi {
     Assert.assertNotNull("Deberia tener el atributo", rutData.get("name"));
     Assert.assertEquals("Deberia tener el atributo name = rut","rut", rutData.get("name"));
     Assert.assertTrue("Deberia tener el atributo value", rutData.containsKey("value"));
-    //Assert.assertNotNull("Deberia tener el atributo value", rutData.get("value"));
-    //Assert.assertEquals("Deberia tener el atributo value", RutUtils.getInstance().format(prepaidTopup.getRut(), null), rutData.get("value"));
   }
 
   @Test
@@ -88,10 +85,9 @@ public class Test_topupUserBalance_v10 extends TestBaseUnitApi {
     prepaidUser = createPrepaidUserV2(prepaidUser);
 
     NewPrepaidTopup10 prepaidTopup = buildNewPrepaidTopup10();
-    prepaidTopup.setRut(prepaidUser.getRut());
     prepaidTopup.setMerchantCode(getRandomNumericString(15));
 
-    HttpResponse resp = topupUserBalanceLocal(prepaidTopup);
+    HttpResponse resp = topupUserBalanceLocal(prepaidTopup,prepaidUser.getUuid());
 
     Assert.assertEquals("status 201", 201, resp.getStatus());
 
@@ -139,10 +135,9 @@ public class Test_topupUserBalance_v10 extends TestBaseUnitApi {
 
     NewPrepaidTopup10 prepaidTopup = buildNewPrepaidTopup10();
     String merchantCode = getRandomNumericString(5);
-    prepaidTopup.setRut(prepaidUser.getRut());
     prepaidTopup.setMerchantCode(merchantCode);
 
-    HttpResponse resp = topupUserBalanceLocal(prepaidTopup);
+    HttpResponse resp = topupUserBalanceLocal(prepaidTopup,prepaidUser.getUuid());
 
     Assert.assertEquals("status 201", 201, resp.getStatus());
 
@@ -192,10 +187,9 @@ public class Test_topupUserBalance_v10 extends TestBaseUnitApi {
 
     NewPrepaidTopup10 prepaidTopup = buildNewPrepaidTopup10();
     String merchantCode = getRandomNumericString(15);
-    prepaidTopup.setRut(prepaidUser.getRut());
     prepaidTopup.setMerchantCode("000" + merchantCode);
 
-    HttpResponse resp = topupUserBalanceLocal(prepaidTopup);
+    HttpResponse resp = topupUserBalanceLocal(prepaidTopup,prepaidUser.getUuid());
 
     Assert.assertEquals("status 201", 201, resp.getStatus());
 
@@ -240,7 +234,7 @@ public class Test_topupUserBalance_v10 extends TestBaseUnitApi {
   @Test
   public void shouldReturn400_OnMissingBody() {
 
-    HttpResponse resp = topupUserBalanceLocal(null);
+    HttpResponse resp = topupUserBalanceLocal(null,getRandomString(10));
     Assert.assertEquals("status 400", 400, resp.getStatus());
 
     Map<String, Object> errorObj = resp.toMap();
@@ -257,14 +251,13 @@ public class Test_topupUserBalance_v10 extends TestBaseUnitApi {
     prepaidUser = createPrepaidUserV2(prepaidUser);
 
     NewPrepaidTopup10 prepaidTopup = new NewPrepaidTopup10();
-    prepaidTopup.setRut(prepaidUser.getRut());
     prepaidTopup.setMerchantCode("987654321");
     NewAmountAndCurrency10 amount = new NewAmountAndCurrency10();
     amount.setCurrencyCode(CodigoMoneda.CHILE_CLP);
     amount.setValue(new BigDecimal("9999.90"));
     prepaidTopup.setAmount(amount);
 
-    HttpResponse resp = topupUserBalanceLocal(prepaidTopup);
+    HttpResponse resp = topupUserBalanceLocal(prepaidTopup,prepaidUser.getUuid());
 
     Assert.assertEquals("status 400", 400, resp.getStatus());
 
@@ -282,13 +275,12 @@ public class Test_topupUserBalance_v10 extends TestBaseUnitApi {
 
     NewPrepaidTopup10 prepaidTopup = new NewPrepaidTopup10();
     prepaidTopup.setTransactionId("123456789");
-    prepaidTopup.setRut(prepaidUser.getRut());
     NewAmountAndCurrency10 amount = new NewAmountAndCurrency10();
     amount.setCurrencyCode(CodigoMoneda.CHILE_CLP);
     amount.setValue(new BigDecimal("9999.90"));
     prepaidTopup.setAmount(amount);
 
-    HttpResponse resp = topupUserBalanceLocal(prepaidTopup);
+    HttpResponse resp = topupUserBalanceLocal(prepaidTopup,prepaidUser.getUuid());
 
     Assert.assertEquals("status 400", 400, resp.getStatus());
 
@@ -306,10 +298,9 @@ public class Test_topupUserBalance_v10 extends TestBaseUnitApi {
 
     NewPrepaidTopup10 prepaidTopup = new NewPrepaidTopup10();
     prepaidTopup.setTransactionId("123456789");
-    prepaidTopup.setRut(prepaidUser.getRut());
     prepaidTopup.setMerchantCode("987654321");
 
-    HttpResponse resp = topupUserBalanceLocal(prepaidTopup);
+    HttpResponse resp = topupUserBalanceLocal(prepaidTopup,prepaidUser.getUuid());
 
     Assert.assertEquals("status 400", 400, resp.getStatus());
 
@@ -327,13 +318,12 @@ public class Test_topupUserBalance_v10 extends TestBaseUnitApi {
 
     NewPrepaidTopup10 prepaidTopup = new NewPrepaidTopup10();
     prepaidTopup.setTransactionId("123456789");
-    prepaidTopup.setRut(prepaidUser.getRut());
     prepaidTopup.setMerchantCode("987654321");
     NewAmountAndCurrency10 amount = new NewAmountAndCurrency10();
     amount.setValue(new BigDecimal("9999.90"));
     prepaidTopup.setAmount(amount);
 
-    HttpResponse resp = topupUserBalanceLocal(prepaidTopup);
+    HttpResponse resp = topupUserBalanceLocal(prepaidTopup,prepaidUser.getUuid());
 
     Assert.assertEquals("status 400", 400, resp.getStatus());
 
@@ -350,13 +340,12 @@ public class Test_topupUserBalance_v10 extends TestBaseUnitApi {
 
     NewPrepaidTopup10 prepaidTopup = new NewPrepaidTopup10();
     prepaidTopup.setTransactionId("123456789");
-    prepaidTopup.setRut(prepaidUser.getRut());
     prepaidTopup.setMerchantCode("987654321");
     NewAmountAndCurrency10 amount = new NewAmountAndCurrency10();
     amount.setCurrencyCode(CodigoMoneda.CHILE_CLP);
     prepaidTopup.setAmount(amount);
 
-    HttpResponse resp = topupUserBalanceLocal(prepaidTopup);
+    HttpResponse resp = topupUserBalanceLocal(prepaidTopup,prepaidUser.getUuid());
 
     Assert.assertEquals("status 400", 400, resp.getStatus());
 
@@ -372,10 +361,9 @@ public class Test_topupUserBalance_v10 extends TestBaseUnitApi {
     prepaidUser = createPrepaidUserV2(prepaidUser);
 
     NewPrepaidTopup10 prepaidTopup = buildNewPrepaidTopup10();
-    prepaidTopup.setRut(prepaidUser.getRut());
     prepaidTopup.setMerchantCode(getRandomString(10));
 
-    HttpResponse resp = topupUserBalanceLocal(prepaidTopup);
+    HttpResponse resp = topupUserBalanceLocal(prepaidTopup,prepaidUser.getUuid());
 
     Assert.assertEquals("status 400", 400, resp.getStatus());
 
@@ -395,9 +383,8 @@ public class Test_topupUserBalance_v10 extends TestBaseUnitApi {
       NewPrepaidTopup10 prepaidTopup = buildNewPrepaidTopup10();
       prepaidTopup.setMerchantCode(getRandomNumericString(15));
       prepaidTopup.getAmount().setValue(BigDecimal.valueOf(500));
-      prepaidTopup.setRut(prepaidUser.getRut());
 
-      HttpResponse resp = topupUserBalanceLocal(prepaidTopup);
+      HttpResponse resp = topupUserBalanceLocal(prepaidTopup,prepaidUser.getUuid());
 
       Assert.assertEquals("status 422", 422, resp.getStatus());
       Map<String, Object> errorObj = resp.toMap();
@@ -414,9 +401,8 @@ public class Test_topupUserBalance_v10 extends TestBaseUnitApi {
       NewPrepaidTopup10 prepaidTopup = buildNewPrepaidTopup10();
       prepaidTopup.setMerchantCode(NewPrepaidBaseTransaction10.WEB_MERCHANT_CODE);
       prepaidTopup.getAmount().setValue(BigDecimal.valueOf(500));
-      prepaidTopup.setRut(prepaidUser.getRut());
 
-      HttpResponse resp = topupUserBalanceLocal(prepaidTopup);
+      HttpResponse resp = topupUserBalanceLocal(prepaidTopup,prepaidUser.getUuid());
 
       Assert.assertEquals("status 422", 422, resp.getStatus());
       Map<String, Object> errorObj = resp.toMap();
@@ -438,9 +424,8 @@ public class Test_topupUserBalance_v10 extends TestBaseUnitApi {
       NewPrepaidTopup10 prepaidTopup = buildNewPrepaidTopup10();
       prepaidTopup.setMerchantCode(getRandomNumericString(15));
       prepaidTopup.getAmount().setValue(BigDecimal.valueOf(101586));
-      prepaidTopup.setRut(prepaidUser.getRut());
 
-      HttpResponse resp = topupUserBalanceLocal(prepaidTopup);
+      HttpResponse resp = topupUserBalanceLocal(prepaidTopup,prepaidUser.getUuid());
 
       Assert.assertEquals("status 422", 422, resp.getStatus());
       Map<String, Object> errorObj = resp.toMap();
@@ -457,9 +442,8 @@ public class Test_topupUserBalance_v10 extends TestBaseUnitApi {
       NewPrepaidTopup10 prepaidTopup = buildNewPrepaidTopup10();
       prepaidTopup.setMerchantCode(NewPrepaidBaseTransaction10.WEB_MERCHANT_CODE);
       prepaidTopup.getAmount().setValue(BigDecimal.valueOf(500001));
-      prepaidTopup.setRut(prepaidUser.getRut());
 
-      HttpResponse resp = topupUserBalanceLocal(prepaidTopup);
+      HttpResponse resp = topupUserBalanceLocal(prepaidTopup,prepaidUser.getUuid());
 
       Assert.assertEquals("status 422", 422, resp.getStatus());
       Map<String, Object> errorObj = resp.toMap();
@@ -480,25 +464,22 @@ public class Test_topupUserBalance_v10 extends TestBaseUnitApi {
     for(int i = 0; i < 10; i++) {
 
       NewPrepaidTopup10 prepaidTopup = buildNewPrepaidTopup10();
-      prepaidTopup.setRut(prepaidUser.getRut());
-
       if(i == 0 ){
         prepaidTopup.getAmount().setValue(BigDecimal.valueOf(5000));
       }else{
         prepaidTopup.getAmount().setValue(BigDecimal.valueOf(100000));
       }
 
-      HttpResponse resp = topupUserBalanceLocal(prepaidTopup);
+      HttpResponse resp = topupUserBalanceLocal(prepaidTopup,prepaidUser.getUuid());
       if(i == 0 )
         Thread.sleep(3000);
       Assert.assertEquals("status 201", 201, resp.getStatus());
     }
 
     NewPrepaidTopup10 prepaidTopup = buildNewPrepaidTopup10();
-    prepaidTopup.setRut(prepaidUser.getRut());
     prepaidTopup.getAmount().setValue(BigDecimal.valueOf(100000));
 
-    HttpResponse resp = topupUserBalanceLocal(prepaidTopup);
+    HttpResponse resp = topupUserBalanceLocal(prepaidTopup,prepaidUser.getUuid());
 
     Assert.assertEquals("status 422", 422, resp.getStatus());
     Map<String, Object> errorObj = resp.toMap();
@@ -516,13 +497,13 @@ public class Test_topupUserBalance_v10 extends TestBaseUnitApi {
       prepaidUser = createPrepaidUserV2(prepaidUser);
 
       NewPrepaidTopup10 prepaidTopup = buildNewPrepaidTopup10();
-      prepaidTopup.setRut(prepaidUser.getRut());
+
       prepaidTopup.setMerchantCode(getRandomNumericString(15));
 
       PrepaidMovement10 prepaidMovement = buildReversePrepaidMovement10(prepaidUser, prepaidTopup);
       prepaidMovement = createPrepaidMovement10(prepaidMovement);
 
-      HttpResponse resp = topupUserBalanceLocal(prepaidTopup);
+      HttpResponse resp = topupUserBalanceLocal(prepaidTopup,prepaidUser.getUuid());
 
       Assert.assertEquals("status 422", 422, resp.getStatus());
       Map<String, Object> errorObj = resp.toMap();
@@ -549,13 +530,12 @@ public class Test_topupUserBalance_v10 extends TestBaseUnitApi {
       prepaidUser = createPrepaidUserV2(prepaidUser);
 
       NewPrepaidTopup10 prepaidTopup = buildNewPrepaidTopup10();
-      prepaidTopup.setRut(prepaidUser.getRut());
       prepaidTopup.setMerchantCode(NewPrepaidBaseTransaction10.WEB_MERCHANT_CODE);
 
       PrepaidMovement10 prepaidMovement = buildReversePrepaidMovement10(prepaidUser, prepaidTopup);
       prepaidMovement = createPrepaidMovement10(prepaidMovement);
 
-      HttpResponse resp = topupUserBalanceLocal(prepaidTopup);
+      HttpResponse resp = topupUserBalanceLocal(prepaidTopup,prepaidUser.getUuid());
 
       Assert.assertEquals("status 422", 422, resp.getStatus());
       Map<String, Object> errorObj = resp.toMap();
@@ -584,10 +564,9 @@ public class Test_topupUserBalance_v10 extends TestBaseUnitApi {
       prepaidUser = createPrepaidUserV2(prepaidUser);
 
       NewPrepaidTopup10 prepaidTopup = buildNewPrepaidTopup10();
-      prepaidTopup.setRut(prepaidUser.getRut());
       prepaidTopup.setMerchantCode(getRandomNumericString(15));
 
-      HttpResponse resp = topupUserBalanceLocal(prepaidTopup);
+      HttpResponse resp = topupUserBalanceLocal(prepaidTopup,prepaidUser.getUuid());
 
       Assert.assertEquals("status 201", 201, resp.getStatus());
 
@@ -602,7 +581,7 @@ public class Test_topupUserBalance_v10 extends TestBaseUnitApi {
       Assert.assertNull("No deberia tener rut", topup.getRut());
 
       // Segunda vez
-      HttpResponse resp1 = topupUserBalanceLocal(prepaidTopup);
+      HttpResponse resp1 = topupUserBalanceLocal(prepaidTopup,prepaidUser.getUuid());
       Assert.assertEquals("status 422", 422, resp1.getStatus());
       Map<String, Object> errorObj1 = resp1.toMap();
       Assert.assertNotNull("Deberia tener error", errorObj1);
@@ -618,10 +597,9 @@ public class Test_topupUserBalance_v10 extends TestBaseUnitApi {
       prepaidUser = createPrepaidUserV2(prepaidUser);
 
       NewPrepaidTopup10 prepaidTopup = buildNewPrepaidTopup10();
-      prepaidTopup.setRut(prepaidUser.getRut());
       prepaidTopup.setMerchantCode(NewPrepaidBaseTransaction10.WEB_MERCHANT_CODE);
 
-      HttpResponse resp = topupUserBalanceLocal(prepaidTopup);
+      HttpResponse resp = topupUserBalanceLocal(prepaidTopup,prepaidUser.getUuid());
 
       Assert.assertEquals("status 201", 201, resp.getStatus());
 
@@ -636,7 +614,7 @@ public class Test_topupUserBalance_v10 extends TestBaseUnitApi {
       Assert.assertNull("No deberia tener rut", topup.getRut());
 
       // Segunda vez
-      HttpResponse resp1 = topupUserBalanceLocal(prepaidTopup);
+      HttpResponse resp1 = topupUserBalanceLocal(prepaidTopup,prepaidUser.getUuid());
       Assert.assertEquals("status 422", 422, resp1.getStatus());
       Map<String, Object> errorObj1 = resp1.toMap();
       Assert.assertNotNull("Deberia tener error", errorObj1);
@@ -654,14 +632,13 @@ public class Test_topupUserBalance_v10 extends TestBaseUnitApi {
       prepaidUser = createPrepaidUserV2(prepaidUser);
 
       NewPrepaidTopup10 prepaidTopup = buildNewPrepaidTopup10();
-      prepaidTopup.setRut(prepaidUser.getRut());
       prepaidTopup.setMerchantCode(getRandomNumericString(15));
 
       PrepaidMovement10 prepaidMovement = buildReversePrepaidMovement10(prepaidUser, prepaidTopup);
       prepaidMovement.setImpfac(prepaidMovement.getImpfac().add(BigDecimal.TEN));
       prepaidMovement = createPrepaidMovement10(prepaidMovement);
 
-      HttpResponse resp = topupUserBalanceLocal(prepaidTopup);
+      HttpResponse resp = topupUserBalanceLocal(prepaidTopup,prepaidUser.getUuid());
 
       Assert.assertEquals("status 201", 201, resp.getStatus());
 
@@ -696,8 +673,6 @@ public class Test_topupUserBalance_v10 extends TestBaseUnitApi {
       Assert.assertNotNull("Deberia tener el atributo", rutData.get("name"));
       Assert.assertEquals("Deberia tener el atributo name = rut","rut", rutData.get("name"));
       Assert.assertTrue("Deberia tener el atributo value", rutData.containsKey("value"));
-      //Assert.assertNotNull("Deberia tener el atributo value", rutData.get("value"));
-      //Assert.assertEquals("Deberia tener el atributo value", RutUtils.getInstance().format(prepaidTopup.getRut(), null), rutData.get("value"));
     }
 
     // WEB
@@ -707,14 +682,13 @@ public class Test_topupUserBalance_v10 extends TestBaseUnitApi {
       prepaidUser = createPrepaidUserV2(prepaidUser);
 
       NewPrepaidTopup10 prepaidTopup = buildNewPrepaidTopup10();
-      prepaidTopup.setRut(prepaidUser.getRut());
       prepaidTopup.setMerchantCode(NewPrepaidBaseTransaction10.WEB_MERCHANT_CODE);
 
       PrepaidMovement10 prepaidMovement = buildReversePrepaidMovement10(prepaidUser, prepaidTopup);
       prepaidMovement.setImpfac(prepaidMovement.getImpfac().add(BigDecimal.TEN));
       prepaidMovement = createPrepaidMovement10(prepaidMovement);
 
-      HttpResponse resp = topupUserBalanceLocal(prepaidTopup);
+      HttpResponse resp = topupUserBalanceLocal(prepaidTopup,prepaidUser.getUuid());
 
       Assert.assertEquals("status 201", 201, resp.getStatus());
 
@@ -749,8 +723,6 @@ public class Test_topupUserBalance_v10 extends TestBaseUnitApi {
       Assert.assertNotNull("Deberia tener el atributo", rutData.get("name"));
       Assert.assertEquals("Deberia tener el atributo name = rut","rut", rutData.get("name"));
       Assert.assertTrue("Deberia tener el atributo value", rutData.containsKey("value"));
-      //Assert.assertNotNull("Deberia tener el atributo value", rutData.get("value"));
-      //Assert.assertEquals("Deberia tener el atributo value", RutUtils.getInstance().format(prepaidTopup.getRut(), null), rutData.get("value"));
     }
   }
 }

@@ -29,7 +29,7 @@ public class Test_PendingCardIssuanceFee10 extends TestBaseUnitAsync {
 
 
     PrepaidUser10 prepaidUser = buildPrepaidUserv2();
-    prepaidUser = createPrepaidUser10(prepaidUser);
+    prepaidUser = createPrepaidUserV2(prepaidUser);
 
     PrepaidCard10 prepaidCard = new PrepaidCard10();
 
@@ -58,7 +58,7 @@ public class Test_PendingCardIssuanceFee10 extends TestBaseUnitAsync {
   public void pendingCardIssuanceFee_PrepaidCardNull() throws Exception {
 
     PrepaidUser10 prepaidUser =  buildPrepaidUserv2();
-    prepaidUser = createPrepaidUser10(prepaidUser);
+    prepaidUser = createPrepaidUserV2(prepaidUser);
 
     PrepaidMovement10 prepaidMovement = new PrepaidMovement10();
 
@@ -88,7 +88,7 @@ public class Test_PendingCardIssuanceFee10 extends TestBaseUnitAsync {
   public void pendingCardIssuanceFee_PrepaidCardStatusActive() throws Exception {
 
     PrepaidUser10 prepaidUser =  buildPrepaidUserv2();
-    prepaidUser = createPrepaidUser10(prepaidUser);
+    prepaidUser = createPrepaidUserV2(prepaidUser);
 
     PrepaidCard10 prepaidCard = new PrepaidCard10();
     prepaidCard.setStatus(PrepaidCardStatus.ACTIVE);
@@ -150,7 +150,7 @@ public class Test_PendingCardIssuanceFee10 extends TestBaseUnitAsync {
   public void pendingCardIssuanceFee_AccountNull() throws Exception {
 
     PrepaidUser10 prepaidUser = buildPrepaidUserv2();
-    prepaidUser = createPrepaidUser10(prepaidUser);
+    prepaidUser = createPrepaidUserV2(prepaidUser);
 
     Account account = createRandomAccount(prepaidUser);
 
@@ -172,7 +172,7 @@ public class Test_PendingCardIssuanceFee10 extends TestBaseUnitAsync {
   public void pendingCardIssuanceFee_AccountUuidNull() throws Exception {
 
     PrepaidUser10 prepaidUser =  buildPrepaidUserv2();
-    prepaidUser = createPrepaidUser10(prepaidUser);
+    prepaidUser = createPrepaidUserV2(prepaidUser);
 
     PrepaidCard10 prepaidCard = new PrepaidCard10();
     prepaidCard.setStatus(PrepaidCardStatus.PENDING);
@@ -201,7 +201,7 @@ public class Test_PendingCardIssuanceFee10 extends TestBaseUnitAsync {
   public void pendingCardIssuanceFee_AccountUuidEmpty() throws Exception {
 
     PrepaidUser10 prepaidUser = buildPrepaidUserv2();
-    prepaidUser = createPrepaidUser10(prepaidUser);
+    prepaidUser = createPrepaidUserV2(prepaidUser);
 
     PrepaidCard10 prepaidCard = new PrepaidCard10();
     prepaidCard.setStatus(PrepaidCardStatus.PENDING);
@@ -224,7 +224,7 @@ public class Test_PendingCardIssuanceFee10 extends TestBaseUnitAsync {
   public void pendingCardIssuanceFee_UserNull() throws Exception {
 
     PrepaidUser10 prepaidUser = buildPrepaidUserv2();
-    prepaidUser = createPrepaidUser10(prepaidUser);
+    prepaidUser = createPrepaidUserV2(prepaidUser);
 
     Account account = createRandomAccount(prepaidUser);
 
@@ -274,21 +274,14 @@ public class Test_PendingCardIssuanceFee10 extends TestBaseUnitAsync {
   public void pendingCardIssuanceFee() throws Exception {
 
     PrepaidUser10 prepaidUser = buildPrepaidUserv2();
-    prepaidUser = createPrepaidUser10(prepaidUser);
+    prepaidUser = createPrepaidUserV2(prepaidUser);
 
-    PrepaidCard10 prepaidCard = buildPrepaidCard10(prepaidUser);
+    Account account = buildAccountFromTecnocom(prepaidUser);
+    account = createAccount(prepaidUser.getId(),account.getAccountNumber());
 
-    TipoAlta tipoAlta = prepaidUser.getUserLevel() == PrepaidUserLevel.LEVEL_2 ? TipoAlta.NIVEL2 : TipoAlta.NIVEL1;
-    AltaClienteDTO altaClienteDTO = getTecnocomService().altaClientes(prepaidUser.getName(), prepaidUser.getLastName(), "", prepaidUser.getDocumentNumber(), TipoDocumento.RUT, tipoAlta);
-    prepaidCard.setProcessorUserId(altaClienteDTO.getContrato());
-
-    DatosTarjetaDTO datosTarjetaDTO = getTecnocomService().datosTarjeta(prepaidCard.getProcessorUserId());
-    prepaidCard.setPan(datosTarjetaDTO.getPan());
-    prepaidCard.setExpiration(datosTarjetaDTO.getFeccadtar());
-    prepaidCard.setEncryptedPan(EncryptUtil.getInstance().encrypt(prepaidCard.getPan()));
+    PrepaidCard10 prepaidCard = buildPrepaidCardWithTecnocomData(prepaidUser,account);
     prepaidCard.setStatus(PrepaidCardStatus.PENDING);
-
-    prepaidCard = createPrepaidCard10(prepaidCard);
+    prepaidCard = createPrepaidCardV2(prepaidCard);
 
     PrepaidTopup10 prepaidTopup = buildPrepaidTopup10();
     PrepaidMovement10 prepaidMovement = buildPrepaidMovement10(prepaidUser, prepaidTopup);
@@ -297,15 +290,13 @@ public class Test_PendingCardIssuanceFee10 extends TestBaseUnitAsync {
     getPrepaidMovementEJBBean10().updatePrepaidMovement(null,
       prepaidMovement.getId(),
       prepaidCard.getPan(),
-      prepaidCard.getProcessorUserId().substring(4, 8),
-      prepaidCard.getProcessorUserId().substring(12),
+      account.getAccountNumber().substring(4, 8),
+      account.getAccountNumber().substring(12),
       123,
       123,
       152,
       null,
       PrepaidMovementStatus.PROCESS_OK);
-
-    Account account = getAccountEJBBean10().insertAccount(prepaidUser.getId(), altaClienteDTO.getContrato());
 
     String messageId = sendPendingCardIssuanceFee(prepaidUser, prepaidTopup, prepaidMovement, prepaidCard, account, 0);
 
@@ -349,21 +340,15 @@ public class Test_PendingCardIssuanceFee10 extends TestBaseUnitAsync {
   public void pendingCardIssuanceFee_expireBalanceCache() throws Exception {
 
     PrepaidUser10 prepaidUser = buildPrepaidUserv2();
-    prepaidUser = createPrepaidUser10(prepaidUser);
+    prepaidUser = createPrepaidUserV2(prepaidUser);
 
-    PrepaidCard10 prepaidCard = buildPrepaidCard10(prepaidUser);
+    Account account = buildAccountFromTecnocom(prepaidUser);
+    account = createAccount(prepaidUser.getId(),account.getAccountNumber());
 
-    TipoAlta tipoAlta = prepaidUser.getUserLevel() == PrepaidUserLevel.LEVEL_2 ? TipoAlta.NIVEL2 : TipoAlta.NIVEL1;
-    AltaClienteDTO altaClienteDTO = getTecnocomService().altaClientes(prepaidUser.getName(), prepaidUser.getLastName(), "", prepaidUser.getDocumentNumber(), TipoDocumento.RUT, tipoAlta);
-    prepaidCard.setProcessorUserId(altaClienteDTO.getContrato());
-
-    DatosTarjetaDTO datosTarjetaDTO = getTecnocomService().datosTarjeta(prepaidCard.getProcessorUserId());
-    prepaidCard.setPan(datosTarjetaDTO.getPan());
-    prepaidCard.setExpiration(datosTarjetaDTO.getFeccadtar());
-    prepaidCard.setEncryptedPan(EncryptUtil.getInstance().encrypt(prepaidCard.getPan()));
+    PrepaidCard10 prepaidCard = buildPrepaidCardWithTecnocomData(prepaidUser,account);
     prepaidCard.setStatus(PrepaidCardStatus.PENDING);
 
-    prepaidCard = createPrepaidCard10(prepaidCard);
+    prepaidCard = createPrepaidCardV2(prepaidCard);
 
     PrepaidTopup10 prepaidTopup = buildPrepaidTopup10();
     PrepaidMovement10 prepaidMovement = buildPrepaidMovement10(prepaidUser, prepaidTopup);
@@ -372,15 +357,13 @@ public class Test_PendingCardIssuanceFee10 extends TestBaseUnitAsync {
     getPrepaidMovementEJBBean10().updatePrepaidMovement(null,
       prepaidMovement.getId(),
       prepaidCard.getPan(),
-      prepaidCard.getProcessorUserId().substring(4, 8),
-      prepaidCard.getProcessorUserId().substring(12),
+      account.getAccountNumber().substring(4, 8),
+      account.getAccountNumber().substring(12),
       123,
       123,
       152,
       null,
       PrepaidMovementStatus.PROCESS_OK);
-
-    Account account = getAccountEJBBean10().insertAccount(prepaidUser.getId(), altaClienteDTO.getContrato());
 
     String messageId = sendPendingCardIssuanceFee(prepaidUser, prepaidTopup, prepaidMovement, prepaidCard, account, 0);
 
@@ -431,13 +414,14 @@ public class Test_PendingCardIssuanceFee10 extends TestBaseUnitAsync {
   public void pendingCardIssuanceFee_ClientDoesNotExistsInTecnocom() throws Exception {
 
     PrepaidUser10 prepaidUser = buildPrepaidUserv2();
-    prepaidUser = createPrepaidUser10(prepaidUser);
+    prepaidUser = createPrepaidUserV2(prepaidUser);
 
-    Account account = createRandomAccount(prepaidUser);
+    Account account = buildAccountFromTecnocom(prepaidUser);
+    account = createAccount(prepaidUser.getId(),account.getAccountNumber());
 
-    PrepaidCard10 prepaidCard = buildPrepaidCard10(prepaidUser,account.getId());
+    PrepaidCard10 prepaidCard = buildPrepaidCardWithTecnocomData(prepaidUser,account);
     prepaidCard.setStatus(PrepaidCardStatus.PENDING);
-    prepaidCard = createPrepaidCard10(prepaidCard);
+    prepaidCard = createPrepaidCardV2(prepaidCard);
 
     PrepaidTopup10 prepaidTopup = buildPrepaidTopup10();
 
@@ -501,13 +485,13 @@ public class Test_PendingCardIssuanceFee10 extends TestBaseUnitAsync {
 
 
     PrepaidUser10 prepaidUser = buildPrepaidUserv2();
-    prepaidUser = createPrepaidUser10(prepaidUser);
+    prepaidUser = createPrepaidUserV2(prepaidUser);
 
     Account account = createRandomAccount(prepaidUser);
 
-    PrepaidCard10 prepaidCard = buildPrepaidCard10(prepaidUser,account.getId());
+    PrepaidCard10 prepaidCard = buildPrepaidCardWithTecnocomData(prepaidUser,account);
     prepaidCard.setStatus(PrepaidCardStatus.PENDING);
-    prepaidCard = createPrepaidCard10(prepaidCard);
+    prepaidCard = createPrepaidCardV2(prepaidCard);
 
     PrepaidTopup10 prepaidTopup = buildPrepaidTopup10();
 

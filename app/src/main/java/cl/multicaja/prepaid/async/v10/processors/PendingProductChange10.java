@@ -120,31 +120,18 @@ public class PendingProductChange10 extends BaseProcessor10 {
   }
 
   private void changeProduct(PrepaidUser10 user, Account account, PrepaidCard10 prepaidCard, TipoAlta tipoAlta) throws Exception {
-    String accountUuid = account != null ? account.getUuid() : "[noUuid]";
 
+    String accountUuid = account != null ? account.getUuid() : "[noUuid]";
     // Subir el nivel del usuario
     getRoute().getPrepaidUserEJBBean10().updatePrepaidUserLevel(user.getId(), PrepaidUserLevel.LEVEL_2);
 
     // Notificar el cierre de la tarjeta antigua
-    getRoute().getPrepaidCardEJBBean11().publishCardEvent(user.getUserIdMc().toString(), accountUuid, prepaidCard.getId(), KafkaEventsRoute10.SEDA_CARD_CLOSED_EVENT);
+    getRoute().getPrepaidCardEJBBean11().publishCardEvent(user.getUuid(), accountUuid, prepaidCard.getId(), KafkaEventsRoute10.SEDA_CARD_CLOSED_EVENT);
 
     // Notificar que se ha creado una tarjeta nueva
-    getRoute().getPrepaidCardEJBBean11().publishCardEvent(user.getUserIdMc().toString(), accountUuid, prepaidCard.getId(), KafkaEventsRoute10.SEDA_CARD_CREATED_EVENT);
+    getRoute().getPrepaidCardEJBBean11().publishCardEvent(user.getUuid(), accountUuid, prepaidCard.getId(), KafkaEventsRoute10.SEDA_CARD_CREATED_EVENT);
   }
-  /*
-  private void sendSuccessMail(User user, Boolean hasCard) throws Exception {
 
-    Map<String, Object> templateData = new HashMap<>();
-    templateData.put("user_name", user.getName());
-
-    EmailBody emailBody = new EmailBody();
-    emailBody.setTemplateData(templateData);
-    emailBody.setAddress(user.getEmail().getValue());
-
-    emailBody.setTemplate(hasCard ? TEMPLATE_MAIL_IDENTITY_VALIDATION_OK_WITH_CARD : TEMPLATE_MAIL_IDENTITY_VALIDATION_OK_WITHOUT_CARD);
-
-    getRoute().getUserClient().sendMail(null, user.getId(), emailBody);
-  }*/
 
   public ProcessorRoute processErrorProductChange() {
     return new ProcessorRoute<ExchangeData<PrepaidProductChangeData10>, ExchangeData<PrepaidProductChangeData10>>() {

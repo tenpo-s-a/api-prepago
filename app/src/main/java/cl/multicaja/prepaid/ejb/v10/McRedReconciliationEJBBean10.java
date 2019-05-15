@@ -10,8 +10,10 @@ import cl.multicaja.core.utils.db.NullParam;
 import cl.multicaja.core.utils.db.OutParam;
 import cl.multicaja.core.utils.db.RowMapper;
 import cl.multicaja.prepaid.async.v10.PrepaidInvoiceDelegate10;
+import cl.multicaja.prepaid.ejb.v11.PrepaidCardEJBBean11;
 import cl.multicaja.prepaid.helpers.mcRed.McRedReconciliationFileDetail;
 import cl.multicaja.prepaid.model.v10.*;
+import cl.multicaja.prepaid.model.v11.Account;
 import cl.multicaja.tecnocom.constants.IndicadorNormalCorrector;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
@@ -53,8 +55,15 @@ public class McRedReconciliationEJBBean10 extends PrepaidBaseEJBBean10 implement
   @EJB
   private PrepaidUserEJBBean10 prepaidUserEJBBean10;
 
+  @EJB
+  private AccountEJBBean10 accountEJBBean10;
+
+  @EJB
+  private PrepaidCardEJBBean11 prepaidCardEJBBean11;
+
   @Inject
   private PrepaidInvoiceDelegate10 prepaidInvoiceDelegate10;
+
 
   public void setPrepaidInvoiceDelegate10(PrepaidInvoiceDelegate10 prepaidInvoiceDelegate10) {
     this.prepaidInvoiceDelegate10 = prepaidInvoiceDelegate10;
@@ -95,6 +104,22 @@ public class McRedReconciliationEJBBean10 extends PrepaidBaseEJBBean10 implement
 
   public void setPrepaidUserEJBBean10(PrepaidUserEJBBean10 prepaidUserEJBBean10) {
     this.prepaidUserEJBBean10 = prepaidUserEJBBean10;
+  }
+
+  public AccountEJBBean10 getAccountEJBBean10() {
+    return accountEJBBean10;
+  }
+
+  public void setAccountEJBBean10(AccountEJBBean10 accountEJBBean10) {
+    this.accountEJBBean10 = accountEJBBean10;
+  }
+
+  public PrepaidCardEJBBean11 getPrepaidCardEJBBean11() {
+    return prepaidCardEJBBean11;
+  }
+
+  public void setPrepaidCardEJBBean11(PrepaidCardEJBBean11 prepaidCardEJBBean11) {
+    this.prepaidCardEJBBean11 = prepaidCardEJBBean11;
   }
 
   @Override
@@ -230,7 +255,10 @@ public class McRedReconciliationEJBBean10 extends PrepaidBaseEJBBean10 implement
           }
           else {
 
-            PrepaidUser10 user = getPrepaidUserEJBBean10().findById(null,prepaidMovement10.getIdPrepaidUser());
+            PrepaidCard10 card = getPrepaidCardEJBBean11().getPrepaidCardById(null,prepaidMovement10.getCardId());
+            Account account = getAccountEJBBean10().findById(card.getAccountId());
+
+            PrepaidUser10 user = getPrepaidUserEJBBean10().findById(null,account.getUserId());
             log.info("Conciliado");
             getPrepaidMovementEJBBean10().updateStatusMovementConSwitch(null, prepaidMovement10.getId(), ReconciliationStatusType.RECONCILED);
             //Todo: Faltaria hacer cambio de usuario prepago a lo nuevo y verificar que va en cada campo

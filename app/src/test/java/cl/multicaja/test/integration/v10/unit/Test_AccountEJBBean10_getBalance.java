@@ -230,7 +230,6 @@ public class Test_AccountEJBBean10_getBalance extends TestBaseUnit {
 
     PrepaidCard10 prepaidCard10 = buildPrepaidCardWithTecnocomData(prepaidUser10, account);
     prepaidCard10.setAccountId(account.getId());
-    prepaidCard10.setProcessorUserId(account.getAccountNumber());
     prepaidCard10 = createPrepaidCardV2(prepaidCard10);
 
     assertTrue("Saldo debe ser empty o null", StringUtils.isAllBlank(account.getBalanceInfo()));

@@ -16,7 +16,6 @@ import cl.multicaja.prepaid.utils.ParametersUtil;
 import cl.multicaja.tecnocom.constants.TipoFactura;
 import org.junit.Assert;
 import org.junit.BeforeClass;
-import org.junit.Ignore;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.InjectMocks;
@@ -273,7 +272,6 @@ public class Test_PrepaidEJBBean10_reverseTopupUserBalance {
     PrepaidCard10 prepaidCard10 = new PrepaidCard10();
     prepaidCard10.setId(Long.MAX_VALUE);
     prepaidCard10.setStatus(PrepaidCardStatus.ACTIVE);
-    prepaidCard10.setProcessorUserId("1");
     prepaidCard10.setEncryptedPan("1234567890");
     prepaidCard10.setPan("1234567890");
 
@@ -332,7 +330,6 @@ public class Test_PrepaidEJBBean10_reverseTopupUserBalance {
     PrepaidCard10 prepaidCard10 = new PrepaidCard10();
     prepaidCard10.setId(Long.MAX_VALUE);
     prepaidCard10.setStatus(PrepaidCardStatus.ACTIVE);
-    prepaidCard10.setProcessorUserId("1");
     prepaidCard10.setEncryptedPan("1234567890");
     prepaidCard10.setPan("1234567890");
 
@@ -401,7 +398,6 @@ public class Test_PrepaidEJBBean10_reverseTopupUserBalance {
     PrepaidCard10 prepaidCard10 = new PrepaidCard10();
     prepaidCard10.setId(Long.MAX_VALUE);
     prepaidCard10.setStatus(PrepaidCardStatus.ACTIVE);
-    prepaidCard10.setProcessorUserId("1");
     prepaidCard10.setEncryptedPan("1234567890");
     prepaidCard10.setPan("1234567890");
 
@@ -467,7 +463,6 @@ public class Test_PrepaidEJBBean10_reverseTopupUserBalance {
     PrepaidCard10 prepaidCard10 = new PrepaidCard10();
     prepaidCard10.setId(Long.MAX_VALUE);
     prepaidCard10.setStatus(PrepaidCardStatus.ACTIVE);
-    prepaidCard10.setProcessorUserId("1");
     prepaidCard10.setEncryptedPan("1234567890");
     prepaidCard10.setPan("1234567890");
 

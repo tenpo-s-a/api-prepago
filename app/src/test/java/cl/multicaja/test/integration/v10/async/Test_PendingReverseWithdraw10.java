@@ -226,7 +226,7 @@ public class Test_PendingReverseWithdraw10 extends TestBaseUnitAsync {
 
     Assert.assertTrue("Debe ser exitosa", firstTopup.isRetornoExitoso());
 
-    ConsultaSaldoDTO balance = getTecnocomService().consultaSaldo(account.getAccountNumber(), prepaidUser.getRut().toString(), TipoDocumento.RUT);
+    ConsultaSaldoDTO balance = getTecnocomService().consultaSaldo(account.getAccountNumber(), prepaidUser.getDocumentNumber(), TipoDocumento.RUT);
     Assert.assertTrue("Debe ser exitosa", balance.isRetornoExitoso());
 
     NewPrepaidWithdraw10 prepaidWithdraw = buildNewPrepaidWithdrawV2();
@@ -353,7 +353,7 @@ public class Test_PendingReverseWithdraw10 extends TestBaseUnitAsync {
 
     Assert.assertTrue("Debe ser exitosa", firstTopup.isRetornoExitoso());
 
-    ConsultaSaldoDTO balance = getTecnocomService().consultaSaldo(account.getAccountNumber(), prepaidUser.getRut().toString(), TipoDocumento.RUT);
+    ConsultaSaldoDTO balance = getTecnocomService().consultaSaldo(account.getAccountNumber(), prepaidUser.getDocumentNumber(), TipoDocumento.RUT);
     Assert.assertTrue("Debe ser exitosa", balance.isRetornoExitoso());
 
     NewPrepaidWithdraw10 prepaidWithdraw = buildNewPrepaidWithdrawV2();
@@ -478,7 +478,7 @@ public class Test_PendingReverseWithdraw10 extends TestBaseUnitAsync {
     InclusionMovimientosDTO firstTopup = topupInTecnocom(account.getAccountNumber(), prepaidCard10, BigDecimal.valueOf(50000));
     Assert.assertTrue("Debe ser exitosa", firstTopup.isRetornoExitoso());
 
-    ConsultaSaldoDTO balance = getTecnocomService().consultaSaldo(account.getAccountNumber() , prepaidUser.getRut().toString(), TipoDocumento.RUT);
+    ConsultaSaldoDTO balance = getTecnocomService().consultaSaldo(account.getAccountNumber() , prepaidUser.getDocumentNumber(), TipoDocumento.RUT);
     Assert.assertTrue("Debe ser exitosa", balance.isRetornoExitoso());
 
     NewPrepaidWithdraw10 prepaidWithdraw = buildNewPrepaidWithdrawV2();
@@ -704,7 +704,7 @@ public class Test_PendingReverseWithdraw10 extends TestBaseUnitAsync {
 
     Assert.assertTrue("Debe ser exitosa", firstTopup.isRetornoExitoso());
 
-    ConsultaSaldoDTO balance = getTecnocomService().consultaSaldo(account.getAccountNumber(), prepaidUser.getRut().toString(), TipoDocumento.RUT);
+    ConsultaSaldoDTO balance = getTecnocomService().consultaSaldo(account.getAccountNumber(), prepaidUser.getDocumentNumber(), TipoDocumento.RUT);
     Assert.assertTrue("Debe ser exitosa", balance.isRetornoExitoso());
 
     NewPrepaidWithdraw10 prepaidWithdraw = buildNewPrepaidWithdrawV2();
@@ -831,7 +831,7 @@ public class Test_PendingReverseWithdraw10 extends TestBaseUnitAsync {
 
     Assert.assertTrue("Debe ser exitosa", firstTopup.isRetornoExitoso());
 
-    ConsultaSaldoDTO balance = getTecnocomService().consultaSaldo(account.getAccountNumber() , prepaidUser.getRut().toString(), TipoDocumento.RUT);
+    ConsultaSaldoDTO balance = getTecnocomService().consultaSaldo(account.getAccountNumber() ,prepaidUser.getDocumentNumber(), TipoDocumento.RUT);
     Assert.assertTrue("Debe ser exitosa", balance.isRetornoExitoso());
 
     NewPrepaidWithdraw10 prepaidWithdraw = buildNewPrepaidWithdrawV2();
@@ -956,7 +956,7 @@ public class Test_PendingReverseWithdraw10 extends TestBaseUnitAsync {
     InclusionMovimientosDTO firstTopup = topupInTecnocom(account.getAccountNumber(), prepaidCard10, BigDecimal.valueOf(50000));
     Assert.assertTrue("Debe ser exitosa", firstTopup.isRetornoExitoso());
 
-    ConsultaSaldoDTO balance = getTecnocomService().consultaSaldo(account.getAccountNumber(), prepaidUser.getRut().toString(), TipoDocumento.RUT);
+    ConsultaSaldoDTO balance = getTecnocomService().consultaSaldo(account.getAccountNumber(), prepaidUser.getDocumentNumber(), TipoDocumento.RUT);
     Assert.assertTrue("Debe ser exitosa", balance.isRetornoExitoso());
 
     NewPrepaidWithdraw10 prepaidWithdraw = buildNewPrepaidWithdrawV2();
@@ -1084,7 +1084,7 @@ public class Test_PendingReverseWithdraw10 extends TestBaseUnitAsync {
     InclusionMovimientosDTO firstTopup = topupInTecnocom(account.getAccountNumber(), prepaidCard10, BigDecimal.valueOf(50000));
     Assert.assertTrue("Debe ser exitosa", firstTopup.isRetornoExitoso());
 
-    ConsultaSaldoDTO balance = getTecnocomService().consultaSaldo(account.getAccountNumber() , prepaidUser.getRut().toString(), TipoDocumento.RUT);
+    ConsultaSaldoDTO balance = getTecnocomService().consultaSaldo(account.getAccountNumber() ,prepaidUser.getDocumentNumber(), TipoDocumento.RUT);
     Assert.assertTrue("Debe ser exitosa", balance.isRetornoExitoso());
 
     NewPrepaidWithdraw10 prepaidWithdraw = buildNewPrepaidWithdrawV2();

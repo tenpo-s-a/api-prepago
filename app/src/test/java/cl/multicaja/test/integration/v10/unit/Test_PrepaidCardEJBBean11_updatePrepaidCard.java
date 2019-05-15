@@ -24,7 +24,7 @@ public class Test_PrepaidCardEJBBean11_updatePrepaidCard extends TestBaseUnit {
   public void updatePrepaidCard_ok() throws Exception {
 
     PrepaidCard10 card = buildPrepaidCard10Pending();
-    card = createPrepaidCard10(card);
+    card = createPrepaidCardV2(card);
 
     Long cardId = card.getId();
 
@@ -37,7 +37,7 @@ public class Test_PrepaidCardEJBBean11_updatePrepaidCard extends TestBaseUnit {
     String producto = getRandomNumericString(2);
     String numeroUnico = getRandomNumericString(8);
 
-    card.setIdUser(Long.MAX_VALUE);
+
     card.setStatus(cardStatus);
     card.setExpiration(cardExpiration);
     card.setNameOnCard(nameOnCard);

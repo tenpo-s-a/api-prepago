@@ -45,7 +45,7 @@ public class Test_PendingTecnocomReconciliationFileAut10 extends TestBaseUnit {
 
       // Crea usuario prepago
       PrepaidUser10 prepaidUser10 = buildPrepaidUserv2(PrepaidUserLevel.LEVEL_2);
-      prepaidUser10 = createPrepaidUser10(prepaidUser10);
+      prepaidUser10 = createPrepaidUserV2(prepaidUser10);
 
       Account account = createAccount(prepaidUser10.getId(),processorUserId);
 

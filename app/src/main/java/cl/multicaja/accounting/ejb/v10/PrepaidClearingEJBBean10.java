@@ -385,8 +385,8 @@ public class PrepaidClearingEJBBean10 extends PrepaidBaseEJBBean10 implements Pr
       //Busca la cuenta bancaria del movimiento
       if(mov.getUserBankAccount().getId() > 0) {
         //Obtener el Id del usuario
-        Long prepaidUserId = getPrepaidMovementEJBBean10().getPrepaidMovementById(mov.getIdTransaction()).getIdPrepaidUser();
-        Long userIdMc = getPrepaidUserEJBBean10().getPrepaidUserById(null, prepaidUserId).getUserIdMc();
+        //Long cardId = getPrepaidMovementEJBBean10().getPrepaidMovementById(mov.getIdTransaction()).getCardId();
+        //Long userIdMc = getPrepaidUserEJBBean10().getPrepaidUserById(null, prepaidUserId).getUserIdMc();
         //TODO: Verificar como se cargaran los datos de las cuentas de transferencia
       }
     }
@@ -578,7 +578,8 @@ public class PrepaidClearingEJBBean10 extends PrepaidBaseEJBBean10 implements Pr
       if(AccountingTxType.RETIRO_WEB.equals(data.getType())) {
         if(AccountingStatusType.PENDING.equals(data.getStatus()) && reconciliedMovement10 == null) { // Aun no ha sido procesado?
           if(result != null) { //Existe tambien en el archivo?
-            PrepaidUser10 prepaidUser10 = getPrepaidUserEJBBean10().getPrepaidUserById(null, prepaidMovement10.getIdPrepaidUser());
+            //TODO: Corregir esto, el movimiento ya no tiene prepaidUserId.
+            //PrepaidUser10 prepaidUser10 = getPrepaidUserEJBBean10().getPrepaidUserById(null, prepaidMovement10.getIdPrepaidUser());
 
             //TODO: Verificar estos datos cuando se modifique la busqueda, ya que los datos ahora estan en la tabla de Clearing
             //Que coincidan los datos del archivo con los de clearing

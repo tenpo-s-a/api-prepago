@@ -58,10 +58,9 @@ public class Test_PendingCard10 extends TestBaseUnitAsync {
     Assert.assertEquals("Deberia ser igual al enviado al procesdo por camel", prepaidTopup.getId(), remoteTopup.getData().getPrepaidTopup10().getId());
     Assert.assertEquals("Deberia ser igual al enviado al procesdo por camel", prepaidUser.getId(), remoteTopup.getData().getPrepaidUser10().getId());
     Assert.assertNotNull("Deberia tener una PrepaidCard", remoteTopup.getData().getPrepaidCard10());
-    Assert.assertNotNull("Deberia tener una PrepaidCard ProcessorUserId", remoteTopup.getData().getPrepaidCard10().getProcessorUserId());
 
     // Busca la tarjeta en la BD
-    PrepaidCard10 dbPrepaidCard = getPrepaidCardEJBBean10().getPrepaidCardById(null, remoteTopup.getData().getPrepaidCard10().getId());
+    PrepaidCard10 dbPrepaidCard = getPrepaidCardEJBBean11().getPrepaidCardById(null, remoteTopup.getData().getPrepaidCard10().getId());
     Assert.assertNotNull("Deberia tener una tarjeta", dbPrepaidCard);
     Assert.assertEquals("Deberia tener una tarjeta en status PENDING", PrepaidCardStatus.PENDING, dbPrepaidCard.getStatus());
 
@@ -161,11 +160,10 @@ public class Test_PendingCard10 extends TestBaseUnitAsync {
     Assert.assertNotNull("Deberia existir un topup", remoteTopup);
     Assert.assertNotNull("Deberia existir un topup", remoteTopup.getData());
     Assert.assertNotNull("Debe contener una tarjeta",remoteTopup.getData().getPrepaidCard10());
-    Assert.assertNotNull("Debe contener un contrato",remoteTopup.getData().getPrepaidCard10().getProcessorUserId());
-    Assert.assertNull("Pan Debe ser Nulo",remoteTopup.getData().getPrepaidCard10().getPan());
+    Assert.assertEquals("Pan Debe ser Nulo",remoteTopup.getData().getPrepaidCard10().getPan(),"");
 
     // Busca la tarjeta en la BD
-    PrepaidCard10 dbPrepaidCard = getPrepaidCardEJBBean10().getPrepaidCardById(null, remoteTopup.getData().getPrepaidCard10().getId());
+    PrepaidCard10 dbPrepaidCard = getPrepaidCardEJBBean11().getPrepaidCardById(null, remoteTopup.getData().getPrepaidCard10().getId());
     Assert.assertNotNull("Deberia tener una tarjeta", dbPrepaidCard);
     Assert.assertEquals("Deberia tener una tarjeta en status PENDING", PrepaidCardStatus.PENDING, dbPrepaidCard.getStatus());
 
@@ -191,7 +189,6 @@ public class Test_PendingCard10 extends TestBaseUnitAsync {
     Account account = buildAccountFromTecnocom(prepaidUser);
     account = createAccount(account.getUserId(),account.getAccountNumber());
 
-
     PrepaidTopup10 prepaidTopup = buildPrepaidTopup10();
 
     CdtTransaction10 cdtTransaction = buildCdtTransaction10(prepaidUser, prepaidTopup);
@@ -201,13 +198,9 @@ public class Test_PendingCard10 extends TestBaseUnitAsync {
 
     prepaidMovement = createPrepaidMovement10(prepaidMovement);
 
-    TipoAlta tipoAlta = prepaidUser.getUserLevel() == PrepaidUserLevel.LEVEL_2 ? TipoAlta.NIVEL2 : TipoAlta.NIVEL1;
-    AltaClienteDTO altaClienteDTO = getTecnocomService().altaClientes(prepaidUser.getName(), prepaidUser.getLastName(), prepaidUser.getLastName(),prepaidUser.getDocumentNumber(), TipoDocumento.RUT, tipoAlta);
-    PrepaidCard10 prepaidCard10 = new PrepaidCard10();
-    prepaidCard10.setProcessorUserId(altaClienteDTO.getContrato());
-    prepaidCard10.setIdUser(prepaidUser.getId());
+    PrepaidCard10 prepaidCard10 = buildPrepaidCardWithTecnocomData(prepaidUser,account);
     prepaidCard10.setStatus(PrepaidCardStatus.PENDING);
-    prepaidCard10 = createPrepaidCard10(prepaidCard10);
+    prepaidCard10 = createPrepaidCardV2(prepaidCard10);
 
 
     String messageId = sendPendingCreateCard(prepaidTopup, prepaidUser, prepaidCard10, cdtTransaction, prepaidMovement, account, 0);
@@ -259,17 +252,13 @@ public class Test_PendingCard10 extends TestBaseUnitAsync {
     prepaidMovement = createPrepaidMovement10(prepaidMovement);
 
     String messageId = sendPendingEmissionCard(prepaidTopup, prepaidUser, cdtTransaction, prepaidMovement,4);
-
+    Thread.sleep(4000);
     Queue qResp = camelFactory.createJMSQueue(PrepaidTopupRoute10.ERROR_EMISSION_RESP);
     ExchangeData<PrepaidTopupData10> remoteTopup = (ExchangeData<PrepaidTopupData10>)camelFactory.createJMSMessenger().getMessage(qResp, messageId);
 
     Assert.assertNotNull("Deberia existir un topup", remoteTopup);
     Assert.assertNotNull("Deberia existir un topup", remoteTopup.getData());
     Assert.assertNull("La tarjeta debe ser Nula", remoteTopup.getData().getPrepaidCard10());
-
-    // Busca la tarjeta en la BD
-    PrepaidCard10 dbPrepaidCard = getPrepaidCardEJBBean10().getLastPrepaidCardByUserIdAndStatus(null, prepaidUser.getId(), PrepaidCardStatus.PENDING);
-    Assert.assertNull("Deberia tener una tarjeta", dbPrepaidCard);
 
     //verifica que la ultima cola por la cual paso el mensaje sea ERROR_EMISSION_REQ
     ProcessorMetadata lastProcessorMetadata = remoteTopup.getLastProcessorMetadata();
@@ -291,7 +280,6 @@ public class Test_PendingCard10 extends TestBaseUnitAsync {
     prepaidUser = createPrepaidUserV2(prepaidUser);
 
     PrepaidTopup10 prepaidTopup = buildPrepaidTopup10();
-
     CdtTransaction10 cdtTransaction = buildCdtTransaction10(prepaidUser, prepaidTopup);
 
     cdtTransaction = createCdtTransaction10(cdtTransaction);
@@ -300,37 +288,32 @@ public class Test_PendingCard10 extends TestBaseUnitAsync {
 
     prepaidMovement = createPrepaidMovement10(prepaidMovement);
 
-    TipoAlta tipoAlta = prepaidUser.getUserLevel() == PrepaidUserLevel.LEVEL_2 ? TipoAlta.NIVEL2 : TipoAlta.NIVEL1;
-    AltaClienteDTO altaClienteDTO = getTecnocomService().altaClientes(prepaidUser.getName(), prepaidUser.getLastName(), "", prepaidUser.getDocumentNumber(), TipoDocumento.RUT, tipoAlta);
+    Account account = buildAccountFromTecnocom(prepaidUser);
+    account = createAccount(account.getUserId(),account.getAccountNumber());
 
-    PrepaidCard10 prepaidCard10 = new PrepaidCard10();
-    prepaidCard10.setProcessorUserId(altaClienteDTO.getContrato());
-    prepaidCard10.setIdUser(prepaidUser.getId());
+    PrepaidCard10 prepaidCard10 = buildPrepaidCardWithTecnocomData(prepaidUser,account);
+    prepaidCard10.setPan("");
+    prepaidCard10.setNameOnCard("");
+    prepaidCard10.setExpiration(0);
+    prepaidCard10.setEncryptedPan("");
+    prepaidCard10.setProducto("");
+    prepaidCard10.setNumeroUnico("");
     prepaidCard10.setStatus(PrepaidCardStatus.PENDING);
-    prepaidCard10 = createPrepaidCard10(prepaidCard10);
-
-    Account account = getAccountEJBBean10().insertAccount(prepaidUser.getId(), getRandomString(15));
+    prepaidCard10 = createPrepaidCardV2(prepaidCard10);
 
     String messageId = sendPendingCreateCard(prepaidTopup, prepaidUser, prepaidCard10, cdtTransaction, prepaidMovement, account, 4);
-
+    Thread.sleep(3000);
     Queue qResp = camelFactory.createJMSQueue(PrepaidTopupRoute10.ERROR_CREATE_CARD_RESP);
     ExchangeData<PrepaidTopupData10> remoteTopup = (ExchangeData<PrepaidTopupData10>)camelFactory.createJMSMessenger().getMessage(qResp, messageId);
 
     Assert.assertNotNull("Deberia existir un topup", remoteTopup);
     Assert.assertNotNull("Deberia existir un topup", remoteTopup.getData());
     Assert.assertNotNull("Debe contener una tarjeta",remoteTopup.getData().getPrepaidCard10());
-    Assert.assertNotNull("Debe contener un contrato",remoteTopup.getData().getPrepaidCard10().getProcessorUserId());
-    Assert.assertNull("Debe contener getPan",remoteTopup.getData().getPrepaidCard10().getPan());
-    Assert.assertNull("Debe contener getNameOnCard",remoteTopup.getData().getPrepaidCard10().getNameOnCard());
-    Assert.assertNull("Debe contener getExpiration",remoteTopup.getData().getPrepaidCard10().getExpiration());
-    Assert.assertNull("Debe contener getEncryptedPan",remoteTopup.getData().getPrepaidCard10().getEncryptedPan());
-    Assert.assertNull("Deberia contener codigo de producto",remoteTopup.getData().getPrepaidCard10().getProducto());
-    Assert.assertNull("Deberia contener numero unico de cliente",remoteTopup.getData().getPrepaidCard10().getNumeroUnico());
-
-    // Busca la tarjeta en la BD
-    PrepaidCard10 dbPrepaidCard = getPrepaidCardEJBBean10().getPrepaidCardById(null, remoteTopup.getData().getPrepaidCard10().getId());
-    Assert.assertNotNull("Deberia tener una tarjeta", dbPrepaidCard);
-    Assert.assertEquals("Deberia tener una tarjeta en status PENDING", PrepaidCardStatus.PENDING, dbPrepaidCard.getStatus());
+    Assert.assertEquals("Debe contener getPan","",remoteTopup.getData().getPrepaidCard10().getPan());
+    Assert.assertEquals("Debe contener getNameOnCard","",remoteTopup.getData().getPrepaidCard10().getNameOnCard());
+    Assert.assertEquals("Debe contener getEncryptedPan","",remoteTopup.getData().getPrepaidCard10().getEncryptedPan());
+    Assert.assertEquals("Deberia contener codigo de producto","",remoteTopup.getData().getPrepaidCard10().getProducto());
+    Assert.assertEquals("Deberia contener numero unico de cliente","",remoteTopup.getData().getPrepaidCard10().getNumeroUnico());
 
     //verifica que la ultima cola por la cual paso el mensaje sea ERROR_CREATE_CARD_REQ
     ProcessorMetadata lastProcessorMetadata = remoteTopup.getLastProcessorMetadata();

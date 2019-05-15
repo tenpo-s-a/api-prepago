@@ -18,7 +18,7 @@ public class Test_PrepaidCardEJBBean10_updatePrepaidCardStatus extends TestBaseU
   public void updatePrepaidCardStatus_ok() throws Exception {
 
     PrepaidCard10 card = buildPrepaidCard10();
-    card = createPrepaidCard10(card);
+    card = createPrepaidCardV2(card);
 
     getPrepaidCardEJBBean10().updatePrepaidCardStatus(null, card.getId(), PrepaidCardStatus.EXPIRED);
 
@@ -32,7 +32,7 @@ public class Test_PrepaidCardEJBBean10_updatePrepaidCardStatus extends TestBaseU
   public void updatePrepaidCardStatus_not_ok() throws Exception {
 
     PrepaidCard10 card = buildPrepaidCard10();
-    card = createPrepaidCard10(card);
+    card = createPrepaidCardV2(card);
 
     try {
 

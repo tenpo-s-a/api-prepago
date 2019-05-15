@@ -51,10 +51,10 @@ public class Test_PrepaidAccountingEJBBean10_processIpmFileTransactions extends 
 
     PrepaidCard10 prepaidCard10 = buildPrepaidCard10();
     prepaidCard10.setPan(Utils.replacePan(pan));
-    prepaidCard10.setProcessorUserId(processorUserId);
+
     prepaidCard10.setEncryptedPan(encryptUtil.encrypt(pan));
-    prepaidCard10.setIdUser(prepaidUser.getId());
-    createPrepaidCard10(prepaidCard10);
+
+    createPrepaidCardV2(prepaidCard10);
 
     //
     String movement = "INSERT INTO %s.prp_movimiento VALUES (1030, 0, %d, '275175', 'PURCHASE', 166, 'PENDING', 'IN_PROCESS', 'RECONCILED', 'RECONCILED', 'OPE', '2019-02-25 15:12:55.415489', '2019-02-25 15:12:55.415489', '', '0001', '000000000014', 152, 0, 3007, '2018-08-08', '', '5176081118013603', 840, 25, 166, 0, '275175', 'A', 'USA', 0, 0, 0, 152, '', 0, 0, 0, '', 0, 1, 0, '');";

@@ -73,33 +73,6 @@ public final class PrepaidResource10 extends BaseResource {
   }
 
   @POST
-  @Path("/topup")
-  public Response topupUserBalanceV1(NewPrepaidTopup10 topupRequest, @Context HttpHeaders headers) throws Exception {
-    PrepaidTopup10 prepaidTopup = this.prepaidEJBBean10.topupUserBalanceV1(headersToMap(headers), topupRequest);
-    return Response.ok(prepaidTopup).status(201).build();
-  }
-
-
-  @POST
-  @Path("/topup/reverse")
-  public Response reverseTopupUserBalance(NewPrepaidTopup10 topupRequest, @Context HttpHeaders headers) throws Exception {
-    this.prepaidEJBBean10.reverseTopupUserBalanceTmp(headersToMap(headers), topupRequest,true);
-    return Response.status(201).build();
-  }
-
-
-  /*
-    Prepaid withdraw
-   */
-
-  @POST
-  @Path("/withdrawal")
-  public Response withdrawUserBalance( NewPrepaidWithdraw10 withdrawRequest, @Context HttpHeaders headers) throws Exception {
-    PrepaidWithdraw10 withdrawTopup = this.prepaidEJBBean10.withdrawUserBalanceDeprecated(headersToMap(headers), withdrawRequest,true);
-    return Response.ok(withdrawTopup).status(201).build();
-  }
-
-  @POST
   @Path("/{user_id}/cash_out")
   public Response withdrawUserBalance(@PathParam("user_id") String extUserId, NewPrepaidWithdraw10 withdrawRequest, @Context HttpHeaders headers) throws Exception {
     if(withdrawRequest != null && withdrawRequest.WEB_MERCHANT_CODE.equals(withdrawRequest.getMerchantCode())){
@@ -117,14 +90,6 @@ public final class PrepaidResource10 extends BaseResource {
     }
     PrepaidWithdraw10 withdrawTopup = this.prepaidEJBBean10.withdrawUserBalance(headersToMap(headers), extUserId, withdrawRequest,true);
     return Response.ok(withdrawTopup).status(201).build();
-  }
-
-
-  @POST
-  @Path("/withdrawal/reverse")
-  public Response reverseWithdrawUserBalance(NewPrepaidWithdraw10 withdrawRequest, @Context HttpHeaders headers) throws Exception {
-    this.prepaidEJBBean10.reverseWithdrawUserBalanceOld(headersToMap(headers), withdrawRequest,true);
-    return Response.status(201).build();
   }
 
   @POST
@@ -152,13 +117,6 @@ public final class PrepaidResource10 extends BaseResource {
   }
 
   @GET
-  @Path("/{userId}/card")
-  public Response getPrepaidCard(@PathParam("userId") Long userIdMc, @Context HttpHeaders headers) throws Exception {
-    PrepaidCard10 prepaidCard10 = prepaidEJBBean10.getPrepaidCard(headersToMap(headers), userIdMc);
-    return Response.ok(prepaidCard10).build();
-  }
-
-  @GET
   @Path("/{userId}/balance")
   @Deprecated
   public Response getPrepaidUserBalance(@PathParam("userId") Long userIdMc, @Context HttpHeaders headers) throws Exception {
@@ -181,47 +139,12 @@ public final class PrepaidResource10 extends BaseResource {
     return Response.ok(prepaidBalance10).build();
   }
 
-  /*
-     Prepaid Simulations
-   */
-  @POST
-  @Path("/{userId}/simulation/topup")
-  @Deprecated
-  public Response topupSimulation(SimulationNew10 simulationNew, @PathParam("userId") Long userIdMc, @Context HttpHeaders headers) throws Exception {
-    SimulationTopupGroup10 simulationTopupGroup10 = this.prepaidEJBBean10.topupSimulationGroup(headersToMap(headers), userIdMc, simulationNew);
-    return Response.ok(simulationTopupGroup10).build();
-  }
-
-  @POST
-  @Path("/{userId}/simulation/withdrawal")
-  @Deprecated
-  public Response withdrawalSimulation(SimulationNew10 simulationNew, @PathParam("userId") Long userIdMc, @Context HttpHeaders headers) throws Exception {
-    SimulationWithdrawal10 simulationWithdrawal10 = this.prepaidEJBBean10.withdrawalSimulation(headersToMap(headers), userIdMc, simulationNew);
-    return Response.ok(simulationWithdrawal10).build();
-  }
-
-  @GET
-  @Path("/{userId}/transactions")
-  public Response getTransactions(@PathParam("userId") Long userIdMc, @QueryParam("from") String from, @QueryParam("to") String to, @QueryParam("count") Integer count, @Context HttpHeaders headers) throws Exception {
-    PrepaidTransactionExtend10 prepaidTransactionExtend10 = this.prepaidEJBBean10.getTransactions(headersToMap(headers),userIdMc,from,to, count);
-    return Response.ok(prepaidTransactionExtend10).build();
-  }
-
   @PUT
   @Path("/{userId}/account/{accountId}/upgrade_card")
   public Response upgradeCard(@PathParam("userId") String userUuid, @PathParam("accountId") String accountUuid, @Context HttpHeaders headers) throws Exception {
     PrepaidCard10 prepaidCard10 = prepaidCardEJBBean11.upgradePrepaidCard(headersToMap(headers), userUuid, accountUuid);
     return Response.ok(prepaidCard10).build();
   }
-
-  /*
-  @POST
-  @Path("/{user_id}/mail")
-  @Deprecated
-  public Response sendMail(EmailBody emailBody, @PathParam("user_id") Long userId, @Context HttpHeaders headers) throws Exception {
-    this.mailPrepaidEJBBean10.sendMailAsync(headersToMap(headers), userId, emailBody);
-    return Response.ok().status(201).build();
-  }*/
 
   @POST
   @Path("/Queue")
@@ -239,29 +162,6 @@ public final class PrepaidResource10 extends BaseResource {
       log.error("Error processing refund for movement: "+movementId, ex);
     }
     return Response.accepted().build();
-  }
-
-  @POST
-  @Path("/processor/notification")
-  public Response callNotificationTecnocom(NotificationTecnocom notificationTecnocom,@Context HttpHeaders headers) throws Exception {
-    Response returnResponse = null;
-
-    String textLogBase = "TestHelperResource-callNotification: ";
-    NotificationTecnocom notificationTecnocomResponse;
-    try{
-
-      notificationTecnocomResponse = this.prepaidEJBBean10.setNotificationCallback(null,notificationTecnocom);
-      returnResponse = Response.ok(notificationTecnocomResponse).status(202).build();
-      log.info(textLogBase+notificationTecnocomResponse.toString());
-
-    }catch(Exception ex){
-      log.error(textLogBase+ex.toString());
-      ex.printStackTrace();
-      returnResponse = Response.ok(ex).build();
-    }
-
-    return returnResponse;
-
   }
 
 }

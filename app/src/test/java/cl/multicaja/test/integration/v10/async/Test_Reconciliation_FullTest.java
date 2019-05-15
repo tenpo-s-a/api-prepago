@@ -3424,10 +3424,10 @@ public class Test_Reconciliation_FullTest extends TestBaseUnitAsync {
     return getPrepaidAccountingEJBBean10().buildAccounting10(prepaidAccountingMovement, AccountingStatusType.PENDING, AccountingStatusType.PENDING);
   }
 
-  McRedReconciliationFileDetail createSwitchMovement(Long fileId, PrepaidMovement10 prepaidMovement10) {
+  McRedReconciliationFileDetail createSwitchMovement(Long fileId, PrepaidMovement10 prepaidMovement10, Long idUsuario) {
     McRedReconciliationFileDetail registroSwitch = new McRedReconciliationFileDetail();
     registroSwitch.setMcCode(prepaidMovement10.getIdTxExterno());
-    registroSwitch.setClientId(prepaidMovement10.getIdPrepaidUser()); //prepaidMovement10.getIdPrepaidUser());
+    registroSwitch.setClientId(idUsuario); //prepaidMovement10.getIdPrepaidUser());
     registroSwitch.setExternalId(0L);
     registroSwitch.setDateTrx(Timestamp.valueOf(LocalDate.now().atStartOfDay()));
     registroSwitch.setFileId(fileId);
@@ -3524,7 +3524,7 @@ public class Test_Reconciliation_FullTest extends TestBaseUnitAsync {
     testData.prepaidMovement.setEstadoNegocio(BusinessStatusType.IN_PROCESS);
 
     if(switchFileId != null) {
-      testData.switchMovement = createSwitchMovement(switchFileId, testData.prepaidMovement);
+      testData.switchMovement = createSwitchMovement(switchFileId, testData.prepaidMovement,prepaidUser.getId());
     } else {
       testData.switchMovement = null;
     }

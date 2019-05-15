@@ -34,7 +34,7 @@ public class Test_ProductChangeRoute10 extends TestBaseUnitAsync {
   @Test
   public void productChangeRetryCount4() throws Exception {
     PrepaidUser10 prepaidUser = buildPrepaidUserv2();
-    prepaidUser = createPrepaidUser10(prepaidUser);
+    prepaidUser = createPrepaidUserV2(prepaidUser);
     TipoAlta tipoAlta = prepaidUser.getUserLevel() == PrepaidUserLevel.LEVEL_2 ? TipoAlta.NIVEL2 : TipoAlta.NIVEL1;
 
     // Crea cuenta/contrato
@@ -42,7 +42,7 @@ public class Test_ProductChangeRoute10 extends TestBaseUnitAsync {
     account = getAccountEJBBean10().insertAccount(prepaidUser.getId(), account.getAccountNumber());
 
     PrepaidCard10 prepaidCard = buildPrepaidCardWithTecnocomData(prepaidUser, account);
-    prepaidCard = createPrepaidCard10(prepaidCard);
+    prepaidCard = createPrepaidCardV2(prepaidCard);
 
     String messageId = sendPendingProductChange(prepaidUser, account, prepaidCard, tipoAlta,4);
 
@@ -71,7 +71,7 @@ public class Test_ProductChangeRoute10 extends TestBaseUnitAsync {
     account = getAccountEJBBean10().insertAccount(prepaidUser.getId(), account.getAccountNumber());
 
     PrepaidCard10 prepaidCard = buildPrepaidCardWithTecnocomData(prepaidUser, account);
-    prepaidCard = createPrepaidCard10(prepaidCard);
+    prepaidCard = createPrepaidCardV2(prepaidCard);
 
     String messageId = sendPendingProductChange(prepaidUser, account, prepaidCard, TipoAlta.NIVEL2,0);
 
@@ -129,7 +129,7 @@ public class Test_ProductChangeRoute10 extends TestBaseUnitAsync {
 
     Assert.assertEquals("Debe tener el mismo card id", prepaidCard.getUuid(), cardEvent.getCard().getId());
     Assert.assertEquals("Debe tener el mismo accountId", account.getUuid(), cardEvent.getAccountId());
-    Assert.assertEquals("Debe tener el mismo userId", prepaidUser.getUserIdMc().toString(), cardEvent.getUserId());
+
     Assert.assertEquals("Debe tener el mismo pan", prepaidCard.getPan(), cardEvent.getCard().getPan());
 
 
@@ -144,7 +144,7 @@ public class Test_ProductChangeRoute10 extends TestBaseUnitAsync {
 
     Assert.assertEquals("Debe tener el mismo card id", prepaidCard.getUuid(), cardEvent.getCard().getId());
     Assert.assertEquals("Debe tener el mismo accountId", account.getUuid(), cardEvent.getAccountId());
-    Assert.assertEquals("Debe tener el mismo userId", prepaidUser.getUserIdMc().toString(), cardEvent.getUserId());
+
     Assert.assertEquals("Debe tener el mismo pan", prepaidCard.getPan(), cardEvent.getCard().getPan());
   }
 }

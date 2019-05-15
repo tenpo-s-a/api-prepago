@@ -45,11 +45,11 @@ public class PrepaidMovementEJBBean11 extends PrepaidMovementEJBBean10 {
 
   private static final String FIND_MOVEMENT_BY_ID_SQL = String.format("SELECT * FROM %s.prp_movimiento WHERE id = ?", getSchema());
   private static final String INSERT_MOVEMENT_SQL
-    = String.format("INSERT INTO %s.prp_movimiento (id_movimiento_ref, id_usuario, id_tx_externo, tipo_movimiento, monto, " +
+    = String.format("INSERT INTO %s.prp_movimiento (id_movimiento_ref, id_tarjeta, id_tx_externo, tipo_movimiento, monto, " +
     "estado, estado_de_negocio, estado_con_switch,estado_con_tecnocom,origen_movimiento,fecha_creacion,fecha_actualizacion," +
     "codent,centalta,cuenta,clamon,indnorcor,tipofac,fecfac,numreffac,pan,clamondiv,impdiv,impfac,cmbapli,numaut,indproaje," +
-    "codcom,codact,impliq,clamonliq,codpais,nompob,numextcta,nummovext,clamone,tipolin,linref,numbencta,numplastico,nomcomred, id_tarjeta) " +
-    "VALUES(?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?);", getSchema());
+    "codcom,codact,impliq,clamonliq,codpais,nompob,numextcta,nummovext,clamone,tipolin,linref,numbencta,numplastico,nomcomred) " +
+    "VALUES(?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?);", getSchema());
 
   // Fee Queries
   private static final String FIND_FEE_BY_ID = String.format("SELECT * FROM %s.prp_movimiento_comision WHERE id = ?", getSchema());
@@ -81,7 +81,7 @@ public class PrepaidMovementEJBBean11 extends PrepaidMovementEJBBean10 {
       PreparedStatement ps = connection
         .prepareStatement(INSERT_MOVEMENT_SQL, new String[] {"id"});
       ps.setLong(1, movement.getIdMovimientoRef());
-      ps.setLong(2, movement.getIdPrepaidUser());
+      ps.setLong(2, movement.getCardId() != null ? movement.getCardId() : 0);
       ps.setString(3, movement.getIdTxExterno());
       ps.setString(4, movement.getTipoMovimiento().toString());
       ps.setBigDecimal(5, movement.getMonto());
@@ -121,7 +121,6 @@ public class PrepaidMovementEJBBean11 extends PrepaidMovementEJBBean10 {
       ps.setLong(39, movement.getNumbencta());
       ps.setLong(40, movement.getNumplastico());
       ps.setString(41, movement.getNomcomred());
-      ps.setLong(42, movement.getCardId());
 
       return ps;
     }, keyHolder);
@@ -150,7 +149,6 @@ public class PrepaidMovementEJBBean11 extends PrepaidMovementEJBBean10 {
       PrepaidMovement10 movement = new PrepaidMovement10();
       movement.setId(rs.getLong("id"));
       movement.setIdMovimientoRef(rs.getLong("id_movimiento_ref"));
-      movement.setIdPrepaidUser(rs.getLong("id_usuario"));
       movement.setIdTxExterno(rs.getString("id_tx_externo"));
       movement.setTipoMovimiento(PrepaidMovementType.valueOfEnum(rs.getString("tipo_movimiento")));
       movement.setMonto(rs.getBigDecimal("monto"));

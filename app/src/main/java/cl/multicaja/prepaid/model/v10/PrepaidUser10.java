@@ -12,25 +12,13 @@ import java.util.Objects;
 public class PrepaidUser10 extends BaseModel {
 
   private Long id;
-  @JsonProperty("user_id")
-  private Long userIdMc;
-  @Deprecated
-  private Integer rut;
+
   private PrepaidUserStatus status;
   private cl.multicaja.prepaid.model.v10.Timestamps timestamps;
   private PrepaidUserLevel userLevel;
   @JsonIgnore
   private PrepaidBalanceInfo10 balance;
-
-  @Deprecated
-  @JsonIgnore
-  private Long balanceExpiration;
-  @Deprecated
-  private boolean hasPrepaidCard;
   private boolean hasPendingFirstTopup;
-  @Deprecated
-  @JsonIgnore
-  private Integer identityVerificationAttempts;
 
   // Campos nuevos
   private String name;
@@ -52,21 +40,6 @@ public class PrepaidUser10 extends BaseModel {
     this.id = id;
   }
 
-  public Long getUserIdMc() {
-    return userIdMc;
-  }
-
-  public void setUserIdMc(Long userIdMc) {
-    this.userIdMc = userIdMc;
-  }
-
-  public Integer getRut() {
-    return rut;
-  }
-
-  public void setRut(Integer rut) {
-    this.rut = rut;
-  }
 
   public PrepaidUserStatus getStatus() {
     return status;
@@ -92,13 +65,7 @@ public class PrepaidUser10 extends BaseModel {
     this.balance = balance;
   }
 
-  public Long getBalanceExpiration() {
-    return balanceExpiration;
-  }
 
-  public void setBalanceExpiration(Long balanceExpiration) {
-    this.balanceExpiration = balanceExpiration;
-  }
 
   public PrepaidUserLevel getUserLevel() {
     return userLevel;
@@ -108,13 +75,7 @@ public class PrepaidUser10 extends BaseModel {
     this.userLevel = userLevel;
   }
 
-  public boolean isHasPrepaidCard() {
-    return hasPrepaidCard;
-  }
 
-  public void setHasPrepaidCard(boolean hasPrepaidCard) {
-    this.hasPrepaidCard = hasPrepaidCard;
-  }
 
   public boolean isHasPendingFirstTopup() {
     return hasPendingFirstTopup;
@@ -122,14 +83,6 @@ public class PrepaidUser10 extends BaseModel {
 
   public void setHasPendingFirstTopup(boolean hasPendingFirstTopup) {
     this.hasPendingFirstTopup = hasPendingFirstTopup;
-  }
-
-  public Integer getIdentityVerificationAttempts() {
-    return identityVerificationAttempts;
-  }
-
-  public void setIdentityVerificationAttempts(Integer identityVerificationAttempts) {
-    this.identityVerificationAttempts = identityVerificationAttempts;
   }
 
   public String getName() {
@@ -187,30 +140,25 @@ public class PrepaidUser10 extends BaseModel {
     if (!(o instanceof PrepaidUser10)) return false;
     PrepaidUser10 that = (PrepaidUser10) o;
     return Objects.equals(getId(), that.getId()) &&
-      Objects.equals(getUserIdMc(), that.getUserIdMc()) &&
-      Objects.equals(getRut(), that.getRut()) &&
+      Objects.equals(getDocumentNumber(), that.getDocumentNumber()) &&
+      Objects.equals(getUuid(), that.getUuid()) &&
       getStatus() == that.getStatus();
   }
 
   @Override
   public int hashCode() {
-    return Objects.hash(getId(), getUserIdMc(), getRut(), getStatus(), getTimestamps());
+    return Objects.hash(getId(), getUuid(), getDocumentNumber(), getStatus(), getTimestamps());
   }
 
   @Override
   public String toString() {
     return "PrepaidUser10{" +
       "id=" + id +
-      ", userIdMc=" + userIdMc +
-      ", rut=" + rut +
       ", status=" + status +
       ", timestamps=" + timestamps +
       ", userLevel=" + userLevel +
       ", balance=" + balance +
-      ", balanceExpiration=" + balanceExpiration +
-      ", hasPrepaidCard=" + hasPrepaidCard +
       ", hasPendingFirstTopup=" + hasPendingFirstTopup +
-      ", identityVerificationAttempts=" + identityVerificationAttempts +
       ", name='" + name + '\'' +
       ", lastName='" + lastName + '\'' +
       ", documentNumber='" + documentNumber + '\'' +

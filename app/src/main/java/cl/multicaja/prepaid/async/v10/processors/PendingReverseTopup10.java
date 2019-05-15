@@ -24,7 +24,6 @@ import java.util.Map;
 
 import static cl.multicaja.prepaid.async.v10.routes.TransactionReversalRoute10.ERROR_REVERSAL_TOPUP_REQ;
 import static cl.multicaja.prepaid.async.v10.routes.TransactionReversalRoute10.PENDING_REVERSAL_TOPUP_REQ;
-import static cl.multicaja.prepaid.model.v10.MailTemplates.TEMPLATE_MAIL_ERROR_TOPUP_REVERSE;
 
 /**
  * @autor abarazarte
@@ -89,7 +88,7 @@ public class PendingReverseTopup10 extends BaseProcessor10 {
           }
           else if (PrepaidMovementStatus.ERROR_TECNOCOM_REINTENTABLE.equals(originalMovement.getEstado()) || PrepaidMovementStatus.ERROR_TIMEOUT_RESPONSE.equals(originalMovement.getEstado()) ){
             log.debug("********** Reintentando movimiento original **********");
-            log.info(String.format("LLamando reversa mov original %s", prepaidCard.getProcessorUserId()));
+            log.info(String.format("LLamando reversa mov original %s", account.getAccountNumber()));
 
               // Se intenta realizar nuevamente la inclusion del movimiento original .
             InclusionMovimientosDTO inclusionMovimientosDTO = getRoute().getTecnocomServiceHelper().topup(contrato, pan, originalMovement.getCodcom(), originalMovement);
@@ -134,7 +133,7 @@ public class PendingReverseTopup10 extends BaseProcessor10 {
           }
           else if(PrepaidMovementStatus.PROCESS_OK.equals(originalMovement.getEstado())) {
             log.debug("********** Realizando reversa de carga **********");
-            log.info(String.format("LLamando reversa %s", prepaidCard.getProcessorUserId()));
+            log.info(String.format("LLamando reversa %s", account.getAccountNumber()));
 
             // Se intenta realizar reversa del movimiento.
             InclusionMovimientosDTO inclusionMovimientosDTO = getRoute().getTecnocomServiceHelper().reverse(contrato, pan, originalMovement.getCodcom(), prepaidMovementReverse);

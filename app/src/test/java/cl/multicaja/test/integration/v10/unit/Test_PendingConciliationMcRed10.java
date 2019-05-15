@@ -425,7 +425,6 @@ public class Test_PendingConciliationMcRed10 extends TestBaseUnitAsync {
         prepaidMovement10.setFechaActualizacion(currentTimeStamp1);
         prepaidMovement10.setFechaCreacion(currentTimeStamp1);
 
-        prepaidMovement10.setIdPrepaidUser(prepaidUser.getId());
         prepaidMovement10.setMonto(new BigDecimal(numberUtils.random(3000,100000)));
         prepaidMovement10.setId(numberUtils.random(3000L,100000L));
         prepaidMovement10.setTipoMovimiento(type);
@@ -485,11 +484,15 @@ public class Test_PendingConciliationMcRed10 extends TestBaseUnitAsync {
       for(PrepaidMovement10 mov:lstPrepaidMovement10s){
         System.out.println(mov);
         String[] data;
+
+        PrepaidCard10 prepaidCard10 = getPrepaidCardEJBBean11().getPrepaidCardById(null,mov.getCardId());
+        Account account = getAccountEJBBean10().findById(prepaidCard10.getAccountId());
+
         if(filename.contains("reversa")) {
-          data = new String[]{mov.getIdTxExterno(),String.valueOf(mov.getFechaCreacion()),String.valueOf(mov.getIdPrepaidUser()),String.valueOf(mov.getMonto().longValue())};
+          data = new String[]{mov.getIdTxExterno(),String.valueOf(mov.getFechaCreacion()),String.valueOf(account.getUserId()),String.valueOf(mov.getMonto().longValue())};
           System.out.println(data);
         }else {
-          data = new String[]{mov.getIdTxExterno(),String.valueOf(mov.getFechaCreacion()),String.valueOf(mov.getIdPrepaidUser()),String.valueOf(mov.getMonto().longValue()),String.valueOf(mov.getId())};
+          data = new String[]{mov.getIdTxExterno(),String.valueOf(mov.getFechaCreacion()),String.valueOf(account.getUserId()),String.valueOf(mov.getMonto().longValue()),String.valueOf(mov.getId())};
         }
         writer.writeNext(data);
       }
@@ -517,10 +520,13 @@ public class Test_PendingConciliationMcRed10 extends TestBaseUnitAsync {
       for(PrepaidMovement10 mov:lstPrepaidMovement10s){
         System.out.println(mov);
         String[] data;
+        PrepaidCard10 prepaidCard10 = getPrepaidCardEJBBean11().getPrepaidCardById(null,mov.getCardId());
+        Account account = getAccountEJBBean10().findById(prepaidCard10.getAccountId());
+
         if(filename.contains("reversa")) {
-          data = new String[]{mov.getIdTxExterno(),String.valueOf(mov.getFechaCreacion()),String.valueOf(mov.getIdPrepaidUser()),String.valueOf(mov.getMonto().longValue()+100)};
+          data = new String[]{mov.getIdTxExterno(),String.valueOf(mov.getFechaCreacion()),String.valueOf(account.getUserId()),String.valueOf(mov.getMonto().longValue()+100)};
         }else {
-          data = new String[]{mov.getIdTxExterno(),String.valueOf(mov.getFechaCreacion()),String.valueOf(mov.getIdPrepaidUser()),String.valueOf(mov.getMonto().longValue()+100),String.valueOf(mov.getId())};
+          data = new String[]{mov.getIdTxExterno(),String.valueOf(mov.getFechaCreacion()),String.valueOf(account.getUserId()),String.valueOf(mov.getMonto().longValue()+100),String.valueOf(mov.getId())};
         }
         writer.writeNext(data);
       }

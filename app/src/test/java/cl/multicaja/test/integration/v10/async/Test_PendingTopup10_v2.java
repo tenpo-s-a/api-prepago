@@ -96,7 +96,7 @@ public class Test_PendingTopup10_v2 extends TestBaseUnitAsync {
   public void pendingTopup_with_card_expired() throws Exception {
 
     PrepaidUser10 prepaidUser10 = buildPrepaidUserv2();
-    prepaidUser10 = createPrepaidUser10(prepaidUser10);
+    prepaidUser10 = createPrepaidUserV2(prepaidUser10);
 
     Account account = buildAccountFromTecnocom(prepaidUser10);
     account = createAccount(prepaidUser10.getId(),account.getAccountNumber());
@@ -105,7 +105,7 @@ public class Test_PendingTopup10_v2 extends TestBaseUnitAsync {
 
     prepaidCard.setStatus(PrepaidCardStatus.EXPIRED);
 
-    prepaidCard = createPrepaidCard10(prepaidCard);
+    prepaidCard = createPrepaidCardV2(prepaidCard);
 
     PrepaidTopup10 prepaidTopup = buildPrepaidTopup10();
 
@@ -411,7 +411,7 @@ public class Test_PendingTopup10_v2 extends TestBaseUnitAsync {
     account = createAccount(prepaidUser10.getId(),account.getAccountNumber());
 
     PrepaidCard10 prepaidCard = buildPrepaidCardWithTecnocomData(prepaidUser10, account);
-    prepaidCard = createPrepaidCard10(prepaidCard);
+    prepaidCard = createPrepaidCardV2(prepaidCard);
 
     PrepaidTopup10 prepaidTopup = buildPrepaidTopup10();
 

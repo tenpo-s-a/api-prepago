@@ -22,7 +22,6 @@ public class Test_PrepaidUserEJBBean11_createUserFromTenpo extends TestBaseUnit 
     Assert.assertNotNull("No es nulo", userFound);
 
     Assert.assertEquals("Igual",userCreated.getUuid(),userFound.getUuid());
-    Assert.assertEquals("Igual",userCreated.getRut(),userFound.getRut());
     Assert.assertEquals("Igual",userCreated.getStatus(),userFound.getStatus());
     Assert.assertEquals("Igual",userCreated.getName(),userFound.getName());
     Assert.assertEquals("Igual",userCreated.getLastName(),userFound.getLastName());

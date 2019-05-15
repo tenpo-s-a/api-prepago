@@ -193,9 +193,9 @@ public final class TestHelpersResource10 extends BaseResource {
     if (prepaidCard10 == null) {
       throw new NotFoundException(ERROR_DATA_NOT_FOUND);
     }
-
+    Account account = accountEJBBean10.findById(prepaidCard10.getAccountId());
     TecnocomService tecnocomService = TecnocomServiceHelper.getInstance().getTecnocomService();
-    ConsultaSaldoDTO consultaSaldoDTO = tecnocomService.consultaSaldo(prepaidCard10.getProcessorUserId(), prepaidUser.getRut().toString(), TipoDocumento.RUT);
+    ConsultaSaldoDTO consultaSaldoDTO = tecnocomService.consultaSaldo(account.getAccountNumber(), prepaidUser.getDocumentNumber(), TipoDocumento.RUT);
 
     // Hacer un gasto aleatorio del saldo disponible
     BigDecimal saldoDisponible = consultaSaldoDTO.getSaldisconp();
@@ -210,7 +210,7 @@ public final class TestHelpersResource10 extends BaseResource {
     int selectedNomcomRed = RandomUtils.nextInt(0, nomcomreds.length - 1);
 
     // Agregar compra
-    InclusionMovimientosDTO inclusionMovimientosDTO = tecnocomService.inclusionMovimientos(prepaidCard10.getProcessorUserId(), prepaidCard10.getPan(), CodigoMoneda.CHILE_CLP, IndicadorNormalCorrector.NORMAL, TipoFactura.COMPRA_INTERNACIONAL, numreffac, gastoAleatorio, numaut, nomcomreds[selectedNomcomRed], nomcomreds[selectedNomcomRed], 123, CodigoMoneda.CHILE_CLP, gastoAleatorio);
+    InclusionMovimientosDTO inclusionMovimientosDTO = tecnocomService.inclusionMovimientos(account.getAccountNumber(), prepaidCard10.getPan(), CodigoMoneda.CHILE_CLP, IndicadorNormalCorrector.NORMAL, TipoFactura.COMPRA_INTERNACIONAL, numreffac, gastoAleatorio, numaut, nomcomreds[selectedNomcomRed], nomcomreds[selectedNomcomRed], 123, CodigoMoneda.CHILE_CLP, gastoAleatorio);
     if (!inclusionMovimientosDTO.isRetornoExitoso()) {
       log.error("* Compra rechazada por Tecnocom * Error: " + inclusionMovimientosDTO.getRetorno());
       log.error(inclusionMovimientosDTO.getDescRetorno());
@@ -244,6 +244,11 @@ public final class TestHelpersResource10 extends BaseResource {
       throw new NotFoundException(ERROR_DATA_NOT_FOUND);
     }
 
+    Account account = accountEJBBean10.findById(prepaidCard10.getAccountId());
+    if (account == null) {
+      throw new NotFoundException(ERROR_DATA_NOT_FOUND);
+    }
+
     TecnocomService tecnocomService = TecnocomServiceHelper.getInstance().getTecnocomService();
 
     String numreffac = getRandomNumericString(10);
@@ -251,7 +256,7 @@ public final class TestHelpersResource10 extends BaseResource {
 
     //add authorization
     InclusionMovimientosDTO inclusionAutorizacionesDTO = tecnocomService.inclusionAutorizaciones(
-      prepaidCard10.getProcessorUserId(),
+      account.getAccountNumber(),
       prepaidCard10.getPan(),
       CodigoMoneda.CHILE_CLP,
       IndicadorNormalCorrector.NORMAL,
@@ -293,7 +298,12 @@ public final class TestHelpersResource10 extends BaseResource {
       throw new NotFoundException(ERROR_DATA_NOT_FOUND);
     }
 
-    String contrato = prepaidCard10.getProcessorUserId();
+    Account account = accountEJBBean10.findById(prepaidCard10.getAccountId());
+    if (account == null) {
+      throw new NotFoundException(ERROR_DATA_NOT_FOUND);
+    }
+
+    String contrato = account.getAccountNumber();
 
     TecnocomService tecnocomService = TecnocomServiceHelper.getInstance().getTecnocomService();
 
@@ -429,10 +439,7 @@ public final class TestHelpersResource10 extends BaseResource {
   @Deprecated
   public PrepaidUser10 buildPrepaidUser10() {
     PrepaidUser10 prepaidUser = new PrepaidUser10();
-    prepaidUser.setUserIdMc(getUniqueLong());
-    prepaidUser.setRut(getUniqueRutNumber());
     prepaidUser.setStatus(PrepaidUserStatus.ACTIVE);
-    prepaidUser.setBalanceExpiration(0L);
     prepaidUser.setDocumentNumber(getUniqueRutNumber().toString());
     prepaidUser.setDocumentType(DocumentType.DNI_CL);
     prepaidUser.setName(getRandomString(10));
@@ -441,11 +448,9 @@ public final class TestHelpersResource10 extends BaseResource {
     return prepaidUser;
   }
 
-  public PrepaidUser10 buildPrepaidUserV2() {
+  private PrepaidUser10 buildPrepaidUserV2() {
     PrepaidUser10 prepaidUser = new PrepaidUser10();
-    prepaidUser.setUserIdMc(getUniqueLong());
     prepaidUser.setStatus(PrepaidUserStatus.ACTIVE);
-    prepaidUser.setBalanceExpiration(0L);
     prepaidUser.setDocumentNumber(getUniqueRutNumber().toString());
     prepaidUser.setDocumentType(DocumentType.DNI_CL);
     prepaidUser.setName(getRandomString(10));
@@ -461,7 +466,7 @@ public final class TestHelpersResource10 extends BaseResource {
   }
 
 
-  public Account buildPrepaidAccountFromTecnocom(PrepaidUser10 prepaidUser) throws Exception {
+  private Account buildPrepaidAccountFromTecnocom(PrepaidUser10 prepaidUser) throws Exception {
     TipoAlta tipoAlta = prepaidUser.getUserLevel() == PrepaidUserLevel.LEVEL_2 ? TipoAlta.NIVEL2 : TipoAlta.NIVEL1;
     AltaClienteDTO altaClienteDTO = TecnocomServiceHelper.getInstance().getTecnocomService().altaClientes(prepaidUser.getName(), prepaidUser.getLastName(), "",prepaidUser.getDocumentNumber(), TipoDocumento.RUT, tipoAlta);
     Account account = new Account();
@@ -470,13 +475,15 @@ public final class TestHelpersResource10 extends BaseResource {
     return account;
   }
 
-  public PrepaidCard10 buildPrepaidCard10FromTecnocom(PrepaidUser10 prepaidUser,String contrato) throws Exception {
+  private Account createAccount (Account account) throws Exception{
+ 	 return accountEJBBean10.insertAccount(account.getUserId(),account.getAccountNumber());
+  }
+
+  private PrepaidCard10 buildPrepaidCard10FromTecnocom(PrepaidUser10 prepaidUser,String contrato) throws Exception {
 
     DatosTarjetaDTO datosTarjetaDTO = TecnocomServiceHelper.getInstance().getTecnocomService().datosTarjeta(contrato);
 
     PrepaidCard10 prepaidCard = new PrepaidCard10();
-    prepaidCard.setIdUser(prepaidUser.getId());
-    prepaidCard.setProcessorUserId(contrato);
     prepaidCard.setPan(Utils.replacePan(datosTarjetaDTO.getPan()));
     prepaidCard.setEncryptedPan(encryptUtil.encrypt(datosTarjetaDTO.getPan()));
     prepaidCard.setStatus(PrepaidCardStatus.ACTIVE);
@@ -538,7 +545,7 @@ public final class TestHelpersResource10 extends BaseResource {
     return cdtTransaction;
   }
 
-  public PrepaidMovement10 buildPrepaidMovement10(PrepaidUser10 prepaidUser, NewPrepaidBaseTransaction10 prepaidTopup, PrepaidCard10 prepaidCard, CdtTransaction10 cdtTransaction, PrepaidMovementType type) {
+  public PrepaidMovement10 buildPrepaidMovement10(PrepaidUser10 prepaidUser, NewPrepaidBaseTransaction10 prepaidTopup, PrepaidCard10 prepaidCard, CdtTransaction10 cdtTransaction, PrepaidMovementType type) throws Exception {
 
     String codent = null;
     try {
@@ -566,14 +573,18 @@ public final class TestHelpersResource10 extends BaseResource {
 
     String centalta = "";
     String cuenta = "";
-    if(prepaidCard != null && !StringUtils.isBlank(prepaidCard.getProcessorUserId())) {
-      centalta = prepaidCard.getProcessorUserId().substring(4, 8);
-      cuenta = prepaidCard.getProcessorUserId().substring(12);
+    Account account = accountEJBBean10.findById(prepaidCard.getAccountId());
+    if (account == null) {
+      log.error("account not found");
+    }
+
+    if(prepaidCard != null && !StringUtils.isBlank(account.getAccountNumber())) {
+      centalta = account.getAccountNumber().substring(4, 8);
+      cuenta = account.getAccountNumber().substring(12);
     }
 
     PrepaidMovement10 prepaidMovement = new PrepaidMovement10();
     prepaidMovement.setIdMovimientoRef(cdtTransaction != null ? cdtTransaction.getTransactionReference() : getUniqueLong());
-    prepaidMovement.setIdPrepaidUser(prepaidUser.getId());
     prepaidMovement.setIdTxExterno(cdtTransaction != null ? cdtTransaction.getExternalTransactionId() : getUniqueLong().toString());
     prepaidMovement.setTipoMovimiento(type);
     prepaidMovement.setMonto(BigDecimal.valueOf(getUniqueInteger()));
@@ -749,7 +760,6 @@ public final class TestHelpersResource10 extends BaseResource {
 
     PrepaidMovement10 prepaidMovement = new PrepaidMovement10();
     prepaidMovement.setIdMovimientoRef(getUniqueLong());
-    prepaidMovement.setIdPrepaidUser(prepaidUser.getId());
     prepaidMovement.setIdTxExterno(reverseRequest.getTransactionId());
     prepaidMovement.setTipoMovimiento(type);
     prepaidMovement.setMonto(BigDecimal.valueOf(getUniqueInteger()));
@@ -862,12 +872,10 @@ public final class TestHelpersResource10 extends BaseResource {
     String pan = getRandomNumericString(16);
 
     PrepaidCard10 prepaidCard = new PrepaidCard10();
-    prepaidCard.setIdUser(prepaidUser != null ? prepaidUser.getId() : null);
     prepaidCard.setPan(Utils.replacePan(pan));
     prepaidCard.setEncryptedPan(EncryptUtil.getInstance().encrypt(pan));
     prepaidCard.setExpiration(expiryDate);
     prepaidCard.setStatus(PrepaidCardStatus.ACTIVE);
-    prepaidCard.setProcessorUserId(getRandomNumericString(20));
     prepaidCard.setNameOnCard("Tarjeta de: " + getRandomString(5));
     prepaidCard.setProducto(getRandomNumericString(2));
     prepaidCard.setNumeroUnico(getRandomNumericString(8));
@@ -958,7 +966,7 @@ public final class TestHelpersResource10 extends BaseResource {
     tc.getTecnocomService().setAutomaticError(false);
     tc.getTecnocomService().setRetorno(null);
 
-    PrepaidUser10 prepaidUser = buildPrepaidUser10();
+    PrepaidUser10 prepaidUser = buildPrepaidUserV2();
     prepaidUser = prepaidUserEJBBean10.createPrepaidUser(null, prepaidUser);
 
     PrepaidTopup10 prepaidTopup = buildPrepaidTopup10();
@@ -996,8 +1004,6 @@ public final class TestHelpersResource10 extends BaseResource {
     TipoAlta tipoAlta = prepaidUser.getUserLevel() == PrepaidUserLevel.LEVEL_2 ? TipoAlta.NIVEL2 : TipoAlta.NIVEL1;
     AltaClienteDTO altaClienteDTO = tc.getTecnocomService().altaClientes(prepaidUser.getName(), prepaidUser.getLastName(), "", prepaidUser.getDocumentNumber(), TipoDocumento.RUT, tipoAlta);
     PrepaidCard10 prepaidCard10 = new PrepaidCard10();
-    prepaidCard10.setProcessorUserId(altaClienteDTO.getContrato());
-    prepaidCard10.setIdUser(prepaidUser.getId());
     prepaidCard10.setStatus(PrepaidCardStatus.PENDING);
     prepaidCard10 = prepaidCardEJBBean10.createPrepaidCard(null, prepaidCard10);
 
@@ -1014,7 +1020,7 @@ public final class TestHelpersResource10 extends BaseResource {
     tc.getTecnocomService().setAutomaticError(false);
     tc.getTecnocomService().setRetorno(null);
 
-    PrepaidUser10 prepaidUser = buildPrepaidUser10();
+    PrepaidUser10 prepaidUser = buildPrepaidUserV2();
     prepaidUser = prepaidUserEJBBean10.createPrepaidUser(null, prepaidUser);
 
     // Crea cuenta
@@ -1095,19 +1101,17 @@ public final class TestHelpersResource10 extends BaseResource {
     tc.getTecnocomService().setRetorno(null);
 
 
-    PrepaidUser10 prepaidUser = buildPrepaidUser10();
+    PrepaidUser10 prepaidUser = buildPrepaidUserV2();
     prepaidUser = prepaidUserEJBBean10.createPrepaidUser(null, prepaidUser);
     log.info("prepaidUser: " + prepaidUser);
 
-    Account account = createRandomAccount(prepaidUser);
+    // Crea cuenta
+    Account account = buildPrepaidAccountFromTecnocom(prepaidUser);
+    account = accountEJBBean10.insertAccount(account.getUserId(),account.getAccountNumber());
 
-    PrepaidCard10 prepaidCard = buildPrepaidCard10(prepaidUser,account);
+    PrepaidCard10 prepaidCard = buildPrepaidCard10FromTecnocom(prepaidUser,account.getAccountNumber());
 
-    TipoAlta tipoAlta = prepaidUser.getUserLevel() == PrepaidUserLevel.LEVEL_2 ? TipoAlta.NIVEL2 : TipoAlta.NIVEL1;
-    AltaClienteDTO altaClienteDTO = tc.getTecnocomService().altaClientes(prepaidUser.getName(), prepaidUser.getLastName(), "", prepaidUser.getDocumentNumber(), TipoDocumento.RUT, tipoAlta);
-    prepaidCard.setProcessorUserId(altaClienteDTO.getContrato());
-
-    DatosTarjetaDTO datosTarjetaDTO = tc.getTecnocomService().datosTarjeta(prepaidCard.getProcessorUserId());
+    DatosTarjetaDTO datosTarjetaDTO = tc.getTecnocomService().datosTarjeta(account.getAccountNumber());
     prepaidCard.setPan(datosTarjetaDTO.getPan());
     prepaidCard.setExpiration(datosTarjetaDTO.getFeccadtar());
     prepaidCard.setEncryptedPan(EncryptUtil.getInstance().encrypt(prepaidCard.getPan()));
@@ -1124,8 +1128,8 @@ public final class TestHelpersResource10 extends BaseResource {
     prepaidMovementEJBBean10.updatePrepaidMovement(null,
       prepaidMovement.getId(),
       prepaidCard.getPan(),
-      prepaidCard.getProcessorUserId().substring(4, 8),
-      prepaidCard.getProcessorUserId().substring(12),
+      account.getAccountNumber().substring(4, 8),
+      account.getAccountNumber().substring(12),
       123,
       123,
       152,
@@ -1162,7 +1166,7 @@ public final class TestHelpersResource10 extends BaseResource {
 
     try{
 
-      PrepaidUser10 prepaidUser = buildPrepaidUser10();
+      PrepaidUser10 prepaidUser = buildPrepaidUserV2();
       prepaidUser = prepaidUserEJBBean10.createPrepaidUser(null, prepaidUser);
 
       Account account = createRandomAccount(prepaidUser);

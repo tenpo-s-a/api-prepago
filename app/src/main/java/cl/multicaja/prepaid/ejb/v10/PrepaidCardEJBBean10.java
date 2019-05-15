@@ -67,46 +67,6 @@ public class PrepaidCardEJBBean10 extends PrepaidBaseEJBBean10 implements Prepai
     this.kafkaEventDelegate10 = kafkaEventDelegate10;
   }
 
-  @Override
-  public PrepaidCard10 createPrepaidCard(Map<String, Object> headers, PrepaidCard10 prepaidCard) throws Exception {
-
-    if(prepaidCard == null){
-      throw new BadRequestException(PARAMETRO_FALTANTE_$VALUE).setData(new KeyValue("value", "prepaidCard"));
-    }
-
-    if(prepaidCard.getIdUser() == null){
-      throw new BadRequestException(PARAMETRO_FALTANTE_$VALUE).setData(new KeyValue("value", "idUser"));
-    }
-
-    if(prepaidCard.getStatus() == null){
-      throw new BadRequestException(PARAMETRO_FALTANTE_$VALUE).setData(new KeyValue("value", "status"));
-    }
-
-    Object[] params = {
-      prepaidCard.getIdUser(),
-      prepaidCard.getPan()==null ?new NullParam(Types.VARCHAR):prepaidCard.getPan(),
-      prepaidCard.getEncryptedPan()==null ?new NullParam(Types.VARCHAR):prepaidCard.getEncryptedPan(),
-      prepaidCard.getProcessorUserId()==null ?new NullParam(Types.VARCHAR):prepaidCard.getProcessorUserId(),
-      prepaidCard.getExpiration()==null ?new NullParam(Types.INTEGER):prepaidCard.getExpiration(),
-      prepaidCard.getStatus().toString(),
-      prepaidCard.getNameOnCard()==null ?new NullParam(Types.VARCHAR):prepaidCard.getNameOnCard(),
-      prepaidCard.getProducto() == null ? new NullParam(Types.VARCHAR) : prepaidCard.getProducto(),
-      prepaidCard.getNumeroUnico() == null ? new NullParam(Types.VARCHAR): prepaidCard.getNumeroUnico(),
-      new OutParam("_r_id", Types.BIGINT),
-      new OutParam("_error_code", Types.VARCHAR),
-      new OutParam("_error_msg", Types.VARCHAR)
-    };
-
-    Map<String, Object> resp = getDbUtils().execute(getSchema() + ".mc_prp_crear_tarjeta_v10", params);
-
-    if ("0".equals(resp.get("_error_code"))) {
-      prepaidCard.setId(getNumberUtils().toLong(resp.get("_r_id")));
-      return prepaidCard;
-    } else {
-      log.error("createPrepaidCard resp: " + resp);
-      throw new BaseException(ERROR_DE_COMUNICACION_CON_BBDD);
-    }
-  }
 
   /**
    *
@@ -121,44 +81,17 @@ public class PrepaidCardEJBBean10 extends PrepaidBaseEJBBean10 implements Prepai
    * @throws Exception
    */
   private List<PrepaidCard10> getPrepaidCards(Map<String, Object> headers, int fetchCount, Long id, Long userId, Integer expiration, PrepaidCardStatus status, String processorUserId,String encryptedPan, String pan) throws Exception {
-    //si viene algun parametro en null se establece NullParam
-    Object[] params = {
-      id != null ? id : new NullParam(Types.BIGINT),
-      userId != null ? userId : new NullParam(Types.BIGINT),
-      expiration != null ? expiration : new NullParam(Types.INTEGER),
-      status != null ? status.toString() : new NullParam(Types.VARCHAR),
-      processorUserId != null ? processorUserId : new NullParam(Types.VARCHAR),
-      encryptedPan!= null ? encryptedPan : new NullParam(Types.VARCHAR),
-      pan != null ? new InParam(pan, Types.VARCHAR) : new NullParam((Types.VARCHAR))
-    };
-
-    //se registra un OutParam del tipo cursor (OTHER) y se agrega un rowMapper para transformar el row al objeto necesario
-    RowMapper rm = (Map<String, Object> row) -> {
-      PrepaidCard10 c = new PrepaidCard10();
-      c.setId(getNumberUtils().toLong(row.get("_id"), null));
-      c.setIdUser(getNumberUtils().toLong(row.get("_id_usuario"), null));
-      c.setPan(String.valueOf(row.get("_pan")));
-      c.setEncryptedPan(String.valueOf(row.get("_pan_encriptado")));
-      c.setProcessorUserId(String.valueOf(row.get("_contrato")));
-      c.setExpiration(getNumberUtils().toInteger(row.get("_expiracion"), null));
-      c.setStatus(PrepaidCardStatus.valueOfEnum(row.get("_estado").toString().trim()));
-      c.setNameOnCard(String.valueOf(row.get("_nombre_tarjeta")));
-      c.setProducto(String.valueOf(row.get("_producto")));
-      c.setNumeroUnico(String.valueOf(row.get("_numero_unico")));
-      Timestamps timestamps = new Timestamps();
-      timestamps.setCreatedAt(((Timestamp)row.get("_fecha_creacion")).toLocalDateTime());
-      timestamps.setUpdatedAt(((Timestamp)row.get("_fecha_actualizacion")).toLocalDateTime());
-      c.setTimestamps(timestamps);
-      return c;
-    };
-
-    Map<String, Object> resp = getDbUtils().execute(getSchema() + ".mc_prp_buscar_tarjetas_v11", fetchCount, rm, params);
-    return (List)resp.get("result");
+    throw new IllegalStateException();
   }
 
   public PrepaidCard10 getPrepaidCardByEncryptedPan(Map<String, Object> headers, String encryptedPan) throws Exception{
     List<PrepaidCard10> lst = this.getPrepaidCards(headers, 1,null, null, null, null, null,encryptedPan, null);
     return lst != null && !lst.isEmpty() ? lst.get(0) : null;
+  }
+
+  @Override
+  public PrepaidCard10 createPrepaidCard(Map<String, Object> headers, PrepaidCard10 prepaidCard) throws Exception {
+    throw new IllegalStateException();
   }
 
   @Override
@@ -260,29 +193,7 @@ public class PrepaidCardEJBBean10 extends PrepaidBaseEJBBean10 implements Prepai
 
   @Override
   public void updatePrepaidCard(Map<String, Object> headers, Long cardId, Long userId, PrepaidCardStatus oldStatus, PrepaidCard10 prepaidCard) throws Exception {
-
-    Object[] params = {
-      cardId == null ? new NullParam(Types.BIGINT): cardId,
-      userId == null ? new NullParam(Types.BIGINT):userId , //_id_usuario
-      oldStatus == null ? new NullParam(Types.VARCHAR):oldStatus.toString() ,
-      prepaidCard.getPan(), //_pan
-      prepaidCard.getEncryptedPan(), //_pan_encriptado
-      prepaidCard.getProcessorUserId(), //_contrato
-      prepaidCard.getExpiration(), //_expiracion
-      prepaidCard.getStatus().toString(), //_estado
-      prepaidCard.getNameOnCard(), //_nombre_tarjeta
-      prepaidCard.getProducto(), //_producto
-      prepaidCard.getNumeroUnico(), //_numero_unico
-      new OutParam("_error_code", Types.VARCHAR),
-      new OutParam("_error_msg", Types.VARCHAR)
-    };
-
-    Map<String, Object> resp = getDbUtils().execute(getSchema() + ".mc_prp_actualiza_tarjeta_v10", params);
-
-    if (!"0".equals(resp.get("_error_code"))) {
-      log.error("updatePrepaidCard resp: " + resp);
-      throw new BaseException(ERROR_DE_COMUNICACION_CON_BBDD);
-    }
+    throw new IllegalStateException();
   }
 
   public PrepaidCard10 getPrepaidCardByPanAndUserId(String pan, Long userId) throws Exception {

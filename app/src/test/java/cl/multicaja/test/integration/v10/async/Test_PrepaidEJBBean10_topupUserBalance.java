@@ -116,7 +116,7 @@ public class Test_PrepaidEJBBean10_topupUserBalance extends TestBaseUnitAsync {
 
     PrepaidCard10 prepaidCard = buildPrepaidCard10(prepaidUser);
     prepaidCard.setStatus(PrepaidCardStatus.LOCKED_HARD);
-    prepaidCard = createPrepaidCard10(prepaidCard);
+    prepaidCard = createPrepaidCardV2(prepaidCard);
 
     try {
       getPrepaidEJBBean10().topupUserBalance(null,prepaidUser.getUuid(), newPrepaidTopup,true);
@@ -135,7 +135,7 @@ public class Test_PrepaidEJBBean10_topupUserBalance extends TestBaseUnitAsync {
 
     PrepaidCard10 prepaidCard = buildPrepaidCard10(prepaidUser);
     prepaidCard.setStatus(PrepaidCardStatus.EXPIRED);
-    prepaidCard = createPrepaidCard10(prepaidCard);
+    prepaidCard = createPrepaidCardV2(prepaidCard);
 
     try {
 

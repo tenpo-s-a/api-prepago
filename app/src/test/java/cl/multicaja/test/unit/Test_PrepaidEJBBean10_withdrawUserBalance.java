@@ -98,7 +98,6 @@ public class Test_PrepaidEJBBean10_withdrawUserBalance {
     //Prepaid user
     PrepaidUser10 prepaidUser = new PrepaidUser10();
     prepaidUser.setId(Long.MAX_VALUE);
-    prepaidUser.setUserIdMc(Long.MAX_VALUE);
     prepaidUser.setStatus(PrepaidUserStatus.ACTIVE);
     prepaidUser.setUuid(uuid);
 
@@ -113,7 +112,6 @@ public class Test_PrepaidEJBBean10_withdrawUserBalance {
     PrepaidCard10 prepaidCard10 = new PrepaidCard10();
     prepaidCard10.setId(Long.MAX_VALUE);
     prepaidCard10.setStatus(PrepaidCardStatus.ACTIVE);
-    prepaidCard10.setProcessorUserId("1");
     prepaidCard10.setEncryptedPan("1234567890");
     prepaidCard10.setPan("1234567890");
 

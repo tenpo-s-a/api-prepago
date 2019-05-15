@@ -134,10 +134,10 @@ public class PrepaidCardEJBBean11 extends PrepaidCardEJBBean10 {
   private static String INSERT_PREPAID_CARD = "INSERT INTO prepago.prp_tarjeta(\n" +
     "            pan, pan_encriptado, estado, \n" +
     "            nombre_tarjeta, producto, numero_unico, fecha_creacion, fecha_actualizacion, \n" +
-    "            uuid, pan_hash, id_cuenta,contrato,expiracion)\n" +
+    "            uuid, pan_hash, id_cuenta)\n" +
     "    VALUES (?, ?, ?, ?,\n" +
     "            ?, ?, ?, ?,\n" +
-    "            ?, ?, ?,?,?);\n";
+    "            ?, ?, ?);\n";
 
   private static String SEARCH_BY_ACCOUNT_ID = String.format("SELECT * FROM %s.prp_tarjeta where id_cuenta = ?",getSchema());
 
@@ -229,16 +229,6 @@ public class PrepaidCardEJBBean11 extends PrepaidCardEJBBean10 {
       sb.append("pan_encriptado = '")
         .append(prepaidCard.getEncryptedPan())
         .append("', ");
-    }
-    if(!StringUtils.isAllBlank(prepaidCard.getProcessorUserId())) {
-      sb.append("contrato = '")
-        .append(prepaidCard.getProcessorUserId())
-        .append("', ");
-    }
-    if(prepaidCard.getExpiration() != null && prepaidCard.getExpiration() > 0) {
-      sb.append("expiracion = ")
-        .append(prepaidCard.getExpiration())
-        .append(", ");
     }
     if(prepaidCard.getStatus() != null) {
       sb.append("estado = '")
@@ -409,19 +399,17 @@ public class PrepaidCardEJBBean11 extends PrepaidCardEJBBean10 {
     getDbUtils().getJdbcTemplate().update(connection -> {
       PreparedStatement ps = connection
         .prepareStatement(INSERT_PREPAID_CARD, new String[] {"id"});
-      ps.setString(1, prepaidCard10.getPan());
-      ps.setString(2, prepaidCard10.getEncryptedPan());
+      ps.setString(1, prepaidCard10.getPan() != null ? prepaidCard10.getPan():"");
+      ps.setString(2, prepaidCard10.getEncryptedPan() != null ?  prepaidCard10.getEncryptedPan() : "");
       ps.setString(3, prepaidCard10.getStatus().name());
-      ps.setString(4, prepaidCard10.getNameOnCard());
-      ps.setString(5, prepaidCard10.getProducto());
-      ps.setString(6, prepaidCard10.getNumeroUnico());
+      ps.setString(4, prepaidCard10.getNameOnCard() != null ? prepaidCard10.getNameOnCard() : "");
+      ps.setString(5, prepaidCard10.getProducto() != null ? prepaidCard10.getProducto() : "");
+      ps.setString(6, prepaidCard10.getNumeroUnico() != null ? prepaidCard10.getNumeroUnico():"");
       ps.setTimestamp(7,Timestamp.valueOf(LocalDateTime.ofInstant(Instant.now(), ZoneId.of("UTC"))));
       ps.setTimestamp(8, Timestamp.valueOf(LocalDateTime.ofInstant(Instant.now(), ZoneId.of("UTC"))));
       ps.setString(9,prepaidCard10.getUuid());
-      ps.setString(10,prepaidCard10.getHashedPan());
+      ps.setString(10,prepaidCard10.getHashedPan()!= null ? prepaidCard10.getHashedPan(): "");
       ps.setLong(11,prepaidCard10.getAccountId());
-      ps.setString(12,"");//cuenta hay que borrarlo
-      ps.setInt(13,0);
       return ps;
     }, keyHolder);
     try{
