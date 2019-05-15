@@ -502,7 +502,7 @@ public class TecnocomReconciliationEJBBean10 extends PrepaidBaseEJBBean10 implem
         //Se busca la tarjeta correspondiente al movimiento
         PrepaidCard10 prepaidCard10 = getPrepaidCardEJBBean11().getPrepaidCardByPanHash(null, panHash);
         if(prepaidCard10 == null) {
-          String msg = String.format("Error processing transaction - PrepaidCard not found with processorUserId [%s]", fileId, String.format("%s%s%s",trx.getCuenta(),trx.getCentAlta(),trx.getCodEnt()));
+          String msg = String.format("Error processing transaction - PrepaidCard not found with pan hash [%s]", panHash);
           log.error(msg);
           trx.setHasError(Boolean.TRUE);
           trx.setErrorDetails(msg);
