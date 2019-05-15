@@ -20,7 +20,7 @@
 CREATE TABLE ${schema}.prp_movimiento (
   id                  BIGSERIAL NOT NULL,
   id_movimiento_ref   BIGINT NOT NULL,
-  id_tarjeta          BIGINT REFERENCES ${schema}.prp_tarjeta(id),
+  id_tarjeta          BIGINT NOT NULL,
   id_tx_externo       VARCHAR(50) NOT NULL,
   tipo_movimiento     VARCHAR(50) NOT NULL,
   monto               NUMERIC NOT NULL,
