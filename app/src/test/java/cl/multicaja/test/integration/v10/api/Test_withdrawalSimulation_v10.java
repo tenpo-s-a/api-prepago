@@ -18,6 +18,8 @@ import static cl.multicaja.core.model.Errors.PARAMETRO_FALTANTE_$VALUE;
 /**
  * @autor vutreras
  */
+//TODO: Revisar si se utilizara esta funcionalidad
+@Ignore
 public class Test_withdrawalSimulation_v10 extends TestBaseUnitApi {
 
   @Before
@@ -38,8 +40,6 @@ public class Test_withdrawalSimulation_v10 extends TestBaseUnitApi {
     return respHttp;
   }
 
-  //TODO: Descomentar al corregir
-  @Ignore
   @Test
   public void withdrawalSimulation_not_ok_by_params_null() throws Exception {
 
@@ -112,8 +112,7 @@ public class Test_withdrawalSimulation_v10 extends TestBaseUnitApi {
       Assert.assertEquals("debe ser error de validacion de parametros", codErrorParamNull, vex.getCode());
     }
   }
-  //TODO: Descomentar al corregir
-  @Ignore
+
   @Test
   public void withdrawalSimulation_not_ok_by_user_not_found() throws Exception {
 
@@ -130,8 +129,7 @@ public class Test_withdrawalSimulation_v10 extends TestBaseUnitApi {
 
     Assert.assertEquals("debe ser error de supera saldo", CLIENTE_NO_EXISTE.getValue(), vex.getCode());
   }
-  //TODO: Descomentar al corregir
-  @Ignore
+
   @Test
   public void withdrawalSimulation_not_ok_by_prepaid_user_not_found() throws Exception {
 
@@ -152,11 +150,9 @@ public class Test_withdrawalSimulation_v10 extends TestBaseUnitApi {
 
      */
   }
-  //TODO: Descomentar al corregir
-  @Ignore
+
   @Test
   public void withdrawalSimulation_not_ok_by_prepaid_user_disabled() throws Exception {
-
     /*User user = registerUser();
     PrepaidUser10 prepaidUser = buildPrepaidUser10(user);
     prepaidUser.setStatus(PrepaidUserStatus.DISABLED);
@@ -177,12 +173,9 @@ public class Test_withdrawalSimulation_v10 extends TestBaseUnitApi {
 
      */
   }
-  //TODO: Descomentar al corregir
-  @Ignore
+
   @Test
   public void withdrawalSimulation_ok_WEB() throws Exception {
-
-
     PrepaidUser10 prepaidUser10 = buildPrepaidUserv2();
     prepaidUser10 = createPrepaidUserV2(prepaidUser10);
 
@@ -219,11 +212,9 @@ public class Test_withdrawalSimulation_v10 extends TestBaseUnitApi {
     Assert.assertEquals("deben ser las mismas comisiones", calculatedFee, resp.getFee());
     Assert.assertEquals("debe ser el mismo monto a retirar (monto + comision)", amount.getValue().add(calculatedFee.getValue()), resp.getAmountToDiscount().getValue());
   }
-  //TODO: Descomentar al corregir
-  @Ignore
+
   @Test
   public void withdrawalSimulation_ok_POS() throws Exception {
-
     PrepaidUser10 prepaidUser10 = buildPrepaidUserv2();
     prepaidUser10 = createPrepaidUserV2(prepaidUser10);
 
@@ -258,8 +249,7 @@ public class Test_withdrawalSimulation_v10 extends TestBaseUnitApi {
     Assert.assertEquals("deben ser las mismas comisiones", calculatedFee, resp.getFee());
     Assert.assertEquals("debe ser el mismo monto a retirar (monto + comision)", amount.getValue().add(calculatedFee.getValue()), resp.getAmountToDiscount().getValue());
   }
-  //TODO: Descomentar al corregir
-  @Ignore
+
   @Test
   public void withdrawalSimulation_not_ok_insufficient_balance_WEB() throws Exception {
     /*
@@ -313,8 +303,7 @@ public class Test_withdrawalSimulation_v10 extends TestBaseUnitApi {
 
      */
   }
-  //TODO: Descomentar al corregir
-  @Ignore
+
   @Test
   public void withdrawalSimulation_not_ok_insufficient_balance_POS() throws Exception {
     /*
@@ -368,8 +357,7 @@ public class Test_withdrawalSimulation_v10 extends TestBaseUnitApi {
 
      */
   }
-  //TODO: Descomentar al corregir
-  @Ignore
+
   @Test
   public void withdrawalSimulation_not_ok_by_min_amount_web() throws Exception {
     /*
@@ -409,8 +397,7 @@ public class Test_withdrawalSimulation_v10 extends TestBaseUnitApi {
 
      */
   }
-  //TODO: Descomentar al corregir
-  @Ignore
+
   @Test
   public void withdrawalSimulation_not_ok_by_min_amount_pos() throws Exception {
     /*
@@ -450,8 +437,7 @@ public class Test_withdrawalSimulation_v10 extends TestBaseUnitApi {
 
      */
   }
-  //TODO: Descomentar al corregir
-  @Ignore
+
   @Test
   public void withdrawalSimulation_not_ok_by_max_amount_web() throws Exception {
     /*
@@ -491,8 +477,7 @@ public class Test_withdrawalSimulation_v10 extends TestBaseUnitApi {
 
      */
   }
-  //TODO: Descomentar al corregir
-  @Ignore
+
   @Test
   public void withdrawalSimulation_not_ok_by_max_amount_pos() throws Exception {
     /*
@@ -531,6 +516,5 @@ public class Test_withdrawalSimulation_v10 extends TestBaseUnitApi {
 
      */
   }
-
 
 }

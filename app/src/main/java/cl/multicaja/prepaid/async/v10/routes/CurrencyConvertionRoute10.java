@@ -20,7 +20,8 @@ public final class CurrencyConvertionRoute10 extends BaseRoute10 {
     /**
      * Extrae valor dolar
      */
-    //TODO: Quitar este if cuando se tenga la configuracion de ambientes para SFTP mastercard
+    //FIXME: La escucha de la carpeta SFTP debe estar en el proyecto prepaid-batch-router.
+    // En este caso se debe escuchar una cola Activemq para procesar dicho archivo.
     //if(ConfigUtils.isEnvTest()) {
     //  from(SFTP_HOST_ENDPOINT)
     //    .process(new PendingCurrencyModification10(this).processCurrencyConvertionFile());

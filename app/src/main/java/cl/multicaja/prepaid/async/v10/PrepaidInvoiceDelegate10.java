@@ -48,6 +48,7 @@ public class PrepaidInvoiceDelegate10 {
    * @return
    * @throws JsonProcessingException
    */
+  //Todo: Verificar si se enviaran eventos para generar boletas
   public String sendInvoice(InvoiceData10 invoiceData10) throws JsonProcessingException {
 
     if (!camelFactory.isCamelRunning()) {
@@ -69,7 +70,7 @@ public class PrepaidInvoiceDelegate10 {
 
   }
 
-  //Todo: Completar los datos
+  //Todo: Verificar si se enviaran eventos para generar boletas
   public InvoiceData10 buildInvoiceData(PrepaidMovement10 prepaidMovement10, PrepaidUser10 prepaidUser10) {
     InvoiceData10 invoiceData10 = new InvoiceData10();
     invoiceData10.setType(prepaidMovement10.getTipoMovimiento());

@@ -1,9 +1,10 @@
 package cl.multicaja.test.integration.v10.unit;
 
-import cl.multicaja.camel.ExchangeData;
+import cl.multicaja.core.exceptions.BadRequestException;
+import cl.multicaja.core.exceptions.NotFoundException;
+import cl.multicaja.core.exceptions.RunTimeValidationException;
+import cl.multicaja.core.exceptions.ValidationException;
 import cl.multicaja.core.exceptions.*;
-import cl.multicaja.core.utils.RutUtils;
-import cl.multicaja.prepaid.async.v10.routes.KafkaEventsRoute10;
 import cl.multicaja.prepaid.model.v10.*;
 import cl.multicaja.prepaid.model.v11.Account;
 import cl.multicaja.prepaid.model.v11.PrepaidMovementFeeType;
@@ -13,7 +14,6 @@ import org.apache.commons.lang3.StringUtils;
 import org.junit.Assert;
 import org.junit.Test;
 
-import javax.jms.Queue;
 import java.math.BigDecimal;
 import java.math.RoundingMode;
 import java.util.List;

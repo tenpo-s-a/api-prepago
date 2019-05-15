@@ -3,11 +3,15 @@ package cl.multicaja.test.integration.v10.api;
 
 import cl.multicaja.core.utils.http.HttpResponse;
 import cl.multicaja.prepaid.model.v10.SimulationNew10;
+import org.junit.Ignore;
 import org.junit.Test;
 
 /**
  * @autor vutreras
  */
+
+//TODO: Verificar si esto se seguira usando
+@Ignore
 public class Test_topupSimulation_v10 extends TestBaseUnitApi {
 
   /*
@@ -23,8 +27,6 @@ public class Test_topupSimulation_v10 extends TestBaseUnitApi {
     return respHttp;
   }
 
-
-  //TODO: Verificar si esto se seguira usando
   @Test
   public void topupSimulation_not_ok_by_params_null() throws Exception {
     /*
@@ -98,10 +100,7 @@ public class Test_topupSimulation_v10 extends TestBaseUnitApi {
     */
   }
 
-
   /*
-  //TODO: Verificar si esto se seguira usando
-  @Ignore
   @Test
   public void topupSimulation_ok_WEB() throws Exception {
 
@@ -146,8 +145,6 @@ public class Test_topupSimulation_v10 extends TestBaseUnitApi {
    */
 
   /*
-  //TODO: Verificar si esto se seguira usando
-  @Ignore
   @Test
   public void topupSimulation_ok_firstTopup_WEB() throws Exception {
 
@@ -204,8 +201,6 @@ public class Test_topupSimulation_v10 extends TestBaseUnitApi {
    */
 
   /*
-  //TODO: Verificar si esto se seguira usando
-  @Ignore
   @Test
   public void topupSimulation_ok_POS() throws Exception {
 
@@ -251,8 +246,6 @@ public class Test_topupSimulation_v10 extends TestBaseUnitApi {
    */
 
   /*
-  //TODO: Verificar si esto se seguira usando
-  @Ignore
   @Test
   public void topupSimulation_ok_firstTopup_POS() throws Exception {
 
@@ -297,8 +290,6 @@ public class Test_topupSimulation_v10 extends TestBaseUnitApi {
    */
 
   /*
-  //TODO: Verificar si esto se seguira usando
-  @Ignore
   @Test
   public void topupSimulation_not_ok_exceeds_balance() throws Exception {
 
@@ -345,8 +336,6 @@ public class Test_topupSimulation_v10 extends TestBaseUnitApi {
    */
 
   /*
-  //TODO: Verificar si esto se seguira usando
-  @Ignore
   @Test
   public void topupSimulation_ok_POS_USERLevel1()  throws Exception {
 
@@ -401,8 +390,6 @@ public class Test_topupSimulation_v10 extends TestBaseUnitApi {
    */
 
   /*
-  //TODO: Verificar si esto se seguira usando
-  @Ignore
   @Test
   public void topupSimulation_not_ok_by_first_topup_max_amount() throws Exception {
 
@@ -442,8 +429,6 @@ public class Test_topupSimulation_v10 extends TestBaseUnitApi {
    */
 
   /*
-  //TODO: Verificar si esto se seguira usando
-  @Ignore
   @Test
   public void topupSimulation_not_ok_by_min_amount() throws Exception {
     //WEB
@@ -522,8 +507,6 @@ public class Test_topupSimulation_v10 extends TestBaseUnitApi {
    */
 
   /*
-  //TODO: Verificar si esto se seguira usando
-  @Ignore
   @Test
   public void topupSimulation_not_ok_by_max_amount_web() throws Exception {
     User user = registerUser();
@@ -565,8 +548,6 @@ public class Test_topupSimulation_v10 extends TestBaseUnitApi {
    */
 
   /*
-  //TODO: Verificar si esto se seguira usando
-  @Ignore
   @Test
   public void topupSimulation_not_ok_by_max_amount_pos() throws Exception {
     User user = registerUser();

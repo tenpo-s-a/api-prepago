@@ -18,6 +18,8 @@ import java.time.ZoneOffset;
 import java.time.ZonedDateTime;
 import java.util.List;
 
+//TODO: eliminar ya que el IPM se leera en prepaid-batch-worker
+@Deprecated
 public class PendingMastercardAccountingFile10 extends BaseProcessor10 {
 
   private static Log log = LogFactory.getLog(PendingMastercardAccountingFile10.class);

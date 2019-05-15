@@ -117,7 +117,7 @@ public class MastercardCurrencyUpdateEJBBean10 extends PrepaidBaseEJBBean10 impl
   }
 
   private Timestamp getExpirationUsdDate(){
-    //TODO: Debe ser reemplazado por el tiemp de expiracion definido por Mastercard
+    //FIXME: Debe ser reemplazado por el tiempo de expiracion definido por Mastercard
     Calendar c = Calendar.getInstance();
     c.setTime(new Date());
     c.add(Calendar.DATE, 1);
