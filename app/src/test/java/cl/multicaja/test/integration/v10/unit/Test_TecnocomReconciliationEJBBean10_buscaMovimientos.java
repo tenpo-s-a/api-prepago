@@ -41,6 +41,7 @@ public class Test_TecnocomReconciliationEJBBean10_buscaMovimientos extends TestB
     movTec.setTipoFac(TipoFactura.CARGA_EFECTIVO_COMERCIO_MULTICAJA);
     movTec.setNumAut("834738");
     movTec.setTipoReg(TecnocomReconciliationRegisterType.AU);
+    movTec.setNomcomred("PruebaComercio1");
     movTec = Test_TecnocomReconciliationEJBBean10_insertaMovimientos.inserTcMov(movTec);
     Assert.assertNotEquals("Id debe ser != 0", 0, movTec.getId().intValue());
     movimientoTecnocom10s.add(movTec);
@@ -144,6 +145,7 @@ public class Test_TecnocomReconciliationEJBBean10_buscaMovimientos extends TestB
     Assert.assertEquals("Deben tener mismo tipofac", insertedMov.getTipoFac(), foundMov.getTipoFac());
     Assert.assertEquals("Deben tener mismo numaut", insertedMov.getNumAut(), foundMov.getNumAut());
     Assert.assertEquals("Deben tener mismo impfac", insertedMov.getImpFac().getValue().stripTrailingZeros(), foundMov.getImpFac().getValue().stripTrailingZeros());
+    Assert.assertEquals("Deben tener mismo Nomcomred", insertedMov.getNomcomred(), foundMov.getNomcomred());
     return true;
   }
 }
