@@ -516,11 +516,20 @@ public class TecnocomReconciliationEJBBean10 extends PrepaidBaseEJBBean10 implem
 
         Account account = getAccountEJBBean10().findById(prepaidCard10.getAccountId());
 
-        // El estado del movimiento se estandariza en base al tipo de operacion (AU -> AUTHORIZED, OP -> PROCESS_OK)
-        PrepaidMovementStatus movementStatus = TecnocomReconciliationRegisterType.AU.equals(trx.getTipoReg()) ? PrepaidMovementStatus.AUTHORIZED : PrepaidMovementStatus.PROCESS_OK;
-
-        // El estado con tecnocom se estandariza para dejar conciliado o pendiente el movimiento
-        ReconciliationStatusType tecnocomStatus = TecnocomReconciliationRegisterType.AU.equals(trx.getTipoReg()) ? ReconciliationStatusType.PENDING : ReconciliationStatusType.RECONCILED;
+        // El estado y el estado_con_tecnocom del movimiento se setearán de acuerdo al tiporeg de la transaccion (AU -> AUTHORIZED + PENDING, OP -> PROCESS_OK + RECONCILED)
+        PrepaidMovementStatus newMovementStatus;
+        ReconciliationStatusType newTecnocomStatus;
+        if (TecnocomReconciliationRegisterType.AU.equals(trx.getTipoReg())) {
+          newMovementStatus = PrepaidMovementStatus.AUTHORIZED;
+          newTecnocomStatus = ReconciliationStatusType.PENDING;
+        } else if (TecnocomReconciliationRegisterType.OP.equals(trx.getTipoReg())) {
+          newMovementStatus = PrepaidMovementStatus.PROCESS_OK;
+          newTecnocomStatus = ReconciliationStatusType.RECONCILED;
+        } else {
+          String msg = String.format("Error processing transaction - Transactions' tiporeg is neither AU nor OP, it's unknown type [%s]", trx.getTipoReg());
+          log.error(msg);
+          throw new ValidationException(ERROR_PROCESSING_FILE.getValue(), msg);
+        }
 
         PrepaidMovement10 prepaidMovement10 = getPrepaidMovementEJBBean11().getPrepaidMovementForAut(account.getUserId(), trx.getTipoFac(), trx.getNumAut(), trx.getCodCom());
 
@@ -528,9 +537,9 @@ public class TecnocomReconciliationEJBBean10 extends PrepaidBaseEJBBean10 implem
           // No existe en nuestra tabla, debe insertarlo
           prepaidMovement10 = buildMovementAut(prepaidCard10.getIdUser(), prepaidCard10.getPan(), trx, prepaidCard10.getId());
 
-          // Se crea con el mismo estado del archivo
-          prepaidMovement10.setEstado(movementStatus);
-          prepaidMovement10.setConTecnocom(tecnocomStatus);
+          // Se crea el movimiento con los mismos estados del archivo
+          prepaidMovement10.setEstado(newMovementStatus);
+          prepaidMovement10.setConTecnocom(newTecnocomStatus);
           prepaidMovement10 = getPrepaidMovementEJBBean10().addPrepaidMovement(null, prepaidMovement10);
 
           // Se consulta al servicio de comisiones y se insertan las comisiones recibidas
@@ -551,10 +560,10 @@ public class TecnocomReconciliationEJBBean10 extends PrepaidBaseEJBBean10 implem
           PrepaidMovementStatus originalStatus = prepaidMovement10.getEstado();
 
           // Se actualiza al mismo estado que se encuentre en el archivo
-          getPrepaidMovementEJBBean10().updatePrepaidMovementStatus(null, prepaidMovement10.getId(), movementStatus);
+          getPrepaidMovementEJBBean10().updatePrepaidMovementStatus(null, prepaidMovement10.getId(), newMovementStatus);
 
           // Se actualiza el estado de tecnocom para dejar conciliado o pendiente el movimiento
-          getPrepaidMovementEJBBean11().updateStatusMovementConTecnocom(null, prepaidMovement10.getId(), tecnocomStatus);
+          getPrepaidMovementEJBBean11().updateStatusMovementConTecnocom(null, prepaidMovement10.getId(), newTecnocomStatus);
 
           if (originalStatus.equals(PrepaidMovementStatus.NOTIFIED)) {
             // Existe en la tabla pero esta cambiando de NOTIFIED a otro estado, por lo que se crea en la tablas de contabilidad
@@ -571,6 +580,20 @@ public class TecnocomReconciliationEJBBean10 extends PrepaidBaseEJBBean10 implem
 
           prepaidInvoiceDelegate10.sendInvoice(prepaidInvoiceDelegate10.buildInvoiceData(prepaidMovement10,null));
         }
+
+        // Liquidacion IPM - Actualiza el valor de monto mastercard en la tabla de contabilidad
+        // Si el movimiento viene en estado OP (conciliado), se actualiza su valor de acuerdo al IPM
+        if (TecnocomReconciliationRegisterType.OP.equals(trx.getTipoReg())) {
+          // Se buscan los registros que coincidan en la tabla IPM
+          // Mismo PAN, mismo codcom, mismo, mismo num aut, monto 2.5% aproximado y que no hayan sido ya conciliados
+
+          // Si hay mas de uno, se elige el mas cercano
+
+          // Actualizar el valor
+
+          // Marcar movimiento tomado en la tabla IPM como conciliado
+        }
+
       } catch (Exception ex) {
         ex.printStackTrace();
         log.error(String.format("Error processing transaction [%s]", trx.getNumAut()));
