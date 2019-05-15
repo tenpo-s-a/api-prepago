@@ -67,7 +67,7 @@
     <dependency>
       <groupId>cl.multicaja</groupId>
       <artifactId>tecnocom-gateway</artifactId>
-      <version>a2cac59f78ef196c9865c0a30981e64a4a118f93</version>
+      <version>120fedd5a00934aaa159fad2c48c765b8c0b2338</version>
     </dependency>
 
     <dependency>

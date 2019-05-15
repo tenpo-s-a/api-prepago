@@ -258,6 +258,9 @@ public class PrepaidMovementEJBBean11 extends PrepaidMovementEJBBean10 {
     newAmountAndCurrency10.setCurrencyCode(movement.getClamon());
 
     transaction.setPrimaryAmount(newAmountAndCurrency10);
+    if(TransactionType.CASH_IN_MULTICAJA.equals(type) || TransactionType.CASH_OUT_MULTICAJA.equals(type)){
+      transaction.setSecondaryAmount(newAmountAndCurrency10);
+    }
     transaction.setType(type.toString());
     transaction.setStatus(status.toString());
 

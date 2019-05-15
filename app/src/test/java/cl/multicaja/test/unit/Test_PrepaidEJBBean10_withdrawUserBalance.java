@@ -37,6 +37,7 @@ import org.mockito.junit.MockitoJUnitRunner;
 
 import java.math.BigDecimal;
 import java.sql.Timestamp;
+import java.time.LocalDateTime;
 import java.time.ZonedDateTime;
 import java.util.Collection;
 import java.util.Collections;
@@ -174,6 +175,8 @@ public class Test_PrepaidEJBBean10_withdrawUserBalance {
     withdrawMovement.setImpfac(BigDecimal.TEN);
     withdrawMovement.setCodcom("1234");
     withdrawMovement.setCodact(1);
+    withdrawMovement.setFechaActualizacion(Timestamp.valueOf(LocalDateTime.now()));
+    withdrawMovement.setFechaCreacion(Timestamp.valueOf(LocalDateTime.now()));
 
     PrepaidMovement10 withdrawReverseMovement = new PrepaidMovement10();
     withdrawReverseMovement.setId(Long.MAX_VALUE);
@@ -183,6 +186,8 @@ public class Test_PrepaidEJBBean10_withdrawUserBalance {
     withdrawReverseMovement.setImpfac(BigDecimal.TEN);
     withdrawReverseMovement.setCodcom("1234");
     withdrawReverseMovement.setCodact(1);
+    withdrawReverseMovement.setFechaActualizacion(Timestamp.valueOf(LocalDateTime.now()));
+    withdrawReverseMovement.setFechaCreacion(Timestamp.valueOf(LocalDateTime.now()));
 
     Mockito.doReturn(withdrawMovement)
       .doReturn(withdrawReverseMovement)
@@ -191,10 +196,6 @@ public class Test_PrepaidEJBBean10_withdrawUserBalance {
     Mockito.doReturn(withdrawMovement)
       .doReturn(withdrawReverseMovement)
       .when(prepaidMovementEJBBean10).addPrepaidMovement(Mockito.any(), Mockito.any(PrepaidMovement10.class));
-
-    Mockito.doReturn(withdrawMovement)
-      .doReturn(withdrawReverseMovement)
-      .when(prepaidMovementEJBBean10).getPrepaidMovementById(Long.MAX_VALUE);
 
     Mockito.doNothing()
       .when(prepaidMovementEJBBean11).addPrepaidMovementFeeList(Mockito.any());
