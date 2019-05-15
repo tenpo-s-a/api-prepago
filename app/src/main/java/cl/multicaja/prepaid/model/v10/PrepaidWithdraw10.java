@@ -13,8 +13,11 @@ public class PrepaidWithdraw10 extends NewPrepaidWithdraw10 implements IPrepaidT
 
   private String status;
   private Timestamps timestamps;
+  @JsonIgnore
   private List<PrepaidMovementFee10> feeList;
+  @JsonIgnore
   private NewAmountAndCurrency10 fee;
+  @JsonIgnore
   private NewAmountAndCurrency10 total;
   @JsonIgnore
   private String messageId;
