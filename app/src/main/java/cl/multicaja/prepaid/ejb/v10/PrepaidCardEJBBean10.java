@@ -326,6 +326,11 @@ public class PrepaidCardEJBBean10 extends PrepaidBaseEJBBean10 implements Prepai
     return null;
   }
 
+  @Override
+  public PrepaidCard10 getPrepaidCardByPanHash(Map<String, Object> headers, String panHash) throws Exception {
+    throw new IllegalStateException();
+  }
+
   /**
    *  Busca una tarjeta por id y publica evento de tarjeta creada
    * @param cardId id interno de la tarjeta
