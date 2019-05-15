@@ -295,7 +295,7 @@ public class TecnocomReconciliationEJBBean10 extends PrepaidBaseEJBBean10 implem
     movimientoTecnocom10.setIdArchivo(fileId);
     movimientoTecnocom10.setOriginOpe(detail.getOrigenope());
     movimientoTecnocom10.setContrato(detail.getContrato());
-    movimientoTecnocom10.setFecFac(Date.valueOf(detail.getFecTrn()).toLocalDate()); // TODO: cual es el formato del string? Para pasarlo directamente a LocalDate sin tener que pasar por sql.Date
+    movimientoTecnocom10.setFecFac(!detail.getFecTrn().equals("") ? Date.valueOf(detail.getFecTrn()).toLocalDate(): null); // TODO: cual es el formato del string? Para pasarlo directamente a LocalDate sin tener que pasar por sql.Date
     movimientoTecnocom10.setTipoReg(detail.getTiporeg());
     if(movimientoTecnocom10.getOperationType() == TecnocomOperationType.PURCHASES){
       movimientoTecnocom10.setFecTrn(Timestamp.valueOf(String.format("%s %s",detail.getFecTrn(),detail.getHorTrn())));
@@ -760,6 +760,8 @@ public class TecnocomReconciliationEJBBean10 extends PrepaidBaseEJBBean10 implem
    */
   public List<MovimientoTecnocom10>  buscaMovimientosTecnocom(String tableName, Long fileId, OriginOpeType originOpeType, String encryptedPan, IndicadorNormalCorrector indnorcor, TipoFactura tipofac, Date fecfac, String numaut) throws Exception {
 
+    List<MovimientoTecnocom10> movimientoTecnocom10s = new ArrayList<>();
+
     StringBuilder sqlQuery = new StringBuilder();
     sqlQuery.append("SELECT ");
     sqlQuery.append(" id, ");
@@ -815,12 +817,16 @@ public class TecnocomReconciliationEJBBean10 extends PrepaidBaseEJBBean10 implem
 
 
     try {
-      return getDbUtils().getJdbcTemplate().query(sqlQuery.toString(), this.getMovimientoTCMapper());
+      movimientoTecnocom10s =  getDbUtils().getJdbcTemplate().query(sqlQuery.toString(), this.getMovimientoTCMapper());
+      if (movimientoTecnocom10s != null && movimientoTecnocom10s.size() == 0) {
+        return null;
+      }
+
     } catch (EmptyResultDataAccessException ex) {
       log.error(String.format("[buscaMovimientosTecnocom] Movimiento no existe"));
       return null;
     }
-
+    return  movimientoTecnocom10s;
   }
 
   private org.springframework.jdbc.core.RowMapper<MovimientoTecnocom10> getMovimientoTCMapper() {
