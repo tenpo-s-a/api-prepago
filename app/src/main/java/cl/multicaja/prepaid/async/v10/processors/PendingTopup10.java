@@ -84,11 +84,9 @@ public class PendingTopup10 extends BaseProcessor10 {
             return null;
           }
 
-          //TODO: Verificar si se enviara el contrato a cargar a futuro, por el momento sirve para obtener el ultimo contrato del usuario
           Account account = getRoute().getAccountEJBBean10().findByUserId(prepaidUser10.getId());
           log.info(account);
 
-          //TODO: Esto se cambiara ya que la tarjeta tiene que venir seleccionada o se usara la principal.
           PrepaidCard10 prepaidCard = getRoute().getPrepaidCardEJBBean11().getByUserIdAndStatus(null, prepaidUser10.getId(),
                                                                                                               PrepaidCardStatus.ACTIVE,
                                                                                                               PrepaidCardStatus.LOCKED,
@@ -249,20 +247,20 @@ public class PendingTopup10 extends BaseProcessor10 {
             QueuesNameType.TOPUP,
             req.getReprocesQueue());
 
-          //TODO: Esto se debe verificar ya que ya no se cuenta con api-user la llamada debera ser directa
+          //FIXME: Implementar creacion de ticket en freshdesk
          /* Ticket ticket = getRoute().getUserClient().createFreshdeskTicket(null, data.getPrepaidUser10().getUuid(), newTicket);
           if (ticket.getId() != null) {
             log.info("Ticket Creado Exitosamente");
           }
           */
         } else if (Errors.ERROR_INDETERMINADO.equals(data.getNumError())) {
-          //TODO: que hacer con los errores indeterminados? deberian devolverse? investigarse?
+          //FIXME: que hacer con los errores indeterminados? deberian devolverse? investigarse?
           // Estos son errores de excepcion no esperados. Probablemente no deberian devolverse
-          // tan rapido. Investigar?
+          // tan rapido. Investigar? Verificar con Negocio
         } else if (PrepaidMovementStatus.REJECTED.equals(data.getPrepaidMovement10().getEstado())) {
           // Comienza el proceso de devolucion
 
-          // TODO: Se debe verificar que hacer en este caso !!!!!!!
+          //FIXME: Que se hace en este caso? se levante un evento a la capa B?
 
           // Se le envia un correo al usuario notificandole que hubo un problema con la carga
           Map<String, Object> templateDataToUser = new HashMap<String, Object>();

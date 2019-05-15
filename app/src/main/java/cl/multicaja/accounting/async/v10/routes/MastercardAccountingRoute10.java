@@ -5,6 +5,8 @@ import cl.multicaja.prepaid.async.v10.routes.BaseRoute10;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 
+//TODO: eliminar ya que el IPM se leera en prepaid-batch-worker
+@Deprecated
 public class MastercardAccountingRoute10 extends BaseRoute10 {
   private static Log log = LogFactory.getLog(MastercardAccountingRoute10.class);
   private final String SFTP_HOST_ENDPOINT;

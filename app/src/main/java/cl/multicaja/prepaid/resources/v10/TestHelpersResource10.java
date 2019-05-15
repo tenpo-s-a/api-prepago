@@ -69,6 +69,9 @@ import static cl.multicaja.prepaid.model.v10.PrepaidMovementType.TOPUP;
 /**
  * @author vutreras
  */
+//TODO: se seguira utilizando esta clase?. Esta clase se utilizaba cuando se tenian los tests en la WEB.
+// De ser necesario, revisar que metodos se deben dejar.
+
 @Path("/1.0/prepaid_testhelpers")
 @Consumes(MediaType.APPLICATION_JSON)
 @Produces(MediaType.APPLICATION_JSON)

@@ -360,7 +360,7 @@ public class PrepaidClearingEJBBean10 extends PrepaidBaseEJBBean10 implements Pr
   }
 
 
-  //TODO: Corregir esto despues.
+  //FIXME: Corregir esto despues. ACTION: Esto es una preparación de ambiente para el test de resolución de respuesta del banco, debería ir en los tests
   /**
    * Busca los movimientos en clearing y genera un archivo csv que se envia por correo
    * @param headers
@@ -441,13 +441,13 @@ public class PrepaidClearingEJBBean10 extends PrepaidBaseEJBBean10 implements Pr
     return atTimezone.format(DateTimeFormatter.ofPattern(pattern));
   }
 
-  //TODO: La creacion del CSV se migra  a prepaid-batch-worker, revisar los test que hacen uso y modificarlos.
+  //FIXME: Corregir esto despues. ACTION: Esto es una preparación de ambiente para el test de resolución de respuesta del banco, debería ir en los tests
   public File createClearingCSV(String filename, String fileId, List<ClearingData10> lstClearingMovement10s) throws IOException {
     File file = new File(filename);
     FileWriter outputFile = new FileWriter(file);
     CSVWriter writer = new CSVWriter(outputFile,',');
 
-    // TODO: Agregar tasa de intercambio
+    // FIXME: Agregar tasa de intercambio ACTION: Revisar en el proyecto prepaid batch worker
     String[] header = new String[]{"ID_PREPAGO","ID_LIQUIDACION", "ID_TRX", "ID_CUENTA_ORIGEN", "TIPO_TRX", "MOV_CONTABLE",
       "FECHA_TRX", "FECHA_CONCILIACION", "MONTO_TRX_PESOS", "MONTO_TRX_MCARD_PESOS", "MONTO_TRX_USD", "VALOR_USD",
       "DIF_TIPO_CAMBIO", "COMISION_PREPAGO_PESOS", "IVA_COMISION_PREPAGO_PESOS", "COMISION_RECAUDADOR_MC_PESOS",
@@ -581,7 +581,7 @@ public class PrepaidClearingEJBBean10 extends PrepaidBaseEJBBean10 implements Pr
           if(result != null) { //Existe tambien en el archivo?
             PrepaidUser10 prepaidUser10 = getPrepaidUserEJBBean10().getPrepaidUserById(null, prepaidMovement10.getIdPrepaidUser());
 
-            //TODO: Verificar estos datos cuando se modifique la busqueda, ya que los datos ahora estan en la tabla de Clearing
+            //TODO: Verificar datos de cuenta bancaria, ya que los datos ahora estan en la tabla de Clearing
             //Que coincidan los datos del archivo con los de clearing
             //Coinciden todos sus valores
             if(data.getAmount().getValue().compareTo(result.getAmount().getValue()) == 0 &&

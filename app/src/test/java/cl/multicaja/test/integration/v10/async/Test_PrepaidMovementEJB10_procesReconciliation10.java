@@ -57,7 +57,7 @@ public class Test_PrepaidMovementEJB10_procesReconciliation10 extends TestBaseUn
 
     getPrepaidMovementEJBBean10().processReconciliation(prepaidMovement10);
 
-    //FIXME: no tiene asserts
+    //TODO: no tiene asserts
   }
 
   // Se hace movimiento contrario al no estar conciliado con el switch (WITHDRAW)
@@ -90,7 +90,7 @@ public class Test_PrepaidMovementEJB10_procesReconciliation10 extends TestBaseUn
 
     getPrepaidMovementEJBBean10().processReconciliation(prepaidMovement10);
 
-    //FIXME: no tiene asserts
+    //TODO: no tiene asserts
   }
 
   // Se hace movimiento contrario al no estar conciliado con el switch (TOPUP) STATUS ERROR
@@ -123,7 +123,7 @@ public class Test_PrepaidMovementEJB10_procesReconciliation10 extends TestBaseUn
 
     getPrepaidMovementEJBBean10().processReconciliation(prepaidMovement10);
 
-    //FIXME: no tiene asserts
+    //TODO: no tiene asserts
 
   }
 
@@ -158,7 +158,7 @@ public class Test_PrepaidMovementEJB10_procesReconciliation10 extends TestBaseUn
 
     getPrepaidMovementEJBBean10().processReconciliation(prepaidMovement10);
 
-    //FIXME: no tiene asserts
+    //TODO: no tiene asserts
   }
 
   @Ignore

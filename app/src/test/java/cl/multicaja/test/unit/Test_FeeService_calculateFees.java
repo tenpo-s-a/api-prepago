@@ -73,25 +73,4 @@ public class Test_FeeService_calculateFees {
     Assert.assertNotNull("Debe tener un charge de iva", ivaCharge);
     Assert.assertEquals("El charge de ommission es de 4", new Long(4), ivaCharge.getAmount());
   }
-
-  // Test ignorado debido a que requiere que el servicio de fees esté arriba
-  // Sólo se usó para verificar que FeeService llame correctamente al servicio
-  @Ignore
-  @Test
-  public void calculateFees_respondsOk_Integration() throws TimeoutException, BaseException {
-    Fee fee = FeeService.getInstance().calculateFees(PrepaidMovementType.PURCHASE, CodigoMoneda.CHILE_CLP, 1000L);
-    Assert.assertNotNull("Debe existir la respuesta", fee);
-    Assert.assertEquals("Debe tener fee total 20", new Long(20L), fee.getTotal());
-
-    List<Charge> charges = fee.getCharges();
-    Assert.assertEquals("Debe tener 2 charges", 2, charges.size());
-
-    Charge commissionCharge = charges.stream().filter(c -> ChargeType.COMMISSION.equals(c.getChargeType())).findAny().orElse(null);
-    Assert.assertNotNull("Debe tener un charge de commission", commissionCharge);
-    Assert.assertEquals("El charge de ommission es de 16", new Long(16), commissionCharge.getAmount());
-
-    Charge ivaCharge = charges.stream().filter(c -> ChargeType.IVA.equals(c.getChargeType())).findAny().orElse(null);
-    Assert.assertNotNull("Debe tener un charge de iva", ivaCharge);
-    Assert.assertEquals("El charge de ommission es de 4", new Long(4), ivaCharge.getAmount());
-  }
 }

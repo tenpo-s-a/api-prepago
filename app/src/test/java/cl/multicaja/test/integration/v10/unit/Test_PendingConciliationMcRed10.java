@@ -317,8 +317,8 @@ public class Test_PendingConciliationMcRed10 extends TestBaseUnitAsync {
         }
       }
     }
-    Assert.assertEquals("Debe haber XX conciliados.", 6, reconciledCount);
-    Assert.assertEquals("Debe haber XX no conciliados.", 0, notReconcilidedCount);
+    Assert.assertEquals("Debe haber 6 conciliados.", 6, reconciledCount);
+    Assert.assertEquals("Debe haber 0 no conciliados.", 0, notReconcilidedCount);
   }
 
   @Test

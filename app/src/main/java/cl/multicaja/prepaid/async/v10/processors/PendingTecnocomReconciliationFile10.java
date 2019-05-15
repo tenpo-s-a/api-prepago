@@ -31,7 +31,7 @@ public class PendingTecnocomReconciliationFile10 extends BaseProcessor10 {
         log.info("[processReconciliationFile] Processing file: " + fileId);
         try{
           //Procesa la data guardada en la tabla
-          //TODO: se debe verificar la lectura de los movimientos desde la tabla para hacer las comparaciones correspondientes
+          //FIXME: se debe verificar la lectura de los movimientos desde la tabla para hacer las comparaciones correspondientes
           // Se debe buscar la tarjeta por el hash del pan
           getRoute().getTecnocomReconciliationEJBBean10().processTecnocomTableData(fileId);
           // llamar a F3
