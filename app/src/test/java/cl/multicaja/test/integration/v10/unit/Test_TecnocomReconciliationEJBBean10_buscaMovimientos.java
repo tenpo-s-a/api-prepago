@@ -1,6 +1,5 @@
 package cl.multicaja.test.integration.v10.unit;
 
-import cl.multicaja.core.exceptions.BadRequestException;
 import cl.multicaja.prepaid.helpers.tecnocom.model.TecnocomReconciliationRegisterType;
 import cl.multicaja.prepaid.model.v10.MovimientoTecnocom10;
 import cl.multicaja.prepaid.model.v10.OriginOpeType;
@@ -11,8 +10,6 @@ import org.junit.Assert;
 import org.junit.BeforeClass;
 import org.junit.Test;
 
-import javax.xml.bind.SchemaOutputResolver;
-import java.math.BigDecimal;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
