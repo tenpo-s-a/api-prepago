@@ -180,11 +180,14 @@ public class TecnocomReconciliationEJBBean10 extends PrepaidBaseEJBBean10 implem
   }
   /**
    * Procesa el archivo de operaciones diarias enviado por Tecnocom
+   * Ya no se usa en esta proyecto, el que lee el archivo se movio a batch-worker
+   *
    * @param inputStream
    * @param fileName
    * @throws Exception
    */
   @Override
+  @Deprecated
   public Long processFile(InputStream inputStream, String fileName) throws Exception {
 
     TecnocomReconciliationFile file;
@@ -282,7 +285,7 @@ public class TecnocomReconciliationEJBBean10 extends PrepaidBaseEJBBean10 implem
     movimientoTecnocom10.setImpDiv(impDiv);
 
     movimientoTecnocom10.setTipoFac(detail.getTipoFac());
-    movimientoTecnocom10.setPan(getEncryptUtil().encrypt(detail.getPan()));
+    movimientoTecnocom10.setPan(detail.getPan()); // El movimiento tecnocom guarda el pan hasheado, pero para test se usa plano
     movimientoTecnocom10.setCuenta(detail.getCuenta());
     movimientoTecnocom10.setTipoLin(detail.getTipolin());
     movimientoTecnocom10.setCodPais(getNumberUtils().toInteger(detail.getCodpais()));
@@ -324,10 +327,10 @@ public class TecnocomReconciliationEJBBean10 extends PrepaidBaseEJBBean10 implem
     for (MovimientoTecnocom10 trx : trxs) {
       try{
         //Se obtiene el pan
-        String pan = Utils.replacePan(getEncryptUtil().decrypt(trx.getPan()));
+        String hashedPan = trx.getPan();
 
         //Se busca la tarjeta correspondiente al movimiento
-        PrepaidCard10 prepaidCard10 = getPrepaidCardEJBBean11().getPrepaidCardByPanAndProcessorUserId(null, pan, trx.getContrato());
+        PrepaidCard10 prepaidCard10 = getPrepaidCardEJBBean11().getPrepaidCardByPanHashAndAccountNumber(null, hashedPan, trx.getContrato());
 
         if(prepaidCard10 == null) {
           String msg = String.format("Error processing transaction - FileID [%s] PrepaidCard not found with processorUserId [%s]", fileId, trx.getContrato());
@@ -352,7 +355,7 @@ public class TecnocomReconciliationEJBBean10 extends PrepaidBaseEJBBean10 implem
 
         if(originalMovement == null) {
           // Movimiento original no existe.
-          PrepaidMovement10 movement10 = TecnocomFileHelper.getInstance().buildMovement(prepaidCard10.getIdUser(), pan, trx);
+          PrepaidMovement10 movement10 = TecnocomFileHelper.getInstance().buildMovement(prepaidCard10.getIdUser(), prepaidCard10.getPan(), trx);
           movement10.setConTecnocom(ReconciliationStatusType.RECONCILED);
           movement10.setConSwitch(ReconciliationStatusType.PENDING);
           movement10.setOriginType(MovementOriginType.SAT);
@@ -420,20 +423,18 @@ public class TecnocomReconciliationEJBBean10 extends PrepaidBaseEJBBean10 implem
       try{
 
         //Se obtiene el pan
-        String pan = Utils.replacePan(getEncryptUtil().decrypt(trx.getPan()));
-
-        //Busca cuenta
+        String hashedPan = trx.getPan();
 
         //Se busca la tarjeta correspondiente al movimiento
-        PrepaidCard10 prepaidCard10 = getPrepaidCardEJBBean11().getPrepaidCardByPanAndProcessorUserId(null, pan, trx.getContrato());
-
+        PrepaidCard10 prepaidCard10 = getPrepaidCardEJBBean11().getPrepaidCardByPanHashAndAccountNumber(null, hashedPan, trx.getContrato());
         if(prepaidCard10 == null) {
-          String msg = String.format("Error processing transaction - PrepaidCard not found with processorUserId [%s]", fileId, trx.getContrato());
+          String msg = String.format("Error processing transaction - PrepaidCard not found with hashedPan [%s]", fileId, trx.getPan());
           log.error(msg);
           trx.setHasError(Boolean.TRUE);
           trx.setErrorDetails(msg);
           throw new ValidationException(ERROR_PROCESSING_FILE.getValue(), msg);
         }
+
         // Procesa las operaciones
         if(trx.getTipoReg().equals(TecnocomReconciliationRegisterType.OP)) {
 
@@ -443,7 +444,6 @@ public class TecnocomReconciliationEJBBean10 extends PrepaidBaseEJBBean10 implem
             trx.getNumAut(), java.sql.Date.valueOf(trx.getFecFac()), trx.getTipoFac());
 
           if(originalMovement == null) {
-            TipoFactura tipofac = trx.getTipoFac();
             String msg = String.format("Error processing transaction - Transaction not found in database with userId = [%s], tipofac= [%s], indnorcor = [%s], numaut = [%s], fecfac = [%s], amount = [%s]",
               prepaidCard10.getIdUser(), trx.getTipoFac().getCode(), trx.getIndNorCor(),  trx.getNumAut(), trx.getFecFac(), trx.getImpFac().getValue());
             log.error(msg);
@@ -501,13 +501,13 @@ public class TecnocomReconciliationEJBBean10 extends PrepaidBaseEJBBean10 implem
       try {
 
         //Se obtiene el pan
-        String pan = Utils.replacePan(getEncryptUtil().decrypt(trx.getPan()));
-        System.out.println(String.format("[%s]  [%s]",pan,trx.getContrato()));
-        //Se busca la tarjeta correspondiente al movimiento
-        PrepaidCard10 prepaidCard10 = getPrepaidCardEJBBean11().getPrepaidCardByPanAndProcessorUserId(null, pan,trx.getContrato());
+        String hashedPan = trx.getPan();
+        System.out.println(String.format("[%s]  [%s]", hashedPan, trx.getContrato()));
 
+        //Se busca la tarjeta correspondiente al movimiento
+        PrepaidCard10 prepaidCard10 = getPrepaidCardEJBBean11().getPrepaidCardByPanHashAndAccountNumber(null, hashedPan, trx.getContrato());
         if(prepaidCard10 == null) {
-          String msg = String.format("Error processing transaction - PrepaidCard not found with processorUserId [%s]", fileId, String.format("%s%s%s",trx.getCuenta(),trx.getCentAlta(),trx.getCodEnt()));
+          String msg = String.format("Error processing transaction - PrepaidCard not found with hashedPan [%s]", hashedPan);
           log.error(msg);
           trx.setHasError(Boolean.TRUE);
           trx.setErrorDetails(msg);
@@ -515,9 +515,6 @@ public class TecnocomReconciliationEJBBean10 extends PrepaidBaseEJBBean10 implem
         }
 
         Account account = getAccountEJBBean10().findById(prepaidCard10.getAccountId());
-
-        // Expira cache del saldo de la cuenta
-        //getAccountEJBBean10().expireBalanceCache(account.getId());
 
         // El estado del movimiento se estandariza en base al tipo de operacion (AU -> AUTHORIZED, OP -> PROCESS_OK)
         PrepaidMovementStatus movementStatus = TecnocomReconciliationRegisterType.AU.equals(trx.getTipoReg()) ? PrepaidMovementStatus.AUTHORIZED : PrepaidMovementStatus.PROCESS_OK;
@@ -541,6 +538,9 @@ public class TecnocomReconciliationEJBBean10 extends PrepaidBaseEJBBean10 implem
 
           // Dado que no esta en la BD, se crean tambien sus campos en las tablas de contabilidad
           insertIntoAccoutingAndClearing(trx.getTipoReg(), prepaidMovement10);
+
+          // Expira cache del saldo de la cuenta
+          getAccountEJBBean10().expireBalanceCache(account.getId());
 
           // Como no se encontro en la BD este movimiento no pasó por el callback
           // Por lo que es necesario levantar el evento de transaccion

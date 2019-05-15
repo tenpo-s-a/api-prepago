@@ -122,6 +122,15 @@ public interface PrepaidCardEJB10 {
   PrepaidCard10 getPrepaidCardByPanAndProcessorUserId(Map<String, Object> headers, String pan, String processorUserId) throws Exception;
 
   /**
+   *  busca una tarjeta por pan hash
+   * @param headers
+   * @param panHash pan hasheado
+   * @return
+   * @throws Exception
+   */
+  PrepaidCard10 getPrepaidCardByPanHashAndAccountNumber(Map<String, Object> headers, String panHash, String account) throws Exception;
+
+  /**
    *  Busca una tarjeta por id y publica evento de tarjeta creada
    * @param cardId id interno de la tarjeta
    * @throws Exception

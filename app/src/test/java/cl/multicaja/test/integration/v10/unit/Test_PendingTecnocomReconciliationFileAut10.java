@@ -51,9 +51,9 @@ public class Test_PendingTecnocomReconciliationFileAut10 extends TestBaseUnit {
 
       PrepaidCard10 prepaidCard10 = buildPrepaidCard10();
       prepaidCard10.setPan(Utils.replacePan(pan));
+      prepaidCard10.setHashedPan(pan); // Para tests, se guarda en claro en vez del hash
       prepaidCard10.setAccountId(account.getId());
       prepaidCard10.setUuid(UUID.randomUUID().toString());
-      prepaidCard10.setHashedPan(getRandomString(10));
       prepaidCard10 = createPrepaidCardV2(prepaidCard10);
 
       users.add(prepaidUser10);

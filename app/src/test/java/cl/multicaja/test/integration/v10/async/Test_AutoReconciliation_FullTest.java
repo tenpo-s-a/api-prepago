@@ -41,14 +41,7 @@ public class Test_AutoReconciliation_FullTest extends TestBaseUnitAsync {
   static UserAccount userAccount;
   static PrepaidUser10 prepaidUser;
   static PrepaidCard10 prepaidCard;
-  static ReconciliationFile10 topupReconciliationFile10;
-  static ReconciliationFile10 topupReverseReconciliationFile10;
-  static ReconciliationFile10 withdrawReconciliationFile10;
-  static ReconciliationFile10 withdrawReverseReconciliationFile10;
   static ReconciliationFile10 tecnocomReconciliationFile10;
-
-  static String switchNotFoundId = "[No_Encontrado_En_Switch]";
-  static String tecnocomNotFoundId = "[No_Encontrado_En_Tecnocom]";
 
   @BeforeClass
   public static void prepareDB() {
@@ -451,10 +444,7 @@ public class Test_AutoReconciliation_FullTest extends TestBaseUnitAsync {
 
     ClearingData10 liq = getPrepaidClearingEJBBean10().searchClearingDataByAccountingId(null, acc.getId());
     Assert.assertEquals("Debe tener estado PENDING", AccountingStatusType.PENDING, liq.getStatus());
-
-
   }
-
 
   private PrepaidMovement10 getPrepaidMovement(PrepaidMovementType movementType, TipoFactura tipofac, String numaut, String pan, String codcom) throws Exception {
     List<PrepaidMovement10> prepaidMovement10s = getPrepaidMovementEJBBean11().getPrepaidMovements(null, null, null, null, movementType,
@@ -488,7 +478,7 @@ public class Test_AutoReconciliation_FullTest extends TestBaseUnitAsync {
     registroTecnocom.setNumAut(getRandomNumericString(6));
     registroTecnocom.setTipoFac(TipoFactura.COMPRA_INTERNACIONAL);
     registroTecnocom.setIndNorCor(IndicadorNormalCorrector.NORMAL.getValue());
-    registroTecnocom.setPan(prepaidCard.getEncryptedPan());
+    registroTecnocom.setPan(prepaidCard.getHashedPan());
     registroTecnocom.setCentAlta("fill");
     registroTecnocom.setClamone(CodigoMoneda.USA_USD);
     registroTecnocom.setCmbApli(new BigDecimal(1L));
@@ -516,144 +506,11 @@ public class Test_AutoReconciliation_FullTest extends TestBaseUnitAsync {
     return registroTecnocom;
   }
 
-  MovimientoTecnocom10 createMovimientoTecnocom(Long fileId, PrepaidMovement10 prepaidMovement10) {
-    MovimientoTecnocom10 registroTecnocom = new MovimientoTecnocom10();
-    registroTecnocom.setIdArchivo(fileId);
-    registroTecnocom.setNumAut(prepaidMovement10.getNumaut());
-    registroTecnocom.setTipoFac(prepaidMovement10.getTipofac());
-    registroTecnocom.setIndNorCor(prepaidMovement10.getIndnorcor().getValue());
-    registroTecnocom.setPan(prepaidCard.getEncryptedPan());
-    registroTecnocom.setCentAlta(prepaidMovement10.getCentalta());
-    registroTecnocom.setClamone(CodigoMoneda.fromValue(prepaidMovement10.getClamone()));
-    registroTecnocom.setCmbApli(new BigDecimal(prepaidMovement10.getCmbapli()));
-    registroTecnocom.setCodAct(prepaidMovement10.getCodact());
-    registroTecnocom.setCodCom(prepaidMovement10.getCodcom());
-    registroTecnocom.setCodEnt(prepaidMovement10.getCodent());
-    registroTecnocom.setCodPais(prepaidMovement10.getCodpais().getValue());
-    registroTecnocom.setContrato(account.getAccountNumber());
-    registroTecnocom.setCuenta(prepaidMovement10.getCuenta());
-    registroTecnocom.setFecFac(new Date(prepaidMovement10.getFecfac().getTime()).toLocalDate());
-    registroTecnocom.setFecTrn(prepaidMovement10.getFechaCreacion());
-    registroTecnocom.setImpautcon(new NewAmountAndCurrency10());
-    registroTecnocom.setImpDiv(new NewAmountAndCurrency10(prepaidMovement10.getImpdiv(), prepaidMovement10.getClamon()));
-    registroTecnocom.setImpFac(new NewAmountAndCurrency10(prepaidMovement10.getImpfac(), prepaidMovement10.getClamon()));
-    registroTecnocom.setImpLiq(new NewAmountAndCurrency10(prepaidMovement10.getImpliq(), prepaidMovement10.getClamon()));
-    registroTecnocom.setIndProaje(prepaidMovement10.getIndproaje().getValue());
-    registroTecnocom.setLinRef(prepaidMovement10.getLinref());
-    registroTecnocom.setNomPob(prepaidMovement10.getNompob());
-    registroTecnocom.setNumExtCta(new Long(prepaidMovement10.getNumextcta()));
-    registroTecnocom.setNumMovExt(new Long(prepaidMovement10.getNummovext()));
-    registroTecnocom.setNumRefFac(prepaidMovement10.getNumreffac());
-    registroTecnocom.setOriginOpe(OriginOpeType.API_ORIGIN.getValue());
-    registroTecnocom.setTipoLin(prepaidMovement10.getTipolin());
-    return registroTecnocom;
-  }
-
-  TestData prepareTestData(PrepaidMovementType movementType, String merchantCode, IndicadorNormalCorrector indnorcor, Long tecnocomFileId) throws Exception {
-    TestData testData = new TestData();
-
-    PrepaidTopup10 prepaidTopup = buildPrepaidTopup10();
-    prepaidTopup.setMerchantCode(merchantCode);
-    prepaidTopup.setFirstTopup(false);
-    if(PrepaidMovementType.TOPUP.equals(movementType)) {
-      testData.cdtTransaction = buildCdtTransaction10(prepaidUser, prepaidTopup);
-    } else {
-      PrepaidWithdraw10 prepaidWithdraw = buildPrepaidWithdrawV2();
-      prepaidWithdraw.setAmount(prepaidTopup.getAmount());
-      prepaidWithdraw.setMerchantCode(prepaidTopup.getMerchantCode());
-      prepaidWithdraw.setTransactionId(prepaidTopup.getTransactionId());
-      testData.cdtTransaction = buildCdtTransaction10(prepaidUser, prepaidWithdraw);
-    }
-
-    testData.prepaidMovement = buildPrepaidMovementV2(prepaidUser, prepaidTopup, prepaidCard, testData.cdtTransaction, movementType);
-
-    testData.prepaidMovement.setIndnorcor(indnorcor);
-    testData.prepaidMovement.setNumaut(getRandomNumericString(6));
-    ZonedDateTime zonedDateTime = ZonedDateTime.now(ZoneId.systemDefault());
-    zonedDateTime = zonedDateTime.minusHours(1); // Crear un movimiento viejo, asi si no vienen en los archivos, expirara.
-    ZonedDateTime utcDateTime = zonedDateTime.withZoneSameInstant(ZoneId.of("UTC"));
-    testData.prepaidMovement.setFechaCreacion(Timestamp.valueOf(utcDateTime.toLocalDateTime())); //Timestamp.from(Instant.now()));
-    testData.prepaidMovement.setMonto(prepaidTopup.getAmount().getValue());
-    testData.prepaidMovement.setEstado(PrepaidMovementStatus.PROCESS_OK);
-    testData.prepaidMovement.setEstadoNegocio(BusinessStatusType.IN_PROCESS);
-
-    if(tecnocomFileId != null) {
-      testData.tecnocomMovement = createMovimientoTecnocom(tecnocomFileId, testData.prepaidMovement);
-    } else {
-      testData.tecnocomMovement = null;
-    }
-
-    if(testData.prepaidMovement != null) {
-      testData.accountingData = IndicadorNormalCorrector.NORMAL.equals(indnorcor) ? createAccountingData(testData.prepaidMovement) : null;
-    } else {
-      testData.accountingData = null;
-    }
-
-    if(testData.prepaidMovement != null) {
-      AccountingStatusType clearingStatus = TipoFactura.RETIRO_TRANSFERENCIA.equals(testData.prepaidMovement.getTipofac()) ? AccountingStatusType.PENDING : AccountingStatusType.INITIAL;
-      testData.clearingData = IndicadorNormalCorrector.NORMAL.equals(indnorcor) ? createClearingData(testData.accountingData, clearingStatus) : null;
-    } else {
-      testData.clearingData = null;
-    }
-
-    return testData;
-  }
-
-  TestData createTestData(TestData preparedData) throws Exception {
-    if(preparedData.cdtTransaction != null) {
-      preparedData.cdtTransaction = createCdtTransaction10(preparedData.cdtTransaction);
-      if (preparedData.prepaidMovement != null) {
-        preparedData.prepaidMovement.setIdMovimientoRef(preparedData.cdtTransaction.getTransactionReference());
-      }
-    }
-
-    if(preparedData.prepaidMovement != null) {
-      preparedData.prepaidMovement = createPrepaidMovement10(preparedData.prepaidMovement);
-    }
-
-    if(preparedData.switchMovement != null) {
-      preparedData.switchMovement = getMcRedReconciliationEJBBean10().addFileMovement(null, preparedData.switchMovement);
-    }
-
-    if(preparedData.tecnocomMovement != null) {
-      preparedData.tecnocomMovement = getTecnocomReconciliationEJBBean10().insertaMovimientoTecnocom(preparedData.tecnocomMovement);
-    }
-
-    if(preparedData.accountingData != null && preparedData.prepaidMovement != null) {
-      preparedData.accountingData.setIdTransaction(preparedData.prepaidMovement.getId());
-      preparedData.accountingData = getPrepaidAccountingEJBBean10().saveAccountingData(null, preparedData.accountingData);
-    }
-
-    if(preparedData.clearingData != null && preparedData.prepaidMovement != null) {
-      preparedData.clearingData.setAccountingId(preparedData.accountingData.getId());
-      preparedData.clearingData = getPrepaidClearingEJBBean10().insertClearingData(null, preparedData.clearingData);
-    }
-
-    return preparedData;
-  }
-
-  ClearingData10 createClearingData(AccountingData10 accountingData10, AccountingStatusType status) throws Exception {
+  private ClearingData10 createClearingData(AccountingData10 accountingData10, AccountingStatusType status) {
     ClearingData10 clearing10 = new ClearingData10();
     clearing10.setStatus(status);
     clearing10.setUserBankAccount(userAccount);
     clearing10.setAccountingId(accountingData10.getId());
     return clearing10;
-  }
-
-  AccountingData10 createAccountingData(PrepaidMovement10 prepaidMovement10) throws Exception {
-    PrepaidAccountingMovement prepaidAccountingMovement = new PrepaidAccountingMovement();
-    prepaidAccountingMovement.setPrepaidMovement10(prepaidMovement10);
-    LocalDate localDate = LocalDate.now(ZoneId.systemDefault()).plusYears(100);
-    prepaidAccountingMovement.setReconciliationDate(Timestamp.valueOf(localDate.atStartOfDay()));
-    return getPrepaidAccountingEJBBean10().buildAccounting10(prepaidAccountingMovement, AccountingStatusType.PENDING, AccountingStatusType.PENDING);
-  }
-
-  class TestData {
-    PrepaidMovement10 prepaidMovement;
-    CdtTransaction10 cdtTransaction;
-    McRedReconciliationFileDetail switchMovement;
-    MovimientoTecnocom10 tecnocomMovement;
-    AccountingData10 accountingData;
-    ClearingData10 clearingData;
   }
 }
