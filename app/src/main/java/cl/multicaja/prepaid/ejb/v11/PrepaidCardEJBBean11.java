@@ -129,7 +129,7 @@ public class PrepaidCardEJBBean11 extends PrepaidCardEJBBean10 {
     " t.pan = ? AND\n" +
     " c.cuenta = ?",getSchema(),getSchema(),getSchema());
 
-  private static final String FIND_BY_PAN_HASH = String.format("SELECT \n" +
+  private static final String FIND_BY_PAN_HASH_AND_ACCOUNTNUMBER = String.format("SELECT \n" +
     "t.id  as id,\n" +
     "t.pan as pan,\n" +
     "t.pan_encriptado as pan_encriptado,\n" +
@@ -143,8 +143,10 @@ public class PrepaidCardEJBBean11 extends PrepaidCardEJBBean10 {
     "t.pan_hash as pan_hash,\n" +
     "t.id_cuenta as id_cuenta\n" +
     "FROM %s.prp_tarjeta t\n"+
+    "INNER JOIN %s.prp_cuenta c ON t.id_cuenta = c.id\n" +
     "WHERE\n" +
-    " t.pan_hash = ? ", getSchema(), getSchema(), getSchema());
+    " t.pan_hash = ? AND\n" +
+    " c.cuenta = ?",getSchema(),getSchema(),getSchema());
 
   private static String UPDATE_PREPAID_CARD_STATUS = String.format("UPDATE %s.prp_tarjeta SET estado = ? where id = ?",getSchema());
 
@@ -217,12 +219,12 @@ public class PrepaidCardEJBBean11 extends PrepaidCardEJBBean10 {
   }
 
   @Override
-  public PrepaidCard10 getPrepaidCardByPanHash(Map<String, Object> headers, String panHash) {
-    log.info(String.format("[getPrepaidCardByPanHash] Buscando tarjeta [panHash: %s]", panHash));
+  public PrepaidCard10 getPrepaidCardByPanHashAndAccountNumber(Map<String, Object> headers, String panHash, String accountNumber) {
+    log.info(String.format("[getPrepaidCardByPanHash] Buscando tarjeta [panHash: %s] [account: %s]", panHash, accountNumber));
     try {
-      return getDbUtils().getJdbcTemplate().queryForObject(FIND_BY_PAN_HASH, getCardMapper(), panHash);
+      return getDbUtils().getJdbcTemplate().queryForObject(FIND_BY_PAN_HASH_AND_ACCOUNTNUMBER, getCardMapper(), panHash, accountNumber);
     } catch (EmptyResultDataAccessException ex) {
-      log.error(String.format("[getPrepaidCardByPanHash] Tarjeta [panHash: %s]", panHash));
+      log.error(String.format("[getPrepaidCardByPanHash] Tarjeta [panHash: %s] [account: %s]", panHash, accountNumber));
       return null;
     }
   }
