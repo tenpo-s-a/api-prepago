@@ -565,8 +565,13 @@ public class TecnocomReconciliationEJBBean10 extends PrepaidBaseEJBBean10 implem
             LocalDateTime localDateTime = LocalDateTime.now(ZoneId.of("UTC"));
             DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss");
             String formattedDate = localDateTime.format(formatter);
-            getPrepaidAccountingEJBBean10().updateAccountingStatusAndConciliationDate(null, prepaidMovement10.getId(), AccountingStatusType.OK, formattedDate);
-            getPrepaidClearingEJBBean10().updateClearingData(null, prepaidMovement10.getId(), AccountingStatusType.PENDING);
+
+            // TODO: En vez de sacarlo y actualizarlo, podria hacerse una funcion que actualiza by IdTrx
+            AccountingData10 accountingData10 = getPrepaidAccountingEJBBean10().searchAccountingByIdTrx(null, prepaidMovement10.getId());
+            getPrepaidAccountingEJBBean10().updateAccountingStatusAndConciliationDate(null, accountingData10.getId(), AccountingStatusType.OK, formattedDate);
+
+            ClearingData10 clearingData10 = getPrepaidClearingEJBBean10().searchClearingDataByAccountingId(null, accountingData10.getId());
+            getPrepaidClearingEJBBean10().updateClearingData(null, clearingData10.getId(), AccountingStatusType.PENDING);
           }
 
           prepaidInvoiceDelegate10.sendInvoice(prepaidInvoiceDelegate10.buildInvoiceData(prepaidMovement10,null));
@@ -633,6 +638,7 @@ public class TecnocomReconciliationEJBBean10 extends PrepaidBaseEJBBean10 implem
     if (TecnocomReconciliationRegisterType.AU.equals(tecnocomReconciliationRegisterType)) {
       accountingStatus = AccountingStatusType.PENDING;
       clearingStatus = AccountingStatusType.INITIAL;
+      // Los movimientos se insertan con fecha de conciliacion lejana, esta se debe actualizar cuando el movimiento es conciliado
       reconciliationDate = ZonedDateTime.now(ZoneOffset.UTC).plusYears(1000).toLocalDateTime();
     } else {
       accountingStatus = AccountingStatusType.OK;
@@ -641,7 +647,6 @@ public class TecnocomReconciliationEJBBean10 extends PrepaidBaseEJBBean10 implem
     }
 
     AccountingData10 accountingData10 = getPrepaidAccountingEJBBean10().buildAccounting10(prepaidAccountingMovement, AccountingStatusType.PENDING, accountingStatus);
-    // Los movimientos se insertan con fecha de conciliacion lejana, esta se debe actualizar cuando el movimiento es conciliado
     accountingData10.setConciliationDate(Timestamp.valueOf(reconciliationDate));
     accountingData10 = getPrepaidAccountingEJBBean10().saveAccountingData(null, accountingData10);
 

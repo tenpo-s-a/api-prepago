@@ -200,6 +200,7 @@ public class Test_AutoReconciliation_FullTest extends TestBaseUnitAsync {
     Assert.assertEquals("Debe tener estado NOT_OK", AccountingStatusType.NOT_OK, acc.getAccountingStatus());
 
     ClearingData10 liq = getPrepaidClearingEJBBean10().searchClearingDataByAccountingId(null, acc.getId());
+    Assert.assertNotNull("Debe existir en clearing", liq);
     Assert.assertEquals("Debe tener estado NOT_SEND", AccountingStatusType.NOT_SEND, liq.getStatus());
 
     // Verificar que exista en la cola de eventos transaction_reversed
@@ -241,6 +242,7 @@ public class Test_AutoReconciliation_FullTest extends TestBaseUnitAsync {
     Assert.assertEquals("Debe tener estado PENDING", AccountingStatusType.PENDING, acc.getAccountingStatus());
 
     ClearingData10 liq = getPrepaidClearingEJBBean10().searchClearingDataByAccountingId(null, acc.getId());
+    Assert.assertNotNull("Debe existir en clearing", liq);
     Assert.assertEquals("Debe tener estado INITIAL", AccountingStatusType.INITIAL, liq.getStatus());
 
     // Verificar que exista en la cola de eventos transaction_authorized
@@ -295,10 +297,10 @@ public class Test_AutoReconciliation_FullTest extends TestBaseUnitAsync {
     Assert.assertEquals("Debe tener estado OK", AccountingStatusType.OK, acc.getAccountingStatus());
 
     ClearingData10 liq = getPrepaidClearingEJBBean10().searchClearingDataByAccountingId(null, acc.getId());
+    Assert.assertNotNull("Debe existir en clearing", liq);
     Assert.assertEquals("Debe tener estado PENDING", AccountingStatusType.PENDING, liq.getStatus());
 
     // Verificar que exista en la cola de eventos transaction_authorized
-
     Queue qResp = camelFactory.createJMSQueue(KafkaEventsRoute10.TRANSACTION_AUTHORIZED_TOPIC);
     ExchangeData<String> event = (ExchangeData<String>) camelFactory.createJMSMessenger(30000, 60000)
       .getMessage(qResp, prepaidMovement10.getIdTxExterno());
@@ -335,6 +337,8 @@ public class Test_AutoReconciliation_FullTest extends TestBaseUnitAsync {
 
     MovimientoTecnocom10 movimientoTecnocom10 = createMovimientoTecnocom(tecnocomReconciliationFile10.getId());
     movimientoTecnocom10.setTipoReg(TecnocomReconciliationRegisterType.AU);
+    movimientoTecnocom10.setTipoFac(TipoFactura.COMPRA_INTERNACIONAL);
+    movimientoTecnocom10.setIndNorCor(movimientoTecnocom10.getTipoFac().getCorrector());
     movimientoTecnocom10 = getTecnocomReconciliationEJBBean10().insertaMovimientoTecnocom(movimientoTecnocom10);
 
     // Se inserta un movimiento en estado NOTIFIED
@@ -342,6 +346,7 @@ public class Test_AutoReconciliation_FullTest extends TestBaseUnitAsync {
     insertedMovement.setEstado(PrepaidMovementStatus.NOTIFIED);
     insertedMovement.setTipoMovimiento(PrepaidMovementType.PURCHASE);
     insertedMovement.setTipofac(TipoFactura.COMPRA_INTERNACIONAL);
+    insertedMovement.setIndnorcor(IndicadorNormalCorrector.NORMAL);
     insertedMovement.setNumaut(movimientoTecnocom10.getNumAut());
     insertedMovement.setCodcom(movimientoTecnocom10.getCodCom());
     insertedMovement.setCuenta(movimientoTecnocom10.getCuenta());
@@ -361,6 +366,7 @@ public class Test_AutoReconciliation_FullTest extends TestBaseUnitAsync {
     Assert.assertEquals("Debe tener estado PENDING", AccountingStatusType.PENDING, acc.getAccountingStatus());
 
     ClearingData10 liq = getPrepaidClearingEJBBean10().searchClearingDataByAccountingId(null, acc.getId());
+    Assert.assertNotNull("Debe existir en clearing", liq);
     Assert.assertEquals("Debe tener estado INITIAL", AccountingStatusType.INITIAL, liq.getStatus());
   }
 
@@ -370,6 +376,8 @@ public class Test_AutoReconciliation_FullTest extends TestBaseUnitAsync {
 
     MovimientoTecnocom10 movimientoTecnocom10 = createMovimientoTecnocom(tecnocomReconciliationFile10.getId());
     movimientoTecnocom10.setTipoReg(TecnocomReconciliationRegisterType.OP);
+    movimientoTecnocom10.setTipoFac(TipoFactura.SUSCRIPCION_INTERNACIONAL);
+    movimientoTecnocom10.setIndNorCor(movimientoTecnocom10.getTipoFac().getCorrector());
     movimientoTecnocom10 = getTecnocomReconciliationEJBBean10().insertaMovimientoTecnocom(movimientoTecnocom10);
 
     // Se inserta un movimiento en estado NOTIFIED
@@ -377,6 +385,7 @@ public class Test_AutoReconciliation_FullTest extends TestBaseUnitAsync {
     insertedMovement.setEstado(PrepaidMovementStatus.NOTIFIED);
     insertedMovement.setTipoMovimiento(PrepaidMovementType.SUSCRIPTION);
     insertedMovement.setTipofac(TipoFactura.SUSCRIPCION_INTERNACIONAL);
+    insertedMovement.setIndnorcor(IndicadorNormalCorrector.NORMAL);
     insertedMovement.setNumaut(movimientoTecnocom10.getNumAut());
     insertedMovement.setCodcom(movimientoTecnocom10.getCodCom());
     insertedMovement.setCuenta(movimientoTecnocom10.getCuenta());
@@ -397,6 +406,7 @@ public class Test_AutoReconciliation_FullTest extends TestBaseUnitAsync {
     Assert.assertTrue("Debe tener fecha conciliacion", isRecentLocalDateTime(acc.getConciliationDate().toLocalDateTime(),5));
 
     ClearingData10 liq = getPrepaidClearingEJBBean10().searchClearingDataByAccountingId(null, acc.getId());
+    Assert.assertNotNull("Debe existir en clearing", liq);
     Assert.assertEquals("Debe tener estado PENDING", AccountingStatusType.PENDING, liq.getStatus());
   }
 
@@ -406,6 +416,8 @@ public class Test_AutoReconciliation_FullTest extends TestBaseUnitAsync {
 
     MovimientoTecnocom10 movimientoTecnocom10 = createMovimientoTecnocom(tecnocomReconciliationFile10.getId());
     movimientoTecnocom10.setTipoReg(TecnocomReconciliationRegisterType.OP);
+    movimientoTecnocom10.setTipoFac(TipoFactura.SUSCRIPCION_INTERNACIONAL);
+    movimientoTecnocom10.setIndNorCor(movimientoTecnocom10.getTipoFac().getCorrector());
     movimientoTecnocom10 = getTecnocomReconciliationEJBBean10().insertaMovimientoTecnocom(movimientoTecnocom10);
 
     // Se inserta un movimiento en estado AUTHORIZED
@@ -413,6 +425,7 @@ public class Test_AutoReconciliation_FullTest extends TestBaseUnitAsync {
     insertedMovement.setEstado(PrepaidMovementStatus.AUTHORIZED);
     insertedMovement.setTipoMovimiento(PrepaidMovementType.SUSCRIPTION);
     insertedMovement.setTipofac(TipoFactura.SUSCRIPCION_INTERNACIONAL);
+    insertedMovement.setIndnorcor(IndicadorNormalCorrector.NORMAL);
     insertedMovement.setNumaut(movimientoTecnocom10.getNumAut());
     insertedMovement.setCodcom(movimientoTecnocom10.getCodCom());
     insertedMovement.setCuenta(movimientoTecnocom10.getCuenta());
@@ -432,18 +445,19 @@ public class Test_AutoReconciliation_FullTest extends TestBaseUnitAsync {
     getTecnocomReconciliationEJBBean10().processTecnocomTableData(tecnocomReconciliationFile10.getId());
 
     // Verificar que exista en la BD en estado PROCESS_OK
-    PrepaidMovement10 prepaidMovement10 = getPrepaidMovement(movimientoTecnocom10.getMovementType(), movimientoTecnocom10.getTipoFac(), movimientoTecnocom10.getNumAut(), prepaidCard.getPan(), movimientoTecnocom10.getCodCom());
+    PrepaidMovement10 prepaidMovement10 = getPrepaidMovementEJBBean11().getPrepaidMovementById(insertedMovement.getId());
     Assert.assertNotNull("Debe exitir el nuevo movimiento en la BD", prepaidMovement10);
     Assert.assertEquals("Debe tener estado PROCESS_OK", PrepaidMovementStatus.PROCESS_OK, prepaidMovement10.getEstado());
 
     // Verificar que exista en la tablas de contabilidad (acc y liq) en sus estados (PENDING y OK + fecha de conciliacion tiene que ser "ahora")
     AccountingData10 acc = getPrepaidAccountingEJBBean10().searchAccountingByIdTrx(null,prepaidMovement10.getId());
-
+    Assert.assertNotNull("Debe existir en accounting", acc);
     Assert.assertEquals("Debe tener estado PENDING", AccountingStatusType.PENDING, acc.getStatus());
     Assert.assertEquals("Debe tener estado OK", AccountingStatusType.OK, acc.getAccountingStatus());
     Assert.assertTrue("Debe tener fecha conciliacion", isRecentLocalDateTime(acc.getConciliationDate().toLocalDateTime(),5));
 
     ClearingData10 liq = getPrepaidClearingEJBBean10().searchClearingDataByAccountingId(null, acc.getId());
+    Assert.assertNotNull("Debe existir en clearing", liq);
     Assert.assertEquals("Debe tener estado PENDING", AccountingStatusType.PENDING, liq.getStatus());
   }
 
