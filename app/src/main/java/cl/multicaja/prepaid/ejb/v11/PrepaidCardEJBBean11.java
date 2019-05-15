@@ -129,6 +129,23 @@ public class PrepaidCardEJBBean11 extends PrepaidCardEJBBean10 {
     " t.pan = ? AND\n" +
     " c.cuenta = ?",getSchema(),getSchema(),getSchema());
 
+  private static final String FIND_BY_PAN_HASH = String.format("SELECT \n" +
+    "t.id  as id,\n" +
+    "t.pan as pan,\n" +
+    "t.pan_encriptado as pan_encriptado,\n" +
+    "t.estado as estado,\n" +
+    "t.nombre_tarjeta as nombre_tarjeta,\n" +
+    "t.producto as producto,\n" +
+    "t.numero_unico as numero_unico,\n" +
+    "t.fecha_creacion as fecha_creacion,\n" +
+    "t.fecha_actualizacion as fecha_actualizacion,\n" +
+    "t.uuid as uuid,\n" +
+    "t.pan_hash as pan_hash,\n" +
+    "t.id_cuenta as id_cuenta\n" +
+    "FROM %s.prp_tarjeta t\n"+
+    "WHERE\n" +
+    " t.pan_hash = ? ", getSchema(), getSchema(), getSchema());
+
   private static String UPDATE_PREPAID_CARD_STATUS = String.format("UPDATE %s.prp_tarjeta SET estado = ? where id = ?",getSchema());
 
   private static String INSERT_PREPAID_CARD = "INSERT INTO prepago.prp_tarjeta(\n" +
@@ -195,6 +212,17 @@ public class PrepaidCardEJBBean11 extends PrepaidCardEJBBean10 {
       return getDbUtils().getJdbcTemplate().queryForObject(FIND_BY_PAN_ACCOUNTNUMBER, getCardMapper(), pan,processorUserId);
     } catch (EmptyResultDataAccessException ex) {
       log.error(String.format("[getPrepaidCardById] Tarjeta [pan: %s] [processorUserId: %s]", pan,processorUserId));
+      return null;
+    }
+  }
+
+  @Override
+  public PrepaidCard10 getPrepaidCardByPanHash(Map<String, Object> headers, String panHash) {
+    log.info(String.format("[getPrepaidCardByPanHash] Buscando tarjeta [panHash: %s]", panHash));
+    try {
+      return getDbUtils().getJdbcTemplate().queryForObject(FIND_BY_PAN_HASH, getCardMapper(), panHash);
+    } catch (EmptyResultDataAccessException ex) {
+      log.error(String.format("[getPrepaidCardByPanHash] Tarjeta [panHash: %s]", panHash));
       return null;
     }
   }
