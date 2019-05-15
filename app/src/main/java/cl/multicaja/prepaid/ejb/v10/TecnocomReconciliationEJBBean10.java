@@ -69,8 +69,8 @@ public class TecnocomReconciliationEJBBean10 extends PrepaidBaseEJBBean10 implem
   private static final String INSERT_MOVEMENT_SQL = "INSERT INTO %s.%s (" +
   "idArchivo, cuenta, pan, codent, centalta, clamon, indnorcor, tipofac, fecfac, numreffac, clamondiv, impdiv, " +
   "impfac, cmbapli, numaut, indproaje, codcom, codact, impliq, clamonliq, codpais, nompob, numextcta, nummovext, " +
-  "clamone, tipolin, linref, fectrn, impautcon, originope, fecha_creacion, fecha_actualizacion, contrato, tiporeg" +
-  ") VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?);";
+  "clamone, tipolin, linref, fectrn, impautcon, originope, fecha_creacion, fecha_actualizacion, contrato, tiporeg, nomcomred" +
+  ") VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?);";
 
   @EJB
   private PrepaidCardEJBBean11 prepaidCardEJBBean11;
@@ -774,7 +774,8 @@ public class TecnocomReconciliationEJBBean10 extends PrepaidBaseEJBBean10 implem
     sqlQuery.append(" fecha_creacion, ");
     sqlQuery.append(" fecha_actualizacion, ");
     sqlQuery.append(" contrato, ");
-    sqlQuery.append(" tiporeg ");
+    sqlQuery.append(" tiporeg, ");
+    sqlQuery.append(" nomcomred ");
     sqlQuery.append(  String.format(" FROM %s.%s ", getSchema(), tableName));
     sqlQuery.append("WHERE ");
     sqlQuery.append(  fileId != null ?        String.format("idArchivo = %d   AND ", fileId) : "");
