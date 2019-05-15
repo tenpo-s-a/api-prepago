@@ -2,7 +2,6 @@ package cl.multicaja.prepaid.helpers.tecnocom.model;
 
 import cl.multicaja.core.utils.NumberUtils;
 import cl.multicaja.prepaid.model.v10.PrepaidMovementType;
-import cl.multicaja.prepaid.model.v10.TecnocomOperationType;
 import cl.multicaja.tecnocom.constants.CodigoPais;
 import cl.multicaja.tecnocom.constants.TipoFactura;
 

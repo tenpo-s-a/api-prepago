@@ -299,18 +299,11 @@ public class TecnocomReconciliationEJBBean10 extends PrepaidBaseEJBBean10 implem
     movimientoTecnocom10.setContrato(detail.getContrato());
     movimientoTecnocom10.setFecFac(!detail.getFecTrn().equals("") ? Date.valueOf(detail.getFecTrn()).toLocalDate(): LocalDate.now()); // TODO: cual es el formato del string? Para pasarlo directamente a LocalDate sin tener que pasar por sql.Date
     movimientoTecnocom10.setTipoReg(detail.getTiporeg());
-    if(movimientoTecnocom10.getOperationType() == TecnocomOperationType.PURCHASES){
-      movimientoTecnocom10.setFecTrn(Timestamp.valueOf(String.format("%s %s",detail.getFecTrn(),detail.getHorTrn())));
-      movimientoTecnocom10.setImpautcon(new NewAmountAndCurrency10(detail.getImpAutCon()));
-      impFac.setValue(BigDecimal.ZERO);
-      movimientoTecnocom10.setImpFac(impFac);
-    } else {
-      // Cualquier cosa, solo se usa para test
-      movimientoTecnocom10.setFecTrn(Timestamp.valueOf(LocalDateTime.now()));
-      movimientoTecnocom10.setImpautcon(new NewAmountAndCurrency10(detail.getImpAutCon()));
-      impFac.setValue(BigDecimal.ZERO);
-      movimientoTecnocom10.setImpFac(impFac);
-    }
+    // Cualquier cosa, solo se usa para test
+    movimientoTecnocom10.setFecTrn(Timestamp.valueOf(LocalDateTime.now()));
+    movimientoTecnocom10.setImpautcon(new NewAmountAndCurrency10(detail.getImpAutCon()));
+    impFac.setValue(BigDecimal.ZERO);
+    movimientoTecnocom10.setImpFac(impFac);
     movimientoTecnocom10.setImpLiq(impFac);
     movimientoTecnocom10.setNumMovExt(0L);
     movimientoTecnocom10.setClamone(CodigoMoneda.CHILE_CLP);
