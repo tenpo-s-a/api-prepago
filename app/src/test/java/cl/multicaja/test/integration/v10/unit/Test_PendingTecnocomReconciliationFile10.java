@@ -700,7 +700,7 @@ public class Test_PendingTecnocomReconciliationFile10 extends TestBaseUnitAsync 
 
     PrepaidTopup10 prepaidTopup = buildPrepaidTopup10();
 
-    PrepaidMovement10 prepaidMovement10 = buildPrepaidMovement10(prepaidUser, prepaidTopup);
+    PrepaidMovement10 prepaidMovement10 = buildPrepaidMovement11(prepaidUser, prepaidTopup);
     prepaidMovement10.setConTecnocom(ReconciliationStatusType.PENDING);
     prepaidMovement10.setConSwitch(ReconciliationStatusType.PENDING);
     prepaidMovement10.setOriginType(MovementOriginType.API);

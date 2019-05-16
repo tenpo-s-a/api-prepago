@@ -43,7 +43,7 @@ public class Test_PrepaidAccountingEJBBean10_getReconciledPrepaidMovementsForAcc
       PrepaidTopup10 prepaidTopup = buildPrepaidTopup10();
 
       // CREA MOVIMIENTOS
-      PrepaidMovement10 prepaidMovement10 = buildPrepaidMovement10(prepaidUser, prepaidTopup);
+      PrepaidMovement10 prepaidMovement10 = buildPrepaidMovement11(prepaidUser, prepaidTopup);
       prepaidMovement10.setConTecnocom(ReconciliationStatusType.RECONCILED);
       prepaidMovement10.setConSwitch(ReconciliationStatusType.RECONCILED);
       prepaidMovement10.setEstadoNegocio(BusinessStatusType.CONFIRMED);
@@ -52,7 +52,7 @@ public class Test_PrepaidAccountingEJBBean10_getReconciledPrepaidMovementsForAcc
       getPrepaidMovementEJBBean10().createMovementConciliate(null, prepaidMovement10.getId(), ReconciliationActionType.CARGA, ReconciliationStatusType.RECONCILED);
       updateDate(prepaidMovement10.getId(), getNewDate(2, prepaidMovement10.getFechaCreacion()));
 
-      prepaidMovement10 = buildPrepaidMovement10(prepaidUser, prepaidTopup);
+      prepaidMovement10 = buildPrepaidMovement11(prepaidUser, prepaidTopup);
       prepaidMovement10.setConTecnocom(ReconciliationStatusType.RECONCILED);
       prepaidMovement10.setConSwitch(ReconciliationStatusType.RECONCILED);
       prepaidMovement10.setEstadoNegocio(BusinessStatusType.CONFIRMED);
@@ -66,7 +66,7 @@ public class Test_PrepaidAccountingEJBBean10_getReconciledPrepaidMovementsForAcc
        */
       addAccountingIpmTrx(prepaidMovement10.getId());
 
-      prepaidMovement10 = buildPrepaidMovement10(prepaidUser, prepaidTopup);
+      prepaidMovement10 = buildPrepaidMovement11(prepaidUser, prepaidTopup);
       prepaidMovement10.setConTecnocom(ReconciliationStatusType.RECONCILED);
       prepaidMovement10.setConSwitch(ReconciliationStatusType.RECONCILED);
       prepaidMovement10.setEstadoNegocio(BusinessStatusType.CONFIRMED);
@@ -75,7 +75,7 @@ public class Test_PrepaidAccountingEJBBean10_getReconciledPrepaidMovementsForAcc
       getPrepaidMovementEJBBean10().createMovementConciliate(null, prepaidMovement10.getId(), ReconciliationActionType.CARGA, ReconciliationStatusType.RECONCILED);
       updateDate(prepaidMovement10.getId(), getNewDate(2, prepaidMovement10.getFechaCreacion()));
 
-      prepaidMovement10 = buildPrepaidMovement10(prepaidUser, prepaidTopup);
+      prepaidMovement10 = buildPrepaidMovement11(prepaidUser, prepaidTopup);
       prepaidMovement10.setConTecnocom(ReconciliationStatusType.RECONCILED);
       prepaidMovement10.setConSwitch(ReconciliationStatusType.PENDING);
       prepaidMovement10.setEstadoNegocio(BusinessStatusType.CONFIRMED);
@@ -85,7 +85,7 @@ public class Test_PrepaidAccountingEJBBean10_getReconciledPrepaidMovementsForAcc
       updateDate(prepaidMovement10.getId(), getNewDate(2, prepaidMovement10.getFechaCreacion()));
 
       // Agrega movimiento reversado
-      prepaidMovement10 = buildPrepaidMovement10(prepaidUser, prepaidTopup);
+      prepaidMovement10 = buildPrepaidMovement11(prepaidUser, prepaidTopup);
       prepaidMovement10.setConTecnocom(ReconciliationStatusType.RECONCILED);
       prepaidMovement10.setConSwitch(ReconciliationStatusType.RECONCILED);
       prepaidMovement10.setEstadoNegocio(BusinessStatusType.REVERSED);

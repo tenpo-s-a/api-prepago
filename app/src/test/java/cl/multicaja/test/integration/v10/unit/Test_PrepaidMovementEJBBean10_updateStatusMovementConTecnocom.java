@@ -27,7 +27,7 @@ public class Test_PrepaidMovementEJBBean10_updateStatusMovementConTecnocom exten
     prepaidUser = createPrepaidUserV2(prepaidUser);
 
     PrepaidTopup10 prepaidTopup = buildPrepaidTopup10();
-    PrepaidMovement10 prepaidMovement10 = buildPrepaidMovement10(prepaidUser, prepaidTopup);
+    PrepaidMovement10 prepaidMovement10 = buildPrepaidMovement11(prepaidUser, prepaidTopup);
     prepaidMovement10 = createPrepaidMovement10(prepaidMovement10);
 
     Assert.assertNotNull("Debe existir el movimiento",prepaidMovement10);

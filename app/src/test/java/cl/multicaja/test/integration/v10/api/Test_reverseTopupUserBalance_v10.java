@@ -395,7 +395,7 @@ public class Test_reverseTopupUserBalance_v10 extends TestBaseUnitApi {
     prepaidTopup.setMerchantCode(getRandomNumericString(15));
     prepaidTopup.getAmount().setValue(BigDecimal.valueOf(500));
 
-    PrepaidMovement10 originalTopup = buildPrepaidMovement10(prepaidUser, new PrepaidTopup10(prepaidTopup));
+    PrepaidMovement10 originalTopup = buildPrepaidMovement11(prepaidUser, new PrepaidTopup10(prepaidTopup));
     originalTopup.setIdTxExterno(prepaidTopup.getTransactionId());
     originalTopup.setMonto(prepaidTopup.getAmount().getValue());
     originalTopup = createPrepaidMovement10(originalTopup);
@@ -436,7 +436,7 @@ public class Test_reverseTopupUserBalance_v10 extends TestBaseUnitApi {
     prepaidTopup.setMerchantCode(NewPrepaidBaseTransaction10.WEB_MERCHANT_CODE);
     prepaidTopup.getAmount().setValue(BigDecimal.valueOf(500));
 
-    PrepaidMovement10 originalTopup = buildPrepaidMovement10(prepaidUser, new PrepaidTopup10(prepaidTopup));
+    PrepaidMovement10 originalTopup = buildPrepaidMovement11(prepaidUser, new PrepaidTopup10(prepaidTopup));
     originalTopup.setMonto(prepaidTopup.getAmount().getValue());
     originalTopup.setIdTxExterno(prepaidTopup.getTransactionId());
     originalTopup = createPrepaidMovement10(originalTopup);
@@ -477,7 +477,7 @@ public class Test_reverseTopupUserBalance_v10 extends TestBaseUnitApi {
     prepaidTopup.setMerchantCode(getRandomNumericString(15));
     prepaidTopup.getAmount().setValue(BigDecimal.valueOf(500));
 
-    PrepaidMovement10 originalTopup = buildPrepaidMovement10(prepaidUser, new PrepaidTopup10(prepaidTopup));
+    PrepaidMovement10 originalTopup = buildPrepaidMovement11(prepaidUser, new PrepaidTopup10(prepaidTopup));
     originalTopup.setIdTxExterno(prepaidTopup.getTransactionId());
     originalTopup.setMonto(prepaidTopup.getAmount().getValue());
     originalTopup = createPrepaidMovement10(originalTopup);
@@ -514,7 +514,7 @@ public class Test_reverseTopupUserBalance_v10 extends TestBaseUnitApi {
     prepaidTopup.setMerchantCode(NewPrepaidBaseTransaction10.WEB_MERCHANT_CODE);
     prepaidTopup.getAmount().setValue(BigDecimal.valueOf(500));
 
-    PrepaidMovement10 originalTopup = buildPrepaidMovement10(prepaidUser, new PrepaidTopup10(prepaidTopup));
+    PrepaidMovement10 originalTopup = buildPrepaidMovement11(prepaidUser, new PrepaidTopup10(prepaidTopup));
     originalTopup.setMonto(prepaidTopup.getAmount().getValue());
     originalTopup.setIdTxExterno(prepaidTopup.getTransactionId());
     originalTopup = createPrepaidMovement10(originalTopup);
@@ -550,7 +550,7 @@ public class Test_reverseTopupUserBalance_v10 extends TestBaseUnitApi {
     prepaidTopup.setMerchantCode(getRandomNumericString(15));
     prepaidTopup.getAmount().setValue(BigDecimal.valueOf(500));
 
-    PrepaidMovement10 originalTopup = buildPrepaidMovement10(prepaidUser, new PrepaidTopup10(prepaidTopup));
+    PrepaidMovement10 originalTopup = buildPrepaidMovement11(prepaidUser, new PrepaidTopup10(prepaidTopup));
     originalTopup.setIdTxExterno(prepaidTopup.getTransactionId());
     originalTopup.setMonto(prepaidTopup.getAmount().getValue());
     originalTopup = createPrepaidMovement10(originalTopup);
@@ -591,7 +591,7 @@ public class Test_reverseTopupUserBalance_v10 extends TestBaseUnitApi {
     prepaidTopup.setMerchantCode(NewPrepaidBaseTransaction10.WEB_MERCHANT_CODE);
     prepaidTopup.getAmount().setValue(BigDecimal.valueOf(500));
 
-    PrepaidMovement10 originalTopup = buildPrepaidMovement10(prepaidUser, new PrepaidTopup10(prepaidTopup));
+    PrepaidMovement10 originalTopup = buildPrepaidMovement11(prepaidUser, new PrepaidTopup10(prepaidTopup));
     originalTopup.setMonto(prepaidTopup.getAmount().getValue());
     originalTopup.setIdTxExterno(prepaidTopup.getTransactionId());
     originalTopup = createPrepaidMovement10(originalTopup);
@@ -641,7 +641,7 @@ public class Test_reverseTopupUserBalance_v10 extends TestBaseUnitApi {
     prepaidTopup.setRut(Integer.parseInt(prepaidUser.getDocumentNumber()));
 
 
-    PrepaidMovement10 originalTopup = buildPrepaidMovement10(prepaidUser, new PrepaidTopup10(prepaidTopup));
+    PrepaidMovement10 originalTopup = buildPrepaidMovement11(prepaidUser, new PrepaidTopup10(prepaidTopup));
     originalTopup.setIdTxExterno(prepaidTopup.getTransactionId());
     originalTopup.setMonto(prepaidTopup.getAmount().getValue());
     originalTopup = createPrepaidMovement10(originalTopup);

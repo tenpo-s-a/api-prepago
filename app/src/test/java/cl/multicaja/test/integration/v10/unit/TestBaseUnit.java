@@ -460,6 +460,7 @@ public class TestBaseUnit extends TestApiBase {
     prepaidCard.setNameOnCard("Tarjeta de: " + getRandomString(5));
     prepaidCard.setProducto(getRandomNumericString(2));
     prepaidCard.setNumeroUnico(getRandomNumericString(8));
+    prepaidCard.setUuid(UUID.randomUUID().toString());
     return prepaidCard;
   }
 
@@ -783,70 +784,30 @@ public class TestBaseUnit extends TestApiBase {
     return fee;
   }
 
-  /*
-    TOPUP
-   */
-
-  /**
-   *
-   * @param prepaidUser
-   * @param prepaidTopup
-   * @return
-   */
-  public PrepaidMovement10 buildPrepaidMovement10(PrepaidUser10 prepaidUser, PrepaidTopup10 prepaidTopup) throws Exception {
-    return buildPrepaidMovement10(prepaidUser, prepaidTopup, null, null, PrepaidMovementType.TOPUP);
+  public PrepaidMovement10 buildPrepaidMovement11(PrepaidUser10 prepaidUser, PrepaidTopup10 prepaidTopup) throws Exception {
+    return buildPrepaidMovementV2(prepaidUser, prepaidTopup, null, null, PrepaidMovementType.TOPUP,null);
   }
 
-  /**
-   *
-   * @param prepaidUser
-   * @param prepaidTopup
-   * @param prepaidCard
-   * @return
-   */
-  public PrepaidMovement10 buildPrepaidMovement10(PrepaidUser10 prepaidUser, PrepaidTopup10 prepaidTopup, PrepaidCard10 prepaidCard) throws Exception {
-    return buildPrepaidMovement10(prepaidUser, prepaidTopup, prepaidCard, null, PrepaidMovementType.TOPUP);
-  }
-
-  /**
-   *
-   * @param prepaidUser
-   * @param prepaidTopup
-   * @param cdtTransaction
-   * @return
-   */
-  public PrepaidMovement10 buildPrepaidMovement10(PrepaidUser10 prepaidUser, PrepaidTopup10 prepaidTopup, CdtTransaction10 cdtTransaction) throws Exception {
-    return buildPrepaidMovement10(prepaidUser, prepaidTopup, null, cdtTransaction, PrepaidMovementType.TOPUP);
+  public PrepaidMovement10 buildPrepaidMovement11(PrepaidUser10 prepaidUser, PrepaidTopup10 prepaidTopup, PrepaidCard10 prepaidCard) throws Exception {
+    return buildPrepaidMovementV2(prepaidUser, prepaidTopup, prepaidCard, null, PrepaidMovementType.TOPUP,null);
   }
 
 
-
-  /**
-   *
-   * @param prepaidUser
-   * @param prepaidTopup
-   * @param prepaidCard
-   * @param cdtTransaction
-   * @return
-   */
-  public PrepaidMovement10 buildPrepaidMovement10(PrepaidUser10 prepaidUser, NewPrepaidBaseTransaction10 prepaidTopup, PrepaidCard10 prepaidCard, CdtTransaction10 cdtTransaction) throws Exception {
-    return buildPrepaidMovement10(prepaidUser, prepaidTopup, prepaidCard, cdtTransaction, PrepaidMovementType.TOPUP);
+  public PrepaidMovement10 buildPrepaidMovement11(PrepaidUser10 prepaidUser, PrepaidTopup10 prepaidTopup, CdtTransaction10 cdtTransaction) throws Exception {
+    return buildPrepaidMovementV2(prepaidUser, prepaidTopup, null, cdtTransaction, PrepaidMovementType.TOPUP,null);
   }
 
-  public PrepaidMovement10 buildPrepaidMovement10(PrepaidUser10 prepaidUser, NewPrepaidBaseTransaction10 prepaidTopup, PrepaidCard10 prepaidCard, CdtTransaction10 cdtTransaction,PrepaidMovementStatus status) {
-    return buildPrepaidMovement10(prepaidUser, prepaidTopup, prepaidCard, cdtTransaction, PrepaidMovementType.TOPUP,status);
+  public PrepaidMovement10 buildPrepaidMovement11(PrepaidUser10 prepaidUser, NewPrepaidBaseTransaction10 prepaidTopup, PrepaidCard10 prepaidCard, CdtTransaction10 cdtTransaction) throws Exception {
+    return buildPrepaidMovementV2(prepaidUser, prepaidTopup, prepaidCard, cdtTransaction, PrepaidMovementType.TOPUP,null);
   }
-  /*
-    WITHDRAW
-   */
-  /**
-   *
-   * @param prepaidUser
-   * @param prepaidWithdraw
-   * @return
-   */
-  public PrepaidMovement10 buildPrepaidMovement10(PrepaidUser10 prepaidUser, PrepaidWithdraw10 prepaidWithdraw) throws Exception {
-    return buildPrepaidMovement10(prepaidUser, prepaidWithdraw, null, null, PrepaidMovementType.WITHDRAW);
+
+
+  public PrepaidMovement10 buildPrepaidMovement11(PrepaidUser10 prepaidUser, NewPrepaidBaseTransaction10 prepaidTopup, PrepaidCard10 prepaidCard, CdtTransaction10 cdtTransaction,PrepaidMovementStatus status) throws Exception {
+    return buildPrepaidMovementV2(prepaidUser, prepaidTopup, prepaidCard, cdtTransaction, PrepaidMovementType.TOPUP,status);
+  }
+
+  public PrepaidMovement10 buildPrepaidMovement11(PrepaidUser10 prepaidUser, PrepaidWithdraw10 prepaidWithdraw) throws Exception {
+    return buildPrepaidMovementV2(prepaidUser, prepaidWithdraw, null, null, PrepaidMovementType.WITHDRAW,null);
   }
 
   /**
@@ -856,21 +817,15 @@ public class TestBaseUnit extends TestApiBase {
    * @param prepaidCard
    * @return
    */
-  public PrepaidMovement10 buildPrepaidMovement10(PrepaidUser10 prepaidUser, PrepaidWithdraw10 prepaidWithdraw, PrepaidCard10 prepaidCard) throws Exception {
-    return buildPrepaidMovement10(prepaidUser, prepaidWithdraw, prepaidCard, null, PrepaidMovementType.WITHDRAW);
+  public PrepaidMovement10 buildPrepaidMovement11(PrepaidUser10 prepaidUser, PrepaidWithdraw10 prepaidWithdraw, PrepaidCard10 prepaidCard) throws Exception {
+    return buildPrepaidMovementV2(prepaidUser, prepaidWithdraw, prepaidCard, null, PrepaidMovementType.WITHDRAW,null);
   }
 
-  /**
-   *
-   * @param prepaidUser
-   * @param prepaidWithdraw
-   * @param cdtTransaction
-   * @return
-   */
-  public PrepaidMovement10 buildPrepaidMovement10(PrepaidUser10 prepaidUser, PrepaidWithdraw10 prepaidWithdraw, CdtTransaction10 cdtTransaction) throws Exception {
-    return buildPrepaidMovement10(prepaidUser, prepaidWithdraw, null, cdtTransaction, PrepaidMovementType.WITHDRAW);
+  public PrepaidMovement10 buildPrepaidMovement11(PrepaidUser10 prepaidUser, PrepaidWithdraw10 prepaidWithdraw, CdtTransaction10 cdtTransaction) throws Exception {
+    return buildPrepaidMovementV2(prepaidUser, prepaidWithdraw, null, cdtTransaction, PrepaidMovementType.WITHDRAW,null);
   }
 
+  @Deprecated
   public PrepaidMovement10 buildPrepaidMovement10(PrepaidUser10 prepaidUser, NewPrepaidBaseTransaction10 prepaidTopup, PrepaidCard10 prepaidCard, CdtTransaction10 cdtTransaction, PrepaidMovementType type) throws Exception {
 
     String codent = null;
@@ -952,7 +907,7 @@ public class TestBaseUnit extends TestApiBase {
 
 
 
-  public PrepaidMovement10 buildPrepaidMovementV2(PrepaidUser10 prepaidUser, NewPrepaidBaseTransaction10 prepaidTopup, PrepaidCard10 prepaidCard, CdtTransaction10 cdtTransaction, PrepaidMovementType type) throws Exception {
+  public PrepaidMovement10 buildPrepaidMovementV2(PrepaidUser10 prepaidUser, NewPrepaidBaseTransaction10 prepaidTopup, PrepaidCard10 prepaidCard, CdtTransaction10 cdtTransaction, PrepaidMovementType type,PrepaidMovementStatus status) throws Exception {
 
     String codent = null;
     try {
@@ -992,7 +947,7 @@ public class TestBaseUnit extends TestApiBase {
     prepaidMovement.setIdTxExterno(cdtTransaction != null ? cdtTransaction.getExternalTransactionId() : getUniqueLong().toString());
     prepaidMovement.setTipoMovimiento(type);
     prepaidMovement.setMonto(BigDecimal.valueOf(getUniqueInteger()));
-    prepaidMovement.setEstado(PrepaidMovementStatus.PENDING);
+    prepaidMovement.setEstado(status == null ? PrepaidMovementStatus.PENDING:status);
     prepaidMovement.setEstadoNegocio(BusinessStatusType.IN_PROCESS);
     prepaidMovement.setCodent(codent);
     prepaidMovement.setCentalta(centalta); //contrato (Numeros del 5 al 8) - se debe actualizar despues
@@ -1031,74 +986,6 @@ public class TestBaseUnit extends TestApiBase {
     return prepaidMovement;
   }
 
-  public PrepaidMovement10 buildPrepaidMovement10(PrepaidUser10 prepaidUser, NewPrepaidBaseTransaction10 prepaidTopup, PrepaidCard10 prepaidCard, CdtTransaction10 cdtTransaction, PrepaidMovementType type,PrepaidMovementStatus status) {
-
-    String codent = null;
-    try {
-      codent = parametersUtil.getString("api-prepaid", "cod_entidad", "v10");
-    } catch (SQLException e) {
-      codent = getConfigUtils().getProperty("tecnocom.codEntity");
-    }
-
-    TipoFactura tipoFactura;
-    if (PrepaidMovementType.TOPUP.equals(type)) {
-      tipoFactura = TipoFactura.CARGA_TRANSFERENCIA;
-    } else {
-      tipoFactura = TipoFactura.RETIRO_TRANSFERENCIA;
-    }
-
-    if (prepaidTopup != null) {
-      if (TransactionOriginType.POS.equals(prepaidTopup.getTransactionOriginType())) {
-        if (PrepaidMovementType.TOPUP.equals(type)) {
-          tipoFactura = TipoFactura.CARGA_EFECTIVO_COMERCIO_MULTICAJA;
-        } else {
-          tipoFactura = TipoFactura.RETIRO_EFECTIVO_COMERCIO_MULTICJA;
-        }
-      }
-    }
-
-    PrepaidMovement10 prepaidMovement = new PrepaidMovement10();
-    prepaidMovement.setIdMovimientoRef(cdtTransaction != null ? cdtTransaction.getTransactionReference() : getUniqueLong());
-
-    prepaidMovement.setIdTxExterno(cdtTransaction != null ? cdtTransaction.getExternalTransactionId() : getUniqueLong().toString());
-    prepaidMovement.setTipoMovimiento(type);
-    prepaidMovement.setMonto(BigDecimal.valueOf(getUniqueInteger()));
-    prepaidMovement.setEstado(status);
-    prepaidMovement.setEstadoNegocio(BusinessStatusType.IN_PROCESS);
-    prepaidMovement.setCodent(codent);
-    prepaidMovement.setCentalta(""); //contrato (Numeros del 5 al 8) - se debe actualizar despues
-    prepaidMovement.setCuenta(""); ////contrato (Numeros del 9 al 20) - se debe actualizar despues
-    prepaidMovement.setClamon(CodigoMoneda.CHILE_CLP);
-    prepaidMovement.setIndnorcor(IndicadorNormalCorrector.NORMAL); //0-Normal
-    prepaidMovement.setTipofac(tipoFactura);
-    prepaidMovement.setFecfac(new Date(System.currentTimeMillis()));
-    prepaidMovement.setNumreffac(""); //se debe actualizar despues, es el id de PrepaidMovement10
-    prepaidMovement.setPan(prepaidCard != null ? prepaidCard.getPan() : ""); // se debe actualizar despues
-    prepaidMovement.setClamondiv(0);
-    prepaidMovement.setImpdiv(BigDecimal.ZERO);
-    prepaidMovement.setImpfac(prepaidTopup != null ? prepaidTopup.getAmount().getValue() : null);
-    prepaidMovement.setCmbapli(0); // se debe actualizar despues
-    prepaidMovement.setNumaut(""); // se debe actualizar despues con los 6 ultimos digitos de NumFacturaRef
-    prepaidMovement.setIndproaje(IndicadorPropiaAjena.AJENA); // A-Ajena
-    prepaidMovement.setCodcom(prepaidTopup != null ? prepaidTopup.getMerchantCode() : null);
-    prepaidMovement.setCodact(prepaidTopup != null ? prepaidTopup.getMerchantCategory() : null);
-    prepaidMovement.setImpliq(BigDecimal.ZERO); // se debe actualizar despues
-    prepaidMovement.setClamonliq(0); // se debe actualizar despues
-    prepaidMovement.setCodpais(CodigoPais.CHILE);
-    prepaidMovement.setNompob(""); // se debe actualizar despues
-    prepaidMovement.setNumextcta(0); // se debe actualizar despues
-    prepaidMovement.setNummovext(0); // se debe actualizar despues
-    prepaidMovement.setClamone(0); // se debe actualizar despues
-    prepaidMovement.setTipolin(""); // se debe actualizar despues
-    prepaidMovement.setLinref(0); // se debe actualizar despues
-    prepaidMovement.setNumbencta(1); // se debe actualizar despues
-    prepaidMovement.setNumplastico(0L); // se debe actualizar despues
-    prepaidMovement.setConTecnocom(ReconciliationStatusType.PENDING);
-    prepaidMovement.setConSwitch(ReconciliationStatusType.PENDING);
-    prepaidMovement.setOriginType(MovementOriginType.API);
-    prepaidMovement.setNomcomred(prepaidTopup != null ? prepaidTopup.getMerchantName() != null ? prepaidTopup.getMerchantName() : getRandomString(10) : getRandomString(10));
-    return prepaidMovement;
-  }
   /*
     REVERSAS
    */

@@ -20,7 +20,7 @@ public class Test_PrepaidMovementEJBBean10_addPrepaidMovement extends TestBaseUn
 
     PrepaidTopup10 prepaidTopup = buildPrepaidTopup10();
 
-    PrepaidMovement10 prepaidMovement10 = buildPrepaidMovement10(prepaidUser, prepaidTopup);
+    PrepaidMovement10 prepaidMovement10 = buildPrepaidMovement11(prepaidUser, prepaidTopup);
 
     createPrepaidMovement10(prepaidMovement10);
   }
@@ -33,7 +33,7 @@ public class Test_PrepaidMovementEJBBean10_addPrepaidMovement extends TestBaseUn
 
     PrepaidTopup10 prepaidTopup = buildPrepaidTopup10();
 
-    PrepaidMovement10 prepaidMovement10 = buildPrepaidMovement10(prepaidUser, prepaidTopup);
+    PrepaidMovement10 prepaidMovement10 = buildPrepaidMovement11(prepaidUser, prepaidTopup);
     SimpleDateFormat format = new SimpleDateFormat("yyyy-MM-dd");
     Date   date       = format.parse ( "2010-10-10" );
     Timestamp timestamp = new Timestamp(date.getTime());

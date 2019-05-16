@@ -18,7 +18,7 @@ public class Test_PrepaidMovementEJBBean11_getPrepaidMovementFeeByMovementId ext
     PrepaidUser10 prepaidUser = buildPrepaidUserv2();
     prepaidUser = createPrepaidUserV2(prepaidUser);
     PrepaidTopup10 prepaidTopup = buildPrepaidTopup10();
-    PrepaidMovement10 prepaidMovement = buildPrepaidMovement10(prepaidUser, prepaidTopup);
+    PrepaidMovement10 prepaidMovement = buildPrepaidMovement11(prepaidUser, prepaidTopup);
     prepaidMovement = createPrepaidMovement10(prepaidMovement);
 
     ArrayList<PrepaidMovementFee10> insertedMovements = new ArrayList<>();
@@ -34,7 +34,7 @@ public class Test_PrepaidMovementEJBBean11_getPrepaidMovementFeeByMovementId ext
     insertedMovements.add(fee);
 
     // Insertar una tercera fee de otro movimiento
-    PrepaidMovement10 prepaidMovement2 = buildPrepaidMovement10(prepaidUser, prepaidTopup);
+    PrepaidMovement10 prepaidMovement2 = buildPrepaidMovement11(prepaidUser, prepaidTopup);
     prepaidMovement2 = createPrepaidMovement10(prepaidMovement2);
     fee = buildPrepaidMovementFee10(prepaidMovement2);
     createPrepaidMovementFee10(fee);

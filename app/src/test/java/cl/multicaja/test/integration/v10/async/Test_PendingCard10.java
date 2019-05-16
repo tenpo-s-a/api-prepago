@@ -40,7 +40,7 @@ public class Test_PendingCard10 extends TestBaseUnitAsync {
 
     cdtTransaction = createCdtTransaction10(cdtTransaction);
 
-    PrepaidMovement10 prepaidMovement = buildPrepaidMovement10(prepaidUser, prepaidTopup, cdtTransaction);
+    PrepaidMovement10 prepaidMovement = buildPrepaidMovement11(prepaidUser, prepaidTopup, cdtTransaction);
 
     prepaidMovement = createPrepaidMovement10(prepaidMovement);
 
@@ -90,7 +90,7 @@ public class Test_PendingCard10 extends TestBaseUnitAsync {
     CdtTransaction10 cdtTransaction = buildCdtTransaction10(prepaidUser, prepaidTopup);
     cdtTransaction = createCdtTransaction10(cdtTransaction);
 
-    PrepaidMovement10 prepaidMovement = buildPrepaidMovement10(prepaidUser, prepaidTopup, cdtTransaction);
+    PrepaidMovement10 prepaidMovement = buildPrepaidMovement11(prepaidUser, prepaidTopup, cdtTransaction);
     prepaidMovement = createPrepaidMovement10(prepaidMovement);
 
     String messageId = sendPendingTopup(prepaidTopup, prepaidUser, cdtTransaction, prepaidMovement, account, 0);
@@ -149,7 +149,7 @@ public class Test_PendingCard10 extends TestBaseUnitAsync {
     CdtTransaction10 cdtTransaction = buildCdtTransaction10(prepaidUser, prepaidTopup);
     cdtTransaction = createCdtTransaction10(cdtTransaction);
 
-    PrepaidMovement10 prepaidMovement = buildPrepaidMovement10(prepaidUser, prepaidTopup, cdtTransaction);
+    PrepaidMovement10 prepaidMovement = buildPrepaidMovement11(prepaidUser, prepaidTopup, cdtTransaction);
     prepaidMovement = createPrepaidMovement10(prepaidMovement);
 
     String messageId = sendPendingEmissionCard(prepaidTopup, prepaidUser, cdtTransaction, prepaidMovement,0);
@@ -194,7 +194,7 @@ public class Test_PendingCard10 extends TestBaseUnitAsync {
     CdtTransaction10 cdtTransaction = buildCdtTransaction10(prepaidUser, prepaidTopup);
     cdtTransaction = createCdtTransaction10(cdtTransaction);
 
-    PrepaidMovement10 prepaidMovement = buildPrepaidMovement10(prepaidUser, prepaidTopup, cdtTransaction);
+    PrepaidMovement10 prepaidMovement = buildPrepaidMovement11(prepaidUser, prepaidTopup, cdtTransaction);
 
     prepaidMovement = createPrepaidMovement10(prepaidMovement);
 
@@ -248,7 +248,7 @@ public class Test_PendingCard10 extends TestBaseUnitAsync {
     CdtTransaction10 cdtTransaction = buildCdtTransaction10(prepaidUser, prepaidTopup);
     cdtTransaction = createCdtTransaction10(cdtTransaction);
 
-    PrepaidMovement10 prepaidMovement = buildPrepaidMovement10(prepaidUser, prepaidTopup, cdtTransaction);
+    PrepaidMovement10 prepaidMovement = buildPrepaidMovement11(prepaidUser, prepaidTopup, cdtTransaction);
     prepaidMovement = createPrepaidMovement10(prepaidMovement);
 
     String messageId = sendPendingEmissionCard(prepaidTopup, prepaidUser, cdtTransaction, prepaidMovement,4);
@@ -284,7 +284,7 @@ public class Test_PendingCard10 extends TestBaseUnitAsync {
 
     cdtTransaction = createCdtTransaction10(cdtTransaction);
 
-    PrepaidMovement10 prepaidMovement = buildPrepaidMovement10(prepaidUser, prepaidTopup, cdtTransaction);
+    PrepaidMovement10 prepaidMovement = buildPrepaidMovement11(prepaidUser, prepaidTopup, cdtTransaction);
 
     prepaidMovement = createPrepaidMovement10(prepaidMovement);
 

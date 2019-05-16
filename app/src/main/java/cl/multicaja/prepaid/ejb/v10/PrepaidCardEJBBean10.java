@@ -110,25 +110,6 @@ public class PrepaidCardEJBBean10 extends PrepaidBaseEJBBean10 implements Prepai
   }
 
   @Override
-  public PrepaidCard10 getLastPrepaidCardByUserIdAndStatus(Map<String, Object> headers, Long userId, PrepaidCardStatus status) throws Exception {
-
-    if(userId == null){
-      throw new BadRequestException(PARAMETRO_FALTANTE_$VALUE).setData(new KeyValue("value", "userId"));
-    }
-    if(status == null){
-      throw new BadRequestException(PARAMETRO_FALTANTE_$VALUE).setData(new KeyValue("value", "status"));
-    }
-
-    PrepaidCard10 prepaidCard10 = this.getLastPrepaidCardByUserId(headers, userId);
-
-    if (prepaidCard10 == null) {
-      return null;
-    }
-
-    return status.equals(prepaidCard10.getStatus()) ? prepaidCard10 : null;
-  }
-
-  @Override
   public PrepaidCard10 getLastPrepaidCardByUserId(Map<String, Object> headers, Long userId) throws Exception {
 
     if(userId == null){

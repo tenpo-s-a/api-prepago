@@ -48,7 +48,7 @@ public class Test_PrepaidMovementEJB10_procesReconciliation10 extends TestBaseUn
     CdtTransaction10 cdtTransaction = buildCdtTransaction10(prepaidUser, prepaidTopup);
     cdtTransaction = createCdtTransaction10(cdtTransaction);
 
-    PrepaidMovement10 prepaidMovement10 = buildPrepaidMovement10(prepaidUser, prepaidTopup, prepaidCard, cdtTransaction);
+    PrepaidMovement10 prepaidMovement10 = buildPrepaidMovement11(prepaidUser, prepaidTopup, prepaidCard, cdtTransaction);
     prepaidMovement10.setConSwitch(ReconciliationStatusType.NOT_RECONCILED);
     prepaidMovement10.setConTecnocom(ReconciliationStatusType.RECONCILED);
     prepaidMovement10.setEstado(PrepaidMovementStatus.PROCESS_OK);
@@ -81,7 +81,7 @@ public class Test_PrepaidMovementEJB10_procesReconciliation10 extends TestBaseUn
     CdtTransaction10 cdtTransaction = buildCdtTransaction10(prepaidUser, prepaidTopup);
     cdtTransaction = createCdtTransaction10(cdtTransaction);
 
-    PrepaidMovement10 prepaidMovement10 = buildPrepaidMovement10(prepaidUser, prepaidTopup, prepaidCard, cdtTransaction);
+    PrepaidMovement10 prepaidMovement10 = buildPrepaidMovement11(prepaidUser, prepaidTopup, prepaidCard, cdtTransaction);
     prepaidMovement10.setConSwitch(ReconciliationStatusType.NOT_RECONCILED);
     prepaidMovement10.setConTecnocom(ReconciliationStatusType.RECONCILED);
     prepaidMovement10.setEstado(PrepaidMovementStatus.PROCESS_OK);
@@ -114,7 +114,7 @@ public class Test_PrepaidMovementEJB10_procesReconciliation10 extends TestBaseUn
     CdtTransaction10 cdtTransaction = buildCdtTransaction10(prepaidUser, prepaidTopup);
     cdtTransaction = createCdtTransaction10(cdtTransaction);
 
-    PrepaidMovement10 prepaidMovement10 = buildPrepaidMovement10(prepaidUser, prepaidTopup, prepaidCard, cdtTransaction);
+    PrepaidMovement10 prepaidMovement10 = buildPrepaidMovement11(prepaidUser, prepaidTopup, prepaidCard, cdtTransaction);
     prepaidMovement10.setConSwitch(ReconciliationStatusType.NOT_RECONCILED);
     prepaidMovement10.setConTecnocom(ReconciliationStatusType.RECONCILED);
     prepaidMovement10.setEstado(PrepaidMovementStatus.ERROR_TIMEOUT_RESPONSE);
@@ -149,7 +149,7 @@ public class Test_PrepaidMovementEJB10_procesReconciliation10 extends TestBaseUn
     CdtTransaction10 cdtTransaction = buildCdtTransaction10(prepaidUser, prepaidTopup);
     cdtTransaction = createCdtTransaction10(cdtTransaction);
 
-    PrepaidMovement10 prepaidMovement10 = buildPrepaidMovement10(prepaidUser, prepaidTopup, prepaidCard10, cdtTransaction);
+    PrepaidMovement10 prepaidMovement10 = buildPrepaidMovement11(prepaidUser, prepaidTopup, prepaidCard10, cdtTransaction);
     prepaidMovement10.setConSwitch(ReconciliationStatusType.NOT_RECONCILED);
     prepaidMovement10.setConTecnocom(ReconciliationStatusType.RECONCILED);
     prepaidMovement10.setEstado(PrepaidMovementStatus.ERROR_TIMEOUT_RESPONSE);
@@ -211,7 +211,7 @@ public class Test_PrepaidMovementEJB10_procesReconciliation10 extends TestBaseUn
     CdtTransaction10 cdtTransaction = buildCdtTransaction10(prepaidUser, prepaidTopup);
     cdtTransaction = createCdtTransaction10(cdtTransaction);
 
-    PrepaidMovement10 prepaidMovement10 = buildPrepaidMovement10(prepaidUser, prepaidTopup, prepaidCard, cdtTransaction);
+    PrepaidMovement10 prepaidMovement10 = buildPrepaidMovement11(prepaidUser, prepaidTopup, prepaidCard, cdtTransaction);
     prepaidMovement10.setConSwitch(ReconciliationStatusType.RECONCILED);
     prepaidMovement10.setConTecnocom(ReconciliationStatusType.NOT_RECONCILED);
     prepaidMovement10.setEstado(PrepaidMovementStatus.REJECTED);

@@ -119,7 +119,7 @@ public class Test_PrepaidMovementEJBBean10_updatePendingPrepaidMovementsSwitchSt
     prepaidUser = createPrepaidUserV2(prepaidUser);
 
     PrepaidTopup10 prepaidTopup = buildPrepaidTopup10();
-    PrepaidMovement10 prepaidMovement10 = buildPrepaidMovement10(prepaidUser, prepaidTopup);
+    PrepaidMovement10 prepaidMovement10 = buildPrepaidMovement11(prepaidUser, prepaidTopup);
 
     // Agregamos movimientos con fecha de modo que 4 movimientos validos esten dentro del dia 2018-08-03.
 

@@ -49,7 +49,7 @@ public class Test_refundMovement_v10 extends TestBaseUnitApi {
     CdtTransaction10 cdtTransaction = buildCdtTransaction10(prepaidUser, prepaidTopup);
     cdtTransaction = createCdtTransaction10(cdtTransaction);
 
-    PrepaidMovement10 prepaidMovement10 = buildPrepaidMovement10(prepaidUser, prepaidTopup, cdtTransaction);
+    PrepaidMovement10 prepaidMovement10 = buildPrepaidMovement11(prepaidUser, prepaidTopup, cdtTransaction);
     prepaidMovement10.setConSwitch(ReconciliationStatusType.RECONCILED);
     prepaidMovement10.setConTecnocom(ReconciliationStatusType.NOT_RECONCILED);
     prepaidMovement10.setEstado(REJECTED);
@@ -118,7 +118,7 @@ public class Test_refundMovement_v10 extends TestBaseUnitApi {
     CdtTransaction10 cdtTransaction = buildCdtTransaction10(prepaidUser, prepaidTopup);
     cdtTransaction = createCdtTransaction10(cdtTransaction);
 
-    PrepaidMovement10 prepaidMovement10 = buildPrepaidMovement10(prepaidUser, prepaidTopup, prepaidCard10, cdtTransaction);
+    PrepaidMovement10 prepaidMovement10 = buildPrepaidMovement11(prepaidUser, prepaidTopup, prepaidCard10, cdtTransaction);
     prepaidMovement10.setConSwitch(ReconciliationStatusType.RECONCILED);
     prepaidMovement10.setConTecnocom(ReconciliationStatusType.NOT_RECONCILED);
     prepaidMovement10.setEstado(REJECTED);
@@ -187,7 +187,7 @@ public class Test_refundMovement_v10 extends TestBaseUnitApi {
     cdtTransaction = createCdtTransaction10(cdtTransaction);
     //cdtTransaction.setIndSimulacion(Boolean.FALSE);
 
-    PrepaidMovement10 prepaidMovement10 = buildPrepaidMovement10(prepaidUser, prepaidTopup, prepaidCard10, cdtTransaction);
+    PrepaidMovement10 prepaidMovement10 = buildPrepaidMovement11(prepaidUser, prepaidTopup, prepaidCard10, cdtTransaction);
 
     prepaidMovement10.setConSwitch(ReconciliationStatusType.RECONCILED);
     prepaidMovement10.setConTecnocom(ReconciliationStatusType.NOT_RECONCILED);
@@ -257,7 +257,7 @@ public class Test_refundMovement_v10 extends TestBaseUnitApi {
     CdtTransaction10 cdtTransaction = buildCdtTransaction10(prepaidUser, prepaidTopup);
     cdtTransaction = createCdtTransaction10(cdtTransaction);
 
-    PrepaidMovement10 prepaidMovement10 = buildPrepaidMovement10(prepaidUser, prepaidTopup, prepaidCard10, cdtTransaction);
+    PrepaidMovement10 prepaidMovement10 = buildPrepaidMovement11(prepaidUser, prepaidTopup, prepaidCard10, cdtTransaction);
 
     prepaidMovement10.setConSwitch(ReconciliationStatusType.RECONCILED);
     prepaidMovement10.setConTecnocom(ReconciliationStatusType.NOT_RECONCILED);
@@ -325,7 +325,7 @@ public class Test_refundMovement_v10 extends TestBaseUnitApi {
     CdtTransaction10 cdtTransaction = buildCdtTransaction10(prepaidUser, prepaidTopup);
     cdtTransaction = createCdtTransaction10(cdtTransaction);
 
-    PrepaidMovement10 prepaidMovement10 = buildPrepaidMovement10(prepaidUser, prepaidTopup, prepaidCard10, cdtTransaction);
+    PrepaidMovement10 prepaidMovement10 = buildPrepaidMovement11(prepaidUser, prepaidTopup, prepaidCard10, cdtTransaction);
 
     prepaidMovement10.setConSwitch(ReconciliationStatusType.RECONCILED);
     prepaidMovement10.setConTecnocom(ReconciliationStatusType.NOT_RECONCILED);
@@ -363,7 +363,7 @@ public class Test_refundMovement_v10 extends TestBaseUnitApi {
     cdtTransaction = createCdtTransaction10(cdtTransaction);
     //cdtTransaction.setIndSimulacion(Boolean.FALSE);
 
-    PrepaidMovement10 prepaidMovement10 = buildPrepaidMovement10(prepaidUser, prepaidTopup, prepaidCard10, cdtTransaction);
+    PrepaidMovement10 prepaidMovement10 = buildPrepaidMovement11(prepaidUser, prepaidTopup, prepaidCard10, cdtTransaction);
 
     prepaidMovement10.setConSwitch(ReconciliationStatusType.RECONCILED);
     prepaidMovement10.setConTecnocom(ReconciliationStatusType.NOT_RECONCILED);

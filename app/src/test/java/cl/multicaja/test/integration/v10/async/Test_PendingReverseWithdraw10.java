@@ -129,7 +129,7 @@ public class Test_PendingReverseWithdraw10 extends TestBaseUnitAsync {
 
     PrepaidWithdraw10 withdraw10 = new PrepaidWithdraw10(prepaidWithdraw);
 
-    PrepaidMovement10 originalWithdraw = buildPrepaidMovement10(prepaidUser, withdraw10);
+    PrepaidMovement10 originalWithdraw = buildPrepaidMovement11(prepaidUser, withdraw10);
     originalWithdraw.setEstado(PrepaidMovementStatus.PROCESS_OK);
     originalWithdraw.setEstadoNegocio(BusinessStatusType.CONFIRMED);
     originalWithdraw.setIdTxExterno(withdraw10.getTransactionId());
@@ -248,7 +248,7 @@ public class Test_PendingReverseWithdraw10 extends TestBaseUnitAsync {
 
     Assert.assertTrue("Debe crear la transaccion CDT", cdtTransaction.isNumErrorOk());
 
-    PrepaidMovement10 originalWithdraw = buildPrepaidMovement10(prepaidUser, withdraw10);
+    PrepaidMovement10 originalWithdraw = buildPrepaidMovement11(prepaidUser, withdraw10);
     originalWithdraw.setEstado(PrepaidMovementStatus.ERROR_TECNOCOM_REINTENTABLE);
     originalWithdraw.setIdTxExterno(withdraw10.getTransactionId());
     originalWithdraw.setMonto(withdraw10.getAmount().getValue());
@@ -375,7 +375,7 @@ public class Test_PendingReverseWithdraw10 extends TestBaseUnitAsync {
 
     Assert.assertTrue("Debe crear la transaccion CDT", cdtTransaction.isNumErrorOk());
 
-    PrepaidMovement10 originalWithdraw = buildPrepaidMovement10(prepaidUser, withdraw10);
+    PrepaidMovement10 originalWithdraw = buildPrepaidMovement11(prepaidUser, withdraw10);
     originalWithdraw.setEstado(PrepaidMovementStatus.ERROR_TIMEOUT_RESPONSE);
     originalWithdraw.setIdTxExterno(withdraw10.getTransactionId());
     originalWithdraw.setMonto(withdraw10.getAmount().getValue());
@@ -500,7 +500,7 @@ public class Test_PendingReverseWithdraw10 extends TestBaseUnitAsync {
 
     Assert.assertTrue("Debe crear la transaccion CDT", cdtTransaction.isNumErrorOk());
 
-    PrepaidMovement10 originalWithdraw = buildPrepaidMovement10(prepaidUser, withdraw10);
+    PrepaidMovement10 originalWithdraw = buildPrepaidMovement11(prepaidUser, withdraw10);
     originalWithdraw.setEstado(PrepaidMovementStatus.ERROR_TIMEOUT_RESPONSE);
     originalWithdraw.setIdTxExterno(withdraw10.getTransactionId());
     originalWithdraw.setMonto(withdraw10.getAmount().getValue());
@@ -607,7 +607,7 @@ public class Test_PendingReverseWithdraw10 extends TestBaseUnitAsync {
 
     PrepaidWithdraw10 withdraw10 = new PrepaidWithdraw10(prepaidWithdraw);
 
-    PrepaidMovement10 originalWithdraw = buildPrepaidMovement10(prepaidUser, withdraw10);
+    PrepaidMovement10 originalWithdraw = buildPrepaidMovement11(prepaidUser, withdraw10);
     originalWithdraw.setEstado(PrepaidMovementStatus.PROCESS_OK);
     originalWithdraw.setEstadoNegocio(BusinessStatusType.CONFIRMED);
     originalWithdraw.setIdTxExterno(withdraw10.getTransactionId());
@@ -726,7 +726,7 @@ public class Test_PendingReverseWithdraw10 extends TestBaseUnitAsync {
 
     Assert.assertTrue("Debe crear la transaccion CDT", cdtTransaction.isNumErrorOk());
 
-    PrepaidMovement10 originalWithdraw = buildPrepaidMovement10(prepaidUser, withdraw10);
+    PrepaidMovement10 originalWithdraw = buildPrepaidMovement11(prepaidUser, withdraw10);
     originalWithdraw.setEstado(PrepaidMovementStatus.ERROR_TECNOCOM_REINTENTABLE);
     originalWithdraw.setIdTxExterno(withdraw10.getTransactionId());
     originalWithdraw.setMonto(withdraw10.getAmount().getValue());
@@ -853,7 +853,7 @@ public class Test_PendingReverseWithdraw10 extends TestBaseUnitAsync {
 
     Assert.assertTrue("Debe crear la transaccion CDT", cdtTransaction.isNumErrorOk());
 
-    PrepaidMovement10 originalWithdraw = buildPrepaidMovement10(prepaidUser, withdraw10);
+    PrepaidMovement10 originalWithdraw = buildPrepaidMovement11(prepaidUser, withdraw10);
     originalWithdraw.setEstado(PrepaidMovementStatus.ERROR_TIMEOUT_RESPONSE);
     originalWithdraw.setIdTxExterno(withdraw10.getTransactionId());
     originalWithdraw.setMonto(withdraw10.getAmount().getValue());
@@ -978,7 +978,7 @@ public class Test_PendingReverseWithdraw10 extends TestBaseUnitAsync {
 
     Assert.assertTrue("Debe crear la transaccion CDT", cdtTransaction.isNumErrorOk());
 
-    PrepaidMovement10 originalWithdraw = buildPrepaidMovement10(prepaidUser, withdraw10);
+    PrepaidMovement10 originalWithdraw = buildPrepaidMovement11(prepaidUser, withdraw10);
     originalWithdraw.setEstado(PrepaidMovementStatus.ERROR_TIMEOUT_RESPONSE);
     originalWithdraw.setIdTxExterno(withdraw10.getTransactionId());
     originalWithdraw.setMonto(withdraw10.getAmount().getValue());
@@ -1093,7 +1093,7 @@ public class Test_PendingReverseWithdraw10 extends TestBaseUnitAsync {
 
     PrepaidWithdraw10 withdraw10 = new PrepaidWithdraw10(prepaidWithdraw);
 
-    PrepaidMovement10 originalWithdraw = buildPrepaidMovement10(prepaidUser, withdraw10);
+    PrepaidMovement10 originalWithdraw = buildPrepaidMovement11(prepaidUser, withdraw10);
     originalWithdraw.setEstado(PrepaidMovementStatus.ERROR_TIMEOUT_RESPONSE);
     originalWithdraw.setIdTxExterno(withdraw10.getTransactionId());
     originalWithdraw.setMonto(BigDecimal.valueOf(100000));

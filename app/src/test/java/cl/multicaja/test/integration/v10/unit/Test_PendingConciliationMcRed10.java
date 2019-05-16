@@ -387,7 +387,7 @@ public class Test_PendingConciliationMcRed10 extends TestBaseUnitAsync {
       PrepaidMovement10 prepaidMovement10 = null;
       if(PrepaidMovementType.TOPUP.equals(type) && IndicadorNormalCorrector.NORMAL.equals(indicadorNormalCorrector)) {
         PrepaidTopup10 prepaidTopup = buildPrepaidTopup10();
-        prepaidMovement10 = buildPrepaidMovement10(prepaidUser, prepaidTopup);
+        prepaidMovement10 = buildPrepaidMovement11(prepaidUser, prepaidTopup);
         if(i + 1 == totalNumberOfMovements)
           fileName="rendicion_cargas_mcpsa_mc_"+sDate+".csv";
       }
@@ -399,7 +399,7 @@ public class Test_PendingConciliationMcRed10 extends TestBaseUnitAsync {
       }
       else if (PrepaidMovementType.WITHDRAW.equals(type) && IndicadorNormalCorrector.NORMAL.equals(indicadorNormalCorrector)) {
         PrepaidWithdraw10 prepaidWithdraw10 = buildPrepaidWithdrawV2();
-        prepaidMovement10 = buildPrepaidMovement10(prepaidUser, prepaidWithdraw10);
+        prepaidMovement10 = buildPrepaidMovement11(prepaidUser, prepaidWithdraw10);
         if(i + 1 == totalNumberOfMovements)
           fileName="rendicion_retiros_mcpsa_mc_"+sDate+".csv";
       }

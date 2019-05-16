@@ -33,7 +33,7 @@ public class Test_PrepaidEJBBean10_reverseCashout_event extends TestBaseUnitAsyn
     prepaidWithdraw.setMerchantCode(getRandomNumericString(15));
     prepaidWithdraw.getAmount().setValue(BigDecimal.valueOf(500));
 
-    PrepaidMovement10 originalTopup = buildPrepaidMovement10(prepaidUser, new PrepaidWithdraw10(prepaidWithdraw));
+    PrepaidMovement10 originalTopup = buildPrepaidMovement11(prepaidUser, new PrepaidWithdraw10(prepaidWithdraw));
     originalTopup.setIdTxExterno(prepaidWithdraw.getTransactionId());
     originalTopup.setMonto(prepaidWithdraw.getAmount().getValue());
     originalTopup = createPrepaidMovement10(originalTopup);

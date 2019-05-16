@@ -4,6 +4,7 @@ package cl.multicaja.test.integration.v10.unit;
 import cl.multicaja.prepaid.model.v10.PrepaidCard10;
 import cl.multicaja.prepaid.model.v10.PrepaidCardStatus;
 import cl.multicaja.prepaid.model.v10.PrepaidUser10;
+import cl.multicaja.prepaid.model.v11.Account;
 import org.junit.Assert;
 import org.junit.Test;
 
@@ -22,13 +23,19 @@ public class Test_PrepaidCardEJBBean10_getPrepaidCards extends TestBaseUnit {
      * Caso en que se registra una nueva tarjet y luego se busca por su id y idUser
      */
 
-    PrepaidCard10 card = buildPrepaidCard10();
-    createPrepaidCardV2(card);
+    PrepaidUser10 prepaidUser = buildPrepaidUserv2();
+    prepaidUser = createPrepaidUserV2(prepaidUser);
 
-    PrepaidCard10 c1 = getPrepaidCardEJBBean10().getPrepaidCardById(null, card.getId());
+    Account account = buildAccountFromTecnocom(prepaidUser);
+    account = createAccount(account.getUserId(),account.getAccountNumber());
+
+    PrepaidCard10 prepaidCard10 = buildPrepaidCardWithTecnocomData(prepaidUser,account);
+    prepaidCard10 = createPrepaidCardV2(prepaidCard10);
+
+    PrepaidCard10 c1 = getPrepaidCardEJBBean10().getPrepaidCardById(null, prepaidCard10.getId());
 
     Assert.assertNotNull("debe retornar una tarjeta", c1);
-    Assert.assertEquals("debe ser igual al registrado anteriormemte", card, c1);
+    Assert.assertEquals("debe ser igual al registrado anteriormemte", prepaidCard10, c1);
   }
 
   @Test
@@ -37,13 +44,18 @@ public class Test_PrepaidCardEJBBean10_getPrepaidCards extends TestBaseUnit {
     PrepaidUser10 prepaidUser = buildPrepaidUser11();
     prepaidUser = createPrepaidUserV2(prepaidUser);
 
+    Account account = buildAccountFromTecnocom(prepaidUser);
+    account = createAccount(account.getUserId(),account.getAccountNumber());
+
     {
       PrepaidCard10 card1 = buildPrepaidCard10(prepaidUser);
       card1.setStatus(PrepaidCardStatus.EXPIRED);
+      card1.setAccountId(account.getId());
       createPrepaidCardV2(card1);
 
       PrepaidCard10 card2 = buildPrepaidCard10(prepaidUser);
       card2.setStatus(PrepaidCardStatus.EXPIRED);
+      card2.setAccountId(account.getId());
       createPrepaidCardV2(card2);
 
       List<Long> lstFind = new ArrayList<>();
@@ -60,10 +72,11 @@ public class Test_PrepaidCardEJBBean10_getPrepaidCards extends TestBaseUnit {
 
     {
       PrepaidCard10 card1 = buildPrepaidCard10(prepaidUser);
+      card1.setAccountId(account.getId());
       card1.setStatus(PrepaidCardStatus.PENDING);
       createPrepaidCardV2(card1);
 
-      PrepaidCard10 prepaidCard = getPrepaidCardEJBBean10().getLastPrepaidCardByUserIdAndStatus(null, prepaidUser.getId(), PrepaidCardStatus.PENDING);
+      PrepaidCard10 prepaidCard = getPrepaidCardEJBBean11().getLastPrepaidCardByAccountIdAndStatus(account.getId(), PrepaidCardStatus.PENDING);
 
       Assert.assertNotNull("debe existir", prepaidCard);
       Assert.assertEquals("debe ser igual a", card1, prepaidCard);
@@ -72,13 +85,15 @@ public class Test_PrepaidCardEJBBean10_getPrepaidCards extends TestBaseUnit {
     {
       PrepaidCard10 card1 = buildPrepaidCard10(prepaidUser);
       card1.setStatus(PrepaidCardStatus.PENDING);
+      card1.setAccountId(account.getId());
       createPrepaidCardV2(card1);
 
       PrepaidCard10 card2 = buildPrepaidCard10(prepaidUser);
       card2.setStatus(PrepaidCardStatus.ACTIVE);
+      card2.setAccountId(account.getId());
       createPrepaidCardV2(card2);
 
-      PrepaidCard10 prepaidCard = getPrepaidCardEJBBean10().getLastPrepaidCardByUserIdAndStatus(null, prepaidUser.getId(), PrepaidCardStatus.PENDING);
+      PrepaidCard10 prepaidCard = getPrepaidCardEJBBean11().getLastPrepaidCardByAccountIdAndStatus(account.getId(), PrepaidCardStatus.PENDING);
 
       Assert.assertNull("no debe existir", prepaidCard);
     }

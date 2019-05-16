@@ -51,7 +51,7 @@ public class Test_PendingReverseTopup10 extends TestBaseUnitAsync {
     CdtTransaction10 cdtTransaction = buildCdtTransaction10(prepaidUser, prepaidTopup);
     cdtTransaction = createCdtTransaction10(cdtTransaction);
 
-    PrepaidMovement10 prepaidMovement = buildPrepaidMovement10(prepaidUser, prepaidTopup, prepaidCard, cdtTransaction,PrepaidMovementStatus.ERROR_TIMEOUT_RESPONSE);
+    PrepaidMovement10 prepaidMovement = buildPrepaidMovement11(prepaidUser, prepaidTopup, prepaidCard, cdtTransaction,PrepaidMovementStatus.ERROR_TIMEOUT_RESPONSE);
     prepaidMovement = createPrepaidMovement10(prepaidMovement);
 
     PrepaidMovement10 prepaidReverseMovement = buildReversePrepaidMovement10(prepaidUser,prepaidTopup);
@@ -130,7 +130,7 @@ public class Test_PendingReverseTopup10 extends TestBaseUnitAsync {
 
     cdtTransaction = createCdtTransaction10(cdtTransaction);
 
-    PrepaidMovement10 prepaidMovement = buildPrepaidMovement10(prepaidUser, prepaidTopup, prepaidCard, cdtTransaction,PrepaidMovementStatus.PROCESS_OK);
+    PrepaidMovement10 prepaidMovement = buildPrepaidMovement11(prepaidUser, prepaidTopup, prepaidCard, cdtTransaction,PrepaidMovementStatus.PROCESS_OK);
     prepaidMovement = createPrepaidMovement10(prepaidMovement);
 
     // crea los movimientos de accounting y clearing correspondientes
@@ -209,7 +209,7 @@ public class Test_PendingReverseTopup10 extends TestBaseUnitAsync {
 
     cdtTransaction = createCdtTransaction10(cdtTransaction);
 
-    PrepaidMovement10 prepaidMovement = buildPrepaidMovement10(prepaidUser, prepaidTopup, prepaidCard, cdtTransaction,PrepaidMovementStatus.PROCESS_OK);
+    PrepaidMovement10 prepaidMovement = buildPrepaidMovement11(prepaidUser, prepaidTopup, prepaidCard, cdtTransaction,PrepaidMovementStatus.PROCESS_OK);
     prepaidMovement = createPrepaidMovement10(prepaidMovement);
 
     // crea los movimientos de accounting y clearing correspondientes
@@ -288,7 +288,7 @@ public class Test_PendingReverseTopup10 extends TestBaseUnitAsync {
 
     cdtTransaction = createCdtTransaction10(cdtTransaction);
 
-    PrepaidMovement10 prepaidMovement = buildPrepaidMovement10(prepaidUser, prepaidTopup, prepaidCard, cdtTransaction,PrepaidMovementStatus.PROCESS_OK);
+    PrepaidMovement10 prepaidMovement = buildPrepaidMovement11(prepaidUser, prepaidTopup, prepaidCard, cdtTransaction,PrepaidMovementStatus.PROCESS_OK);
     prepaidMovement = createPrepaidMovement10(prepaidMovement);
 
     // crea los movimientos de accounting y clearing correspondientes
@@ -371,7 +371,7 @@ public class Test_PendingReverseTopup10 extends TestBaseUnitAsync {
 
     cdtTransaction = createCdtTransaction10(cdtTransaction);
 
-    PrepaidMovement10 prepaidMovement = buildPrepaidMovement10(prepaidUser, prepaidTopup, prepaidCard, cdtTransaction,PrepaidMovementStatus.PROCESS_OK);
+    PrepaidMovement10 prepaidMovement = buildPrepaidMovement11(prepaidUser, prepaidTopup, prepaidCard, cdtTransaction,PrepaidMovementStatus.PROCESS_OK);
     prepaidMovement = createPrepaidMovement10(prepaidMovement);
 
     // crea los movimientos de accounting y clearing correspondientes
@@ -454,7 +454,7 @@ public class Test_PendingReverseTopup10 extends TestBaseUnitAsync {
 
     cdtTransaction = createCdtTransaction10(cdtTransaction);
 
-    PrepaidMovement10 prepaidMovement = buildPrepaidMovement10(prepaidUser, prepaidTopup, prepaidCard, cdtTransaction,PrepaidMovementStatus.ERROR_TIMEOUT_RESPONSE);
+    PrepaidMovement10 prepaidMovement = buildPrepaidMovement11(prepaidUser, prepaidTopup, prepaidCard, cdtTransaction,PrepaidMovementStatus.ERROR_TIMEOUT_RESPONSE);
     prepaidMovement = createPrepaidMovement10(prepaidMovement);
 
     PrepaidMovement10 prepaidReverseMovement = buildReversePrepaidMovement10(prepaidUser,prepaidTopup);
@@ -557,7 +557,7 @@ public class Test_PendingReverseTopup10 extends TestBaseUnitAsync {
 
     cdtTransaction = createCdtTransaction10(cdtTransaction);
 
-    PrepaidMovement10 prepaidMovement = buildPrepaidMovement10(prepaidUser, prepaidTopup, prepaidCard, cdtTransaction,PrepaidMovementStatus.ERROR_TIMEOUT_RESPONSE);
+    PrepaidMovement10 prepaidMovement = buildPrepaidMovement11(prepaidUser, prepaidTopup, prepaidCard, cdtTransaction,PrepaidMovementStatus.ERROR_TIMEOUT_RESPONSE);
     prepaidMovement = createPrepaidMovement10(prepaidMovement);
 
     PrepaidMovement10 prepaidReverseMovement = buildReversePrepaidMovement10(prepaidUser,prepaidTopup);
@@ -660,7 +660,7 @@ public class Test_PendingReverseTopup10 extends TestBaseUnitAsync {
 
     cdtTransaction = createCdtTransaction10(cdtTransaction);
 
-    PrepaidMovement10 prepaidMovement = buildPrepaidMovement10(prepaidUser, prepaidTopup, prepaidCard, cdtTransaction,PrepaidMovementStatus.ERROR_TIMEOUT_RESPONSE);
+    PrepaidMovement10 prepaidMovement = buildPrepaidMovement11(prepaidUser, prepaidTopup, prepaidCard, cdtTransaction,PrepaidMovementStatus.ERROR_TIMEOUT_RESPONSE);
     prepaidMovement = createPrepaidMovement10(prepaidMovement);
     inclusionMovimientosTecnocom(account,prepaidCard,prepaidMovement);
 
@@ -765,7 +765,7 @@ public class Test_PendingReverseTopup10 extends TestBaseUnitAsync {
 
     cdtTransaction = createCdtTransaction10(cdtTransaction);
 
-    PrepaidMovement10 prepaidMovement = buildPrepaidMovement10(prepaidUser, prepaidTopup, prepaidCard, cdtTransaction,PrepaidMovementStatus.ERROR_TIMEOUT_RESPONSE);
+    PrepaidMovement10 prepaidMovement = buildPrepaidMovement11(prepaidUser, prepaidTopup, prepaidCard, cdtTransaction,PrepaidMovementStatus.ERROR_TIMEOUT_RESPONSE);
     prepaidMovement = createPrepaidMovement10(prepaidMovement);
     inclusionMovimientosTecnocom(account,prepaidCard,prepaidMovement);
 

@@ -117,9 +117,10 @@ public class PendingCardIssuanceFee10 extends BaseProcessor10 {
           issuanceFeeMovement.setConTecnocom(ReconciliationStatusType.PENDING);
           issuanceFeeMovement.setConSwitch(ReconciliationStatusType.PENDING);
           issuanceFeeMovement.setNumaut(null);
+          issuanceFeeMovement.setCardId(prepaidCard.getId());
 
-          issuanceFeeMovement = getRoute().getPrepaidMovementEJBBean10().addPrepaidMovement(null, issuanceFeeMovement);
-          issuanceFeeMovement = getRoute().getPrepaidMovementEJBBean10().getPrepaidMovementById(issuanceFeeMovement.getId());
+          issuanceFeeMovement = getRoute().getPrepaidMovementEJBBean11().addPrepaidMovement(null, issuanceFeeMovement);
+          issuanceFeeMovement = getRoute().getPrepaidMovementEJBBean11().getPrepaidMovementById(issuanceFeeMovement.getId());
 
           req.getData().setIssuanceFeeMovement10(issuanceFeeMovement);
         }

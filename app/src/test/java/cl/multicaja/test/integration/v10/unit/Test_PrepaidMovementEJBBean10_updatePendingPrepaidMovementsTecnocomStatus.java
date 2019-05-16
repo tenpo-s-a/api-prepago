@@ -71,7 +71,7 @@ public class Test_PrepaidMovementEJBBean10_updatePendingPrepaidMovementsTecnocom
     prepaidUser = createPrepaidUserV2(prepaidUser);
 
     PrepaidTopup10 prepaidTopup = buildPrepaidTopup10();
-    PrepaidMovement10 prepaidMovement10 = buildPrepaidMovement10(prepaidUser, prepaidTopup);
+    PrepaidMovement10 prepaidMovement10 = buildPrepaidMovement11(prepaidUser, prepaidTopup);
 
     prepaidMovement10 = createPrepaidMovement10(prepaidMovement10);
     changeMovement(prepaidMovement10.getId(), "2018-07-05 23:04:58", TipoFactura.CARGA_TRANSFERENCIA.getCode(), IndicadorNormalCorrector.NORMAL.getValue());

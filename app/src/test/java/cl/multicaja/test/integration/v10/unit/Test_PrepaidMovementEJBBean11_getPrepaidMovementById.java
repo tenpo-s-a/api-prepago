@@ -41,7 +41,7 @@ public class Test_PrepaidMovementEJBBean11_getPrepaidMovementById extends TestBa
 
     PrepaidTopup10 topup = buildPrepaidTopup10();
 
-    PrepaidMovement10 movement = buildPrepaidMovement10(user, topup);
+    PrepaidMovement10 movement = buildPrepaidMovement11(user, topup);
     movement.setConSwitch(ReconciliationStatusType.RECONCILED);
     movement.setConTecnocom(ReconciliationStatusType.RECONCILED);
     movement.setEstado(PrepaidMovementStatus.PROCESS_OK);

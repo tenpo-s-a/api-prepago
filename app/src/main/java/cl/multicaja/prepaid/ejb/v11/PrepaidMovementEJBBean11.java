@@ -3,6 +3,7 @@ package cl.multicaja.prepaid.ejb.v11;
 import cl.multicaja.core.exceptions.BadRequestException;
 import cl.multicaja.core.exceptions.BaseException;
 import cl.multicaja.core.exceptions.ValidationException;
+import cl.multicaja.core.model.Errors;
 import cl.multicaja.core.utils.KeyValue;
 import cl.multicaja.prepaid.async.v10.KafkaEventDelegate10;
 import cl.multicaja.prepaid.ejb.v10.PrepaidMovementEJBBean10;
@@ -55,7 +56,8 @@ public class PrepaidMovementEJBBean11 extends PrepaidMovementEJBBean10 {
   private static final String FIND_FEE_BY_ID = String.format("SELECT * FROM %s.prp_movimiento_comision WHERE id = ?", getSchema());
   private static final String FIND_FEE_BY_MOVEMENT_ID = String.format("SELECT * FROM %s.prp_movimiento_comision WHERE id_movimiento = ?", getSchema());
   private static final String INSERT_FEE_SQL = String.format("INSERT INTO %s.prp_movimiento_comision (id_movimiento, tipo_comision, monto, iva, creacion, actualizacion) VALUES(?, ?, ?, ?, timezone('utc', now()), timezone('utc', now()))", getSchema());
-
+  private static final String GET_NUMAUT = String.format("SELECT %s.getnumaut()",getSchema());
+  private static final String FIND_MOVEMENT_BY = "SELECT * FROM %s.prp_movimiento %s";
   @Inject
   private KafkaEventDelegate10 kafkaEventDelegate10;
 
@@ -83,7 +85,7 @@ public class PrepaidMovementEJBBean11 extends PrepaidMovementEJBBean10 {
       ps.setLong(1, movement.getIdMovimientoRef());
       ps.setLong(2, movement.getCardId() != null ? movement.getCardId() : 0);
       ps.setString(3, movement.getIdTxExterno());
-      ps.setString(4, movement.getTipoMovimiento().toString());
+      ps.setString(4, movement.getTipoMovimiento().name());
       ps.setBigDecimal(5, movement.getMonto());
       ps.setObject(6, movement.getEstado().toString());
       ps.setObject(7, movement.getEstadoNegocio().toString());
@@ -98,14 +100,14 @@ public class PrepaidMovementEJBBean11 extends PrepaidMovementEJBBean10 {
       ps.setObject(16, movement.getClamon().getValue());
       ps.setObject(17, movement.getIndnorcor().getValue());
       ps.setObject(18, movement.getTipofac().getCode());
-      ps.setDate(19, java.sql.Date.valueOf(movement.getFecfac().toInstant().atZone(ZoneId.of("UTC")).toLocalDate()));
+      ps.setDate(19, new java.sql.Date(movement.getFecfac().getTime()));
       ps.setString(20, movement.getNumreffac());
       ps.setString(21, movement.getPan());
       ps.setLong(22, movement.getClamondiv());
       ps.setBigDecimal(23, movement.getImpdiv());
       ps.setBigDecimal(24, movement.getImpfac());
       ps.setLong(25, movement.getCmbapli());
-      ps.setString(26, movement.getNumaut());
+      ps.setString(26, movement.getNumaut() != null ? movement.getNumaut() :  getNumAut());
       ps.setObject(27, movement.getIndproaje().toString());
       ps.setString(28, movement.getCodcom());
       ps.setLong(29, movement.getCodact());
@@ -164,7 +166,7 @@ public class PrepaidMovementEJBBean11 extends PrepaidMovementEJBBean10 {
       movement.setCuenta(rs.getString("cuenta"));
       movement.setClamon(CodigoMoneda.fromValue(rs.getInt("clamon")));
       movement.setIndnorcor(IndicadorNormalCorrector.fromValue(rs.getInt("indnorcor")));
-      movement.setTipofac(TipoFactura.valueOfEnum(rs.getString("tipofac")));
+      movement.setTipofac(TipoFactura.valueOfEnumByCodeAndCorrector(rs.getInt("tipofac"),rs.getInt("indnorcor")));
       movement.setFecfac(rs.getDate("fecfac"));
       movement.setNumreffac(rs.getString("numreffac"));
       movement.setPan(rs.getString("pan"));
@@ -353,6 +355,34 @@ public class PrepaidMovementEJBBean11 extends PrepaidMovementEJBBean10 {
     }, keyHolder);
 
     return  this.getPrepaidMovementFeeById((long) keyHolder.getKey());
+  }
+
+  public List<PrepaidMovement10> getPrepaidMovementByIdPrepaidCardAndTipoMovimiento(Long idPrepaidCard, PrepaidMovementType tipoMovimiento) throws BaseException {
+
+    if (idPrepaidCard == null) {
+      throw new BadRequestException(PARAMETRO_FALTANTE_$VALUE).setData(new KeyValue("value", "idPrepaidCard"));
+    }
+    if (tipoMovimiento == null) {
+      throw new BadRequestException(PARAMETRO_FALTANTE_$VALUE).setData(new KeyValue("value", "tipoMovimiento"));
+    }
+    log.info(String.format("[getPrepaidMovementByIdPrepaidUserAndTipoMovimiento] Buscando movimiento por id [%d] tipo mov[%s]", idPrepaidCard,tipoMovimiento.name()));
+
+    StringBuilder where = new StringBuilder();
+    where.append(" WHERE ");
+    where.append(" id_tarjeta = ").append(idPrepaidCard).append(" AND");
+    where.append(" tipo_movimiento = ").append("'").append(tipoMovimiento.name()).append("'");
+
+    try {
+      return getDbUtils().getJdbcTemplate().query(String.format(FIND_MOVEMENT_BY,getSchema(),where.toString()), this.getMovementMapper());
+    } catch (EmptyResultDataAccessException ex) {
+      log.info(String.format("[getPrepaidMovementByIdPrepaidUserAndTipoMovimiento] Buscando movimiento por id [%d] tipo mov[%s] no existe", idPrepaidCard,tipoMovimiento.name()));
+      return null;
+    }
+  }
+
+  private String getNumAut() {
+   String numAut = getDbUtils().getJdbcTemplate().queryForObject(GET_NUMAUT,String.class);
+   return numAut;
   }
 
   private RowMapper<PrepaidMovementFee10> getMovementFeeMapper() {

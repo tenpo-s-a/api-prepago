@@ -19,7 +19,7 @@ public class Test_PrepaidMovementEJBBean11_createPrepaidMovementFeeById extends 
     PrepaidUser10 prepaidUser = buildPrepaidUserv2();
     prepaidUser = createPrepaidUserV2(prepaidUser);
     PrepaidTopup10 prepaidTopup = buildPrepaidTopup10();
-    PrepaidMovement10 prepaidMovement = buildPrepaidMovement10(prepaidUser, prepaidTopup);
+    PrepaidMovement10 prepaidMovement = buildPrepaidMovement11(prepaidUser, prepaidTopup);
     prepaidMovement = createPrepaidMovement10(prepaidMovement);
 
     PrepaidMovementFee10 fee = buildPrepaidMovementFee10(prepaidMovement);

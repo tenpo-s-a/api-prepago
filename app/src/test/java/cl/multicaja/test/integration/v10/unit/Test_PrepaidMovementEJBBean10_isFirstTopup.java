@@ -17,12 +17,12 @@ public class Test_PrepaidMovementEJBBean10_isFirstTopup extends TestBaseUnit {
 
     PrepaidTopup10 prepaidTopup = buildPrepaidTopup10();
 
-    PrepaidMovement10 prepaidMovement1 = buildPrepaidMovement10(prepaidUser, prepaidTopup);
+    PrepaidMovement10 prepaidMovement1 = buildPrepaidMovement11(prepaidUser, prepaidTopup);
     prepaidMovement1.setEstadoNegocio(BusinessStatusType.REVERSED);
 
     createPrepaidMovement10(prepaidMovement1);
 
-    PrepaidMovement10 prepaidMovement2 = buildPrepaidMovement10(prepaidUser, prepaidTopup);
+    PrepaidMovement10 prepaidMovement2 = buildPrepaidMovement11(prepaidUser, prepaidTopup);
     prepaidMovement2.setEstado(PrepaidMovementStatus.PROCESS_OK);
 
     createPrepaidMovement10(prepaidMovement2);

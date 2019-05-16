@@ -1,9 +1,7 @@
 package cl.multicaja.test.integration.v10.unit;
 
-import cl.multicaja.prepaid.model.v10.PrepaidMovement10;
-import cl.multicaja.prepaid.model.v10.PrepaidMovementStatus;
-import cl.multicaja.prepaid.model.v10.PrepaidTopup10;
-import cl.multicaja.prepaid.model.v10.PrepaidUser10;
+import cl.multicaja.prepaid.model.v10.*;
+import cl.multicaja.prepaid.model.v11.Account;
 import org.apache.commons.lang3.StringUtils;
 import org.junit.Assert;
 import org.junit.Test;
@@ -33,9 +31,16 @@ public class Test_PrepaidMovementEJBBean10_getPrepaidMovement extends TestBaseUn
     PrepaidUser10 prepaidUser = buildPrepaidUserv2();
     prepaidUser = createPrepaidUserV2(prepaidUser);
 
+    Account account = buildAccountFromTecnocom(prepaidUser);
+    account = createAccount(prepaidUser.getId(),account.getAccountNumber());
+
+    PrepaidCard10 prepaidCard = buildPrepaidCardWithTecnocomData(prepaidUser,account);
+    prepaidCard.setStatus(PrepaidCardStatus.PENDING);
+    prepaidCard = createPrepaidCardV2(prepaidCard);
+
     PrepaidTopup10 prepaidTopup = buildPrepaidTopup10();
 
-    PrepaidMovement10 prepaidMovement1 = buildPrepaidMovement10(prepaidUser, prepaidTopup);
+    PrepaidMovement10 prepaidMovement1 = buildPrepaidMovement11(prepaidUser, prepaidTopup);
     prepaidMovement1 = createPrepaidMovement10(prepaidMovement1);
     String numaut1 = prepaidMovement1.getId().toString();
     //solamente los 6 primeros digitos de numreffac
@@ -46,7 +51,7 @@ public class Test_PrepaidMovementEJBBean10_getPrepaidMovement extends TestBaseUn
     }
     prepaidMovement1.setNumaut(numaut1);
 
-    PrepaidMovement10 prepaidMovement2 = buildPrepaidMovement10(prepaidUser, prepaidTopup);
+    PrepaidMovement10 prepaidMovement2 = buildPrepaidMovement11(prepaidUser, prepaidTopup);
     prepaidMovement2 = createPrepaidMovement10(prepaidMovement2);
     String numaut2 = prepaidMovement2.getId().toString();
     //solamente los 6 primeros digitos de numreffac
@@ -73,7 +78,7 @@ public class Test_PrepaidMovementEJBBean10_getPrepaidMovement extends TestBaseUn
     Assert.assertTrue("debe contener el movimiento", contains(lst, prepaidMovement1));
     Assert.assertTrue("debe contener el movimiento", contains(lst, prepaidMovement2));
 
-    lst = getPrepaidMovementEJBBean10().getPrepaidMovementByIdPrepaidUserAndTipoMovimiento(prepaidUser.getId(), prepaidMovement1.getTipoMovimiento());
+    lst =  getPrepaidMovementEJBBean11().getPrepaidMovementByIdPrepaidCardAndTipoMovimiento(prepaidCard.getId(), prepaidMovement1.getTipoMovimiento());
 
     Assert.assertNotNull("debe retornar una lista", lst);
     Assert.assertEquals("deben ser 2", 2, lst.size());

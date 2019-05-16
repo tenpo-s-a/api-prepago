@@ -49,17 +49,6 @@ public interface PrepaidCardEJB10 {
   PrepaidCard10 getPrepaidCardById(Map<String, Object> headers, Long id) throws Exception;
 
   /**
-   * permite buscar la ultima tarjeta prepago por su id de usuario prepago y estado
-   *
-   * @param headers
-   * @param userId
-   * @param status
-   * @return
-   * @throws Exception
-   */
-  PrepaidCard10 getLastPrepaidCardByUserIdAndStatus(Map<String, Object> headers, Long userId, PrepaidCardStatus status) throws Exception;
-
-  /**
    * permite buscar la ultima tarjeta prepago por su id de usuario prepago y uno de los estado
    *
    * @param headers

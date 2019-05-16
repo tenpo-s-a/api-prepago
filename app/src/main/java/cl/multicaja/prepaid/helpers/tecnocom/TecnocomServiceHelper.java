@@ -132,10 +132,15 @@ public final class TecnocomServiceHelper {
     }
 
     log.info(String.format("LLamando a inclusion de movimientos para carga de saldo a contrato %s", contrato));
-
+    try{
     return this.getTecnocomService().inclusionMovimientos(contrato, pan, clamon, indnorcor, tipofac,
       numreffac, impfac, numaut, codcom,
       nomcomred, codact, clamondiv,impfac);
+    }catch (Exception e){
+      log.info(e.getLocalizedMessage());
+      e.printStackTrace();
+    }
+    return null;
   }
 
 

@@ -67,7 +67,7 @@ public class Test_createTicketFreshDesckErrorQueue10 extends TestBaseUnitAsync {
     CdtTransaction10 cdtTransaction = buildCdtTransaction10(prepaidUser, prepaidTopup);
     cdtTransaction = createCdtTransaction10(cdtTransaction);
 
-    PrepaidMovement10 prepaidMovement = buildPrepaidMovement10(prepaidUser, prepaidTopup, prepaidCard, cdtTransaction);
+    PrepaidMovement10 prepaidMovement = buildPrepaidMovement11(prepaidUser, prepaidTopup, prepaidCard, cdtTransaction);
     prepaidMovement = createPrepaidMovement10(prepaidMovement);
     //Se setea para que de error de conexion!
 
@@ -96,7 +96,7 @@ public class Test_createTicketFreshDesckErrorQueue10 extends TestBaseUnitAsync {
     CdtTransaction10 cdtTransaction = buildCdtTransaction10(prepaidUser, prepaidTopup);
     cdtTransaction = createCdtTransaction10(cdtTransaction);
 
-    PrepaidMovement10 prepaidMovement = buildPrepaidMovement10(prepaidUser, prepaidTopup, cdtTransaction);
+    PrepaidMovement10 prepaidMovement = buildPrepaidMovement11(prepaidUser, prepaidTopup, cdtTransaction);
     prepaidMovement = createPrepaidMovement10(prepaidMovement);
 
     tc.getTecnocomService().setAutomaticError(true);
@@ -124,7 +124,7 @@ public class Test_createTicketFreshDesckErrorQueue10 extends TestBaseUnitAsync {
     CdtTransaction10 cdtTransaction = buildCdtTransaction10(prepaidUser, prepaidTopup);
     cdtTransaction = createCdtTransaction10(cdtTransaction);
 
-    PrepaidMovement10 prepaidMovement = buildPrepaidMovement10(prepaidUser, prepaidTopup, cdtTransaction);
+    PrepaidMovement10 prepaidMovement = buildPrepaidMovement11(prepaidUser, prepaidTopup, cdtTransaction);
     prepaidMovement = createPrepaidMovement10(prepaidMovement);
 
     TipoAlta tipoAlta = prepaidUser.getUserLevel() == PrepaidUserLevel.LEVEL_2 ? TipoAlta.NIVEL2 : TipoAlta.NIVEL1;
@@ -168,7 +168,7 @@ public class Test_createTicketFreshDesckErrorQueue10 extends TestBaseUnitAsync {
 
     cdtTransaction = createCdtTransaction10(cdtTransaction);
 
-    PrepaidMovement10 prepaidMovement = buildPrepaidMovement10(prepaidUser, prepaidTopup, prepaidCard, cdtTransaction,PrepaidMovementStatus.PROCESS_OK);
+    PrepaidMovement10 prepaidMovement = buildPrepaidMovement11(prepaidUser, prepaidTopup, prepaidCard, cdtTransaction,PrepaidMovementStatus.PROCESS_OK);
     prepaidMovement.setEstado(PrepaidMovementStatus.PROCESS_OK);
     prepaidMovement = createPrepaidMovement10(prepaidMovement);
     System.out.println(prepaidMovement);
@@ -208,7 +208,7 @@ public class Test_createTicketFreshDesckErrorQueue10 extends TestBaseUnitAsync {
 
     PrepaidWithdraw10 withdraw10 = new PrepaidWithdraw10(prepaidWithdraw);
 
-    PrepaidMovement10 originalWithdraw = buildPrepaidMovement10(prepaidUser, withdraw10);
+    PrepaidMovement10 originalWithdraw = buildPrepaidMovement11(prepaidUser, withdraw10);
     originalWithdraw.setEstado(PrepaidMovementStatus.PROCESS_OK);
     originalWithdraw.setIdTxExterno(withdraw10.getTransactionId());
     originalWithdraw.setMonto(withdraw10.getAmount().getValue());
@@ -248,7 +248,7 @@ public class Test_createTicketFreshDesckErrorQueue10 extends TestBaseUnitAsync {
 
     PrepaidTopup10 prepaidTopup = buildPrepaidTopup10();
 
-    PrepaidMovement10 prepaidMovement = buildPrepaidMovement10(prepaidUser, prepaidTopup);
+    PrepaidMovement10 prepaidMovement = buildPrepaidMovement11(prepaidUser, prepaidTopup);
     prepaidMovement = createPrepaidMovement10(prepaidMovement);
 
     getPrepaidMovementEJBBean10().updatePrepaidMovement(null,

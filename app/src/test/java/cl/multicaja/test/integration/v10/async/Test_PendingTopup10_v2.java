@@ -70,7 +70,7 @@ public class Test_PendingTopup10_v2 extends TestBaseUnitAsync {
     CdtTransaction10 cdtTransaction = buildCdtTransaction10(prepaidUser10, prepaidTopup);
     cdtTransaction = createCdtTransaction10(cdtTransaction);
 
-    PrepaidMovement10 prepaidMovement = buildPrepaidMovement10(prepaidUser10, prepaidTopup, prepaidCard, cdtTransaction);
+    PrepaidMovement10 prepaidMovement = buildPrepaidMovement11(prepaidUser10, prepaidTopup, prepaidCard, cdtTransaction);
     prepaidMovement = createPrepaidMovement10(prepaidMovement);
 
     String messageId = sendPendingTopup(prepaidTopup, prepaidUser10, cdtTransaction, prepaidMovement, account,0);
@@ -113,7 +113,7 @@ public class Test_PendingTopup10_v2 extends TestBaseUnitAsync {
 
     cdtTransaction = createCdtTransaction10(cdtTransaction);
 
-    PrepaidMovement10 prepaidMovement = buildPrepaidMovement10(prepaidUser10, prepaidTopup, prepaidCard, cdtTransaction);
+    PrepaidMovement10 prepaidMovement = buildPrepaidMovement11(prepaidUser10, prepaidTopup, prepaidCard, cdtTransaction);
 
     prepaidMovement = createPrepaidMovement10(prepaidMovement);
 
@@ -156,7 +156,7 @@ public class Test_PendingTopup10_v2 extends TestBaseUnitAsync {
 
     cdtTransaction = createCdtTransaction10(cdtTransaction);
 
-    PrepaidMovement10 prepaidMovement = buildPrepaidMovement10(prepaidUser10, prepaidTopup, prepaidCard, cdtTransaction);
+    PrepaidMovement10 prepaidMovement = buildPrepaidMovement11(prepaidUser10, prepaidTopup, prepaidCard, cdtTransaction);
 
     prepaidMovement = createPrepaidMovement10(prepaidMovement);
 
@@ -240,7 +240,7 @@ public class Test_PendingTopup10_v2 extends TestBaseUnitAsync {
 
     cdtTransaction = createCdtTransaction10(cdtTransaction);
 
-    PrepaidMovement10 prepaidMovement = buildPrepaidMovement10(prepaidUser10, prepaidTopup, prepaidCard, cdtTransaction);
+    PrepaidMovement10 prepaidMovement = buildPrepaidMovement11(prepaidUser10, prepaidTopup, prepaidCard, cdtTransaction);
 
     prepaidMovement = createPrepaidMovement10(prepaidMovement);
 
@@ -328,7 +328,7 @@ public class Test_PendingTopup10_v2 extends TestBaseUnitAsync {
     CdtTransaction10 cdtTransaction = buildCdtTransaction10(prepaidUser10, prepaidTopup);
     cdtTransaction = createCdtTransaction10(cdtTransaction);
 
-    PrepaidMovement10 prepaidMovement = buildPrepaidMovement10(prepaidUser10, prepaidTopup, prepaidCard10, cdtTransaction);
+    PrepaidMovement10 prepaidMovement = buildPrepaidMovement11(prepaidUser10, prepaidTopup, prepaidCard10, cdtTransaction);
     prepaidMovement = createPrepaidMovement10(prepaidMovement);
 
     String messageId = sendPendingTopup(prepaidTopup, prepaidUser10, cdtTransaction, prepaidMovement, account, 0);
@@ -419,7 +419,7 @@ public class Test_PendingTopup10_v2 extends TestBaseUnitAsync {
 
     cdtTransaction = createCdtTransaction10(cdtTransaction);
 
-    PrepaidMovement10 prepaidMovement = buildPrepaidMovement10(prepaidUser10, prepaidTopup, prepaidCard, cdtTransaction);
+    PrepaidMovement10 prepaidMovement = buildPrepaidMovement11(prepaidUser10, prepaidTopup, prepaidCard, cdtTransaction);
 
     prepaidMovement = createPrepaidMovement10(prepaidMovement);
 

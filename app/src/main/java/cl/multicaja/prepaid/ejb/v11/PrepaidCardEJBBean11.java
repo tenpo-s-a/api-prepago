@@ -129,6 +129,7 @@ public class PrepaidCardEJBBean11 extends PrepaidCardEJBBean10 {
     " t.pan = ? AND\n" +
     " c.cuenta = ?",getSchema(),getSchema(),getSchema());
 
+
   private static String UPDATE_PREPAID_CARD_STATUS = String.format("UPDATE %s.prp_tarjeta SET estado = ? where id = ?",getSchema());
 
   private static String INSERT_PREPAID_CARD = "INSERT INTO prepago.prp_tarjeta(\n" +
@@ -140,6 +141,8 @@ public class PrepaidCardEJBBean11 extends PrepaidCardEJBBean10 {
     "            ?, ?, ?);\n";
 
   private static String SEARCH_BY_ACCOUNT_ID = String.format("SELECT * FROM %s.prp_tarjeta where id_cuenta = ?",getSchema());
+
+  private static String SEARCH_BY_ACCOUNT_AND_STAUS = String.format("select * from %s.prp_tarjeta where id_cuenta = ? and estado = ? order by fecha_creacion asc limit 1",getSchema());
 
   public PrepaidCardEJBBean11() {
     super();
@@ -320,6 +323,19 @@ public class PrepaidCardEJBBean11 extends PrepaidCardEJBBean10 {
     return bCryptPasswordEncoder.encode(pan);
   }
 
+  public PrepaidCard10 getLastPrepaidCardByAccountIdAndStatus(Long accountId, PrepaidCardStatus status) throws Exception {
+    if(accountId == null){
+      throw new BadRequestException(PARAMETRO_FALTANTE_$VALUE).setData(new KeyValue("value", "accountId"));
+    }
+    log.info(String.format("getLastPrepaidCardByAccountIdAndStatus %d %s",accountId,status.name()));
+
+    try{
+      return getDbUtils().getJdbcTemplate().queryForObject(SEARCH_BY_ACCOUNT_AND_STAUS, getCardMapper(), accountId,status.name());
+    }catch (Exception e){
+      return null;
+    }
+  }
+
   @Override
   public PrepaidCard10 upgradePrepaidCard(Map<String, Object> headers, String userUuid, String accountUuid) throws Exception {
 
@@ -337,7 +353,7 @@ public class PrepaidCardEJBBean11 extends PrepaidCardEJBBean10 {
       throw new ValidationException(CUENTA_NO_EXISTE);
     }
 
-    PrepaidCard10 prepaidCard = getLastPrepaidCardByUserIdAndStatus(headers, prepaidUser.getId(), PrepaidCardStatus.ACTIVE);
+    PrepaidCard10 prepaidCard = getLastPrepaidCardByAccountIdAndStatus(account.getId(), PrepaidCardStatus.ACTIVE);
     if(prepaidCard == null) {
       throw new NotFoundException(TARJETA_NO_EXISTE);
     }

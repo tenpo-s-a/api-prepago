@@ -67,31 +67,31 @@ public class Test_PrepaidMovementEJBBean10_expireNotReconciledMovements extends 
       reconciliationFile10.setType(ReconciliationFileType.TECNOCOM_FILE);
       getReconciliationFilesEJBBean10().createReconciliationFile(null, reconciliationFile10);
 
-      PrepaidMovement10 prepaidMovement10 = buildPrepaidMovement10(prepaidUser, prepaidTopup);
+      PrepaidMovement10 prepaidMovement10 = buildPrepaidMovement11(prepaidUser, prepaidTopup);
       prepaidMovement10.setTipoMovimiento(PrepaidMovementType.TOPUP);
       prepaidMovement10.setIndnorcor(IndicadorNormalCorrector.NORMAL);
       prepaidMovement10 = createPrepaidMovement10(prepaidMovement10);
       topupMovements.add(0, prepaidMovement10);
 
-      prepaidMovement10 = buildPrepaidMovement10(prepaidUser, prepaidTopup);
+      prepaidMovement10 = buildPrepaidMovement11(prepaidUser, prepaidTopup);
       prepaidMovement10.setTipoMovimiento(PrepaidMovementType.TOPUP);
       prepaidMovement10.setIndnorcor(IndicadorNormalCorrector.CORRECTORA);
       prepaidMovement10 = createPrepaidMovement10(prepaidMovement10);
       topupReversedMovements.add(0, prepaidMovement10);
 
-      prepaidMovement10 = buildPrepaidMovement10(prepaidUser, prepaidTopup);
+      prepaidMovement10 = buildPrepaidMovement11(prepaidUser, prepaidTopup);
       prepaidMovement10.setTipoMovimiento(PrepaidMovementType.WITHDRAW);
       prepaidMovement10.setIndnorcor(IndicadorNormalCorrector.NORMAL);
       prepaidMovement10 = createPrepaidMovement10(prepaidMovement10);
       withdrawMovements.add(0, prepaidMovement10);
 
-      prepaidMovement10 = buildPrepaidMovement10(prepaidUser, prepaidTopup);
+      prepaidMovement10 = buildPrepaidMovement11(prepaidUser, prepaidTopup);
       prepaidMovement10.setTipoMovimiento(PrepaidMovementType.WITHDRAW);
       prepaidMovement10.setIndnorcor(IndicadorNormalCorrector.CORRECTORA);
       prepaidMovement10 = createPrepaidMovement10(prepaidMovement10);
       withdrawReversedMovements.add(0, prepaidMovement10);
 
-      prepaidMovement10 = buildPrepaidMovement10(prepaidUser, prepaidTopup);
+      prepaidMovement10 = buildPrepaidMovement11(prepaidUser, prepaidTopup);
       prepaidMovement10.setTipoMovimiento(PrepaidMovementType.TOPUP);
       prepaidMovement10.setIndnorcor(IndicadorNormalCorrector.NORMAL);
       prepaidMovement10.setConSwitch(ReconciliationStatusType.RECONCILED);
@@ -196,31 +196,31 @@ public class Test_PrepaidMovementEJBBean10_expireNotReconciledMovements extends 
       reconciliationFile10.setType(ReconciliationFileType.TECNOCOM_FILE);
       getReconciliationFilesEJBBean10().createReconciliationFile(null, reconciliationFile10);
 
-      PrepaidMovement10 prepaidMovement10 = buildPrepaidMovement10(prepaidUser, prepaidTopup);
+      PrepaidMovement10 prepaidMovement10 = buildPrepaidMovement11(prepaidUser, prepaidTopup);
       prepaidMovement10.setTipoMovimiento(PrepaidMovementType.TOPUP);
       prepaidMovement10.setIndnorcor(IndicadorNormalCorrector.NORMAL);
       prepaidMovement10 = createPrepaidMovement10(prepaidMovement10);
       topupMovements.add(0, prepaidMovement10);
 
-      prepaidMovement10 = buildPrepaidMovement10(prepaidUser, prepaidTopup);
+      prepaidMovement10 = buildPrepaidMovement11(prepaidUser, prepaidTopup);
       prepaidMovement10.setTipoMovimiento(PrepaidMovementType.TOPUP);
       prepaidMovement10.setIndnorcor(IndicadorNormalCorrector.CORRECTORA);
       prepaidMovement10 = createPrepaidMovement10(prepaidMovement10);
       topupReversedMovements.add(0, prepaidMovement10);
 
-      prepaidMovement10 = buildPrepaidMovement10(prepaidUser, prepaidTopup);
+      prepaidMovement10 = buildPrepaidMovement11(prepaidUser, prepaidTopup);
       prepaidMovement10.setTipoMovimiento(PrepaidMovementType.WITHDRAW);
       prepaidMovement10.setIndnorcor(IndicadorNormalCorrector.NORMAL);
       prepaidMovement10 = createPrepaidMovement10(prepaidMovement10);
       withdrawMovements.add(0, prepaidMovement10);
 
-      prepaidMovement10 = buildPrepaidMovement10(prepaidUser, prepaidTopup);
+      prepaidMovement10 = buildPrepaidMovement11(prepaidUser, prepaidTopup);
       prepaidMovement10.setTipoMovimiento(PrepaidMovementType.WITHDRAW);
       prepaidMovement10.setIndnorcor(IndicadorNormalCorrector.CORRECTORA);
       prepaidMovement10 = createPrepaidMovement10(prepaidMovement10);
       withdrawReversedMovements.add(0, prepaidMovement10);
 
-      prepaidMovement10 = buildPrepaidMovement10(prepaidUser, prepaidTopup);
+      prepaidMovement10 = buildPrepaidMovement11(prepaidUser, prepaidTopup);
       prepaidMovement10.setTipoMovimiento(PrepaidMovementType.TOPUP);
       prepaidMovement10.setIndnorcor(IndicadorNormalCorrector.NORMAL);
       prepaidMovement10.setConSwitch(ReconciliationStatusType.RECONCILED);
@@ -325,31 +325,31 @@ public class Test_PrepaidMovementEJBBean10_expireNotReconciledMovements extends 
       reconciliationFile10.setType(ReconciliationFileType.TECNOCOM_FILE);
       getReconciliationFilesEJBBean10().createReconciliationFile(null, reconciliationFile10);
 
-      PrepaidMovement10 prepaidMovement10 = buildPrepaidMovement10(prepaidUser, prepaidTopup);
+      PrepaidMovement10 prepaidMovement10 = buildPrepaidMovement11(prepaidUser, prepaidTopup);
       prepaidMovement10.setTipoMovimiento(PrepaidMovementType.TOPUP);
       prepaidMovement10.setIndnorcor(IndicadorNormalCorrector.NORMAL);
       prepaidMovement10 = createPrepaidMovement10(prepaidMovement10);
       topupMovements.add(0, prepaidMovement10);
 
-      prepaidMovement10 = buildPrepaidMovement10(prepaidUser, prepaidTopup);
+      prepaidMovement10 = buildPrepaidMovement11(prepaidUser, prepaidTopup);
       prepaidMovement10.setTipoMovimiento(PrepaidMovementType.TOPUP);
       prepaidMovement10.setIndnorcor(IndicadorNormalCorrector.CORRECTORA);
       prepaidMovement10 = createPrepaidMovement10(prepaidMovement10);
       topupReversedMovements.add(0, prepaidMovement10);
 
-      prepaidMovement10 = buildPrepaidMovement10(prepaidUser, prepaidTopup);
+      prepaidMovement10 = buildPrepaidMovement11(prepaidUser, prepaidTopup);
       prepaidMovement10.setTipoMovimiento(PrepaidMovementType.WITHDRAW);
       prepaidMovement10.setIndnorcor(IndicadorNormalCorrector.NORMAL);
       prepaidMovement10 = createPrepaidMovement10(prepaidMovement10);
       withdrawMovements.add(0, prepaidMovement10);
 
-      prepaidMovement10 = buildPrepaidMovement10(prepaidUser, prepaidTopup);
+      prepaidMovement10 = buildPrepaidMovement11(prepaidUser, prepaidTopup);
       prepaidMovement10.setTipoMovimiento(PrepaidMovementType.WITHDRAW);
       prepaidMovement10.setIndnorcor(IndicadorNormalCorrector.CORRECTORA);
       prepaidMovement10 = createPrepaidMovement10(prepaidMovement10);
       withdrawReversedMovements.add(0, prepaidMovement10);
 
-      prepaidMovement10 = buildPrepaidMovement10(prepaidUser, prepaidTopup);
+      prepaidMovement10 = buildPrepaidMovement11(prepaidUser, prepaidTopup);
       prepaidMovement10.setTipoMovimiento(PrepaidMovementType.TOPUP);
       prepaidMovement10.setIndnorcor(IndicadorNormalCorrector.NORMAL);
       prepaidMovement10.setConSwitch(ReconciliationStatusType.RECONCILED);
@@ -459,31 +459,31 @@ public class Test_PrepaidMovementEJBBean10_expireNotReconciledMovements extends 
       reconciliationFile10.setType(ReconciliationFileType.TECNOCOM_FILE);
       getReconciliationFilesEJBBean10().createReconciliationFile(null, reconciliationFile10);
 
-      PrepaidMovement10 prepaidMovement10 = buildPrepaidMovement10(prepaidUser, prepaidTopup);
+      PrepaidMovement10 prepaidMovement10 = buildPrepaidMovement11(prepaidUser, prepaidTopup);
       prepaidMovement10.setTipoMovimiento(PrepaidMovementType.TOPUP);
       prepaidMovement10.setIndnorcor(IndicadorNormalCorrector.NORMAL);
       prepaidMovement10 = createPrepaidMovement10(prepaidMovement10);
       topupMovements.add(0, prepaidMovement10);
 
-      prepaidMovement10 = buildPrepaidMovement10(prepaidUser, prepaidTopup);
+      prepaidMovement10 = buildPrepaidMovement11(prepaidUser, prepaidTopup);
       prepaidMovement10.setTipoMovimiento(PrepaidMovementType.TOPUP);
       prepaidMovement10.setIndnorcor(IndicadorNormalCorrector.CORRECTORA);
       prepaidMovement10 = createPrepaidMovement10(prepaidMovement10);
       topupReversedMovements.add(0, prepaidMovement10);
 
-      prepaidMovement10 = buildPrepaidMovement10(prepaidUser, prepaidTopup);
+      prepaidMovement10 = buildPrepaidMovement11(prepaidUser, prepaidTopup);
       prepaidMovement10.setTipoMovimiento(PrepaidMovementType.WITHDRAW);
       prepaidMovement10.setIndnorcor(IndicadorNormalCorrector.NORMAL);
       prepaidMovement10 = createPrepaidMovement10(prepaidMovement10);
       withdrawMovements.add(0, prepaidMovement10);
 
-      prepaidMovement10 = buildPrepaidMovement10(prepaidUser, prepaidTopup);
+      prepaidMovement10 = buildPrepaidMovement11(prepaidUser, prepaidTopup);
       prepaidMovement10.setTipoMovimiento(PrepaidMovementType.WITHDRAW);
       prepaidMovement10.setIndnorcor(IndicadorNormalCorrector.CORRECTORA);
       prepaidMovement10 = createPrepaidMovement10(prepaidMovement10);
       withdrawReversedMovements.add(0, prepaidMovement10);
 
-      prepaidMovement10 = buildPrepaidMovement10(prepaidUser, prepaidTopup);
+      prepaidMovement10 = buildPrepaidMovement11(prepaidUser, prepaidTopup);
       prepaidMovement10.setTipoMovimiento(PrepaidMovementType.TOPUP);
       prepaidMovement10.setIndnorcor(IndicadorNormalCorrector.NORMAL);
       prepaidMovement10.setConSwitch(ReconciliationStatusType.RECONCILED);
@@ -588,31 +588,31 @@ public class Test_PrepaidMovementEJBBean10_expireNotReconciledMovements extends 
       reconciliationFile10.setType(ReconciliationFileType.TECNOCOM_FILE);
       getReconciliationFilesEJBBean10().createReconciliationFile(null, reconciliationFile10);
 
-      PrepaidMovement10 prepaidMovement10 = buildPrepaidMovement10(prepaidUser, prepaidTopup);
+      PrepaidMovement10 prepaidMovement10 = buildPrepaidMovement11(prepaidUser, prepaidTopup);
       prepaidMovement10.setTipoMovimiento(PrepaidMovementType.TOPUP);
       prepaidMovement10.setIndnorcor(IndicadorNormalCorrector.NORMAL);
       prepaidMovement10 = createPrepaidMovement10(prepaidMovement10);
       topupMovements.add(0, prepaidMovement10);
 
-      prepaidMovement10 = buildPrepaidMovement10(prepaidUser, prepaidTopup);
+      prepaidMovement10 = buildPrepaidMovement11(prepaidUser, prepaidTopup);
       prepaidMovement10.setTipoMovimiento(PrepaidMovementType.TOPUP);
       prepaidMovement10.setIndnorcor(IndicadorNormalCorrector.CORRECTORA);
       prepaidMovement10 = createPrepaidMovement10(prepaidMovement10);
       topupReversedMovements.add(0, prepaidMovement10);
 
-      prepaidMovement10 = buildPrepaidMovement10(prepaidUser, prepaidTopup);
+      prepaidMovement10 = buildPrepaidMovement11(prepaidUser, prepaidTopup);
       prepaidMovement10.setTipoMovimiento(PrepaidMovementType.WITHDRAW);
       prepaidMovement10.setIndnorcor(IndicadorNormalCorrector.NORMAL);
       prepaidMovement10 = createPrepaidMovement10(prepaidMovement10);
       withdrawMovements.add(0, prepaidMovement10);
 
-      prepaidMovement10 = buildPrepaidMovement10(prepaidUser, prepaidTopup);
+      prepaidMovement10 = buildPrepaidMovement11(prepaidUser, prepaidTopup);
       prepaidMovement10.setTipoMovimiento(PrepaidMovementType.WITHDRAW);
       prepaidMovement10.setIndnorcor(IndicadorNormalCorrector.CORRECTORA);
       prepaidMovement10 = createPrepaidMovement10(prepaidMovement10);
       withdrawReversedMovements.add(0, prepaidMovement10);
 
-      prepaidMovement10 = buildPrepaidMovement10(prepaidUser, prepaidTopup);
+      prepaidMovement10 = buildPrepaidMovement11(prepaidUser, prepaidTopup);
       prepaidMovement10.setTipoMovimiento(PrepaidMovementType.TOPUP);
       prepaidMovement10.setIndnorcor(IndicadorNormalCorrector.NORMAL);
       prepaidMovement10.setConSwitch(ReconciliationStatusType.RECONCILED);
@@ -721,31 +721,31 @@ public class Test_PrepaidMovementEJBBean10_expireNotReconciledMovements extends 
       reconciliationFile10.setType(ReconciliationFileType.TECNOCOM_FILE);
       getReconciliationFilesEJBBean10().createReconciliationFile(null, reconciliationFile10);
 
-      PrepaidMovement10 prepaidMovement10 = buildPrepaidMovement10(prepaidUser, prepaidTopup);
+      PrepaidMovement10 prepaidMovement10 = buildPrepaidMovement11(prepaidUser, prepaidTopup);
       prepaidMovement10.setTipoMovimiento(PrepaidMovementType.TOPUP);
       prepaidMovement10.setIndnorcor(IndicadorNormalCorrector.NORMAL);
       prepaidMovement10 = createPrepaidMovement10(prepaidMovement10);
       topupMovements.add(0, prepaidMovement10);
 
-      prepaidMovement10 = buildPrepaidMovement10(prepaidUser, prepaidTopup);
+      prepaidMovement10 = buildPrepaidMovement11(prepaidUser, prepaidTopup);
       prepaidMovement10.setTipoMovimiento(PrepaidMovementType.TOPUP);
       prepaidMovement10.setIndnorcor(IndicadorNormalCorrector.CORRECTORA);
       prepaidMovement10 = createPrepaidMovement10(prepaidMovement10);
       topupReversedMovements.add(0, prepaidMovement10);
 
-      prepaidMovement10 = buildPrepaidMovement10(prepaidUser, prepaidTopup);
+      prepaidMovement10 = buildPrepaidMovement11(prepaidUser, prepaidTopup);
       prepaidMovement10.setTipoMovimiento(PrepaidMovementType.WITHDRAW);
       prepaidMovement10.setIndnorcor(IndicadorNormalCorrector.NORMAL);
       prepaidMovement10 = createPrepaidMovement10(prepaidMovement10);
       withdrawMovements.add(0, prepaidMovement10);
 
-      prepaidMovement10 = buildPrepaidMovement10(prepaidUser, prepaidTopup);
+      prepaidMovement10 = buildPrepaidMovement11(prepaidUser, prepaidTopup);
       prepaidMovement10.setTipoMovimiento(PrepaidMovementType.WITHDRAW);
       prepaidMovement10.setIndnorcor(IndicadorNormalCorrector.CORRECTORA);
       prepaidMovement10 = createPrepaidMovement10(prepaidMovement10);
       withdrawReversedMovements.add(0, prepaidMovement10);
 
-      prepaidMovement10 = buildPrepaidMovement10(prepaidUser, prepaidTopup);
+      prepaidMovement10 = buildPrepaidMovement11(prepaidUser, prepaidTopup);
       prepaidMovement10.setTipoMovimiento(PrepaidMovementType.TOPUP);
       prepaidMovement10.setIndnorcor(IndicadorNormalCorrector.NORMAL);
       prepaidMovement10.setConSwitch(ReconciliationStatusType.RECONCILED);
@@ -854,31 +854,31 @@ public class Test_PrepaidMovementEJBBean10_expireNotReconciledMovements extends 
       reconciliationFile10.setType(ReconciliationFileType.TECNOCOM_FILE);
       getReconciliationFilesEJBBean10().createReconciliationFile(null, reconciliationFile10);
 
-      PrepaidMovement10 prepaidMovement10 = buildPrepaidMovement10(prepaidUser, prepaidTopup);
+      PrepaidMovement10 prepaidMovement10 = buildPrepaidMovement11(prepaidUser, prepaidTopup);
       prepaidMovement10.setTipoMovimiento(PrepaidMovementType.TOPUP);
       prepaidMovement10.setIndnorcor(IndicadorNormalCorrector.NORMAL);
       prepaidMovement10 = createPrepaidMovement10(prepaidMovement10);
       topupMovements.add(0, prepaidMovement10);
 
-      prepaidMovement10 = buildPrepaidMovement10(prepaidUser, prepaidTopup);
+      prepaidMovement10 = buildPrepaidMovement11(prepaidUser, prepaidTopup);
       prepaidMovement10.setTipoMovimiento(PrepaidMovementType.TOPUP);
       prepaidMovement10.setIndnorcor(IndicadorNormalCorrector.CORRECTORA);
       prepaidMovement10 = createPrepaidMovement10(prepaidMovement10);
       topupReversedMovements.add(0, prepaidMovement10);
 
-      prepaidMovement10 = buildPrepaidMovement10(prepaidUser, prepaidTopup);
+      prepaidMovement10 = buildPrepaidMovement11(prepaidUser, prepaidTopup);
       prepaidMovement10.setTipoMovimiento(PrepaidMovementType.WITHDRAW);
       prepaidMovement10.setIndnorcor(IndicadorNormalCorrector.NORMAL);
       prepaidMovement10 = createPrepaidMovement10(prepaidMovement10);
       withdrawMovements.add(0, prepaidMovement10);
 
-      prepaidMovement10 = buildPrepaidMovement10(prepaidUser, prepaidTopup);
+      prepaidMovement10 = buildPrepaidMovement11(prepaidUser, prepaidTopup);
       prepaidMovement10.setTipoMovimiento(PrepaidMovementType.WITHDRAW);
       prepaidMovement10.setIndnorcor(IndicadorNormalCorrector.CORRECTORA);
       prepaidMovement10 = createPrepaidMovement10(prepaidMovement10);
       withdrawReversedMovements.add(0, prepaidMovement10);
 
-      prepaidMovement10 = buildPrepaidMovement10(prepaidUser, prepaidTopup);
+      prepaidMovement10 = buildPrepaidMovement11(prepaidUser, prepaidTopup);
       prepaidMovement10.setTipoMovimiento(PrepaidMovementType.TOPUP);
       prepaidMovement10.setIndnorcor(IndicadorNormalCorrector.NORMAL);
       prepaidMovement10.setConSwitch(ReconciliationStatusType.RECONCILED);
@@ -987,31 +987,31 @@ public class Test_PrepaidMovementEJBBean10_expireNotReconciledMovements extends 
       reconciliationFile10.setType(ReconciliationFileType.TECNOCOM_FILE);
       getReconciliationFilesEJBBean10().createReconciliationFile(null, reconciliationFile10);
 
-      PrepaidMovement10 prepaidMovement10 = buildPrepaidMovement10(prepaidUser, prepaidTopup);
+      PrepaidMovement10 prepaidMovement10 = buildPrepaidMovement11(prepaidUser, prepaidTopup);
       prepaidMovement10.setTipoMovimiento(PrepaidMovementType.TOPUP);
       prepaidMovement10.setIndnorcor(IndicadorNormalCorrector.NORMAL);
       prepaidMovement10 = createPrepaidMovement10(prepaidMovement10);
       topupMovements.add(0, prepaidMovement10);
 
-      prepaidMovement10 = buildPrepaidMovement10(prepaidUser, prepaidTopup);
+      prepaidMovement10 = buildPrepaidMovement11(prepaidUser, prepaidTopup);
       prepaidMovement10.setTipoMovimiento(PrepaidMovementType.TOPUP);
       prepaidMovement10.setIndnorcor(IndicadorNormalCorrector.CORRECTORA);
       prepaidMovement10 = createPrepaidMovement10(prepaidMovement10);
       topupReversedMovements.add(0, prepaidMovement10);
 
-      prepaidMovement10 = buildPrepaidMovement10(prepaidUser, prepaidTopup);
+      prepaidMovement10 = buildPrepaidMovement11(prepaidUser, prepaidTopup);
       prepaidMovement10.setTipoMovimiento(PrepaidMovementType.WITHDRAW);
       prepaidMovement10.setIndnorcor(IndicadorNormalCorrector.NORMAL);
       prepaidMovement10 = createPrepaidMovement10(prepaidMovement10);
       withdrawMovements.add(0, prepaidMovement10);
 
-      prepaidMovement10 = buildPrepaidMovement10(prepaidUser, prepaidTopup);
+      prepaidMovement10 = buildPrepaidMovement11(prepaidUser, prepaidTopup);
       prepaidMovement10.setTipoMovimiento(PrepaidMovementType.WITHDRAW);
       prepaidMovement10.setIndnorcor(IndicadorNormalCorrector.CORRECTORA);
       prepaidMovement10 = createPrepaidMovement10(prepaidMovement10);
       withdrawReversedMovements.add(0, prepaidMovement10);
 
-      prepaidMovement10 = buildPrepaidMovement10(prepaidUser, prepaidTopup);
+      prepaidMovement10 = buildPrepaidMovement11(prepaidUser, prepaidTopup);
       prepaidMovement10.setTipoMovimiento(PrepaidMovementType.TOPUP);
       prepaidMovement10.setIndnorcor(IndicadorNormalCorrector.NORMAL);
       prepaidMovement10.setConSwitch(ReconciliationStatusType.RECONCILED);

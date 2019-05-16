@@ -122,7 +122,7 @@ public class Test_PrepaidMovementEJBBean11_publishTransactionRejectedEvent exten
     PrepaidUser10 user = buildPrepaidUserv2();
     PrepaidTopup10 topup = buildPrepaidTopup10();
 
-    PrepaidMovement10 movement = buildPrepaidMovement10(user, topup);
+    PrepaidMovement10 movement = buildPrepaidMovement11(user, topup);
     movement.setFechaCreacion(Timestamp.from(Instant.now()));
     movement.setFechaActualizacion(Timestamp.from(Instant.now()));
 
@@ -167,7 +167,7 @@ public class Test_PrepaidMovementEJBBean11_publishTransactionRejectedEvent exten
     PrepaidUser10 user = buildPrepaidUserv2();
     PrepaidTopup10 topup = buildPrepaidTopup10();
 
-    PrepaidMovement10 movement = buildPrepaidMovement10(user, topup);
+    PrepaidMovement10 movement = buildPrepaidMovement11(user, topup);
     movement.setFechaCreacion(Timestamp.from(Instant.now()));
     movement.setFechaActualizacion(Timestamp.from(Instant.now()));
 

@@ -413,7 +413,7 @@ public class Test_reverseWithdrawUserBalance_v10 extends TestBaseUnitApi {
     prepaidWithdraw.getAmount().setValue(BigDecimal.valueOf(500));
     prepaidWithdraw.setPassword("1235");
 
-    PrepaidMovement10 originalWithdraw = buildPrepaidMovement10(prepaidUser, new PrepaidWithdraw10(prepaidWithdraw));
+    PrepaidMovement10 originalWithdraw = buildPrepaidMovement11(prepaidUser, new PrepaidWithdraw10(prepaidWithdraw));
     originalWithdraw.setIdTxExterno(prepaidWithdraw.getTransactionId());
     originalWithdraw.setMonto(prepaidWithdraw.getAmount().getValue());
     originalWithdraw = createPrepaidMovement10(originalWithdraw);
@@ -454,7 +454,7 @@ public class Test_reverseWithdrawUserBalance_v10 extends TestBaseUnitApi {
     prepaidWithdraw.getAmount().setValue(BigDecimal.valueOf(500));
     prepaidWithdraw.setPassword("1235");
 
-    PrepaidMovement10 originalWithdraw = buildPrepaidMovement10(prepaidUser, new PrepaidWithdraw10(prepaidWithdraw));
+    PrepaidMovement10 originalWithdraw = buildPrepaidMovement11(prepaidUser, new PrepaidWithdraw10(prepaidWithdraw));
     originalWithdraw.setMonto(prepaidWithdraw.getAmount().getValue());
     originalWithdraw.setIdTxExterno(prepaidWithdraw.getTransactionId());
     originalWithdraw = createPrepaidMovement10(originalWithdraw);
@@ -494,7 +494,7 @@ public class Test_reverseWithdrawUserBalance_v10 extends TestBaseUnitApi {
     prepaidWithdraw.getAmount().setValue(BigDecimal.valueOf(500));
     prepaidWithdraw.setPassword("1235");
 
-    PrepaidMovement10 originalWithdraw = buildPrepaidMovement10(prepaidUser, new PrepaidWithdraw10(prepaidWithdraw));
+    PrepaidMovement10 originalWithdraw = buildPrepaidMovement11(prepaidUser, new PrepaidWithdraw10(prepaidWithdraw));
     originalWithdraw.setIdTxExterno(prepaidWithdraw.getTransactionId());
     originalWithdraw.setMonto(prepaidWithdraw.getAmount().getValue());
     originalWithdraw = createPrepaidMovement10(originalWithdraw);
@@ -535,7 +535,7 @@ public class Test_reverseWithdrawUserBalance_v10 extends TestBaseUnitApi {
     prepaidWithdraw.getAmount().setValue(BigDecimal.valueOf(500));
     prepaidWithdraw.setPassword("1235");
 
-    PrepaidMovement10 originalWithdraw = buildPrepaidMovement10(prepaidUser, new PrepaidWithdraw10(prepaidWithdraw));
+    PrepaidMovement10 originalWithdraw = buildPrepaidMovement11(prepaidUser, new PrepaidWithdraw10(prepaidWithdraw));
     originalWithdraw.setMonto(prepaidWithdraw.getAmount().getValue());
     originalWithdraw.setIdTxExterno(prepaidWithdraw.getTransactionId());
     originalWithdraw = createPrepaidMovement10(originalWithdraw);
@@ -575,7 +575,7 @@ public class Test_reverseWithdrawUserBalance_v10 extends TestBaseUnitApi {
     prepaidWithdraw.getAmount().setValue(BigDecimal.valueOf(500));
     prepaidWithdraw.setPassword("1235");
 
-    PrepaidMovement10 originalWithdraw = buildPrepaidMovement10(prepaidUser, new PrepaidWithdraw10(prepaidWithdraw));
+    PrepaidMovement10 originalWithdraw = buildPrepaidMovement11(prepaidUser, new PrepaidWithdraw10(prepaidWithdraw));
     originalWithdraw.setIdTxExterno(prepaidWithdraw.getTransactionId());
     originalWithdraw.setMonto(prepaidWithdraw.getAmount().getValue());
     originalWithdraw = createPrepaidMovement10(originalWithdraw);
@@ -611,7 +611,7 @@ public class Test_reverseWithdrawUserBalance_v10 extends TestBaseUnitApi {
     prepaidWithdraw.getAmount().setValue(BigDecimal.valueOf(500));
     prepaidWithdraw.setPassword("1235");
 
-    PrepaidMovement10 originalWithdraw = buildPrepaidMovement10(prepaidUser, new PrepaidWithdraw10(prepaidWithdraw));
+    PrepaidMovement10 originalWithdraw = buildPrepaidMovement11(prepaidUser, new PrepaidWithdraw10(prepaidWithdraw));
     originalWithdraw.setMonto(prepaidWithdraw.getAmount().getValue());
     originalWithdraw.setIdTxExterno(prepaidWithdraw.getTransactionId());
     originalWithdraw = createPrepaidMovement10(originalWithdraw);

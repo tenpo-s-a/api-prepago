@@ -231,7 +231,7 @@ public class Test_getPrepaidCard_v10 extends TestBaseUnitApi {
 
     PrepaidTopup10 prepaidTopup = buildPrepaidTopup10();
 
-    PrepaidMovement10 prepaidMovement10 = buildPrepaidMovement10(prepaidUser10, prepaidTopup);
+    PrepaidMovement10 prepaidMovement10 = buildPrepaidMovement11(prepaidUser10, prepaidTopup);
     prepaidMovement10.setEstado(PrepaidMovementStatus.PENDING);
     prepaidMovement10 = createPrepaidMovement10(prepaidMovement10);
 
@@ -251,7 +251,7 @@ public class Test_getPrepaidCard_v10 extends TestBaseUnitApi {
 
     PrepaidTopup10 prepaidTopup = buildPrepaidTopup10();
 
-    PrepaidMovement10 prepaidMovement10 = buildPrepaidMovement10(prepaidUser10, prepaidTopup);
+    PrepaidMovement10 prepaidMovement10 = buildPrepaidMovement11(prepaidUser10, prepaidTopup);
     prepaidMovement10.setEstado(PrepaidMovementStatus.IN_PROCESS);
     prepaidMovement10 = createPrepaidMovement10(prepaidMovement10);
 
@@ -272,12 +272,12 @@ public class Test_getPrepaidCard_v10 extends TestBaseUnitApi {
 
       PrepaidTopup10 prepaidTopup = buildPrepaidTopup10();
 
-      PrepaidMovement10 prepaidMovement10 = buildPrepaidMovement10(prepaidUser10, prepaidTopup);
+      PrepaidMovement10 prepaidMovement10 = buildPrepaidMovement11(prepaidUser10, prepaidTopup);
       prepaidMovement10.setEstado(PrepaidMovementStatus.ERROR_IN_PROCESS_EMISSION_CARD);
       prepaidMovement10 = createPrepaidMovement10(prepaidMovement10);
 
       prepaidTopup = buildPrepaidTopup10();
-      prepaidMovement10 = buildPrepaidMovement10(prepaidUser10, prepaidTopup);
+      prepaidMovement10 = buildPrepaidMovement11(prepaidUser10, prepaidTopup);
       prepaidMovement10.setEstado(PrepaidMovementStatus.PENDING);
       prepaidMovement10 = createPrepaidMovement10(prepaidMovement10);
 
@@ -295,17 +295,17 @@ public class Test_getPrepaidCard_v10 extends TestBaseUnitApi {
 
       PrepaidTopup10 prepaidTopup = buildPrepaidTopup10();
 
-      PrepaidMovement10 prepaidMovement10 = buildPrepaidMovement10(prepaidUser10, prepaidTopup);
+      PrepaidMovement10 prepaidMovement10 = buildPrepaidMovement11(prepaidUser10, prepaidTopup);
       prepaidMovement10.setEstado(PrepaidMovementStatus.ERROR_IN_PROCESS_EMISSION_CARD);
       prepaidMovement10 = createPrepaidMovement10(prepaidMovement10);
 
       prepaidTopup = buildPrepaidTopup10();
-      prepaidMovement10 = buildPrepaidMovement10(prepaidUser10, prepaidTopup);
+      prepaidMovement10 = buildPrepaidMovement11(prepaidUser10, prepaidTopup);
       prepaidMovement10.setEstado(PrepaidMovementStatus.ERROR_IN_PROCESS_CREATE_CARD);
       prepaidMovement10 = createPrepaidMovement10(prepaidMovement10);
 
       prepaidTopup = buildPrepaidTopup10();
-      prepaidMovement10 = buildPrepaidMovement10(prepaidUser10, prepaidTopup);
+      prepaidMovement10 = buildPrepaidMovement11(prepaidUser10, prepaidTopup);
       prepaidMovement10.setEstado(PrepaidMovementStatus.IN_PROCESS);
       prepaidMovement10 = createPrepaidMovement10(prepaidMovement10);
 

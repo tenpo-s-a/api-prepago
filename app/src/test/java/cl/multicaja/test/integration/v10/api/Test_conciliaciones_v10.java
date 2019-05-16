@@ -63,7 +63,7 @@ public class Test_conciliaciones_v10 extends TestBaseUnitApi {
     prepaidTopup.setMerchantCode(getRandomNumericString(15));
     prepaidTopup.getAmount().setValue(BigDecimal.valueOf(getUniqueInteger()));
 
-    PrepaidMovement10 originalTopup = buildPrepaidMovement10(prepaidUser, new PrepaidTopup10(prepaidTopup));
+    PrepaidMovement10 originalTopup = buildPrepaidMovement11(prepaidUser, new PrepaidTopup10(prepaidTopup));
     originalTopup.setIdTxExterno(prepaidTopup.getTransactionId());
     originalTopup.setMonto(prepaidTopup.getAmount().getValue());
     originalTopup = createPrepaidMovement10(originalTopup);
@@ -108,7 +108,7 @@ public class Test_conciliaciones_v10 extends TestBaseUnitApi {
     prepaidWithdraw.getAmount().setValue(BigDecimal.valueOf(500));
     prepaidWithdraw.setPassword("1235");
 
-      PrepaidMovement10 originalWithdraw = buildPrepaidMovement10(prepaidUser, new PrepaidWithdraw10(prepaidWithdraw));
+      PrepaidMovement10 originalWithdraw = buildPrepaidMovement11(prepaidUser, new PrepaidWithdraw10(prepaidWithdraw));
       originalWithdraw.setIdTxExterno(prepaidWithdraw.getTransactionId());
       originalWithdraw.setMonto(prepaidWithdraw.getAmount().getValue());
       originalWithdraw = createPrepaidMovement10(originalWithdraw);

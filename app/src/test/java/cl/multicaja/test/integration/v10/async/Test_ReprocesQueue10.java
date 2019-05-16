@@ -58,7 +58,7 @@ public class Test_ReprocesQueue10 extends TestBaseUnitAsync {
     CdtTransaction10 cdtTransaction = buildCdtTransaction10(prepaidUser, prepaidTopup);
     cdtTransaction = createCdtTransaction10(cdtTransaction);
 
-    PrepaidMovement10 prepaidMovement = buildPrepaidMovement10(prepaidUser, prepaidTopup, prepaidCard, cdtTransaction);
+    PrepaidMovement10 prepaidMovement = buildPrepaidMovement11(prepaidUser, prepaidTopup, prepaidCard, cdtTransaction);
     prepaidMovement = createPrepaidMovement10(prepaidMovement);
 
     //Se setea para que de error de conexion!
@@ -97,7 +97,7 @@ public class Test_ReprocesQueue10 extends TestBaseUnitAsync {
     CdtTransaction10 cdtTransaction = buildCdtTransaction10(prepaidUser, prepaidTopup);
     cdtTransaction = createCdtTransaction10(cdtTransaction);
 
-    PrepaidMovement10 prepaidMovement = buildPrepaidMovement10(prepaidUser, prepaidTopup, prepaidCard, cdtTransaction);
+    PrepaidMovement10 prepaidMovement = buildPrepaidMovement11(prepaidUser, prepaidTopup, prepaidCard, cdtTransaction);
     prepaidMovement = createPrepaidMovement10(prepaidMovement);
     //Se setea para que de error de conexion!
 
@@ -150,7 +150,7 @@ public class Test_ReprocesQueue10 extends TestBaseUnitAsync {
     CdtTransaction10 cdtTransaction = buildCdtTransaction10(prepaidUser, prepaidTopup);
     cdtTransaction = createCdtTransaction10(cdtTransaction);
 
-    PrepaidMovement10 prepaidMovement = buildPrepaidMovement10(prepaidUser, prepaidTopup, cdtTransaction);
+    PrepaidMovement10 prepaidMovement = buildPrepaidMovement11(prepaidUser, prepaidTopup, cdtTransaction);
     prepaidMovement = createPrepaidMovement10(prepaidMovement);
 
     tc.getTecnocomService().setAutomaticError(true);
@@ -202,7 +202,7 @@ public class Test_ReprocesQueue10 extends TestBaseUnitAsync {
     CdtTransaction10 cdtTransaction = buildCdtTransaction10(prepaidUser, prepaidTopup);
     cdtTransaction = createCdtTransaction10(cdtTransaction);
 
-    PrepaidMovement10 prepaidMovement = buildPrepaidMovement10(prepaidUser, prepaidTopup, cdtTransaction);
+    PrepaidMovement10 prepaidMovement = buildPrepaidMovement11(prepaidUser, prepaidTopup, cdtTransaction);
     prepaidMovement = createPrepaidMovement10(prepaidMovement);
 
 
@@ -268,7 +268,7 @@ public class Test_ReprocesQueue10 extends TestBaseUnitAsync {
 
     cdtTransaction = createCdtTransaction10(cdtTransaction);
 
-    PrepaidMovement10 prepaidMovement = buildPrepaidMovement10(prepaidUser, prepaidTopup, prepaidCard10, cdtTransaction,PrepaidMovementStatus.PROCESS_OK);
+    PrepaidMovement10 prepaidMovement = buildPrepaidMovement11(prepaidUser, prepaidTopup, prepaidCard10, cdtTransaction,PrepaidMovementStatus.PROCESS_OK);
     prepaidMovement.setEstado(PrepaidMovementStatus.PROCESS_OK);
     prepaidMovement = createPrepaidMovement10(prepaidMovement);
     System.out.println(prepaidMovement);
@@ -335,7 +335,7 @@ public class Test_ReprocesQueue10 extends TestBaseUnitAsync {
 
     PrepaidWithdraw10 withdraw10 = new PrepaidWithdraw10(prepaidWithdraw);
 
-    PrepaidMovement10 originalWithdraw = buildPrepaidMovement10(prepaidUser, withdraw10);
+    PrepaidMovement10 originalWithdraw = buildPrepaidMovement11(prepaidUser, withdraw10);
     originalWithdraw.setEstado(PrepaidMovementStatus.PROCESS_OK);
     originalWithdraw.setIdTxExterno(withdraw10.getTransactionId());
     originalWithdraw.setMonto(withdraw10.getAmount().getValue());
@@ -406,7 +406,7 @@ public class Test_ReprocesQueue10 extends TestBaseUnitAsync {
 
     PrepaidTopup10 prepaidTopup = buildPrepaidTopup10();
 
-    PrepaidMovement10 prepaidMovement = buildPrepaidMovement10(prepaidUser, prepaidTopup);
+    PrepaidMovement10 prepaidMovement = buildPrepaidMovement11(prepaidUser, prepaidTopup);
     prepaidMovement = createPrepaidMovement10(prepaidMovement);
 
     getPrepaidMovementEJBBean10().updatePrepaidMovement(null,
@@ -458,7 +458,7 @@ public class Test_ReprocesQueue10 extends TestBaseUnitAsync {
     Assert.assertEquals("Deberia tener una tarjeta en status ACTIVE", PrepaidCardStatus.ACTIVE, prepaidCard2.getStatus());
 
     // Busca el movimiento en la BD
-    List<PrepaidMovement10> dbMovements = getPrepaidMovementEJBBean10().getPrepaidMovementByIdPrepaidUserAndTipoMovimiento( prepaidUser.getId(), PrepaidMovementType.ISSUANCE_FEE);
+    List<PrepaidMovement10> dbMovements = getPrepaidMovementEJBBean11().getPrepaidMovementByIdPrepaidCardAndTipoMovimiento( prepaidCard10.getId(), PrepaidMovementType.ISSUANCE_FEE);
 
     Assert.assertTrue("Debe tener un movimiento de comision", dbMovements.size() > 0);
     Assert.assertEquals("Debe tener un movimiento de comision", issuanceFeeMovement.getId(), dbMovements.get(0).getId());

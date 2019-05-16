@@ -80,7 +80,7 @@ public class Test_Reconciliation_FullTest extends TestBaseUnitAsync {
       prepaidTopup.setMerchantCode(NewPrepaidBaseTransaction10.WEB_MERCHANT_CODE);
       prepaidTopup.setFirstTopup(false);
       CdtTransaction10 cdtTransaction = test.buildCdtTransaction10(prepaidUser, prepaidTopup);
-      PrepaidMovement10 prepaidMovement = test.buildPrepaidMovement10(prepaidUser, prepaidTopup, prepaidCard, cdtTransaction, PrepaidMovementType.TOPUP);
+      PrepaidMovement10 prepaidMovement = test.buildPrepaidMovementV2(prepaidUser, prepaidTopup, prepaidCard, cdtTransaction, PrepaidMovementType.TOPUP,null);
       prepaidMovement.setIndnorcor(IndicadorNormalCorrector.NORMAL);
       prepaidMovement.setNumaut(getRandomNumericString(6));
       prepaidMovement.setFechaCreacion(null);
@@ -3511,7 +3511,7 @@ public class Test_Reconciliation_FullTest extends TestBaseUnitAsync {
       testData.cdtTransaction = buildCdtTransaction10(prepaidUser, prepaidWithdraw);
     }
 
-    testData.prepaidMovement = buildPrepaidMovementV2(prepaidUser, prepaidTopup, prepaidCard, testData.cdtTransaction, movementType);
+    testData.prepaidMovement = buildPrepaidMovementV2(prepaidUser, prepaidTopup, prepaidCard, testData.cdtTransaction, movementType,null);
 
     testData.prepaidMovement.setIndnorcor(indnorcor);
     testData.prepaidMovement.setNumaut(getRandomNumericString(6));

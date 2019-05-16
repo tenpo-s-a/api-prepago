@@ -50,7 +50,7 @@ public class Test_PrepaidClearingEJBBean10_getWebWithdrawForReconciliation exten
       prepaidWithdraw.setMerchantCode(NewPrepaidBaseTransaction10.WEB_MERCHANT_CODE);
 
       //Movimiento
-      PrepaidMovement10  prepaidMovement = buildPrepaidMovement10(prepaidUser, prepaidWithdraw);
+      PrepaidMovement10  prepaidMovement = buildPrepaidMovement11(prepaidUser, prepaidWithdraw);
       // Conciliacion con Tecnocom pendiente
       prepaidMovement.setConTecnocom(ReconciliationStatusType.PENDING);
 
@@ -78,7 +78,7 @@ public class Test_PrepaidClearingEJBBean10_getWebWithdrawForReconciliation exten
       prepaidWithdraw.setMerchantCode(NewPrepaidBaseTransaction10.WEB_MERCHANT_CODE);
 
       //Movimiento
-      PrepaidMovement10  prepaidMovement = buildPrepaidMovement10(prepaidUser, prepaidWithdraw);
+      PrepaidMovement10  prepaidMovement = buildPrepaidMovement11(prepaidUser, prepaidWithdraw);
       // Conciliacion con Tecnocom pendiente
       prepaidMovement.setConTecnocom(ReconciliationStatusType.RECONCILED);
 
@@ -108,7 +108,7 @@ public class Test_PrepaidClearingEJBBean10_getWebWithdrawForReconciliation exten
       prepaidWithdraw.setMerchantCode(NewPrepaidBaseTransaction10.WEB_MERCHANT_CODE);
 
       //Movimiento
-      PrepaidMovement10  prepaidMovement = buildPrepaidMovement10(prepaidUser, prepaidWithdraw);
+      PrepaidMovement10  prepaidMovement = buildPrepaidMovement11(prepaidUser, prepaidWithdraw);
       // Conciliacion con Tecnocom pendiente
       prepaidMovement.setConTecnocom(ReconciliationStatusType.RECONCILED);
 
@@ -136,7 +136,7 @@ public class Test_PrepaidClearingEJBBean10_getWebWithdrawForReconciliation exten
       prepaidWithdraw.setMerchantCode(NewPrepaidBaseTransaction10.WEB_MERCHANT_CODE);
 
       //Movimiento
-      PrepaidMovement10  prepaidMovement = buildPrepaidMovement10(prepaidUser, prepaidWithdraw);
+      PrepaidMovement10  prepaidMovement = buildPrepaidMovement11(prepaidUser, prepaidWithdraw);
       // Conciliacion con Tecnocom pendiente
       prepaidMovement.setConTecnocom(ReconciliationStatusType.NOT_RECONCILED);
 
@@ -166,7 +166,7 @@ public class Test_PrepaidClearingEJBBean10_getWebWithdrawForReconciliation exten
       prepaidWithdraw.setMerchantCode(NewPrepaidBaseTransaction10.WEB_MERCHANT_CODE);
 
       //Movimiento
-      PrepaidMovement10  prepaidMovement = buildPrepaidMovement10(prepaidUser, prepaidWithdraw);
+      PrepaidMovement10  prepaidMovement = buildPrepaidMovement11(prepaidUser, prepaidWithdraw);
       // Conciliacion con Tecnocom pendiente
       prepaidMovement.setConTecnocom(ReconciliationStatusType.RECONCILED);
 
@@ -194,7 +194,7 @@ public class Test_PrepaidClearingEJBBean10_getWebWithdrawForReconciliation exten
       prepaidWithdraw.setMerchantCode(NewPrepaidBaseTransaction10.WEB_MERCHANT_CODE);
 
       //Movimiento
-      PrepaidMovement10  prepaidMovement = buildPrepaidMovement10(prepaidUser, prepaidWithdraw);
+      PrepaidMovement10  prepaidMovement = buildPrepaidMovement11(prepaidUser, prepaidWithdraw);
       // Conciliacion con Tecnocom pendiente
       prepaidMovement.setConTecnocom(ReconciliationStatusType.PENDING);
 
@@ -252,7 +252,7 @@ public class Test_PrepaidClearingEJBBean10_getWebWithdrawForReconciliation exten
       prepaidWithdraw.setMerchantCode(NewPrepaidBaseTransaction10.WEB_MERCHANT_CODE);
 
       //Movimiento
-      PrepaidMovement10  prepaidMovement = buildPrepaidMovement10(prepaidUser, prepaidWithdraw);
+      PrepaidMovement10  prepaidMovement = buildPrepaidMovement11(prepaidUser, prepaidWithdraw);
       // Conciliacion con Tecnocom pendiente
       prepaidMovement.setConTecnocom(ReconciliationStatusType.PENDING);
 
@@ -280,7 +280,7 @@ public class Test_PrepaidClearingEJBBean10_getWebWithdrawForReconciliation exten
       prepaidWithdraw.setMerchantCode(NewPrepaidBaseTransaction10.WEB_MERCHANT_CODE);
 
       //Movimiento
-      PrepaidMovement10  prepaidMovement = buildPrepaidMovement10(prepaidUser, prepaidWithdraw);
+      PrepaidMovement10  prepaidMovement = buildPrepaidMovement11(prepaidUser, prepaidWithdraw);
       // Conciliacion con Tecnocom pendiente
       prepaidMovement.setConTecnocom(ReconciliationStatusType.RECONCILED);
 
@@ -308,7 +308,7 @@ public class Test_PrepaidClearingEJBBean10_getWebWithdrawForReconciliation exten
       prepaidWithdraw.setMerchantCode(NewPrepaidBaseTransaction10.WEB_MERCHANT_CODE);
 
       //Movimiento
-      PrepaidMovement10  prepaidMovement = buildPrepaidMovement10(prepaidUser, prepaidWithdraw);
+      PrepaidMovement10  prepaidMovement = buildPrepaidMovement11(prepaidUser, prepaidWithdraw);
       // Conciliacion con Tecnocom pendiente
       prepaidMovement.setConTecnocom(ReconciliationStatusType.RECONCILED);
 
@@ -336,7 +336,7 @@ public class Test_PrepaidClearingEJBBean10_getWebWithdrawForReconciliation exten
       prepaidWithdraw.setMerchantCode(NewPrepaidBaseTransaction10.WEB_MERCHANT_CODE);
 
       //Movimiento
-      PrepaidMovement10  prepaidMovement = buildPrepaidMovement10(prepaidUser, prepaidWithdraw);
+      PrepaidMovement10  prepaidMovement = buildPrepaidMovement11(prepaidUser, prepaidWithdraw);
       // Conciliacion con Tecnocom pendiente
       prepaidMovement.setConTecnocom(ReconciliationStatusType.PENDING);
 
