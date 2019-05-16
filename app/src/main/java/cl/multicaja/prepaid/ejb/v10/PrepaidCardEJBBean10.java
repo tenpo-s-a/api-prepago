@@ -327,7 +327,7 @@ public class PrepaidCardEJBBean10 extends PrepaidBaseEJBBean10 implements Prepai
   }
 
   @Override
-  public PrepaidCard10 getPrepaidCardByPanHash(Map<String, Object> headers, String panHash) throws Exception {
+  public PrepaidCard10 getPrepaidCardByPanHashAndAccountNumber(Map<String, Object> headers, String panHash, String accountNumber) throws Exception {
     throw new IllegalStateException();
   }
 

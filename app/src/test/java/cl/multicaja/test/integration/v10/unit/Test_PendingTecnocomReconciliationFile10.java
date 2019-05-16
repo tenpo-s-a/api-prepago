@@ -37,6 +37,7 @@ public class Test_PendingTecnocomReconciliationFile10 extends TestBaseUnitAsync 
     getDbUtils().getJdbcTemplate().execute(String.format("TRUNCATE %s.prp_movimientos_tecnocom CASCADE", getSchema()));
     getDbUtils().getJdbcTemplate().execute(String.format("TRUNCATE %s.prp_movimientos_tecnocom_hist CASCADE", getSchema()));
     getDbUtils().getJdbcTemplate().execute(String.format("TRUNCATE %s.prp_archivos_conciliacion CASCADE", getSchema()));
+    getDbUtils().getJdbcTemplate().execute(String.format("TRUNCATE %s.prp_tarjeta CASCADE", getSchema()));
   }
 
   private void prepareUsersAndCards() throws Exception {
@@ -61,7 +62,7 @@ public class Test_PendingTecnocomReconciliationFile10 extends TestBaseUnitAsync 
       prepaidCard10.setPan(Utils.replacePan(pan));
       prepaidCard10.setAccountId(account.getId());
       prepaidCard10.setUuid(UUID.randomUUID().toString());
-      prepaidCard10.setHashedPan(getRandomString(20));
+      prepaidCard10.setHashedPan(pan); // Solo para los test, guardaremos el hashed pan en claro como hashed.
       prepaidCard10 = createPrepaidCardV2(prepaidCard10);
 
       users.add(prepaidUser10);
@@ -102,7 +103,7 @@ public class Test_PendingTecnocomReconciliationFile10 extends TestBaseUnitAsync 
     Long fileId = null;
     try {
       InputStream is = putSuccessFileIntoSftp(filename);
-      fileId =getTecnocomReconciliationEJBBean10().processFile(is, filename);
+      fileId = getTecnocomReconciliationEJBBean10().processFile(is, filename);
     } catch (Exception e) {
       e.printStackTrace();
       Assert.fail("Should not be here");
@@ -159,7 +160,7 @@ public class Test_PendingTecnocomReconciliationFile10 extends TestBaseUnitAsync 
         .get()
         .getUserId();
 
-      String pan = Utils.replacePan(encryptUtil.decrypt(trx.getPan()));
+      String pan = Utils.replacePan(trx.getPan()); // En los test, el pan viene en claro
       PrepaidMovement10 movement10 = TecnocomFileHelper.getInstance().buildMovement(userId, pan, trx);
       movement10.setConTecnocom(ReconciliationStatusType.PENDING);
       movement10.setConSwitch(ReconciliationStatusType.PENDING);
@@ -246,7 +247,7 @@ public class Test_PendingTecnocomReconciliationFile10 extends TestBaseUnitAsync 
         .getUserId();
 
 
-      String pan = Utils.replacePan(encryptUtil.decrypt(trx.getPan()));
+      String pan = Utils.replacePan(trx.getPan()); // En los test, el pan viene en claro
       PrepaidMovement10 movement10 = TecnocomFileHelper.getInstance().buildMovement(userId, pan, trx);
       movement10.setConTecnocom(ReconciliationStatusType.PENDING);
       movement10.setConSwitch(ReconciliationStatusType.PENDING);
@@ -332,7 +333,7 @@ public class Test_PendingTecnocomReconciliationFile10 extends TestBaseUnitAsync 
 
 
 
-      String pan = Utils.replacePan(encryptUtil.decrypt(trx.getPan()));
+      String pan = Utils.replacePan(trx.getPan()); // En los test, el pan viene en claro
       PrepaidMovement10 movement10 = TecnocomFileHelper.getInstance().buildMovement(userId, pan, trx);
       movement10.setConTecnocom(ReconciliationStatusType.PENDING);
       movement10.setConSwitch(ReconciliationStatusType.PENDING);
@@ -418,7 +419,7 @@ public class Test_PendingTecnocomReconciliationFile10 extends TestBaseUnitAsync 
         .getUserId();
 
 
-      String pan = Utils.replacePan(encryptUtil.decrypt(trx.getPan()));
+      String pan = Utils.replacePan(trx.getPan()); // En los test, el pan viene en claro
       PrepaidMovement10 movement10 = TecnocomFileHelper.getInstance().buildMovement(userId, pan, trx);
       movement10.setConTecnocom(ReconciliationStatusType.PENDING);
       movement10.setConSwitch(ReconciliationStatusType.PENDING);
@@ -509,7 +510,7 @@ public class Test_PendingTecnocomReconciliationFile10 extends TestBaseUnitAsync 
 
 
 
-      String pan = Utils.replacePan(encryptUtil.decrypt(trx.getPan()));
+      String pan = Utils.replacePan(trx.getPan()); // En los test, el pan viene en claro
       PrepaidMovement10 movement10 = TecnocomFileHelper.getInstance().buildMovement(userId, pan, trx);
       movement10.setConTecnocom(ReconciliationStatusType.PENDING);
       movement10.setConSwitch(ReconciliationStatusType.PENDING);
@@ -595,7 +596,7 @@ public class Test_PendingTecnocomReconciliationFile10 extends TestBaseUnitAsync 
         .getUserId();
 
 
-      String pan = Utils.replacePan(encryptUtil.decrypt(trx.getPan()));
+      String pan = Utils.replacePan(trx.getPan()); // En los test, el pan viene en claro
       PrepaidMovement10 movement10 = TecnocomFileHelper.getInstance().buildMovement(userId, pan, trx);
       movement10.setConTecnocom(ReconciliationStatusType.PENDING);
       movement10.setConSwitch(ReconciliationStatusType.PENDING);
@@ -683,7 +684,7 @@ public class Test_PendingTecnocomReconciliationFile10 extends TestBaseUnitAsync 
 
 
 
-      String pan = Utils.replacePan(encryptUtil.decrypt(trx.getPan()));
+      String pan = Utils.replacePan(trx.getPan()); // En los test, el pan viene en claro
       PrepaidMovement10 movement10 = TecnocomFileHelper.getInstance().buildMovement(userId, pan, trx);
       movement10.setConTecnocom(ReconciliationStatusType.PENDING);
       movement10.setConSwitch(ReconciliationStatusType.PENDING);
