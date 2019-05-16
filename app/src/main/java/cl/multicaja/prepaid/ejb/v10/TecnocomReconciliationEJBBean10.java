@@ -581,16 +581,15 @@ public class TecnocomReconciliationEJBBean10 extends PrepaidBaseEJBBean10 implem
           prepaidInvoiceDelegate10.sendInvoice(prepaidInvoiceDelegate10.buildInvoiceData(prepaidMovement10,null));
         }
 
+        // Todo: Logica de la actualizacion del valor IPM
         // Liquidacion IPM - Actualiza el valor de monto mastercard en la tabla de contabilidad
         // Si el movimiento viene en estado OP (conciliado), se actualiza su valor de acuerdo al IPM
         if (TecnocomReconciliationRegisterType.OP.equals(trx.getTipoReg())) {
           // Se buscan los registros que coincidan en la tabla IPM
           // Mismo PAN, mismo codcom, mismo, mismo num aut, monto 2.5% aproximado y que no hayan sido ya conciliados
-
-
           // Si hay mas de uno, se elige el mas cercano
 
-          // Actualizar el valor
+          // Actualizar el valor en la tablas de liquidacion
 
           // Marcar movimiento tomado en la tabla IPM como conciliado
         }

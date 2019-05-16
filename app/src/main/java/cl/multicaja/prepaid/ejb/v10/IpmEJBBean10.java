@@ -31,7 +31,7 @@ public class IpmEJBBean10 extends PrepaidBaseEJBBean10 {
 
   private static Log log = LogFactory.getLog(IpmEJBBean10.class);
 
-  private static final String FIND_IPM_DATA_BY_RECONCILIATION_SIMILARITY =
+  private static final String FIND_IPM_MOVEMENT_BY_RECONCILIATION_SIMILARITY =
     String.format("SELECT * FROM %s.ipm_file_data " +
                      "WHERE " +
                      "  pan = ? AND " +
@@ -40,6 +40,22 @@ public class IpmEJBBean10 extends PrepaidBaseEJBBean10 {
                      "  reconciled = FALSE AND " +
                      "  transaction_amount >= ? AND transaction_amount <= ?", getSchemaAccounting());
 
+  private static final String UPDATE_IPM_MOVEMENT_RECONCILED_STATUS = String.format("UPDATE %s.ipm_file_data SET reconciled = ? WHERE id = ?", getSchemaAccounting());
+
+  /**
+   * Busca un movimiento similar, que tenga:
+   *      - Mismo pan
+   *      - Mismo codcom
+   *      - Mismo numaut
+   *      - No este conciliado
+   *      - Tenga 2.5% de diferencia en el monto (Entre 97.5% y 102.5%)
+   * @param truncatedPan
+   * @param codcom
+   * @param amount
+   * @param numaut
+   * @return
+   * @throws Exception
+   */
   public IpmMovement10 findByReconciliationSimilarity(String truncatedPan, String codcom, BigDecimal amount, String numaut) throws Exception {
     if (truncatedPan == null) {
       throw new BadRequestException(PARAMETRO_FALTANTE_$VALUE).setData(new KeyValue("value", "truncatedPan"));
@@ -60,20 +76,20 @@ public class IpmEJBBean10 extends PrepaidBaseEJBBean10 {
     log.info(String.format("[findByReconciliationSimilarity] Buscando ipmMovement no conciliado por truncatedPan [%s] codcom [%s] amount [%s] numaut [%s]", truncatedPan, codcom, amount.toString(), numaut));
     try {
       // Obtener lista de entradas similares
-      List<IpmMovement10> ipmMovement10List = getDbUtils().getJdbcTemplate().query(FIND_IPM_DATA_BY_RECONCILIATION_SIMILARITY, this.getIpmMovementMapper(), truncatedPan, codcom, numaut, lowAmount, highAmount);
+      List<IpmMovement10> ipmMovement10List = getDbUtils().getJdbcTemplate().query(FIND_IPM_MOVEMENT_BY_RECONCILIATION_SIMILARITY, this.getIpmMovementMapper(), truncatedPan, codcom, numaut, lowAmount, highAmount);
 
       if (ipmMovement10List == null || ipmMovement10List.isEmpty()) {
         return null;
       }
 
-      // Buscar el monto que se acerque mas al monto buscado
+      // De los encontrados, buscar el monto que se acerque mas al monto buscado
       BigDecimal minDelta = BigDecimal.valueOf(Double.MAX_VALUE);
       IpmMovement10 minFound = null;
       for (IpmMovement10 foundMovement : ipmMovement10List) {
-        BigDecimal amountDelta = amount.subtract(foundMovement.getTransactionAmount()).abs();
-        if (amountDelta.compareTo(minDelta) < 0) {
+        BigDecimal amountDelta = amount.subtract(foundMovement.getTransactionAmount()).abs(); // Buscar diferencia con el amount
+        if (amountDelta.compareTo(minDelta) < 0) { // Esta mas cerca que el actual?
           minDelta = amountDelta;
-          minFound = foundMovement;
+          minFound = foundMovement; // Nuevo candidato
         }
       }
 
@@ -82,6 +98,10 @@ public class IpmEJBBean10 extends PrepaidBaseEJBBean10 {
       log.error(String.format("[findByReconciliationSimilarity]  Cuenta/contrato no conciliado con truncatedPan [%s] codcom [%s] amount [%s] numaut [%s]", truncatedPan, codcom, amount.toString(), numaut));
       return null;
     }
+  }
+
+  public void updateIpmMovementReconciledStatus(Long id, boolean reconciledStatus) throws Exception {
+    
   }
 
   private RowMapper<IpmMovement10> getIpmMovementMapper() {

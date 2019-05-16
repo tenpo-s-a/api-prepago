@@ -2,21 +2,74 @@ package cl.multicaja.test.integration.v10.unit;
 
 import cl.multicaja.prepaid.ejb.v10.IpmEJBBean10;
 import cl.multicaja.prepaid.model.v10.IpmMovement10;
+import org.junit.After;
 import org.junit.Assert;
+import org.junit.Before;
 import org.junit.Test;
 
+import java.math.BigDecimal;
 import java.util.List;
 
 public class Test_IpmEJBBean_findByReconciliationSimilarity extends TestBaseUnit {
 
+  @Before
+  @After
+  public void clearData() {
+    getDbUtils().getJdbcTemplate().execute(String.format("TRUNCATE %s.ipm_file_data CASCADE", getSchemaAccounting()));
+  }
+
   @Test
   public void findByReconciliationSimilarity_findOk() throws Exception {
+    // Inserta un movimiento original (100%)
     IpmMovement10 insertedMovement = buildIpmMovement10();
-    System.out.println(String.format("reconciled: %s %b", insertedMovement.getReconciled(), insertedMovement.getReconciled()));
     insertIpmMovement(insertedMovement);
 
-    IpmMovement10 ipmMovement10 = getIpmEJBBean10().findByReconciliationSimilarity(insertedMovement.getPan(), insertedMovement.getMerchantCode(), insertedMovement.getTransactionAmount(), insertedMovement.getApprovalCode());
-    compareIpmMovements(insertedMovement, ipmMovement10);
+    // Inserta un movimiento que tiene el 90% del valor original
+    IpmMovement10 veryLowMovement = buildIpmMovement10();
+    veryLowMovement.setPan(insertedMovement.getPan());
+    veryLowMovement.setMerchantCode(insertedMovement.getMerchantCode());
+    veryLowMovement.setApprovalCode(insertedMovement.getApprovalCode());
+    veryLowMovement.setTransactionAmount(insertedMovement.getTransactionAmount().multiply(new BigDecimal(0.90f)));
+    insertIpmMovement(veryLowMovement);
+
+    // Inserta un movimiento que tiene el 99.0% del valor original
+    IpmMovement10 lowMovement = buildIpmMovement10();
+    lowMovement.setPan(insertedMovement.getPan());
+    lowMovement.setMerchantCode(insertedMovement.getMerchantCode());
+    lowMovement.setApprovalCode(insertedMovement.getApprovalCode());
+    lowMovement.setTransactionAmount(insertedMovement.getTransactionAmount().multiply(new BigDecimal(0.99f)));
+    insertIpmMovement(lowMovement);
+
+    // Inserta un movimiento que tiene el 99.1% del valor original, PERO ya esta conciliado, por lo que no deberia ser elegido
+    IpmMovement10 lowReconciledMovement = buildIpmMovement10();
+    lowReconciledMovement.setPan(insertedMovement.getPan());
+    lowReconciledMovement.setMerchantCode(insertedMovement.getMerchantCode());
+    lowReconciledMovement.setApprovalCode(insertedMovement.getApprovalCode());
+    lowReconciledMovement.setTransactionAmount(insertedMovement.getTransactionAmount().multiply(new BigDecimal(0.991f)));
+    lowReconciledMovement.setReconciled(true);
+    insertIpmMovement(lowReconciledMovement);
+
+    // Inserta un movimiento que tiene el 110% del valor original
+    IpmMovement10 veryHighMovement = buildIpmMovement10();
+    veryHighMovement.setPan(insertedMovement.getPan());
+    veryHighMovement.setMerchantCode(insertedMovement.getMerchantCode());
+    veryHighMovement.setApprovalCode(insertedMovement.getApprovalCode());
+    veryHighMovement.setTransactionAmount(insertedMovement.getTransactionAmount().multiply(new BigDecimal(1.10f)));
+    insertIpmMovement(veryHighMovement);
+
+    // Inserta un movimiento que tiene el 101% del valor original
+    IpmMovement10 highMovement = buildIpmMovement10();
+    highMovement.setPan(insertedMovement.getPan());
+    highMovement.setMerchantCode(insertedMovement.getMerchantCode());
+    highMovement.setApprovalCode(insertedMovement.getApprovalCode());
+    highMovement.setTransactionAmount(insertedMovement.getTransactionAmount().multiply(new BigDecimal(1.01f)));
+    insertIpmMovement(highMovement);
+
+    // Buscamos un valor que sea cerca al 99.2% del valor original
+    IpmMovement10 ipmMovement10 = getIpmEJBBean10().findByReconciliationSimilarity(insertedMovement.getPan(), insertedMovement.getMerchantCode(), insertedMovement.getTransactionAmount().multiply(new BigDecimal(0.992)), insertedMovement.getApprovalCode());
+
+    // Debe encontrar el lowMovement (99.0%) como mas cercano y no conciliado
+    compareIpmMovements(lowMovement, ipmMovement10);
   }
 
   private void compareIpmMovements(IpmMovement10 expected, IpmMovement10 found) {
