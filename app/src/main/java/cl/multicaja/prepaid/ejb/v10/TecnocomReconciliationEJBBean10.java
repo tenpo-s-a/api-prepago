@@ -597,7 +597,7 @@ public class TecnocomReconciliationEJBBean10 extends PrepaidBaseEJBBean10 implem
 
           prepaidInvoiceDelegate10.sendInvoice(prepaidInvoiceDelegate10.buildInvoiceData(prepaidMovement10,null));
         }
-        
+
         // Si el movimiento viene en estado OP (conciliado), se actualiza su valor de acuerdo al archivo IPM
         if (TecnocomReconciliationRegisterType.OP.equals(trx.getTipoReg())) {
           // Se busca el registro "mas parecido" en la tabla IPM
@@ -611,7 +611,7 @@ public class TecnocomReconciliationEJBBean10 extends PrepaidBaseEJBBean10 implem
             // Marcar movimiento tomado en la tabla IPM como conciliado
             getIpmEJBBean10().updateIpmMovementReconciledStatus(ipmMovement10.getId(), true);
           } else {
-            String msg = String.format("Error: while searching for similar to IPM movement [modId: %s], not found", prepaidMovement10.getId());
+            String msg = String.format("Error while searching for similar to IPM movement [modId: %s], not found", prepaidMovement10.getId());
             log.error(msg);
             throw new ValidationException(ERROR_DATA_NOT_FOUND.getValue(), msg);
           }
