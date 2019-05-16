@@ -1,5 +1,8 @@
 package cl.multicaja.prepaid.ejb.v11;
 
+import cl.multicaja.accounting.model.v10.AccountingData10;
+import cl.multicaja.accounting.model.v10.AccountingStatusType;
+import cl.multicaja.accounting.model.v10.ClearingData10;
 import cl.multicaja.core.exceptions.BadRequestException;
 import cl.multicaja.core.exceptions.BaseException;
 import cl.multicaja.core.utils.KeyValue;
@@ -9,6 +12,7 @@ import cl.multicaja.prepaid.kafka.events.TransactionEvent;
 import cl.multicaja.prepaid.kafka.events.model.*;
 import cl.multicaja.prepaid.kafka.events.model.Timestamps;
 import cl.multicaja.prepaid.model.v10.*;
+import cl.multicaja.prepaid.model.v11.Account;
 import cl.multicaja.prepaid.model.v11.PrepaidMovementFeeType;
 import cl.multicaja.tecnocom.constants.*;
 import org.apache.commons.lang3.StringUtils;
@@ -422,5 +426,97 @@ public class PrepaidMovementEJBBean11 extends PrepaidMovementEJBBean10 {
       prepaidMovementFee.setTimestamps(timestamps);
       return prepaidMovementFee;
     };
+  }
+
+  public void expireNotReconciledAuthorizations() throws Exception {
+    StringBuilder queryExpire = new StringBuilder();
+    queryExpire.append("UPDATE %s.prp_movimiento mov SET estado_con_tecnocom = 'NOT_RECONCILED', estado = 'EXPIRED' " );
+    queryExpire.append("WHERE (mov.tipo_movimiento = 'SUSCRIPTION' OR mov.tipo_movimiento = 'PURCHASE') ");
+    queryExpire.append("AND mov.estado_con_tecnocom = 'PENDING' ");
+    queryExpire.append("AND mov.estado = '%s' ");
+    queryExpire.append("AND (SELECT COUNT(f.id) ");
+    queryExpire.append("FROM %s.prp_archivos_conciliacion f ");
+    queryExpire.append("WHERE f.created_at >= mov.fecha_creacion AND f.tipo = 'TECNOCOM_FILE' AND f.status = 'OK' ) >= %d");
+    String expiredQuery = queryExpire.toString();
+
+    //Expira los movimientos con estado Notified que ya cumplieron 2 archivos
+    List<PrepaidMovement10> notifiedMovements = this.searchMovementsForExpire(PrepaidMovementStatus.NOTIFIED.toString(), 2);
+
+    String expiredNotifiedQuery = String.format(expiredQuery,getSchema(), PrepaidMovementStatus.NOTIFIED.toString(), getSchema(), 2);
+    log.info("Expirando autorizaciones notificadas: " + expiredNotifiedQuery);
+    getDbUtils().getJdbcTemplate().execute(expiredNotifiedQuery);
+
+    //Levanta eventos por cada movimiento expirado para notificadas
+    this.lauchEventReverse(notifiedMovements);
+
+    //Expira los movimientos con estado Authorized que ya cumplieron 7 archivos
+    List<PrepaidMovement10> authorizedMovements = this.searchMovementsForExpire(PrepaidMovementStatus.AUTHORIZED.toString(), 7);
+
+    String expiredAuthorizedQuery = String.format(expiredQuery,getSchema(), PrepaidMovementStatus.AUTHORIZED.toString(), getSchema(), 7);
+    log.info("Expirando autorizaciones autorizadas: " + expiredAuthorizedQuery);
+    getDbUtils().getJdbcTemplate().execute(expiredAuthorizedQuery);
+
+    //Levanta eventos por cada movimiento expirado para autorizadas
+    this.lauchEventReverse(authorizedMovements);
+
+    //Se cierran los estados para accounting y clearing
+    this.closingStatusForAccountingAndClearing(authorizedMovements);
+  }
+
+  public void lauchEventReverse(List<PrepaidMovement10> movement10s) throws Exception {
+    for (PrepaidMovement10 movement: movement10s) {
+      TransactionType transactionType = null;
+      PrepaidCard10 prepaidCard10 = getPrepaidCardEJB11().getPrepaidCardById(null, movement.getCardId());
+      Account account10 = getAccountEJBBean10().findById(prepaidCard10.getAccountId());
+      PrepaidUser10 prepaidUser10 = getPrepaidUserEJB10().findById(null, account10.getUserId());
+      List<PrepaidMovementFee10> feeList = new ArrayList<PrepaidMovementFee10>();
+
+      if (movement.getTipofac() == TipoFactura.COMPRA_INTERNACIONAL) {
+        transactionType = TransactionType.PURCHASE;
+      }
+      if (movement.getTipofac() == TipoFactura.SUSCRIPCION_INTERNACIONAL) {
+        transactionType = TransactionType.SUSCRIPTION;
+      }
+
+      publishTransactionReversedEvent(
+        prepaidUser10.getUuid(),
+        account10.getUuid(),
+        prepaidCard10.getUuid(),
+        movement,
+        feeList,
+        transactionType
+      );
+    }
+  }
+
+  public List<PrepaidMovement10> searchMovementsForExpire(String movement, int numFiles){
+    StringBuilder queryExpire = new StringBuilder();
+    queryExpire.append("select * from  %s.prp_movimiento mov " );
+    queryExpire.append("WHERE (mov.tipo_movimiento = 'SUSCRIPTION' OR mov.tipo_movimiento = 'PURCHASE') ");
+    queryExpire.append("AND mov.estado_con_tecnocom = 'PENDING' ");
+    queryExpire.append("AND mov.estado = '%s' ");
+    queryExpire.append("AND (SELECT COUNT(f.id) ");
+    queryExpire.append("FROM %s.prp_archivos_conciliacion f ");
+    queryExpire.append("WHERE f.created_at >= mov.fecha_creacion AND f.tipo = 'TECNOCOM_FILE' AND f.status = 'OK' ) >= %d");
+    String expiredQuerySelected = queryExpire.toString();
+
+    //PrepaidMovementStatus.NOTIFIED.toString()
+    String expiredQuerySelect = String.format(expiredQuerySelected,getSchema(),movement,getSchema(),numFiles);
+    log.info("Buscando autorizaciones " + movement +": " + expiredQuerySelect);
+
+    return getDbUtils().getJdbcTemplate().query(expiredQuerySelect, this.getMovementMapper());
+  }
+
+  public void closingStatusForAccountingAndClearing(List<PrepaidMovement10> movement10s) throws Exception {
+    for (PrepaidMovement10 movement: movement10s) {
+      PrepaidCard10 prepaidCard10 = getPrepaidCardEJB11().getPrepaidCardById(null, movement.getCardId());
+      AccountingData10 acc = getPrepaidAccountingEJB10().searchAccountingByIdTrx(null,movement.getId());
+      ClearingData10 clearingData10 = getPrepaidClearingEJB10().searchClearingDataByAccountingId(null, acc.getId());
+
+      // Al expirar los movimientos en acc y liq se deben cerrar estos (not_ok y not_send respectivamente)
+      getPrepaidAccountingEJB10().updateAccountingStatus(null, acc.getId(), AccountingStatusType.NOT_OK);
+      getPrepaidClearingEJB10().updateClearingData(null, clearingData10.getId(), AccountingStatusType.NOT_SEND);
+
+    }
   }
 }
