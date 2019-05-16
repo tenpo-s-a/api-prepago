@@ -587,6 +587,7 @@ public class TecnocomReconciliationEJBBean10 extends PrepaidBaseEJBBean10 implem
           // Se buscan los registros que coincidan en la tabla IPM
           // Mismo PAN, mismo codcom, mismo, mismo num aut, monto 2.5% aproximado y que no hayan sido ya conciliados
 
+
           // Si hay mas de uno, se elige el mas cercano
 
           // Actualizar el valor
