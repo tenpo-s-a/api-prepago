@@ -12,7 +12,6 @@ import cl.multicaja.core.model.ZONEID;
 import cl.multicaja.core.utils.EncryptUtil;
 import cl.multicaja.core.utils.KeyValue;
 import cl.multicaja.core.utils.NumberUtils;
-import cl.multicaja.core.utils.Utils;
 import cl.multicaja.core.utils.db.InParam;
 import cl.multicaja.core.utils.db.OutParam;
 import cl.multicaja.prepaid.async.v10.PrepaidInvoiceDelegate10;
@@ -101,9 +100,10 @@ public class TecnocomReconciliationEJBBean10 extends PrepaidBaseEJBBean10 implem
   @EJB
   private AccountEJBBean10 accountEJBBean10;
 
-
   @Inject
   private PrepaidInvoiceDelegate10 prepaidInvoiceDelegate10;
+
+  private FeeService feeService;
 
   public void setPrepaidInvoiceDelegate10(PrepaidInvoiceDelegate10 prepaidInvoiceDelegate10) {
     this.prepaidInvoiceDelegate10 = prepaidInvoiceDelegate10;
@@ -178,6 +178,11 @@ public class TecnocomReconciliationEJBBean10 extends PrepaidBaseEJBBean10 implem
     }
     return encryptUtil;
   }
+
+  public void setFeeService(FeeService feeService) { this.feeService = feeService; }
+
+  public FeeService getFeeService() { return this.feeService; }
+
   /**
    * Procesa el archivo de operaciones diarias enviado por Tecnocom
    * Ya no se usa en esta proyecto, el que lee el archivo se movio a batch-worker
@@ -495,7 +500,7 @@ public class TecnocomReconciliationEJBBean10 extends PrepaidBaseEJBBean10 implem
       }
     }
   }
-  private void insertAutorization(Long fileId, List<MovimientoTecnocom10> trxs){
+  private void insertAutorization(Long fileId, List<MovimientoTecnocom10> trxs) throws Exception {
     log.info("INSERT AUT IN");
     for (MovimientoTecnocom10 trx : trxs) {
       try {
@@ -583,6 +588,7 @@ public class TecnocomReconciliationEJBBean10 extends PrepaidBaseEJBBean10 implem
           trx.setErrorDetails(ex.getMessage());
         }
         processErrorTrx(fileId, trx);
+        throw ex; // Todo: borrar este throw, solo para tests
       }
     }
     log.info("INSERT AUT OUT");
@@ -590,7 +596,7 @@ public class TecnocomReconciliationEJBBean10 extends PrepaidBaseEJBBean10 implem
 
   private void insertMovementFees(PrepaidMovement10 prepaidMovement10) throws Exception {
     // Pide la lista de comisiones al servicio
-    Fee fees = FeeService.getInstance().calculateFees(prepaidMovement10.getTipoMovimiento(), prepaidMovement10.getClamon(), prepaidMovement10.getImpfac().longValue());
+    Fee fees = getFeeService().calculateFees(prepaidMovement10.getTipoMovimiento(), prepaidMovement10.getClamon(), prepaidMovement10.getImpfac().longValue());
     List<Charge> feeCharges = fees.getCharges();
 
     if (feeCharges != null) {

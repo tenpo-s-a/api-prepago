@@ -6,10 +6,15 @@ import cl.multicaja.accounting.model.v10.ClearingData10;
 import cl.multicaja.accounting.model.v10.UserAccount;
 import cl.multicaja.camel.ExchangeData;
 import cl.multicaja.cdt.model.v10.CdtTransaction10;
+import cl.multicaja.core.exceptions.BaseException;
 import cl.multicaja.core.utils.EncryptUtil;
 import cl.multicaja.core.utils.Utils;
 import cl.multicaja.core.utils.db.DBUtils;
 import cl.multicaja.prepaid.async.v10.routes.KafkaEventsRoute10;
+import cl.multicaja.prepaid.helpers.fees.FeeService;
+import cl.multicaja.prepaid.helpers.fees.model.Charge;
+import cl.multicaja.prepaid.helpers.fees.model.ChargeType;
+import cl.multicaja.prepaid.helpers.fees.model.Fee;
 import cl.multicaja.prepaid.helpers.mcRed.McRedReconciliationFileDetail;
 import cl.multicaja.prepaid.helpers.tecnocom.TecnocomServiceHelper;
 import cl.multicaja.prepaid.helpers.tecnocom.model.TecnocomReconciliationRegisterType;
@@ -24,6 +29,7 @@ import org.junit.AfterClass;
 import org.junit.Assert;
 import org.junit.BeforeClass;
 import org.junit.Test;
+import org.mockito.Mockito;
 import org.netbeans.modules.schema2beans.ValidateException;
 
 import javax.jms.Queue;
@@ -35,6 +41,7 @@ import java.sql.Timestamp;
 import java.time.*;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.concurrent.TimeoutException;
 
 public class Test_AutoReconciliation_FullTest extends TestBaseUnitAsync {
   static Account account;
@@ -228,6 +235,9 @@ public class Test_AutoReconciliation_FullTest extends TestBaseUnitAsync {
     movimientoTecnocom10.setTipoReg(TecnocomReconciliationRegisterType.AU);
     movimientoTecnocom10 = getTecnocomReconciliationEJBBean10().insertaMovimientoTecnocom(movimientoTecnocom10);
 
+    // Prepara un mock del servicio de fees, para que retornes las fees esperadas
+    prepareCalculateFeesMock(movimientoTecnocom10.getImpFac().getValue());
+
     getTecnocomReconciliationEJBBean10().processTecnocomTableData(tecnocomReconciliationFile10.getId());
 
     // Verificar que exista el movimiento nuevo en la BD en estado AU
@@ -281,6 +291,9 @@ public class Test_AutoReconciliation_FullTest extends TestBaseUnitAsync {
     MovimientoTecnocom10 movimientoTecnocom10 = createMovimientoTecnocom(tecnocomReconciliationFile10.getId());
     movimientoTecnocom10.setTipoReg(TecnocomReconciliationRegisterType.OP);
     movimientoTecnocom10 = getTecnocomReconciliationEJBBean10().insertaMovimientoTecnocom(movimientoTecnocom10);
+
+    // Prepara un mock del servicio de fees, para que retornes las fees esperadas
+    prepareCalculateFeesMock(movimientoTecnocom10.getImpFac().getValue());
 
     getTecnocomReconciliationEJBBean10().processTecnocomTableData(tecnocomReconciliationFile10.getId());
 
@@ -459,6 +472,34 @@ public class Test_AutoReconciliation_FullTest extends TestBaseUnitAsync {
     ClearingData10 liq = getPrepaidClearingEJBBean10().searchClearingDataByAccountingId(null, acc.getId());
     Assert.assertNotNull("Debe existir en clearing", liq);
     Assert.assertEquals("Debe tener estado PENDING", AccountingStatusType.PENDING, liq.getStatus());
+  }
+
+  private void prepareCalculateFeesMock(BigDecimal amount) throws TimeoutException, BaseException {
+    // Prepara un mock del servicio de fees
+    BigDecimal expectedPrepaidFee = amount.multiply(new BigDecimal(0.02).multiply(new BigDecimal(0.81)));
+    BigDecimal expectedIvaFee = amount.multiply(new BigDecimal(0.02).multiply(new BigDecimal(0.19)));
+
+    List<Charge> chargesList = new ArrayList<>();
+
+    Charge prepaidCharge = new Charge();
+    prepaidCharge.setChargeType(ChargeType.COMMISSION);
+    prepaidCharge.setAmount(expectedPrepaidFee.longValue());
+    chargesList.add(prepaidCharge);
+
+    Charge ivaCharge = new Charge();
+    ivaCharge.setChargeType(ChargeType.IVA);
+    ivaCharge.setAmount(expectedIvaFee.longValue());
+    chargesList.add(ivaCharge);
+
+    // Prepara una fee esperada para que devuelva el servicio
+    Fee returnedFee = new Fee();
+    returnedFee.setTotal(expectedPrepaidFee.add(expectedIvaFee).longValue());
+    returnedFee.setCharges(chargesList);
+
+    // Setea que calculaFees() como mock para que devuelva la fee esperada
+    FeeService mockFeeService = Mockito.mock(FeeService.class);
+    Mockito.doReturn(returnedFee).when(mockFeeService).calculateFees(Mockito.any(), Mockito.any(), Mockito.any());
+    getTecnocomReconciliationEJBBean10().setFeeService(mockFeeService);
   }
 
   private PrepaidMovement10 getPrepaidMovement(PrepaidMovementType movementType, TipoFactura tipofac, String numaut, String pan, String codcom) throws Exception {
