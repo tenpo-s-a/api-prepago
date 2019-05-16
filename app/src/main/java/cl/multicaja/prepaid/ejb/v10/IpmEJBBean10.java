@@ -40,7 +40,7 @@ public class IpmEJBBean10 extends PrepaidBaseEJBBean10 {
                      "  reconciled = FALSE AND " +
                      "  transaction_amount >= ? AND transaction_amount <= ?", getSchemaAccounting());
 
-  private static final String UPDATE_IPM_MOVEMENT_RECONCILED_STATUS = String.format("UPDATE %s.ipm_file_data SET reconciled = ? WHERE id = ?", getSchemaAccounting());
+  private static final String UPDATE_IPM_MOVEMENT_RECONCILED_STATUS = "UPDATE %s.ipm_file_data SET reconciled = %b WHERE id = %s";
 
   /**
    * Busca un movimiento similar, que tenga:
@@ -95,13 +95,23 @@ public class IpmEJBBean10 extends PrepaidBaseEJBBean10 {
 
       return minFound;
     } catch (EmptyResultDataAccessException ex) {
-      log.error(String.format("[findByReconciliationSimilarity]  Cuenta/contrato no conciliado con truncatedPan [%s] codcom [%s] amount [%s] numaut [%s]", truncatedPan, codcom, amount.toString(), numaut));
+      log.error(String.format("[findByReconciliationSimilarity]  No se encontro MovimientoIpm no conciliado con truncatedPan [%s] codcom [%s] amount [%s] numaut [%s]", truncatedPan, codcom, amount.toString(), numaut));
       return null;
     }
   }
 
   public void updateIpmMovementReconciledStatus(Long id, boolean reconciledStatus) throws Exception {
-    
+    if (id == null) {
+      throw new BadRequestException(PARAMETRO_FALTANTE_$VALUE).setData(new KeyValue("value", "id"));
+    }
+
+    String updateQuery = String.format(UPDATE_IPM_MOVEMENT_RECONCILED_STATUS, getSchemaAccounting(), reconciledStatus, id);
+    try {
+      getDbUtils().getJdbcTemplate().execute(updateQuery);
+    } catch(Exception e) {
+      log.error(String.format("[updateIpmMovementReconciledStatus]  No se pudo actualizar el estado reconciliado a [%b] del movimiento [%s]", reconciledStatus, id));
+      throw new Exception("No se pudo actualizar el saldo");
+    }
   }
 
   private RowMapper<IpmMovement10> getIpmMovementMapper() {
