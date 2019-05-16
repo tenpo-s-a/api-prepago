@@ -351,6 +351,7 @@ public class Test_AutoReconciliation_FullTest extends TestBaseUnitAsync {
     insertedMovement.setNumaut(movimientoTecnocom10.getNumAut());
     insertedMovement.setCodcom(movimientoTecnocom10.getCodCom());
     insertedMovement.setCuenta(movimientoTecnocom10.getCuenta());
+    insertedMovement.setNomcomred("PruebaComercioNombre");
     insertedMovement = createPrepaidMovement11(insertedMovement);
 
     getTecnocomReconciliationEJBBean10().processTecnocomTableData(tecnocomReconciliationFile10.getId());
