@@ -50,8 +50,7 @@ public class Test_PendingTecnocomReconciliationFile10 extends TestBaseUnitAsync 
       String processorUserId =  contracts.get(i);
 
       System.out.println(String.format("%s -> %s", pan, processorUserId));
-
-
+      
       // Crea usuario prepago
       PrepaidUser10 prepaidUser10 = buildPrepaidUserv2();
       prepaidUser10 = createPrepaidUserV2(prepaidUser10);
