@@ -10,7 +10,7 @@ import org.junit.Test;
 import java.math.BigDecimal;
 import java.util.List;
 
-public class Test_IpmEJBBean_findByReconciliationSimilarity extends TestBaseUnit {
+public class Test_IpmEJBBean10_findByReconciliationSimilarity extends TestBaseUnit {
 
   @Before
   @After
@@ -72,7 +72,7 @@ public class Test_IpmEJBBean_findByReconciliationSimilarity extends TestBaseUnit
     compareIpmMovements(lowMovement, ipmMovement10);
   }
 
-  private void compareIpmMovements(IpmMovement10 expected, IpmMovement10 found) {
+  public void compareIpmMovements(IpmMovement10 expected, IpmMovement10 found) {
     Assert.assertNotNull("Debe existir", found);
     Assert.assertEquals("Debe tener mismo file_id", expected.getFileId(), found.getFileId());
     Assert.assertEquals("Debe tener mismo message_type", expected.getMessageType(), found.getMessageType());
@@ -101,7 +101,7 @@ public class Test_IpmEJBBean_findByReconciliationSimilarity extends TestBaseUnit
     Assert.assertTrue("Debe tener mismo updated_at", isRecentLocalDateTime(found.getTimestamps().getUpdatedAt(), 5));
   }
 
-  private void insertIpmMovement(IpmMovement10 ipmMovement10) throws Exception {
+  public void insertIpmMovement(IpmMovement10 ipmMovement10) throws Exception {
     String insertQuery = String.format(
       "INSERT INTO %s.ipm_file_data (" +
         "  file_id, " +

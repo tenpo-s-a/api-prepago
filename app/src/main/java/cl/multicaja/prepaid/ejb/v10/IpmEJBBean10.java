@@ -114,7 +114,7 @@ public class IpmEJBBean10 extends PrepaidBaseEJBBean10 {
     }
   }
 
-  private RowMapper<IpmMovement10> getIpmMovementMapper() {
+  public RowMapper<IpmMovement10> getIpmMovementMapper() {
     return (ResultSet rs, int rowNum) -> {
       IpmMovement10 ipmMovement = new IpmMovement10();
       ipmMovement.setId(rs.getLong("id"));
