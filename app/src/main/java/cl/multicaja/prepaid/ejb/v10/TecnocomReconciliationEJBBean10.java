@@ -100,6 +100,9 @@ public class TecnocomReconciliationEJBBean10 extends PrepaidBaseEJBBean10 implem
   @EJB
   private AccountEJBBean10 accountEJBBean10;
 
+  @EJB
+  private IpmEJBBean10 ipmEJBBean10;
+
   @Inject
   private PrepaidInvoiceDelegate10 prepaidInvoiceDelegate10;
 
@@ -171,6 +174,10 @@ public class TecnocomReconciliationEJBBean10 extends PrepaidBaseEJBBean10 implem
   public void setAccountEJBBean10(AccountEJBBean10 accountEJBBean10) {
     this.accountEJBBean10 = accountEJBBean10;
   }
+
+  public IpmEJBBean10 getIpmEJBBean10() { return ipmEJBBean10; }
+
+  public void setIpmEJBBean10(IpmEJBBean10 ipmEJBBean10) { this.ipmEJBBean10 = ipmEJBBean10; }
 
   private EncryptUtil getEncryptUtil(){
     if(encryptUtil == null){
@@ -592,18 +599,24 @@ public class TecnocomReconciliationEJBBean10 extends PrepaidBaseEJBBean10 implem
         }
 
         // Todo: Logica de la actualizacion del valor IPM
-        // Liquidacion IPM - Actualiza el valor de monto mastercard en la tabla de contabilidad
-        // Si el movimiento viene en estado OP (conciliado), se actualiza su valor de acuerdo al IPM
+        // Si el movimiento viene en estado OP (conciliado), se actualiza su valor de acuerdo al archivo IPM
         if (TecnocomReconciliationRegisterType.OP.equals(trx.getTipoReg())) {
-          // Se buscan los registros que coincidan en la tabla IPM
-          // Mismo PAN, mismo codcom, mismo, mismo num aut, monto 2.5% aproximado y que no hayan sido ya conciliados
-          // Si hay mas de uno, se elige el mas cercano
+          // Se busca el registro "mas parecido" en la tabla IPM
+          IpmMovement10 ipmMovement10 = ipmEJBBean10.findByReconciliationSimilarity(prepaidCard10.getPan(), trx.getCodCom(), trx.getImpFac().getValue(), trx.getNumAut());
+          if (ipmMovement10 != null) {
+            // Actualizar el valor de mastercard en la tablas de liquidacion
+            AccountingData10 accountingData10 = getPrepaidAccountingEJBBean10().searchAccountingByIdTrx(null, prepaidMovement10.getId());
+            accountingData10.getAmountMastercard().setValue(ipmMovement10.getTransactionAmount());
+            getPrepaidAccountingEJBBean10().updateAccountingDataFull(null, accountingData10);
 
-          // Actualizar el valor en la tablas de liquidacion
-
-          // Marcar movimiento tomado en la tabla IPM como conciliado
+            // Marcar movimiento tomado en la tabla IPM como conciliado
+            getIpmEJBBean10().updateIpmMovementReconciledStatus(ipmMovement10.getId(), true);
+          } else {
+            String msg = String.format("Error searching for similar IPM movement [modId: %s]", prepaidMovement10.getId());
+            log.error(msg);
+            throw new ValidationException(ERROR_DATA_NOT_FOUND.getValue(), msg);
+          }
         }
-
       } catch (Exception ex) {
         ex.printStackTrace();
         log.error(String.format("Error processing transaction [%s]", trx.getNumAut()));
@@ -611,7 +624,6 @@ public class TecnocomReconciliationEJBBean10 extends PrepaidBaseEJBBean10 implem
           trx.setErrorDetails(ex.getMessage());
         }
         processErrorTrx(fileId, trx);
-        throw ex; // Todo: borrar este throw, solo para tests
       }
     }
     log.info("INSERT AUT OUT");
