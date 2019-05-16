@@ -1,18 +1,14 @@
 package cl.multicaja.test.integration.v10.unit;
 
 import cl.multicaja.core.exceptions.BadRequestException;
-import cl.multicaja.core.utils.KeyValue;
 import cl.multicaja.prepaid.model.v10.IpmMovement10;
 import org.junit.After;
 import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;
-import org.springframework.dao.EmptyResultDataAccessException;
 
-import java.math.BigDecimal;
 import java.util.List;
 
-import static cl.multicaja.core.model.Errors.PARAMETRO_FALTANTE_$VALUE;
 
 public class Test_IpmEJBBean10_updateIpmMovementReconciledStatus extends TestBaseUnit {
   @Before
@@ -45,7 +41,7 @@ public class Test_IpmEJBBean10_updateIpmMovementReconciledStatus extends TestBas
     new Test_IpmEJBBean10_findByReconciliationSimilarity().insertIpmMovement(ipmMovement10);
   }
 
-  public IpmMovement10 selectIpmMovement(Long id) throws Exception {
+  public IpmMovement10 selectIpmMovement(Long id) {
     List<IpmMovement10> ipmMovement10List = getDbUtils().getJdbcTemplate().query(String.format("SELECT * FROM %s.ipm_file_data WHERE id = %s", getSchemaAccounting(), id), getIpmEJBBean10().getIpmMovementMapper());
     return ipmMovement10List != null && !ipmMovement10List.isEmpty() ? ipmMovement10List.get(0) : null;
   }
