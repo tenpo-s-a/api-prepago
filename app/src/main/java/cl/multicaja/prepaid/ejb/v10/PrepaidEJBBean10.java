@@ -369,7 +369,6 @@ public class PrepaidEJBBean10 extends PrepaidBaseEJBBean10 implements PrepaidEJB
     PrepaidTopup10 prepaidTopup = new PrepaidTopup10(topupRequest);
     prepaidTopup.setUserId(user.getId());
     prepaidTopup.setStatus("exitoso");
-    prepaidTopup.setTimestamps(new Timestamps());
 
     /*
       Calcular monto a cargar y comisiones
@@ -442,6 +441,8 @@ public class PrepaidEJBBean10 extends PrepaidBaseEJBBean10 implements PrepaidEJB
       prepaidMovement.setConSwitch(ReconciliationStatusType.RECONCILED);
     }
     prepaidMovement = getPrepaidMovementEJB10().addPrepaidMovement(null, prepaidMovement);
+    prepaidTopup.setTimestamps(new Timestamps(prepaidMovement.getFechaCreacion().toLocalDateTime(),
+      prepaidMovement.getFechaActualizacion().toLocalDateTime()));
 
     /*
       Registra las comisiones asociadas a este movimiento
@@ -819,7 +820,6 @@ public class PrepaidEJBBean10 extends PrepaidBaseEJBBean10 implements PrepaidEJB
     PrepaidWithdraw10 prepaidWithdraw = new PrepaidWithdraw10(withdrawRequest);
     prepaidWithdraw.setUserId(prepaidUser.getId());
     prepaidWithdraw.setStatus("exitoso");
-    prepaidWithdraw.setTimestamps(new Timestamps());
 
     /*
       Calcular monto a cargar y comisiones
@@ -888,7 +888,8 @@ public class PrepaidEJBBean10 extends PrepaidBaseEJBBean10 implements PrepaidEJB
     }
 
     prepaidMovement = getPrepaidMovementEJB10().addPrepaidMovement(headers, prepaidMovement);
-    prepaidMovement = getPrepaidMovementEJB10().getPrepaidMovementById(prepaidMovement.getId());
+    prepaidWithdraw.setTimestamps(new Timestamps(prepaidMovement.getFechaCreacion().toLocalDateTime(),
+      prepaidMovement.getFechaActualizacion().toLocalDateTime()));
 
     prepaidWithdraw.setId(prepaidMovement.getId());
 
