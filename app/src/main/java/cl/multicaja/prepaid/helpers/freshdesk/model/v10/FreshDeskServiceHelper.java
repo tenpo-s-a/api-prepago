@@ -23,6 +23,7 @@ public class FreshdeskServiceHelper {
     }
     return this.configUtils;
   }
+  
 
   public FreshdeskService getFreshdeskService() {
     return freshdeskService;
