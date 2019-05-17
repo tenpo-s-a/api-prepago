@@ -1,10 +1,15 @@
 package cl.multicaja.prepaid.helpers.tenpo;
 
 
+import java.util.UUID;
+import java.util.concurrent.TimeoutException;
+
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
+
 import cl.multicaja.core.exceptions.BadRequestException;
 import cl.multicaja.core.exceptions.BaseException;
 import cl.multicaja.core.exceptions.NotFoundException;
-import cl.multicaja.core.exceptions.ValidationException;
 import cl.multicaja.core.utils.ConfigUtils;
 import cl.multicaja.core.utils.http.HttpError;
 import cl.multicaja.core.utils.http.HttpHeader;
@@ -12,44 +17,56 @@ import cl.multicaja.core.utils.http.HttpResponse;
 import cl.multicaja.core.utils.http.HttpUtils;
 import cl.multicaja.core.utils.json.JsonMapper;
 import cl.multicaja.prepaid.helpers.tenpo.model.User;
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
-
-
-import java.util.*;
-import java.util.concurrent.TimeoutException;
+import cl.multicaja.prepaid.utils.EnvironmentUtil;
 
 public class ApiCall {
 
-  private static ApiCall instance;
   private static final Log LOG = LogFactory.getLog(ApiCall.class);
-  private HttpUtils httpUtils = HttpUtils.getInstance();
-  private JsonMapper jsonMapper;
-  private ConfigUtils configUtils;
+  private static final String TENPO_USER_API_URL = "TENPO_USER_API_URL";
   private static final int TIMEOUT = 15000;
-  private String apiUrl = this.getConfigUtils().getProperty("apis.user.url");
-
   private static final HttpHeader[] DEFAULT_HTTP_HEADERS = {
     new HttpHeader("Content-Type", "application/json"),
   };
 
+  private static ApiCall instance;
+  private static JsonMapper jsonMapper;
+  private static ConfigUtils configUtils;
+  
+  private HttpUtils httpUtils = HttpUtils.getInstance();
+  private String apiUrl = EnvironmentUtil.getVariable(TENPO_USER_API_URL, () -> 
+    this.getConfigUtils().getProperty("apis.user.url"));
+
+  private ApiCall() {}
+
   private JsonMapper getJsonMapper() {
     if(jsonMapper == null) {
-      jsonMapper = new JsonMapper();
+      synchronized(ApiCall.class) {
+        if(jsonMapper == null) {
+          jsonMapper = new JsonMapper();
+        }
+      }
     }
     return jsonMapper;
   }
 
   public static ApiCall getInstance() {
     if(instance == null) {
-      instance = new ApiCall();
+      synchronized(ApiCall.class) {
+        if(instance == null) {
+          instance = new ApiCall();
+        }
+      }
     }
     return instance;
   }
 
   private ConfigUtils getConfigUtils() {
     if(configUtils == null) {
-      configUtils = new ConfigUtils("api-prepaid");
+      synchronized(ApiCall.class) {
+        if(configUtils == null) {
+          configUtils = new ConfigUtils("api-prepaid");
+        }
+      }
     }
     return configUtils;
   }
