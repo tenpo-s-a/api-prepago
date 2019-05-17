@@ -295,11 +295,12 @@ public class Test_AutoReconciliation_FullTest extends TestBaseUnitAsync {
 
     // Inserta el movimiento que vino en el archivo IPM (para hacer un match, y reescribir su valor)
     IpmMovement10 ipmMovement10 = buildIpmMovement10();
+    ipmMovement10.setReconciled(false);
     ipmMovement10.setTransactionAmount(movimientoTecnocom10.getImpFac().getValue().multiply(new BigDecimal(1.005))); // Alterar levemente el valor para que se reescriba
     ipmMovement10.setPan(prepaidCard.getPan());
     ipmMovement10.setMerchantCode(movimientoTecnocom10.getCodCom());
     ipmMovement10.setApprovalCode(movimientoTecnocom10.getNumAut());
-    insertIpmMovement(ipmMovement10);
+    ipmMovement10 = createIpmMovement(ipmMovement10);
 
     // Prepara un mock del servicio de fees, para que retornes las fees esperadas
     prepareCalculateFeesMock(movimientoTecnocom10.getImpFac().getValue());
@@ -324,6 +325,10 @@ public class Test_AutoReconciliation_FullTest extends TestBaseUnitAsync {
 
     // El movimiento ha pasado a OP, verificar que su valor de contabilidad mastercard ha sido actualizado con el del IPM
     Assert.assertEquals("Deben tener mismo valor", ipmMovement10.getTransactionAmount().setScale(2, RoundingMode.HALF_UP), acc.getAmountMastercard().getValue().setScale(2, RoundingMode.HALF_UP));
+
+    // El movimiento en IPM debe pasar a conciliado
+    IpmMovement10 foundIpmMovement = getIpmMovementById(ipmMovement10.getId());
+    Assert.assertTrue("Debe estar en estado reconciled", foundIpmMovement.getReconciled());
 
     // Verificar que exista en la cola de eventos transaction_authorized
     Queue qResp = camelFactory.createJMSQueue(KafkaEventsRoute10.TRANSACTION_AUTHORIZED_TOPIC);
@@ -412,7 +417,7 @@ public class Test_AutoReconciliation_FullTest extends TestBaseUnitAsync {
     ipmMovement10.setPan(prepaidCard.getPan());
     ipmMovement10.setMerchantCode(movimientoTecnocom10.getCodCom());
     ipmMovement10.setApprovalCode(movimientoTecnocom10.getNumAut());
-    insertIpmMovement(ipmMovement10);
+    createIpmMovement(ipmMovement10);
 
     // Se inserta un movimiento en estado NOTIFIED
     PrepaidMovement10 insertedMovement = buildPrepaidMovementV2(prepaidUser, topup, prepaidCard, null, PrepaidMovementType.TOPUP);
@@ -445,6 +450,10 @@ public class Test_AutoReconciliation_FullTest extends TestBaseUnitAsync {
 
     // El movimiento ha pasado a OP, verificar que su valor de contabilidad mastercard ha sido actualizado con el del IPM
     Assert.assertEquals("Deben tener mismo valor", ipmMovement10.getTransactionAmount().setScale(2, RoundingMode.HALF_UP), acc.getAmountMastercard().getValue().setScale(2, RoundingMode.HALF_UP));
+
+    // El movimiento en IPM debe pasar a conciliado
+    IpmMovement10 foundIpmMovement = getIpmMovementById(ipmMovement10.getId());
+    Assert.assertTrue("Debe estar en estado reconciled", foundIpmMovement.getReconciled());
   }
 
   @Test
@@ -464,7 +473,7 @@ public class Test_AutoReconciliation_FullTest extends TestBaseUnitAsync {
     ipmMovement10.setPan(prepaidCard.getPan());
     ipmMovement10.setMerchantCode(movimientoTecnocom10.getCodCom());
     ipmMovement10.setApprovalCode(movimientoTecnocom10.getNumAut());
-    insertIpmMovement(ipmMovement10);
+    createIpmMovement(ipmMovement10);
 
     // Se inserta un movimiento en estado AUTHORIZED
     PrepaidMovement10 insertedMovement = buildPrepaidMovementV2(prepaidUser, topup, prepaidCard, null, PrepaidMovementType.TOPUP);
@@ -508,6 +517,10 @@ public class Test_AutoReconciliation_FullTest extends TestBaseUnitAsync {
 
     // El movimiento ha pasado a OP, verificar que su valor de contabilidad mastercard ha sido actualizado con el del IPM
     Assert.assertEquals("Deben tener mismo valor", ipmMovement10.getTransactionAmount().setScale(2, RoundingMode.HALF_UP), acc.getAmountMastercard().getValue().setScale(2, RoundingMode.HALF_UP));
+
+    // El movimiento en IPM debe pasar a conciliado
+    IpmMovement10 foundIpmMovement = getIpmMovementById(ipmMovement10.getId());
+    Assert.assertTrue("Debe estar en estado reconciled", foundIpmMovement.getReconciled());
   }
 
   private void prepareCalculateFeesMock(BigDecimal amount) throws TimeoutException, BaseException {

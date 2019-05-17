@@ -32,13 +32,18 @@ import cl.multicaja.accounting.model.v10.UserAccountNew;
 import org.apache.commons.lang3.RandomUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.junit.Assert;
+import org.springframework.dao.EmptyResultDataAccessException;
+import org.springframework.jdbc.support.GeneratedKeyHolder;
+import org.springframework.jdbc.support.KeyHolder;
 
 import javax.persistence.EntityManager;
 import javax.persistence.EntityManagerFactory;
 import javax.persistence.Persistence;
 import java.math.BigDecimal;
+import java.sql.PreparedStatement;
 import java.sql.SQLException;
 import java.sql.Timestamp;
+import java.time.Instant;
 import java.time.LocalDateTime;
 import java.time.ZoneId;
 import java.util.*;
@@ -1823,8 +1828,8 @@ public class TestBaseUnit extends TestApiBase {
     return ipmMovement10;
   }
 
-  public void insertIpmMovement(IpmMovement10 ipmMovement10) throws Exception {
-    String insertQuery = String.format(
+  public IpmMovement10 createIpmMovement(IpmMovement10 movement) throws Exception {
+    String insertMovementSql = String.format(
       "INSERT INTO %s.ipm_file_data (" +
         "  file_id, " +
         "  message_type, " +
@@ -1851,55 +1856,75 @@ public class TestBaseUnit extends TestApiBase {
         "  created_at, " +
         "  updated_at " +
         ") VALUES (" +
-        "  %s, " +
-        "  %s, " +
-        "  %s, " +
-        "  %s, " +
-        "  %s, " +
-        "  '%s', " +
-        "  %s, " +
-        "  %s, " +
-        "  %s, " +
-        "  %s, " +
-        "  %s, " +
-        "  timezone('utc', now()), " +
-        "  '%s', " +
-        "  %s, " +
-        "  %s, " +
-        "  %s, " +
-        "  '%s', " +
-        "  '%s', " +
-        "  '%s', " +
-        "  '%s', " +
-        "  '%s', " +
-        "  %b, " +
-        "  timezone('utc', now()), " +
-        "  timezone('utc', now()) " +
-        ")",
-      getSchemaAccounting(),
-      ipmMovement10.getFileId(),
-      ipmMovement10.getMessageType(),
-      ipmMovement10.getFunctionCode(),
-      ipmMovement10.getMessageReason(),
-      ipmMovement10.getMessageNumber(),
-      ipmMovement10.getPan(),
-      ipmMovement10.getTransactionAmount(),
-      ipmMovement10.getReconciliationAmount(),
-      ipmMovement10.getCardholderBillingAmount(),
-      ipmMovement10.getReconciliationConversionRate(),
-      ipmMovement10.getCardholderBillingConversionRate(),
-      ipmMovement10.getApprovalCode(),
-      ipmMovement10.getTransactionCurrencyCode(),
-      ipmMovement10.getReconciliationCurrencyCode(),
-      ipmMovement10.getCardholderBillingCurrencyCode(),
-      ipmMovement10.getMerchantCode(),
-      ipmMovement10.getMerchantName(),
-      ipmMovement10.getMerchantState(),
-      ipmMovement10.getMerchantCountry(),
-      ipmMovement10.getTransactionLifeCycleId(),
-      ipmMovement10.getReconciled()
-    );
+        "  ?, " +
+        "  ?, " +
+        "  ?, " +
+        "  ?, " +
+        "  ?, " +
+        "  ?, " +
+        "  ?, " +
+        "  ?, " +
+        "  ?, " +
+        "  ?, " +
+        "  ?, " +
+        "  ?, " +
+        "  ?, " +
+        "  ?, " +
+        "  ?, " +
+        "  ?, " +
+        "  ?, " +
+        "  ?, " +
+        "  ?, " +
+        "  ?, " +
+        "  ?, " +
+        "  ?, " +
+        "  ?, " +
+        "  ? " +
+        ")", getSchemaAccounting());
 
-    getDbUtils().getJdbcTemplate().execute(insertQuery);
+    KeyHolder keyHolder = new GeneratedKeyHolder();
+
+    getDbUtils().getJdbcTemplate().update(connection -> {
+      PreparedStatement ps = connection.prepareStatement(insertMovementSql, new String[] {"id"});
+      ps.setLong(1, movement.getFileId());
+      ps.setLong(2, movement.getMessageType());
+      ps.setInt(3, movement.getFunctionCode());
+      ps.setInt(4, movement.getMessageReason());
+      ps.setInt(5, movement.getMessageNumber());
+      ps.setString(6, movement.getPan());
+      ps.setBigDecimal(7, movement.getTransactionAmount());
+      ps.setBigDecimal(8, movement.getReconciliationAmount());
+      ps.setBigDecimal(9, movement.getCardholderBillingAmount());
+      ps.setBigDecimal(10, movement.getReconciliationConversionRate());
+      ps.setBigDecimal(11, movement.getCardholderBillingConversionRate());
+      ps.setTimestamp(12, Timestamp.valueOf(movement.getTransactionLocalDate()));
+      ps.setString(13, movement.getApprovalCode());
+      ps.setInt(14, movement.getTransactionCurrencyCode());
+      ps.setInt(15, movement.getReconciliationCurrencyCode());
+      ps.setInt(16, movement.getCardholderBillingCurrencyCode());
+      ps.setString(17, movement.getMerchantCode());
+      ps.setString(18, movement.getMerchantName());
+      ps.setString(19, movement.getMerchantState());
+      ps.setString(20, movement.getMerchantCountry());
+      ps.setString(21, movement.getTransactionLifeCycleId());
+      ps.setBoolean(22, movement.getReconciled());
+      ps.setTimestamp(23, Timestamp.valueOf(LocalDateTime.ofInstant(Instant.now(), ZoneId.of("UTC"))));
+      ps.setTimestamp(24, Timestamp.valueOf(LocalDateTime.ofInstant(Instant.now(), ZoneId.of("UTC"))));
+
+      return ps;
+    }, keyHolder);
+
+    return getIpmMovementById((long) keyHolder.getKey());
+  }
+
+  public IpmMovement10 getIpmMovementById(Long id) {
+    String findMovementByIdSql = String.format("SELECT * FROM %s.ipm_file_data WHERE id = ?", getSchemaAccounting());
+
+    try {
+      return getDbUtils().getJdbcTemplate()
+        .queryForObject(findMovementByIdSql, getIpmEJBBean10().getIpmMovementMapper(), id);
+    } catch (EmptyResultDataAccessException ex) {
+      return null;
+    }
   }
 }
