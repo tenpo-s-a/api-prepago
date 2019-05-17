@@ -557,6 +557,8 @@ public class TecnocomReconciliationEJBBean10 extends PrepaidBaseEJBBean10 implem
 
           // Se consulta al servicio de comisiones y se insertan las comisiones recibidas
           insertMovementFees(prepaidMovement10);
+          // Todo: falta construir la lista de comisiones para TODOS los tipos de trx (Compras, Suscripciones, Refund = sin lista)
+          List<PrepaidMovementFee10> feeList = Collections.emptyList();
 
           // Dado que no esta en la BD, se crean tambien sus campos en las tablas de contabilidad
           insertIntoAccoutingAndClearing(trx.getTipoReg(), prepaidMovement10);
@@ -567,14 +569,29 @@ public class TecnocomReconciliationEJBBean10 extends PrepaidBaseEJBBean10 implem
           // Como no se encontro en la BD este movimiento no pasó por el callback
           // Por lo que es necesario levantar el evento de transaccion
           PrepaidUser10 prepaidUser10 = getPrepaidUserEJBBean10().findById(null, account.getUserId());
-          TransactionType transactionType = prepaidMovement10.getTipoMovimiento().equals(PrepaidMovementType.SUSCRIPTION) ? TransactionType.SUSCRIPTION : TransactionType.PURCHASE;
+          TransactionType transactionType;
+          switch (prepaidMovement10.getTipoMovimiento()) {
+            case PURCHASE:
+              transactionType = TransactionType.PURCHASE;
+              break;
+            case SUSCRIPTION:
+              transactionType = TransactionType.SUSCRIPTION;
+              break;
+            case REFUND:
+              transactionType = TransactionType.REFUND;
+              break;
+            default:
+              String msg = String.format("Error - Transaction of type %s came as AUTO in OP file", prepaidMovement10.getTipoMovimiento().toString());
+              log.error(msg);
+              throw new ValidationException(ERROR_PROCESSING_FILE.getValue(), msg);
+          }
 
           // Determinar que tipo de transaccion es, y levantar el evento apropiado
-          TipoFactura tipoFactura = TipoFactura.valueOfEnumByCodeAndCorrector(trx.getTipoFac().getCode(), trx.getIndNorCor());
-          if (TipoFactura.DEVOLUCION_COMPRA_INTERNACIONAL.equals(tipoFactura)) {
-            
+          if (IndicadorNormalCorrector.NORMAL.getValue().equals(trx.getIndNorCor())) {
+            getPrepaidMovementEJBBean11().publishTransactionAuthorizedEvent(prepaidUser10.getUuid(), account.getUuid(), prepaidCard10.getUuid(), prepaidMovement10, feeList, transactionType);
+          } else {
+            getPrepaidMovementEJBBean11().publishTransactionReversedEvent(prepaidUser10.getUuid(), account.getUuid(), prepaidCard10.getUuid(), prepaidMovement10, feeList, transactionType);
           }
-          getPrepaidMovementEJBBean11().publishTransactionAuthorizedEvent(prepaidUser10.getUuid(), account.getUuid(), prepaidCard10.getUuid(), prepaidMovement10, Collections.emptyList(), transactionType);
         } else {
           PrepaidMovementStatus originalStatus = prepaidMovement10.getEstado();
 
@@ -636,12 +653,14 @@ public class TecnocomReconciliationEJBBean10 extends PrepaidBaseEJBBean10 implem
   }
 
   private void insertMovementFees(PrepaidMovement10 prepaidMovement10) throws Exception {
-    // Todo: Si el movimiento es de tipo DEVOLUCION, no se calculan comisiones de ningun tipo.
+    // Por negocio las devoluciones no generan comisiones de ningun tipo
+    if (PrepaidMovementType.REFUND.equals(prepaidMovement10.getTipoMovimiento())) {
+      return;
+    }
 
-
+    // Pide la lista de comisiones al servicio
     List<Charge> feeCharges;
     try {
-      // Pide la lista de comisiones al servicio
       Fee fees = getFeeService().calculateFees(prepaidMovement10.getTipoMovimiento(), prepaidMovement10.getClamon(), prepaidMovement10.getImpfac().longValue());
       feeCharges = fees.getCharges();
     } catch (Exception e) {
