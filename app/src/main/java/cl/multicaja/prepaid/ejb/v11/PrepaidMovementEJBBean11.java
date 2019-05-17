@@ -1,8 +1,10 @@
 package cl.multicaja.prepaid.ejb.v11;
 
+import cl.multicaja.accounting.model.v10.AccountingData10;
+import cl.multicaja.accounting.model.v10.AccountingStatusType;
+import cl.multicaja.accounting.model.v10.ClearingData10;
 import cl.multicaja.core.exceptions.BadRequestException;
 import cl.multicaja.core.exceptions.BaseException;
-import cl.multicaja.core.exceptions.ValidationException;
 import cl.multicaja.core.utils.KeyValue;
 import cl.multicaja.prepaid.async.v10.KafkaEventDelegate10;
 import cl.multicaja.prepaid.ejb.v10.PrepaidMovementEJBBean10;
@@ -10,6 +12,7 @@ import cl.multicaja.prepaid.kafka.events.TransactionEvent;
 import cl.multicaja.prepaid.kafka.events.model.*;
 import cl.multicaja.prepaid.kafka.events.model.Timestamps;
 import cl.multicaja.prepaid.model.v10.*;
+import cl.multicaja.prepaid.model.v11.Account;
 import cl.multicaja.prepaid.model.v11.PrepaidMovementFeeType;
 import cl.multicaja.tecnocom.constants.*;
 import org.apache.commons.lang3.StringUtils;
@@ -23,8 +26,10 @@ import org.springframework.jdbc.support.KeyHolder;
 import javax.ejb.*;
 import javax.inject.Inject;
 import java.math.BigDecimal;
+import java.sql.Date;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
+import java.text.SimpleDateFormat;
 import java.sql.Timestamp;
 import java.time.Instant;
 import java.time.LocalDateTime;
@@ -145,6 +150,56 @@ public class PrepaidMovementEJBBean11 extends PrepaidMovementEJBBean10 {
     }
   }
 
+  @Override
+  public List<PrepaidMovement10> getPrepaidMovements(Long id, Long idMovimientoRef, Long idPrepaidUser, String idTxExterno, PrepaidMovementType tipoMovimiento,
+                                                     PrepaidMovementStatus estado, String cuenta, CodigoMoneda clamon, IndicadorNormalCorrector indnorcor, TipoFactura tipofac, Date fecfac, String numaut,
+                                                     ReconciliationStatusType estadoConSwitch, ReconciliationStatusType estadoConTecnocom, MovementOriginType origen, String pan, String codcom) throws Exception {
+    StringBuilder query = new StringBuilder();
+    query.append(String.format("SELECT * FROM %s.prp_movimiento WHERE ", getSchema()));
+    query.append(id != null ? String.format("id = %d AND ", id) : "");
+    query.append(idMovimientoRef != null ? String.format("id_movimiento_ref = %d AND ", idMovimientoRef) : "");
+    query.append(idPrepaidUser != null ? String.format("id_usuario = %d AND ", idPrepaidUser) : "");
+    query.append(idTxExterno != null ? String.format("id_tx_externo = '%s' AND ", idTxExterno) : "");
+    query.append(tipoMovimiento != null ? String.format("tipo_movimiento = '%s' AND ", tipoMovimiento.toString()) : "");
+    query.append(estado != null ? String.format("estado = '%s' AND ", estado.toString()) : "");
+    query.append(cuenta != null ? String.format("cuenta = '%s' AND ", cuenta) : "");
+    query.append(clamon != null ? String.format("clamon = %d AND ", clamon.getValue()) : "");
+    query.append(indnorcor != null ? String.format("indnorcor = %d AND ", indnorcor.getValue()) : "");
+    query.append(tipofac != null ? String.format("tipofac = %d AND ", tipofac.getCode()) : "");
+    if (fecfac != null) {
+      SimpleDateFormat sdf = new SimpleDateFormat("YYYYMMdd");
+      String fecfacString = sdf.format(fecfac);
+      query.append(String.format("fecfac = to_date('%s', 'YYYYMMDD') AND ", fecfacString));
+    }
+    query.append(numaut != null ? String.format("numaut = '%s' AND ", numaut) : "");
+    query.append(estadoConSwitch != null ? String.format("estado_con_switch = '%s' AND ", estadoConSwitch.getValue()) : "");
+    query.append(estadoConTecnocom != null ? String.format("estado_con_tecnocom = '%s' AND ", estadoConTecnocom.getValue()) : "");
+    query.append(origen != null ? String.format("origen_movimiento = '%s' AND ", origen.getValue()) : "");
+    query.append(pan != null ? String.format("pan = '%s' AND ", pan) : "");
+    query.append(codcom != null ? String.format("codcom = '%s' AND ", codcom) : "");
+    query.append("1 = 1");
+
+    log.info(String.format("[getPrepaidMovements] Buscando movimiento [id: %d]", id));
+
+    try {
+      return getDbUtils().getJdbcTemplate().query(query.toString(), this.getMovementMapper());
+    } catch (EmptyResultDataAccessException ex) {
+      log.error(String.format("[getPrepaidMovements] Movimiento con id [%d] no existe", id));
+      return null;
+    }
+  }
+
+  public PrepaidMovement10 getPrepaidMovementForAut(Long idPrepaidUser, TipoFactura tipoFactura, String numaut, String codcom) throws Exception {
+    if (idPrepaidUser == null) {
+      throw new BadRequestException(PARAMETRO_FALTANTE_$VALUE).setData(new KeyValue("value", "idPrepaidUser"));
+    }
+    if (numaut == null) {
+      throw new BadRequestException(PARAMETRO_FALTANTE_$VALUE).setData(new KeyValue("value", "numaut"));
+    }
+    List<PrepaidMovement10> lst = this.getPrepaidMovements(null, null, idPrepaidUser, null, null, null, null, null, null, tipoFactura, null, numaut, null, null, null, null, codcom);
+    return lst != null && !lst.isEmpty() ? lst.get(0) : null;
+  }
+
   private RowMapper<PrepaidMovement10> getMovementMapper() {
     return (ResultSet rs, int rowNum) -> {
       PrepaidMovement10 movement = new PrepaidMovement10();
@@ -166,7 +221,7 @@ public class PrepaidMovementEJBBean11 extends PrepaidMovementEJBBean10 {
       movement.setCuenta(rs.getString("cuenta"));
       movement.setClamon(CodigoMoneda.fromValue(rs.getInt("clamon")));
       movement.setIndnorcor(IndicadorNormalCorrector.fromValue(rs.getInt("indnorcor")));
-      movement.setTipofac(TipoFactura.valueOfEnum(rs.getString("tipofac")));
+      movement.setTipofac(TipoFactura.valueOfEnumByCodeAndCorrector(rs.getInt("tipofac"),rs.getInt("indnorcor")));
       movement.setFecfac(rs.getDate("fecfac"));
       movement.setNumreffac(rs.getString("numreffac"));
       movement.setPan(rs.getString("pan"));
@@ -374,5 +429,97 @@ public class PrepaidMovementEJBBean11 extends PrepaidMovementEJBBean10 {
       prepaidMovementFee.setTimestamps(timestamps);
       return prepaidMovementFee;
     };
+  }
+
+  public void expireNotReconciledAuthorizations() throws Exception {
+    StringBuilder queryExpire = new StringBuilder();
+    queryExpire.append("UPDATE %s.prp_movimiento mov SET estado_con_tecnocom = 'NOT_RECONCILED', estado = 'EXPIRED' " );
+    queryExpire.append("WHERE (mov.tipo_movimiento = 'SUSCRIPTION' OR mov.tipo_movimiento = 'PURCHASE') ");
+    queryExpire.append("AND mov.estado_con_tecnocom = 'PENDING' ");
+    queryExpire.append("AND mov.estado = '%s' ");
+    queryExpire.append("AND (SELECT COUNT(f.id) ");
+    queryExpire.append("FROM %s.prp_archivos_conciliacion f ");
+    queryExpire.append("WHERE f.created_at >= mov.fecha_creacion AND f.tipo = 'TECNOCOM_FILE' AND f.status = 'OK' ) >= %d");
+    String expiredQuery = queryExpire.toString();
+
+    //Expira los movimientos con estado Notified que ya cumplieron 2 archivos
+    List<PrepaidMovement10> notifiedMovements = this.searchMovementsForExpire(PrepaidMovementStatus.NOTIFIED.toString(), 2);
+
+    String expiredNotifiedQuery = String.format(expiredQuery,getSchema(), PrepaidMovementStatus.NOTIFIED.toString(), getSchema(), 2);
+    log.info("Expirando autorizaciones notificadas: " + expiredNotifiedQuery);
+    getDbUtils().getJdbcTemplate().execute(expiredNotifiedQuery);
+
+    //Levanta eventos por cada movimiento expirado para notificadas
+    this.lauchEventReverse(notifiedMovements);
+
+    //Expira los movimientos con estado Authorized que ya cumplieron 7 archivos
+    List<PrepaidMovement10> authorizedMovements = this.searchMovementsForExpire(PrepaidMovementStatus.AUTHORIZED.toString(), 7);
+
+    String expiredAuthorizedQuery = String.format(expiredQuery,getSchema(), PrepaidMovementStatus.AUTHORIZED.toString(), getSchema(), 7);
+    log.info("Expirando autorizaciones autorizadas: " + expiredAuthorizedQuery);
+    getDbUtils().getJdbcTemplate().execute(expiredAuthorizedQuery);
+
+    //Levanta eventos por cada movimiento expirado para autorizadas
+    this.lauchEventReverse(authorizedMovements);
+
+    //Se cierran los estados para accounting y clearing
+    this.closingStatusForAccountingAndClearing(authorizedMovements);
+  }
+
+  public void lauchEventReverse(List<PrepaidMovement10> movement10s) throws Exception {
+    for (PrepaidMovement10 movement: movement10s) {
+      TransactionType transactionType = null;
+      PrepaidCard10 prepaidCard10 = getPrepaidCardEJB11().getPrepaidCardById(null, movement.getCardId());
+      Account account10 = getAccountEJBBean10().findById(prepaidCard10.getAccountId());
+      PrepaidUser10 prepaidUser10 = getPrepaidUserEJB10().findById(null, account10.getUserId());
+      List<PrepaidMovementFee10> feeList = new ArrayList<PrepaidMovementFee10>();
+
+      if (movement.getTipofac() == TipoFactura.COMPRA_INTERNACIONAL) {
+        transactionType = TransactionType.PURCHASE;
+      }
+      if (movement.getTipofac() == TipoFactura.SUSCRIPCION_INTERNACIONAL) {
+        transactionType = TransactionType.SUSCRIPTION;
+      }
+
+      publishTransactionReversedEvent(
+        prepaidUser10.getUuid(),
+        account10.getUuid(),
+        prepaidCard10.getUuid(),
+        movement,
+        feeList,
+        transactionType
+      );
+    }
+  }
+
+  public List<PrepaidMovement10> searchMovementsForExpire(String movement, int numFiles){
+    StringBuilder queryExpire = new StringBuilder();
+    queryExpire.append("select * from  %s.prp_movimiento mov " );
+    queryExpire.append("WHERE (mov.tipo_movimiento = 'SUSCRIPTION' OR mov.tipo_movimiento = 'PURCHASE') ");
+    queryExpire.append("AND mov.estado_con_tecnocom = 'PENDING' ");
+    queryExpire.append("AND mov.estado = '%s' ");
+    queryExpire.append("AND (SELECT COUNT(f.id) ");
+    queryExpire.append("FROM %s.prp_archivos_conciliacion f ");
+    queryExpire.append("WHERE f.created_at >= mov.fecha_creacion AND f.tipo = 'TECNOCOM_FILE' AND f.status = 'OK' ) >= %d");
+    String expiredQuerySelected = queryExpire.toString();
+
+    //PrepaidMovementStatus.NOTIFIED.toString()
+    String expiredQuerySelect = String.format(expiredQuerySelected,getSchema(),movement,getSchema(),numFiles);
+    log.info("Buscando autorizaciones " + movement +": " + expiredQuerySelect);
+
+    return getDbUtils().getJdbcTemplate().query(expiredQuerySelect, this.getMovementMapper());
+  }
+
+  public void closingStatusForAccountingAndClearing(List<PrepaidMovement10> movement10s) throws Exception {
+    for (PrepaidMovement10 movement: movement10s) {
+      PrepaidCard10 prepaidCard10 = getPrepaidCardEJB11().getPrepaidCardById(null, movement.getCardId());
+      AccountingData10 acc = getPrepaidAccountingEJB10().searchAccountingByIdTrx(null,movement.getId());
+      ClearingData10 clearingData10 = getPrepaidClearingEJB10().searchClearingDataByAccountingId(null, acc.getId());
+
+      // Al expirar los movimientos en acc y liq se deben cerrar estos (not_ok y not_send respectivamente)
+      getPrepaidAccountingEJB10().updateAccountingStatus(null, acc.getId(), AccountingStatusType.NOT_OK);
+      getPrepaidClearingEJB10().updateClearingData(null, clearingData10.getId(), AccountingStatusType.NOT_SEND);
+
+    }
   }
 }

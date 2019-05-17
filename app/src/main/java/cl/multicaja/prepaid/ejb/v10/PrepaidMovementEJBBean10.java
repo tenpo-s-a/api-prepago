@@ -41,10 +41,7 @@ import java.io.FileWriter;
 import java.math.BigDecimal;
 import java.nio.file.Files;
 import java.nio.file.Paths;
-import java.sql.Date;
-import java.sql.SQLException;
-import java.sql.Timestamp;
-import java.sql.Types;
+import java.sql.*;
 import java.time.*;
 import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
@@ -61,15 +58,6 @@ public class PrepaidMovementEJBBean10 extends PrepaidBaseEJBBean10 implements Pr
 
   private static Log log = LogFactory.getLog(PrepaidMovementEJBBean10.class);
 
-  private static final String FIND_MOVEMENT_BY_ID_SQL = String.format("SELECT * FROM %s.prp_movimiento WHERE id = ?", getSchema());
-
-  private static final String INSERT_MOVEMENT_SQL
-    = String.format("INSERT INTO %s.prp_movimiento (id_movimiento_ref, id_usuario, id_tx_externo, tipo_movimiento, monto, " +
-    "estado, estado_de_negocio, estado_con_switch,estado_con_tecnocom,origen_movimiento,fecha_creacion,fecha_actualizacion," +
-    "codent,centalta,cuenta,clamon,indnorcor,tipofac,fecfac,numreffac,pan,clamondiv,impdiv,impfac,cmbapli,numaut,indproaje," +
-    "codcom,codact,impliq,clamonliq,codpais,nompob,numextcta,nummovext,clamone,tipolin,linref,numbencta,numplastico,nomcomred) " +
-    "VALUES(?, ?, ?, ?, ?, ?, ?, ?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?);", getSchema());
-
   @Inject
   private PrepaidTopupDelegate10 delegate;
 
@@ -81,6 +69,9 @@ public class PrepaidMovementEJBBean10 extends PrepaidBaseEJBBean10 implements Pr
 
   @EJB
   private PrepaidCardEJBBean11 prepaidCardEJB11;
+
+  @EJB
+  private AccountEJBBean10 accountEJBBean10;
 
   @EJB
   private CdtEJBBean10 cdtEJB10;
@@ -107,6 +98,7 @@ public class PrepaidMovementEJBBean10 extends PrepaidBaseEJBBean10 implements Pr
   private ReconciliationFilesEJBBean10 reconciliationFilesEJBBean10;
 
   private ResearchMovementInformationFiles researchMovementInformationFiles;
+
 
   protected String toJson(Object obj) throws JsonProcessingException {
     return new ObjectMapper().writeValueAsString(obj);
@@ -164,12 +156,13 @@ public class PrepaidMovementEJBBean10 extends PrepaidBaseEJBBean10 implements Pr
     return prepaidUserEJB10;
   }
 
-  public PrepaidCardEJBBean11 getPrepaidCardEJB11() {
-    return prepaidCardEJB11;
+
+  public AccountEJBBean10 getAccountEJBBean10() {
+    return accountEJBBean10;
   }
 
-  public void setPrepaidCardEJB11(PrepaidCardEJBBean11 prepaidCardEJB11) {
-    this.prepaidCardEJB11 = prepaidCardEJB11;
+  public void setAccountEJBBean10(AccountEJBBean10 accountEJBBean10) {
+    this.accountEJBBean10 = accountEJBBean10;
   }
 
   public CdtEJBBean10 getCdtEJB10() {
@@ -220,6 +213,14 @@ public class PrepaidMovementEJBBean10 extends PrepaidBaseEJBBean10 implements Pr
     for (PrepaidMovement10 movement : data) {
       addPrepaidMovement(header, movement);
     }
+  }
+
+  public PrepaidCardEJBBean11 getPrepaidCardEJB11() {
+    return prepaidCardEJB11;
+  }
+
+  public void setPrepaidCardEJB11(PrepaidCardEJBBean11 prepaidCardEJB11) {
+    this.prepaidCardEJB11 = prepaidCardEJB11;
   }
 
   @Override
@@ -686,14 +687,14 @@ public class PrepaidMovementEJBBean10 extends PrepaidBaseEJBBean10 implements Pr
     return lst != null && !lst.isEmpty() ? lst.get(0) : null;
   }
 
-  public PrepaidMovement10 getPrepaidMovementForAut(Long idPrepaidUse, TipoFactura tipoFactura, String numaut) throws Exception {
-    if (idPrepaidUse == null) {
-      throw new BadRequestException(PARAMETRO_FALTANTE_$VALUE).setData(new KeyValue("value", "idPrepaidUse"));
+  public PrepaidMovement10 getPrepaidMovementForAut(Long idPrepaidUser, TipoFactura tipoFactura, String numaut) throws Exception {
+    if (idPrepaidUser == null) {
+      throw new BadRequestException(PARAMETRO_FALTANTE_$VALUE).setData(new KeyValue("value", "idPrepaidUser"));
     }
     if (numaut == null) {
       throw new BadRequestException(PARAMETRO_FALTANTE_$VALUE).setData(new KeyValue("value", "numaut"));
     }
-    List<PrepaidMovement10> lst = this.getPrepaidMovements(null, null, idPrepaidUse, null, null, null, null, null, null, tipoFactura, null, numaut);
+    List<PrepaidMovement10> lst = this.getPrepaidMovements(null, null, idPrepaidUser, null, null, null, null, null, null, tipoFactura, null, numaut);
     return lst != null && !lst.isEmpty() ? lst.get(0) : null;
   }
 
@@ -864,7 +865,7 @@ public class PrepaidMovementEJBBean10 extends PrepaidBaseEJBBean10 implements Pr
       List<MovimientoTecnocom10> movimientoTecnocom10List = getTecnocomReconciliationEJBBean().buscaMovimientosTecnocomHist(null, null, prepaidCard10.getEncryptedPan(), prepaidMovement.getIndnorcor(), prepaidMovement.getTipofac(), new java.sql.Date(prepaidMovement.getFecfac().getTime()), prepaidMovement.getNumaut());
 
       ResearchMovementInformationFiles researchMovementInformationFiles = new ResearchMovementInformationFiles();
-      if (movimientoTecnocom10List != null && movimientoTecnocom10List.size() <= 0) {
+      if (movimientoTecnocom10List != null && !movimientoTecnocom10List.isEmpty()) {
         // Se registra la iformacion para poder encontrar el movimiento en el archivo
         MovimientoTecnocom10 movimientoTecnocom10 = movimientoTecnocom10List.get(0);
         researchMovementInformationFiles.setIdArchivo(movimientoTecnocom10.getIdArchivo());
@@ -2195,6 +2196,13 @@ public class PrepaidMovementEJBBean10 extends PrepaidBaseEJBBean10 implements Pr
     return PrepaidMovementStatus.ERROR_TECNOCOM_REINTENTABLE.equals(status) ||
       PrepaidMovementStatus.ERROR_TIMEOUT_CONEXION.equals(status) ||
       PrepaidMovementStatus.ERROR_TIMEOUT_RESPONSE.equals(status);
+  }
+
+  @Override
+  public List<PrepaidMovement10> getPrepaidMovements(Long id, Long idMovimientoRef, Long idPrepaidUser, String idTxExterno, PrepaidMovementType tipoMovimiento,
+                                                     PrepaidMovementStatus estado, String cuenta, CodigoMoneda clamon, IndicadorNormalCorrector indnorcor, TipoFactura tipofac, Date fecfac, String numaut,
+                                                     ReconciliationStatusType estadoConSwitch, ReconciliationStatusType estadoConTecnocom, MovementOriginType origen, String pan, String codcom) throws Exception {
+    throw new IllegalStateException();
   }
 
 }

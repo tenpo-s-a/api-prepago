@@ -1,6 +1,6 @@
 package cl.multicaja.test.integration.v10.unit;
 
-import cl.multicaja.core.exceptions.BadRequestException;
+import cl.multicaja.prepaid.helpers.tecnocom.model.TecnocomReconciliationRegisterType;
 import cl.multicaja.prepaid.model.v10.MovimientoTecnocom10;
 import cl.multicaja.prepaid.model.v10.OriginOpeType;
 import cl.multicaja.tecnocom.constants.IndicadorNormalCorrector;
@@ -10,8 +10,6 @@ import org.junit.Assert;
 import org.junit.BeforeClass;
 import org.junit.Test;
 
-import javax.xml.bind.SchemaOutputResolver;
-import java.math.BigDecimal;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
@@ -42,6 +40,7 @@ public class Test_TecnocomReconciliationEJBBean10_buscaMovimientos extends TestB
     movTec.setIndNorCor(0);
     movTec.setTipoFac(TipoFactura.CARGA_EFECTIVO_COMERCIO_MULTICAJA);
     movTec.setNumAut("834738");
+    movTec.setTipoReg(TecnocomReconciliationRegisterType.AU);
     movTec = Test_TecnocomReconciliationEJBBean10_insertaMovimientos.inserTcMov(movTec);
     Assert.assertNotEquals("Id debe ser != 0", 0, movTec.getId().intValue());
     movimientoTecnocom10s.add(movTec);
@@ -51,24 +50,27 @@ public class Test_TecnocomReconciliationEJBBean10_buscaMovimientos extends TestB
     movTec.setIndNorCor(1);
     movTec.setTipoFac(TipoFactura.ANULA_CARGA_EFECTIVO_COMERCIO_MULTICAJA);
     movTec.setNumAut("756345");
+    movTec.setTipoReg(TecnocomReconciliationRegisterType.AU);
     movTec = Test_TecnocomReconciliationEJBBean10_insertaMovimientos.inserTcMov(movTec);
     Assert.assertNotEquals("Id debe ser != 0", 0, movTec.getId().intValue());
     movimientoTecnocom10s.add(movTec);
 
     movTec = Test_TecnocomReconciliationEJBBean10_insertaMovimientos.buildRandomTcMov(fileId);
     movTec.setPan("47636355463");
-    movTec.setIndNorCor(0);
+    movTec.setIndNorCor(1);
     movTec.setTipoFac(TipoFactura.ANULA_COMISION_APERTURA);
     movTec.setNumAut("235334");
+    movTec.setTipoReg(TecnocomReconciliationRegisterType.AU);
     movTec = Test_TecnocomReconciliationEJBBean10_insertaMovimientos.inserTcMov(movTec);
     Assert.assertNotEquals("Id debe ser != 0", 0, movTec.getId().intValue());
     movimientoTecnocom10s.add(movTec);
 
     movTec = Test_TecnocomReconciliationEJBBean10_insertaMovimientos.buildRandomTcMov(fileId2);
     movTec.setPan("57647385756748");
-    movTec.setIndNorCor(0);
+    movTec.setIndNorCor(1);
     movTec.setTipoFac(TipoFactura.ANULA_COMISION_APERTURA);
     movTec.setNumAut("457674");
+    movTec.setTipoReg(TecnocomReconciliationRegisterType.AU);
     movTec = Test_TecnocomReconciliationEJBBean10_insertaMovimientos.inserTcMov(movTec);
     Assert.assertNotEquals("Id debe ser != 0", 0, movTec.getId().intValue());
     movimientoTecnocom10s.add(movTec);
@@ -76,40 +78,40 @@ public class Test_TecnocomReconciliationEJBBean10_buscaMovimientos extends TestB
     List<MovimientoTecnocom10> movimientoTecnocom10s2 = getTecnocomReconciliationEJBBean10().buscaMovimientosTecnocom(fileId, OriginOpeType.SAT_ORIGIN);
     Assert.assertEquals("Debe existir 3 movimientos", 3, movimientoTecnocom10s2.size());
     for (int i = 0; i < movimientoTecnocom10s2.size(); i++) {
-      Assert.assertTrue("Deben ser iguales", compareMovs(movimientoTecnocom10s.get(0), movimientoTecnocom10s2.get(0)));
+      Assert.assertTrue("Deben ser iguales", compareMovs(movimientoTecnocom10s.get(i), movimientoTecnocom10s2.get(i)));
     }
 
     // Debe buscar en la tabla por default
     movimientoTecnocom10s2 = getTecnocomReconciliationEJBBean10().buscaMovimientosTecnocom(fileId, OriginOpeType.SAT_ORIGIN, null, null, null, null, null);
     Assert.assertEquals("Debe existir 3 movimientos", 3, movimientoTecnocom10s2.size());
     for (int i = 0; i < movimientoTecnocom10s2.size(); i++) {
-      Assert.assertTrue("Deben ser iguales", compareMovs(movimientoTecnocom10s.get(0), movimientoTecnocom10s2.get(0)));
+      Assert.assertTrue("Deben ser iguales", compareMovs(movimientoTecnocom10s.get(i), movimientoTecnocom10s2.get(i)));
     }
 
     movimientoTecnocom10s2 = getTecnocomReconciliationEJBBean10().buscaMovimientosTecnocom("prp_movimientos_tecnocom_hist", fileId, OriginOpeType.SAT_ORIGIN, null, null, null, null, null);
     Assert.assertEquals("Debe existir 3 movimientos", 3, movimientoTecnocom10s2.size());
     for (int i = 0; i < movimientoTecnocom10s2.size(); i++) {
-      Assert.assertTrue("Deben ser iguales", compareMovs(movimientoTecnocom10s.get(0), movimientoTecnocom10s2.get(0)));
+      Assert.assertTrue("Deben ser iguales", compareMovs(movimientoTecnocom10s.get(i), movimientoTecnocom10s2.get(i)));
     }
 
     movimientoTecnocom10s2 = getTecnocomReconciliationEJBBean10().buscaMovimientosTecnocom(null, null, movimientoTecnocom10s.get(0).getPan(), null, null, null, null);
     Assert.assertEquals("Debe existir 1 movimiento", 1, movimientoTecnocom10s2.size());
     Assert.assertTrue("Deben ser iguales", compareMovs(movimientoTecnocom10s.get(0), movimientoTecnocom10s2.get(0)));
 
-    movimientoTecnocom10s2 = getTecnocomReconciliationEJBBean10().buscaMovimientosTecnocom(null, null, null, IndicadorNormalCorrector.CORRECTORA, null, null, null);
+    movimientoTecnocom10s2 = getTecnocomReconciliationEJBBean10().buscaMovimientosTecnocom(null, null, null, IndicadorNormalCorrector.NORMAL, null, null, null);
     Assert.assertEquals("Debe existir 1 movimiento", 1, movimientoTecnocom10s2.size());
-    Assert.assertTrue("Deben ser iguales", compareMovs(movimientoTecnocom10s.get(1), movimientoTecnocom10s2.get(0)));
+    Assert.assertTrue("Deben ser iguales", compareMovs(movimientoTecnocom10s.get(0), movimientoTecnocom10s2.get(0)));
 
     movimientoTecnocom10s2 = getTecnocomReconciliationEJBBean10().buscaMovimientosTecnocom(null, null, null, null, TipoFactura.CARGA_EFECTIVO_COMERCIO_MULTICAJA, null, null);
     Assert.assertEquals("Debe existir 2 movimientos", 2, movimientoTecnocom10s2.size());
     for (int i = 0; i < movimientoTecnocom10s2.size(); i++) {
-      Assert.assertTrue("Deben ser iguales", compareMovs(movimientoTecnocom10s.get(0), movimientoTecnocom10s2.get(0)));
+      Assert.assertTrue("Deben ser iguales", compareMovs(movimientoTecnocom10s.get(i), movimientoTecnocom10s2.get(i)));
     }
 
     movimientoTecnocom10s2 = getTecnocomReconciliationEJBBean10().buscaMovimientosTecnocom(null, null, null, null, null, java.sql.Date.valueOf(movimientoTecnocom10s.get(0).getFecFac()), null);
     Assert.assertEquals("Debe existir 4 movimientos", 4, movimientoTecnocom10s2.size());
     for (int i = 0; i < movimientoTecnocom10s2.size(); i++) {
-      Assert.assertTrue("Deben ser iguales", compareMovs(movimientoTecnocom10s.get(0), movimientoTecnocom10s2.get(0)));
+      Assert.assertTrue("Deben ser iguales", compareMovs(movimientoTecnocom10s.get(i), movimientoTecnocom10s2.get(i)));
     }
 
     movimientoTecnocom10s2 = getTecnocomReconciliationEJBBean10().buscaMovimientosTecnocom(null, null, null, null, null, null, movimientoTecnocom10s.get(0).getNumAut());
@@ -119,7 +121,17 @@ public class Test_TecnocomReconciliationEJBBean10_buscaMovimientos extends TestB
     movimientoTecnocom10s2 = getTecnocomReconciliationEJBBean10().buscaMovimientosTecnocom(null, null, null, null, null, null, null);
     Assert.assertEquals("Debe existir 4 movimientos", 4, movimientoTecnocom10s2.size());
     for (int i = 0; i < movimientoTecnocom10s2.size(); i++) {
-      Assert.assertTrue("Deben ser iguales", compareMovs(movimientoTecnocom10s.get(0), movimientoTecnocom10s2.get(0)));
+      Assert.assertTrue("Deben ser iguales", compareMovs(movimientoTecnocom10s.get(i), movimientoTecnocom10s2.get(i)));
+    }
+
+    // Buscar por tipo de factura
+    String tiposFactura = TipoFactura.CARGA_EFECTIVO_COMERCIO_MULTICAJA.toString();
+    movimientoTecnocom10s2 = getTecnocomReconciliationEJBBean10().buscaMovimientosTecnocom(fileId, OriginOpeType.SAT_ORIGIN, tiposFactura);
+    Assert.assertEquals("Debe existir 2 movimientos", 2, movimientoTecnocom10s2.size());
+    for (MovimientoTecnocom10 foundMovement : movimientoTecnocom10s2) {
+      MovimientoTecnocom10 insertedMovement = movimientoTecnocom10s.stream().filter(m -> m.getId().equals(foundMovement.getId())).findAny().orElse(null);
+      Assert.assertNotNull("Debe existir", insertedMovement);
+      Assert.assertTrue("Deben ser iguales", compareMovs(insertedMovement, foundMovement));
     }
   }
 
@@ -134,18 +146,4 @@ public class Test_TecnocomReconciliationEJBBean10_buscaMovimientos extends TestB
     Assert.assertEquals("Deben tener mismo impfac", insertedMov.getImpFac().getValue().stripTrailingZeros(), foundMov.getImpFac().getValue().stripTrailingZeros());
     return true;
   }
-
-
-  @Test(expected = BadRequestException.class)
-  public void testBuscaMovimientoNoOK_f1() throws BadRequestException {
-    try {
-      List<MovimientoTecnocom10> movTec2 = getTecnocomReconciliationEJBBean10().buscaMovimientosTecnocom(null, 23L, OriginOpeType.SAT_ORIGIN, null, null, null, null, null);
-    } catch (BadRequestException e) {
-      Assert.assertEquals("Debe ser: ", e.getData()[0].getValue(), "tableName");
-      throw new BadRequestException();
-    } catch (Exception e) {
-      Assert.fail("No debe caer aca");
-    }
-  }
-
 }
