@@ -22,14 +22,12 @@ import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 
-import javax.inject.Inject;
 import java.math.BigDecimal;
 import java.util.HashMap;
 import java.util.Map;
 
 import static cl.multicaja.prepaid.async.v10.routes.PrepaidTopupRoute10.ERROR_CARD_ISSUANCE_FEE_REQ;
 import static cl.multicaja.prepaid.async.v10.routes.PrepaidTopupRoute10.PENDING_CARD_ISSUANCE_FEE_REQ;
-import static cl.multicaja.prepaid.model.v10.MailTemplates.TEMPLATE_MAIL_ERROR_ISSUANCE_FEE;
 
 /**
  * @autor abarazarte
@@ -37,8 +35,6 @@ import static cl.multicaja.prepaid.model.v10.MailTemplates.TEMPLATE_MAIL_ERROR_I
 public class PendingCardIssuanceFee10 extends BaseProcessor10 {
 
   private static Log log = LogFactory.getLog(PendingCardIssuanceFee10.class);
-
-  private FreshDeskServiceHelper freshDeskServiceHelper = new FreshDeskServiceHelper();
 
   public PendingCardIssuanceFee10(BaseRoute10 route) {
     super(route);
@@ -297,7 +293,7 @@ public class PendingCardIssuanceFee10 extends BaseProcessor10 {
           newTicket.addCustomField(CustomFieldsName.REINTENTOS, req.getReprocesQueue());
 
           newTicket.setUniqueExternalId(user.getUuid());
-          Ticket ticket = freshDeskServiceHelper.createTicketInFreshdesk(newTicket);
+          Ticket ticket = FreshdeskServiceHelper.getInstance().getFreshdeskService().createTicket(newTicket);
           if (ticket != null && ticket.getId() != null) {
             log.info("[processErrorPendingIssuanceFee][Ticket_Success][ticketId]:"+ticket.getId());
           }else{

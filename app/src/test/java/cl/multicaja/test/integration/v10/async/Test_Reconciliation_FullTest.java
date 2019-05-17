@@ -11,7 +11,7 @@ import cl.multicaja.core.utils.NumberUtils;
 import cl.multicaja.core.utils.db.DBUtils;
 import cl.multicaja.prepaid.external.freshdesk.model.Ticket;
 import cl.multicaja.prepaid.external.freshdesk.model.TicketsResponse;
-import cl.multicaja.prepaid.helpers.freshdesk.model.v10.FreshDeskServiceHelper;
+import cl.multicaja.prepaid.helpers.freshdesk.model.v10.FreshdeskServiceHelper;
 import cl.multicaja.prepaid.helpers.freshdesk.model.v10.TicketType;
 import cl.multicaja.prepaid.helpers.mcRed.McRedReconciliationFileDetail;
 import cl.multicaja.prepaid.helpers.tecnocom.TecnocomServiceHelper;
@@ -22,7 +22,6 @@ import cl.multicaja.tecnocom.constants.*;
 import org.junit.*;
 import org.springframework.jdbc.core.RowMapper;
 
-import javax.inject.Inject;
 import java.math.BigDecimal;
 import java.sql.Date;
 import java.sql.SQLException;
@@ -46,8 +45,6 @@ public class Test_Reconciliation_FullTest extends TestBaseUnitAsync {
 
   static String switchNotFoundId = "[No_Encontrado_En_Switch]";
   static String tecnocomNotFoundId = "[No_Encontrado_En_Tecnocom]";
-
-  private FreshDeskServiceHelper freshDeskServiceHelper = new FreshDeskServiceHelper();
 
   @BeforeClass
   public static void prepareDB() {
@@ -3199,7 +3196,7 @@ public class Test_Reconciliation_FullTest extends TestBaseUnitAsync {
     LocalDateTime beginDate = LocalDateTime.now(ZoneId.of("UTC"));
     beginDate.minusMinutes(5);
     LocalDateTime endDate = beginDate.plusMinutes(5);
-    TicketsResponse ticketsResponse = freshDeskServiceHelper.getFreshdeskService().getTicketsByTypeAndCreatedDate(0, beginDate, endDate,ticketType.getValue());
+    TicketsResponse ticketsResponse = FreshdeskServiceHelper.getInstance().getFreshdeskService().getTicketsByTypeAndCreatedDate(0, beginDate, endDate,ticketType.getValue());
     Assert.assertTrue("Debe tener al menos un ticket", ticketsResponse.getTotal() > 0);
 
     boolean found = false;

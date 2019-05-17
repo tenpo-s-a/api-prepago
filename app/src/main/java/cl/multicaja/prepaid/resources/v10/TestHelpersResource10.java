@@ -119,8 +119,6 @@ public final class TestHelpersResource10 extends BaseResource {
   @Inject
   private KafkaEventDelegate10 kafkaEventDelegate10;
 
-  private FreshDeskServiceHelper freshDeskServiceHelper = new FreshDeskServiceHelper();
-
  	private void validate() {
     if (ConfigUtils.isEnvProduction()) {
       throw new SecurityException("Este metodo no puede ser ejecutado en un ambiente de produccion");
@@ -1232,7 +1230,7 @@ public final class TestHelpersResource10 extends BaseResource {
       newTicket.setProductId(43000001595L);
       newTicket.addCustomField("cf_id_movimiento", prepaidMovement.getId().toString());
 
-      Ticket ticket = freshDeskServiceHelper.createTicketInFreshdesk(newTicket);
+      Ticket ticket = FreshdeskServiceHelper.getInstance().getFreshdeskService().createTicket(newTicket);
       if (ticket != null && ticket.getId() != null) {
         log.info("[prepareToRefund][Ticket_Success][ticketId]:"+ticket.getId());
       }else{

@@ -110,8 +110,6 @@ public class PrepaidMovementEJBBean10 extends PrepaidBaseEJBBean10 implements Pr
 
   private ResearchMovementInformationFiles researchMovementInformationFiles;
 
-  private FreshDeskServiceHelper freshDeskServiceHelper = new FreshDeskServiceHelper();
-
   protected String toJson(Object obj) throws JsonProcessingException {
     return new ObjectMapper().writeValueAsString(obj);
   }
@@ -1510,7 +1508,7 @@ public class PrepaidMovementEJBBean10 extends PrepaidBaseEJBBean10 implements Pr
       newTicket.addCustomField("cf_id_movimiento", movFull.getId().toString());
 
       newTicket.setUniqueExternalId(prepaidUser10.getUuid());
-      Ticket ticket = freshDeskServiceHelper.createTicketInFreshdesk(newTicket);
+      Ticket ticket = FreshdeskServiceHelper.getInstance().getFreshdeskService().createTicket(newTicket);
       if (ticket != null && ticket.getId() != null) {
         log.info("[processReconciliation][Ticket_Success][ticketId]:"+ticket.getId());
       }else{

@@ -8,7 +8,7 @@ import cl.multicaja.prepaid.async.v10.model.PrepaidTopupData10;
 import cl.multicaja.prepaid.async.v10.routes.BaseRoute10;
 import cl.multicaja.prepaid.external.freshdesk.model.NewTicket;
 import cl.multicaja.prepaid.external.freshdesk.model.Ticket;
-import cl.multicaja.prepaid.helpers.freshdesk.model.v10.FreshDeskServiceHelper;
+import cl.multicaja.prepaid.helpers.freshdesk.model.v10.FreshdeskServiceHelper;
 import cl.multicaja.prepaid.model.v10.*;
 import cl.multicaja.prepaid.model.v11.Account;
 import cl.multicaja.prepaid.utils.TemplateUtils;
@@ -22,7 +22,6 @@ import org.apache.camel.Exchange;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 
-import javax.inject.Inject;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.UUID;
@@ -35,8 +34,6 @@ import static cl.multicaja.prepaid.async.v10.routes.PrepaidTopupRoute10.*;
 public class PendingCard10 extends BaseProcessor10 {
 
   private static Log log = LogFactory.getLog(PendingCard10.class);
-
-  private FreshDeskServiceHelper freshDeskServiceHelper = new FreshDeskServiceHelper();
 
   public PendingCard10(BaseRoute10 route) {
     super(route);
@@ -264,7 +261,7 @@ public class PendingCard10 extends BaseProcessor10 {
         NewTicket newTicket = createTicket("Error al dar de Alta a Cliente",template,prepaidUser10.getDocumentNumber(),data.getPrepaidTopup10().getMessageId(),QueuesNameType.PENDING_EMISSION,req.getReprocesQueue());
 
         newTicket.setUniqueExternalId(prepaidUser10.getUuid());
-        Ticket ticket = freshDeskServiceHelper.createTicketInFreshdesk(newTicket);
+        Ticket ticket = FreshdeskServiceHelper.getInstance().getFreshdeskService().createTicket(newTicket);
         if(ticket.getId() != null){
           log.info("[processErrorWithdrawReversal][Ticket_Success][id]:"+ticket.getId());
         }
@@ -308,7 +305,7 @@ public class PendingCard10 extends BaseProcessor10 {
           );
 
           newTicket.setUniqueExternalId(prepaidUser10.getUuid());
-          Ticket ticket = freshDeskServiceHelper.createTicketInFreshdesk(newTicket);
+          Ticket ticket = FreshdeskServiceHelper.getInstance().getFreshdeskService().createTicket(newTicket);
           if (ticket != null && ticket.getId() != null) {
             log.info("[processErrorCreateCard][Ticket_Success][ticketId]:"+ticket.getId());
           }else{

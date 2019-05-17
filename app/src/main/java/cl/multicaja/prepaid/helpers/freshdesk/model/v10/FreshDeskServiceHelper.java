@@ -2,64 +2,49 @@ package cl.multicaja.prepaid.helpers.freshdesk.model.v10;
 
 import cl.multicaja.prepaid.external.freshdesk.FreshdeskService;
 import cl.multicaja.prepaid.external.freshdesk.FreshdeskServiceImpl;
-import cl.multicaja.prepaid.external.freshdesk.model.*;
-import cl.multicaja.prepaid.external.freshdesk.model.Ticket;
-import cl.multicaja.prepaid.model.v10.PrepaidUser10;
-import cl.multicaja.prepaid.model.v11.User;
-import org.apache.commons.lang3.ArrayUtils;
-import org.apache.commons.lang3.StringUtils;
+import cl.multicaja.core.utils.ConfigUtils;
 
-import java.io.IOException;
-import java.time.LocalDateTime;
-import java.util.Arrays;
 
-public class FreshDeskServiceHelper {
+public class FreshdeskServiceHelper {
 
-  //TODO Reemplazar por properties.
-  private final String apiUrl = "https://multicaja.freshdesk.com";
-  private final String apiUser = "CEFMK1T4XuXYrBhbuN";
-  private final String apiPassword = "X";
-  private final Boolean isEnabled = Boolean.TRUE;
+  private final String API_URL = "https://multicaja.freshdesk.com";
+  private final String API_USER = "CEFMK1T4XuXYrBhbuN";
+  private final String API_PASSWORD = "X";
+  private final Boolean API_IS_ENABLED = Boolean.TRUE;
 
-  private FreshdeskService freshdeskService = new FreshdeskServiceImpl(apiUrl,apiUser,apiPassword,isEnabled);
+  private FreshdeskService freshdeskService;
+  private ConfigUtils configUtils;
+
+  private static FreshdeskServiceHelper instance;
+
+  public ConfigUtils getConfigUtils() {
+    if (this.configUtils == null) {
+      this.configUtils = new ConfigUtils("api-prepaid");
+    }
+    return this.configUtils;
+  }
 
   public FreshdeskService getFreshdeskService() {
     return freshdeskService;
   }
 
+  private void setFreshdeskService(FreshdeskService freshdeskService) {
+    this.freshdeskService = freshdeskService;
+  }
 
-  public Ticket createTicketInFreshdeskByFreshdeskContact(PrepaidUser10 prepaidUser10, NewTicket newTicket){
+  public FreshdeskServiceHelper(){
+    String apiUrl = getConfigUtils().getProperty("freshdesk.endpoint") == null ? this.API_URL : getConfigUtils().getProperty("freshdesk.endpoint");
+    String apiUser = getConfigUtils().getProperty("freshdesk.user") == null ? this.API_USER : getConfigUtils().getProperty("freshdesk.user");
+    String apiPassword = getConfigUtils().getProperty("freshdesk.password") == null ? this.API_PASSWORD : getConfigUtils().getProperty("freshdesk.password");
+    Boolean apiIsEnabled = Boolean.valueOf(getConfigUtils().getProperty("freshdesk.enabled") == null ? this.API_IS_ENABLED.toString() : getConfigUtils().getProperty("freshdesk.enabled"));
+    setFreshdeskService(new FreshdeskServiceImpl(apiUrl,apiUser,apiPassword,apiIsEnabled));
+  }
 
-    Ticket ticket = null;
-    //Contact contact = freshdeskService.findContact(user.getFreshDeskId()); //TODO: Prepaid User debería tener este id, el cual pueda consumir la capa C y viceversa
-    Contact contact = null;
-
-    if(contact.getActive()){
-      if(contact.getId() != null && contact.getId() > 0){
-        ticket = getFreshdeskService().createTicket(newTicket);
-      }else{
-        //Create Contact then create ticket
-      }
-    }else{
-      //Exception
+  public  static FreshdeskServiceHelper getInstance() {
+    if (instance == null) {
+      instance = new FreshdeskServiceHelper();
     }
-    return ticket;
-  }
-
-  public Ticket createTicketInFreshdesk(NewTicket newTicket){
-    return getFreshdeskService().createTicket(newTicket);
-  }
-
-  public TicketsResponse getTicketsByTypeAndCreatedDate(Integer page, LocalDateTime from, LocalDateTime to, String type) throws Exception{
-    return getFreshdeskService().getTicketsByTypeAndCreatedDate(page,from,to,type);
-  }
-
-  public GroupsResponse getGroups() throws IOException {
-    return getFreshdeskService().listGroups();
-  }
-
-  public ProductsResponse getProducts() throws IOException {
-    return getFreshdeskService().listProducts();
+    return instance;
   }
 
   public Boolean isClosedOrResolved(Long status) {

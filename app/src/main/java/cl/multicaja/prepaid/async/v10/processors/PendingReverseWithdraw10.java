@@ -9,7 +9,7 @@ import cl.multicaja.prepaid.async.v10.model.PrepaidReverseData10;
 import cl.multicaja.prepaid.async.v10.routes.BaseRoute10;
 import cl.multicaja.prepaid.external.freshdesk.model.NewTicket;
 import cl.multicaja.prepaid.external.freshdesk.model.Ticket;
-import cl.multicaja.prepaid.helpers.freshdesk.model.v10.FreshDeskServiceHelper;
+import cl.multicaja.prepaid.helpers.freshdesk.model.v10.FreshdeskServiceHelper;
 import cl.multicaja.prepaid.model.v10.*;
 import cl.multicaja.prepaid.model.v11.Account;
 import cl.multicaja.prepaid.utils.TemplateUtils;
@@ -31,8 +31,6 @@ import static cl.multicaja.prepaid.async.v10.routes.TransactionReversalRoute10.P
 public class PendingReverseWithdraw10 extends BaseProcessor10  {
 
   private static Log log = LogFactory.getLog(PendingReverseWithdraw10.class);
-
-  private FreshDeskServiceHelper freshDeskServiceHelper = new FreshDeskServiceHelper();
 
   public PendingReverseWithdraw10(BaseRoute10 route) {
     super(route);
@@ -292,7 +290,7 @@ public class PendingReverseWithdraw10 extends BaseProcessor10  {
             req.getReprocesQueue());
 
           newTicket.setUniqueExternalId(data.getPrepaidUser10().getUuid());
-          Ticket ticket = freshDeskServiceHelper.createTicketInFreshdesk(newTicket);
+          Ticket ticket = FreshdeskServiceHelper.getInstance().getFreshdeskService().createTicket(newTicket);
           if (ticket != null && ticket.getId() != null) {
             log.info("[processErrorWithdrawReversal][Ticket_Success][ticketId]:"+ticket.getId());
           }else{

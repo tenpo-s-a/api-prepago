@@ -10,7 +10,6 @@ import cl.multicaja.prepaid.model.v11.Account;
 import org.junit.*;
 import org.springframework.jdbc.core.RowMapper;
 
-import javax.inject.Inject;
 import java.math.BigDecimal;
 import java.sql.Timestamp;
 import java.time.*;
@@ -20,8 +19,6 @@ import static cl.multicaja.prepaid.helpers.CalculationsHelper.getParametersUtil;
 import static cl.multicaja.test.integration.v10.async.Test_Reconciliation_FullTest.prepaidCard;
 
 public class Test_PrepaidMovementEJB10_procesReconciliation10 extends TestBaseUnitAsync {
-
-  private FreshDeskServiceHelper freshDeskServiceHelper = new FreshDeskServiceHelper();
 
   @Before
   @After
@@ -193,7 +190,7 @@ public class Test_PrepaidMovementEJB10_procesReconciliation10 extends TestBaseUn
     newTicket.addCustomField("cf_id_movimiento", "123444567");
 
     newTicket.setUniqueExternalId(prepaidUser.getUuid());
-    Ticket ticket = freshDeskServiceHelper.createTicketInFreshdesk(newTicket);
+    Ticket ticket = FreshdeskServiceHelper.getInstance().getFreshdeskService().createTicket(newTicket);
     if (ticket != null && ticket.getId() != null) {
       log.info("[processReconciliation_SendTicketDevolucion][Ticket_Success][ticketId]:"+ticket.getId());
     }else{
