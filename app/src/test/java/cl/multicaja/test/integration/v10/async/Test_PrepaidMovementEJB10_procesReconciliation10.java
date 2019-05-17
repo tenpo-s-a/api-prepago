@@ -2,12 +2,15 @@ package cl.multicaja.test.integration.v10.async;
 
 import cl.multicaja.accounting.model.v10.*;
 import cl.multicaja.cdt.model.v10.CdtTransaction10;
+import cl.multicaja.prepaid.external.freshdesk.model.NewTicket;
+import cl.multicaja.prepaid.external.freshdesk.model.Ticket;
 import cl.multicaja.prepaid.helpers.freshdesk.model.v10.*;
 import cl.multicaja.prepaid.model.v10.*;
 import cl.multicaja.prepaid.model.v11.Account;
 import org.junit.*;
 import org.springframework.jdbc.core.RowMapper;
 
+import javax.inject.Inject;
 import java.math.BigDecimal;
 import java.sql.Timestamp;
 import java.time.*;
@@ -17,6 +20,8 @@ import static cl.multicaja.prepaid.helpers.CalculationsHelper.getParametersUtil;
 import static cl.multicaja.test.integration.v10.async.Test_Reconciliation_FullTest.prepaidCard;
 
 public class Test_PrepaidMovementEJB10_procesReconciliation10 extends TestBaseUnitAsync {
+
+  private FreshDeskServiceHelper freshDeskServiceHelper = new FreshDeskServiceHelper();
 
   @Before
   @After
@@ -180,16 +185,20 @@ public class Test_PrepaidMovementEJB10_procesReconciliation10 extends TestBaseUn
     newTicket.setDescription(template);
     newTicket.setGroupId(GroupId.OPERACIONES);
     newTicket.setUniqueExternalId("14621456");
-    newTicket.setType(TicketType.DEVOLUCION);
-    newTicket.setStatus(StatusType.OPEN);
-    newTicket.setPriority(PriorityType.URGENT);
+    newTicket.setType(TicketType.DEVOLUCION.getValue());
+    newTicket.setStatus(Long.valueOf(StatusType.OPEN.getValue()));
+    newTicket.setPriority(Long.valueOf(PriorityType.URGENT.getValue()));
     newTicket.setSubject("Devolucion de carga");
     newTicket.setProductId(43000001595L);
     newTicket.addCustomField("cf_id_movimiento", "123444567");
 
-    //Ticket ticket = getUserClient().createFreshdeskTicket(null, user.getId(), newTicket);
-    //Assert.assertNotNull("Deberia crear un ticket de devolucion", ticket);
-    //Assert.assertNotNull("Ticket debe tener id", ticket.getId());
+    newTicket.setUniqueExternalId(prepaidUser.getUuid());
+    Ticket ticket = freshDeskServiceHelper.createTicketInFreshdesk(newTicket);
+    if (ticket != null && ticket.getId() != null) {
+      log.info("[processReconciliation_SendTicketDevolucion][Ticket_Success][ticketId]:"+ticket.getId());
+    }else{
+      log.info("[processReconciliation_SendTicketDevolucion][Ticket_Fail][ticketData]:"+newTicket.toString());
+    }
   }
 
   @Test

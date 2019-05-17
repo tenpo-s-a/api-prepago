@@ -6,7 +6,9 @@ import cl.multicaja.core.model.Errors;
 import cl.multicaja.prepaid.async.v10.model.PrepaidTopupData10;
 import cl.multicaja.prepaid.async.v10.routes.BaseRoute10;
 import cl.multicaja.prepaid.async.v10.routes.KafkaEventsRoute10;
+import cl.multicaja.prepaid.external.freshdesk.model.Ticket;
 import cl.multicaja.prepaid.helpers.CalculationsHelper;
+import cl.multicaja.prepaid.external.freshdesk.model.*;
 import cl.multicaja.prepaid.helpers.freshdesk.model.v10.*;
 import cl.multicaja.prepaid.model.v10.*;
 import cl.multicaja.prepaid.model.v11.Account;
@@ -20,6 +22,7 @@ import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 
+import javax.inject.Inject;
 import java.math.BigDecimal;
 import java.util.HashMap;
 import java.util.Map;
@@ -34,6 +37,8 @@ import static cl.multicaja.prepaid.model.v10.MailTemplates.TEMPLATE_MAIL_ERROR_I
 public class PendingCardIssuanceFee10 extends BaseProcessor10 {
 
   private static Log log = LogFactory.getLog(PendingCardIssuanceFee10.class);
+
+  private FreshDeskServiceHelper freshDeskServiceHelper = new FreshDeskServiceHelper();
 
   public PendingCardIssuanceFee10(BaseRoute10 route) {
     super(route);
@@ -282,20 +287,22 @@ public class PendingCardIssuanceFee10 extends BaseProcessor10 {
           newTicket.setDescription(template);
           newTicket.setGroupId(GroupId.OPERACIONES);
           newTicket.setUniqueExternalId(user.getDocumentNumber());
-          newTicket.setType(TicketType.COLAS_NEGATIVAS);
-          newTicket.setStatus(StatusType.OPEN);
-          newTicket.setPriority(PriorityType.URGENT);
+          newTicket.setType(TicketType.COLAS_NEGATIVAS.getValue());
+          newTicket.setStatus(Long.valueOf(StatusType.OPEN.getValue()));
+          newTicket.setPriority(Long.valueOf(PriorityType.URGENT.getValue()));
           newTicket.setSubject("Error al cobrar comisión Apertura");
           // Ticket Custom Fields:
           newTicket.addCustomField(CustomFieldsName.ID_COLA,data.getPrepaidTopup10().getMessageId());
           newTicket.addCustomField(CustomFieldsName.NOMBRE_COLA, QueuesNameType.ISSUANCE_FEE.getValue());
           newTicket.addCustomField(CustomFieldsName.REINTENTOS, req.getReprocesQueue());
 
-          //FIXME: Implementar la creación de tickets en freshdesk
-          Ticket ticket = null; //getRoute().getUserClient().createFreshdeskTicket(null,user.getId(),newTicket);
-          //if(ticket.getId() != null){
-            //log.info("Ticket Creado Exitosamente");
-          //}
+          newTicket.setUniqueExternalId(user.getUuid());
+          Ticket ticket = freshDeskServiceHelper.createTicketInFreshdesk(newTicket);
+          if (ticket != null && ticket.getId() != null) {
+            log.info("[processErrorPendingIssuanceFee][Ticket_Success][ticketId]:"+ticket.getId());
+          }else{
+            log.info("[processErrorPendingIssuanceFee][Ticket_Fail][ticketData]:"+newTicket.toString());
+          }
         } else {
           Map<String, Object> templateData = new HashMap<String, Object>();
           templateData.put("idUsuario", user.getId());

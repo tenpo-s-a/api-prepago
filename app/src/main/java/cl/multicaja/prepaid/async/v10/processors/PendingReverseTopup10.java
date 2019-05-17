@@ -7,7 +7,10 @@ import cl.multicaja.cdt.model.v10.CdtTransaction10;
 import cl.multicaja.core.model.Errors;
 import cl.multicaja.prepaid.async.v10.model.PrepaidReverseData10;
 import cl.multicaja.prepaid.async.v10.routes.BaseRoute10;
-import cl.multicaja.prepaid.helpers.freshdesk.model.v10.NewTicket;
+//import cl.multicaja.prepaid.helpers.freshdesk.model.v10.NewTicket;
+import cl.multicaja.prepaid.external.freshdesk.model.NewTicket;
+import cl.multicaja.prepaid.external.freshdesk.model.Ticket;
+import cl.multicaja.prepaid.helpers.freshdesk.model.v10.FreshDeskServiceHelper;
 import cl.multicaja.prepaid.model.v10.*;
 import cl.multicaja.prepaid.model.v11.Account;
 import cl.multicaja.prepaid.utils.TemplateUtils;
@@ -19,12 +22,12 @@ import org.apache.camel.Exchange;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 
+import javax.inject.Inject;
 import java.util.HashMap;
 import java.util.Map;
 
 import static cl.multicaja.prepaid.async.v10.routes.TransactionReversalRoute10.ERROR_REVERSAL_TOPUP_REQ;
 import static cl.multicaja.prepaid.async.v10.routes.TransactionReversalRoute10.PENDING_REVERSAL_TOPUP_REQ;
-import static cl.multicaja.prepaid.model.v10.MailTemplates.TEMPLATE_MAIL_ERROR_TOPUP_REVERSE;
 
 /**
  * @autor abarazarte
@@ -32,6 +35,8 @@ import static cl.multicaja.prepaid.model.v10.MailTemplates.TEMPLATE_MAIL_ERROR_T
 public class PendingReverseTopup10 extends BaseProcessor10 {
 
   private static Log log = LogFactory.getLog(PendingReverseTopup10.class);
+
+  private FreshDeskServiceHelper freshDeskServiceHelper = new FreshDeskServiceHelper();
 
   public PendingReverseTopup10(BaseRoute10 route) {
     super(route);
@@ -259,12 +264,14 @@ public class PendingReverseTopup10 extends BaseProcessor10 {
             data.getPrepaidTopup10().getMessageId(),
             QueuesNameType.REVERSE_TOPUP,
             req.getReprocesQueue());
-          //FIXME: Implementar la creación de tickets en freshdesk
-          //Ticket ticket = getRoute().getUserClient().createFreshdeskTicket(null,user.getUuid(),newTicket);
-          /*if(ticket.getId() != null){
-            log.info("Ticket Creado Exitosamente");
+
+          newTicket.setUniqueExternalId(user.getUuid());
+          Ticket ticket = freshDeskServiceHelper.createTicketInFreshdesk(newTicket);
+          if (ticket != null && ticket.getId() != null) {
+            log.info("[processErrorTopupReverse][Ticket_Success][ticketId]:"+ticket.getId());
+          }else{
+            log.info("[processErrorTopupReverse][Ticket_Fail][ticketData]:"+newTicket.toString());
           }
-           */
         } else {
           Map<String, Object> templateData = new HashMap<>();
           templateData.put("idUsuario", user.getId());

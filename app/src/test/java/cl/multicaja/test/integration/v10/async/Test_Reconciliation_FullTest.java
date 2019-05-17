@@ -7,7 +7,11 @@ import cl.multicaja.accounting.model.v10.UserAccount;
 import cl.multicaja.cdt.model.v10.CdtTransaction10;
 import cl.multicaja.core.exceptions.BaseException;
 import cl.multicaja.core.utils.EncryptUtil;
+import cl.multicaja.core.utils.NumberUtils;
 import cl.multicaja.core.utils.db.DBUtils;
+import cl.multicaja.prepaid.external.freshdesk.model.Ticket;
+import cl.multicaja.prepaid.external.freshdesk.model.TicketsResponse;
+import cl.multicaja.prepaid.helpers.freshdesk.model.v10.FreshDeskServiceHelper;
 import cl.multicaja.prepaid.helpers.freshdesk.model.v10.TicketType;
 import cl.multicaja.prepaid.helpers.mcRed.McRedReconciliationFileDetail;
 import cl.multicaja.prepaid.helpers.tecnocom.TecnocomServiceHelper;
@@ -18,16 +22,15 @@ import cl.multicaja.tecnocom.constants.*;
 import org.junit.*;
 import org.springframework.jdbc.core.RowMapper;
 
+import javax.inject.Inject;
 import java.math.BigDecimal;
 import java.sql.Date;
 import java.sql.SQLException;
 import java.sql.Timestamp;
-import java.time.Instant;
-import java.time.LocalDate;
-import java.time.ZoneId;
-import java.time.ZonedDateTime;
+import java.time.*;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Map;
 
 public class Test_Reconciliation_FullTest extends TestBaseUnitAsync {
 
@@ -43,6 +46,8 @@ public class Test_Reconciliation_FullTest extends TestBaseUnitAsync {
 
   static String switchNotFoundId = "[No_Encontrado_En_Switch]";
   static String tecnocomNotFoundId = "[No_Encontrado_En_Tecnocom]";
+
+  private FreshDeskServiceHelper freshDeskServiceHelper = new FreshDeskServiceHelper();
 
   @BeforeClass
   public static void prepareDB() {
@@ -3190,12 +3195,11 @@ public class Test_Reconciliation_FullTest extends TestBaseUnitAsync {
   }
 
   void assertTicket(Long movementId, TicketType ticketType) throws Exception {
-    // Todo: como validar la existencia del ticket?
-    /*
+
     LocalDateTime beginDate = LocalDateTime.now(ZoneId.of("UTC"));
     beginDate.minusMinutes(5);
     LocalDateTime endDate = beginDate.plusMinutes(5);
-    TicketsResponse ticketsResponse = UserClient.getInstance().getFreshdeskTicketsByTypeAndCreatedDate(null, 0, ticketType, beginDate, endDate);
+    TicketsResponse ticketsResponse = freshDeskServiceHelper.getFreshdeskService().getTicketsByTypeAndCreatedDate(0, beginDate, endDate,ticketType.getValue());
     Assert.assertTrue("Debe tener al menos un ticket", ticketsResponse.getTotal() > 0);
 
     boolean found = false;
@@ -3209,7 +3213,6 @@ public class Test_Reconciliation_FullTest extends TestBaseUnitAsync {
       }
     }
     Assert.assertTrue("Debe encontrar el ticket de devolucion", found);
-    */
   }
 
   private void assertResearch(Long movementId, Boolean exists) {
