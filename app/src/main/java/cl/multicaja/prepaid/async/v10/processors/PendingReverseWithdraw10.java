@@ -292,7 +292,7 @@ public class PendingReverseWithdraw10 extends BaseProcessor10  {
             req.getReprocesQueue());
 
           newTicket.setUniqueExternalId(data.getPrepaidUser10().getUuid());
-          Ticket ticket = getFreshDeskServiceHelper().createTicketInFreshdesk(newTicket);
+          Ticket ticket = freshDeskServiceHelper.createTicketInFreshdesk(newTicket);
           if (ticket != null && ticket.getId() != null) {
             log.info("[processErrorWithdrawReversal][Ticket_Success][ticketId]:"+ticket.getId());
           }else{
