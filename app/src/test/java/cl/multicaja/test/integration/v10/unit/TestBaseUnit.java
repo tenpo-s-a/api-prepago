@@ -366,6 +366,7 @@ public class TestBaseUnit extends TestApiBase {
       tecnocomReconciliationEJBBean10.setReconciliationFilesEJBBean10(getReconciliationFilesEJBBean10());
       tecnocomReconciliationEJBBean10.setPrepaidInvoiceDelegate10(getInvoiceDelegate10());
       tecnocomReconciliationEJBBean10.setAccountEJBBean10(getAccountEJBBean10());
+      tecnocomReconciliationEJBBean10.setIpmEJBBean10(getIpmEJBBean10());
     }
     return tecnocomReconciliationEJBBean10;
   }
@@ -404,7 +405,7 @@ public class TestBaseUnit extends TestApiBase {
     return TecnocomServiceHelper.getInstance().getTecnocomService();
   }
 
-  static IpmEJBBean10 getIpmEJBBean10() {
+  public static IpmEJBBean10 getIpmEJBBean10() {
     if (ipmEJBBean10 == null) {
       ipmEJBBean10 = new IpmEJBBean10();
     }
@@ -1820,5 +1821,85 @@ public class TestBaseUnit extends TestApiBase {
     timestamps.setUpdatedAt(LocalDateTime.now(ZoneId.of("UTC")));
     ipmMovement10.setTimestamps(timestamps);
     return ipmMovement10;
+  }
+
+  public void insertIpmMovement(IpmMovement10 ipmMovement10) throws Exception {
+    String insertQuery = String.format(
+      "INSERT INTO %s.ipm_file_data (" +
+        "  file_id, " +
+        "  message_type, " +
+        "  function_code, " +
+        "  message_reason, " +
+        "  message_number, " +
+        "  pan, " +
+        "  transaction_amount, " +
+        "  reconciliation_amount, " +
+        "  cardholder_billing_amount, " +
+        "  reconciliation_conversion_rate, " +
+        "  cardholder_billing_conversion_rate, " +
+        "  transaction_local_date, " +
+        "  approval_code, " +
+        "  transaction_currency_code, " +
+        "  reconciliation_currency_code, " +
+        "  cardholder_billing_currency_code, " +
+        "  merchant_code, " +
+        "  merchant_name, " +
+        "  merchant_state, " +
+        "  merchant_country, " +
+        "  transaction_life_cycle_id, " +
+        "  reconciled, " +
+        "  created_at, " +
+        "  updated_at " +
+        ") VALUES (" +
+        "  %s, " +
+        "  %s, " +
+        "  %s, " +
+        "  %s, " +
+        "  %s, " +
+        "  '%s', " +
+        "  %s, " +
+        "  %s, " +
+        "  %s, " +
+        "  %s, " +
+        "  %s, " +
+        "  timezone('utc', now()), " +
+        "  '%s', " +
+        "  %s, " +
+        "  %s, " +
+        "  %s, " +
+        "  '%s', " +
+        "  '%s', " +
+        "  '%s', " +
+        "  '%s', " +
+        "  '%s', " +
+        "  %b, " +
+        "  timezone('utc', now()), " +
+        "  timezone('utc', now()) " +
+        ")",
+      getSchemaAccounting(),
+      ipmMovement10.getFileId(),
+      ipmMovement10.getMessageType(),
+      ipmMovement10.getFunctionCode(),
+      ipmMovement10.getMessageReason(),
+      ipmMovement10.getMessageNumber(),
+      ipmMovement10.getPan(),
+      ipmMovement10.getTransactionAmount(),
+      ipmMovement10.getReconciliationAmount(),
+      ipmMovement10.getCardholderBillingAmount(),
+      ipmMovement10.getReconciliationConversionRate(),
+      ipmMovement10.getCardholderBillingConversionRate(),
+      ipmMovement10.getApprovalCode(),
+      ipmMovement10.getTransactionCurrencyCode(),
+      ipmMovement10.getReconciliationCurrencyCode(),
+      ipmMovement10.getCardholderBillingCurrencyCode(),
+      ipmMovement10.getMerchantCode(),
+      ipmMovement10.getMerchantName(),
+      ipmMovement10.getMerchantState(),
+      ipmMovement10.getMerchantCountry(),
+      ipmMovement10.getTransactionLifeCycleId(),
+      ipmMovement10.getReconciled()
+    );
+
+    getDbUtils().getJdbcTemplate().execute(insertQuery);
   }
 }
