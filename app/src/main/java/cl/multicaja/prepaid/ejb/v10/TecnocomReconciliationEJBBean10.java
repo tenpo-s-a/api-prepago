@@ -544,7 +544,7 @@ public class TecnocomReconciliationEJBBean10 extends PrepaidBaseEJBBean10 implem
           throw new ValidationException(ERROR_PROCESSING_FILE.getValue(), msg);
         }
 
-        PrepaidMovement10 prepaidMovement10 = getPrepaidMovementEJBBean11().getPrepaidMovementForAut(account.getUserId(), trx.getTipoFac(), trx.getNumAut(), trx.getCodCom());
+        PrepaidMovement10 prepaidMovement10 = getPrepaidMovementEJBBean11().getPrepaidMovementForAut(account.getUserId(), trx.getTipoFac(), IndicadorNormalCorrector.fromValue(trx.getIndNorCor()), trx.getNumAut(), trx.getCodCom());
 
         if (prepaidMovement10 == null) {
           // No existe en nuestra tabla, debe insertarlo
@@ -568,6 +568,8 @@ public class TecnocomReconciliationEJBBean10 extends PrepaidBaseEJBBean10 implem
           // Por lo que es necesario levantar el evento de transaccion
           PrepaidUser10 prepaidUser10 = getPrepaidUserEJBBean10().findById(null, account.getUserId());
           TransactionType transactionType = prepaidMovement10.getTipoMovimiento().equals(PrepaidMovementType.SUSCRIPTION) ? TransactionType.SUSCRIPTION : TransactionType.PURCHASE;
+
+          // Todo: determinar que tipo de transaccion es, y levantar el evento apropiado (authorized, reversed o devolucion)
           getPrepaidMovementEJBBean11().publishTransactionAuthorizedEvent(prepaidUser10.getUuid(), account.getUuid(), prepaidCard10.getUuid(), prepaidMovement10, Collections.emptyList(), transactionType);
         } else {
           PrepaidMovementStatus originalStatus = prepaidMovement10.getEstado();
@@ -630,6 +632,9 @@ public class TecnocomReconciliationEJBBean10 extends PrepaidBaseEJBBean10 implem
   }
 
   private void insertMovementFees(PrepaidMovement10 prepaidMovement10) throws Exception {
+    // Todo: Si el movimiento es de tipo DEVOLUCION, no se calculan comisiones de ningun tipo.
+
+
     List<Charge> feeCharges;
     try {
       // Pide la lista de comisiones al servicio
@@ -718,7 +723,7 @@ public class TecnocomReconciliationEJBBean10 extends PrepaidBaseEJBBean10 implem
     prepaidMovement.setCentalta(batchTrx.getCentAlta());
     prepaidMovement.setCuenta(batchTrx.getCuenta());
     prepaidMovement.setClamon(batchTrx.getImpFac().getCurrencyCode());
-    prepaidMovement.setIndnorcor(IndicadorNormalCorrector.fromValue(batchTrx.getTipoFac().getCorrector()));
+    prepaidMovement.setIndnorcor(IndicadorNormalCorrector.fromValue(batchTrx.getIndNorCor()));
     prepaidMovement.setTipofac(batchTrx.getTipoFac());
     prepaidMovement.setFecfac(new Date(batchTrx.getFecTrn().getTime()));
     prepaidMovement.setNumreffac(""); //se debe actualizar despues, es el id de PrepaidMovement10
