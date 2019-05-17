@@ -101,20 +101,6 @@ pipeline:
       event: [ push ]
       branch: master
 
-  db_mock_migration_staging:
-    image: maven:3.6.0-jdk-8-alpine
-    commands:
-      - ./drone-mvn-cache.sh
-      - cd pg
-      - ./db-create.sh -Denv=mock
-      - ./migrate-up.sh -Denv=mock
-      - ./migrate-down.sh 1000 -Denv=mock
-      - ./migrate-up.sh -Denv=mock
-      - ./migrate-bootstrap.sh --force -Denv=mock
-    when:
-      event: [ push ]
-      branch: master
-
   db_consul_uat:
     image: hashicorp/consul-template:alpine
     commands:
@@ -171,38 +157,6 @@ pipeline:
       event: [ push ]
       branch: master
 
-  deploy_mock_to_staging:
-    image: mccontainerregistry.azurecr.io/tools/drone-phoenix:1.0.0
-    cluster: staging
-    template: deployment-mock.staging.yml
-    vars:
-      - IMAGE=mccontainerregistry.azurecr.io/api-prepago:${DRONE_COMMIT_SHA}
-      - DB_NAME=prepago_api_dev_mock
-      - API_ENVIRONMENT=mock
-      - DB_USERNAME=prepago
-      - DB_PASSWORD=N8BC2VQ74PrGv4SeXdHvcT8VPT7pTWU2
-      - DB_HOST_FQDN=prepaid-postgresql-staging.postgres.database.azure.com
-      - DB_HOST_NAME=prepaid-postgresql-staging
-    when:
-      event: [ push ]
-      branch: master
-
-  deploy_virtual_service_to_staging:
-    image: mccontainerregistry.azurecr.io/tools/drone-phoenix:1.0.0
-    cluster: staging
-    template: virtual-service.staging.yml
-    when:
-      event: [ push ]
-      branch: master
-
-  deploy_destination_rule_to_staging:
-    image: mccontainerregistry.azurecr.io/tools/drone-phoenix:1.0.0
-    cluster: staging
-    template: destination-rule.staging.yml
-    when:
-      event: [ push ]
-      branch: master
-
   deploy_to_uat:
     image: mccontainerregistry.azurecr.io/tools/drone-phoenix:1.0.0
     cluster: delta
@@ -219,7 +173,7 @@ pipeline:
   deploy_mock_to_uat:
     image: mccontainerregistry.azurecr.io/tools/drone-phoenix:1.0.0
     cluster: delta
-    template: deployment-mock.staging.yml
+    template: deployment-mock.uat.yml
     vars:
       - IMAGE=mccontainerregistry.azurecr.io/api-prepago:${DRONE_COMMIT_SHA}
       - DB_NAME=prepago_api_mock
@@ -245,15 +199,6 @@ pipeline:
     when:
       event: [ tag ]
       ref: refs/tags/snapshot*
-
-  #deploy_to_production:
-  #  image: mccontainerregistry.azurecr.io/tools/drone-phoenix:1.0.0
-  #  cluster: production
-  #  vars:
-  #    - IMAGE=mccontainerregistry.azurecr.io/api-prepago:${DRONE_COMMIT_SHA}
-  #  when:
-  #    event: [ tag ]
-  #    ref: refs/tags/release*
 
   rebuild-cache:
     image: drillster/drone-volume-cache
