@@ -417,7 +417,7 @@ public class Test_AutoReconciliation_FullTest extends TestBaseUnitAsync {
     ipmMovement10.setPan(prepaidCard.getPan());
     ipmMovement10.setMerchantCode(movimientoTecnocom10.getCodCom());
     ipmMovement10.setApprovalCode(movimientoTecnocom10.getNumAut());
-    createIpmMovement(ipmMovement10);
+    ipmMovement10 = createIpmMovement(ipmMovement10);
 
     // Se inserta un movimiento en estado NOTIFIED
     PrepaidMovement10 insertedMovement = buildPrepaidMovementV2(prepaidUser, topup, prepaidCard, null, PrepaidMovementType.TOPUP);
@@ -473,7 +473,7 @@ public class Test_AutoReconciliation_FullTest extends TestBaseUnitAsync {
     ipmMovement10.setPan(prepaidCard.getPan());
     ipmMovement10.setMerchantCode(movimientoTecnocom10.getCodCom());
     ipmMovement10.setApprovalCode(movimientoTecnocom10.getNumAut());
-    createIpmMovement(ipmMovement10);
+    ipmMovement10 = createIpmMovement(ipmMovement10);
 
     // Se inserta un movimiento en estado AUTHORIZED
     PrepaidMovement10 insertedMovement = buildPrepaidMovementV2(prepaidUser, topup, prepaidCard, null, PrepaidMovementType.TOPUP);
