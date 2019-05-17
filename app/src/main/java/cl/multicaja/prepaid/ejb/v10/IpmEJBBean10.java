@@ -49,6 +49,7 @@ public class IpmEJBBean10 extends PrepaidBaseEJBBean10 {
    *      - Mismo numaut
    *      - No este conciliado
    *      - Tenga 2.5% de diferencia en el monto (Entre 97.5% y 102.5%)
+   *      - Si hay mas de uno, elige el mas cercano al monto original (100.0%)
    * @param truncatedPan
    * @param codcom
    * @param amount
