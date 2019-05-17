@@ -569,7 +569,11 @@ public class TecnocomReconciliationEJBBean10 extends PrepaidBaseEJBBean10 implem
           PrepaidUser10 prepaidUser10 = getPrepaidUserEJBBean10().findById(null, account.getUserId());
           TransactionType transactionType = prepaidMovement10.getTipoMovimiento().equals(PrepaidMovementType.SUSCRIPTION) ? TransactionType.SUSCRIPTION : TransactionType.PURCHASE;
 
-          // Todo: determinar que tipo de transaccion es, y levantar el evento apropiado (authorized, reversed o devolucion)
+          // Determinar que tipo de transaccion es, y levantar el evento apropiado
+          TipoFactura tipoFactura = TipoFactura.valueOfEnumByCodeAndCorrector(trx.getTipoFac().getCode(), trx.getIndNorCor());
+          if (TipoFactura.DEVOLUCION_COMPRA_INTERNACIONAL.equals(tipoFactura)) {
+            
+          }
           getPrepaidMovementEJBBean11().publishTransactionAuthorizedEvent(prepaidUser10.getUuid(), account.getUuid(), prepaidCard10.getUuid(), prepaidMovement10, Collections.emptyList(), transactionType);
         } else {
           PrepaidMovementStatus originalStatus = prepaidMovement10.getEstado();
