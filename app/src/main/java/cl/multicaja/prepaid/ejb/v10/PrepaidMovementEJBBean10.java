@@ -1499,7 +1499,6 @@ public class PrepaidMovementEJBBean10 extends PrepaidBaseEJBBean10 implements Pr
       NewTicket newTicket = new NewTicket();
       newTicket.setDescription(template);
       newTicket.setGroupId(GroupId.OPERACIONES);
-      newTicket.setUniqueExternalId(String.valueOf(prepaidUser10.getDocumentNumber()));
       newTicket.setType(TicketType.DEVOLUCION.getValue());
       newTicket.setStatus(Long.valueOf(StatusType.OPEN.getValue()));
       newTicket.setPriority(Long.valueOf(PriorityType.URGENT.getValue()));

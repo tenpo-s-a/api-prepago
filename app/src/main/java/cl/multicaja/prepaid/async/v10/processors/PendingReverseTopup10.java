@@ -7,7 +7,6 @@ import cl.multicaja.cdt.model.v10.CdtTransaction10;
 import cl.multicaja.core.model.Errors;
 import cl.multicaja.prepaid.async.v10.model.PrepaidReverseData10;
 import cl.multicaja.prepaid.async.v10.routes.BaseRoute10;
-//import cl.multicaja.prepaid.helpers.freshdesk.model.v10.NewTicket;
 import cl.multicaja.prepaid.external.freshdesk.model.NewTicket;
 import cl.multicaja.prepaid.external.freshdesk.model.Ticket;
 import cl.multicaja.prepaid.helpers.freshdesk.model.v10.FreshdeskServiceHelper;
@@ -257,12 +256,11 @@ public class PendingReverseTopup10 extends BaseProcessor10 {
 
           NewTicket newTicket = createTicket("Error al realizar reversa carga",
             template,
-            user.getDocumentNumber(),
+            user.getUuid(),
             data.getPrepaidTopup10().getMessageId(),
             QueuesNameType.REVERSE_TOPUP,
             req.getReprocesQueue());
 
-          newTicket.setUniqueExternalId(user.getUuid());
           Ticket ticket = FreshdeskServiceHelper.getInstance().getFreshdeskService().createTicket(newTicket);
           if (ticket != null && ticket.getId() != null) {
             log.info("[processErrorTopupReverse][Ticket_Success][ticketId]:"+ticket.getId());

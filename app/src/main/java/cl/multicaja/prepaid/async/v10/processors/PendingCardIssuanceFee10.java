@@ -282,7 +282,6 @@ public class PendingCardIssuanceFee10 extends BaseProcessor10 {
           NewTicket newTicket = new NewTicket();
           newTicket.setDescription(template);
           newTicket.setGroupId(GroupId.OPERACIONES);
-          newTicket.setUniqueExternalId(user.getDocumentNumber());
           newTicket.setType(TicketType.COLAS_NEGATIVAS.getValue());
           newTicket.setStatus(Long.valueOf(StatusType.OPEN.getValue()));
           newTicket.setPriority(Long.valueOf(PriorityType.URGENT.getValue()));

@@ -10,6 +10,16 @@ import java.util.stream.Stream;
 
 public enum TicketType {
 
+  //Antiguos Items - No borrar
+  /*
+  VALIDACION_IDENTIDAD("Validación de identidad"),
+  GENERICO("Genérico"),
+  COLAS_NEGATIVAS("Cola Negativa"),
+  DEVOLUCION("devolucion"),
+  EMERGENCIA("Emergencia");
+   */
+
+  //Nuevos Items
   GENERICO("Genérico"),
   EMERGENCIA("Emergencia"),
   CIERRE_DE_CUENTA("Cierre de cuenta"),

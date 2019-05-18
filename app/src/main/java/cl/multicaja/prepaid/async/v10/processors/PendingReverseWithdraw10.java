@@ -284,12 +284,11 @@ public class PendingReverseWithdraw10 extends BaseProcessor10  {
 
           NewTicket newTicket = createTicket("Error al realizar reversa de Retiro",
             template,
-            user.getDocumentNumber(),
+            data.getPrepaidUser10().getUuid(),
             data.getPrepaidWithdraw10().getMessageId(),
             QueuesNameType.REVERSE_WITHDRAWAL,
             req.getReprocesQueue());
 
-          newTicket.setUniqueExternalId(data.getPrepaidUser10().getUuid());
           Ticket ticket = FreshdeskServiceHelper.getInstance().getFreshdeskService().createTicket(newTicket);
           if (ticket != null && ticket.getId() != null) {
             log.info("[processErrorWithdrawReversal][Ticket_Success][ticketId]:"+ticket.getId());

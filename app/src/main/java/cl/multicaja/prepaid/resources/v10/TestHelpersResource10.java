@@ -1217,10 +1217,7 @@ public final class TestHelpersResource10 extends BaseResource {
 
 
       NewTicket newTicket = new NewTicket();
-      //newTicket.setRequesterId(prepaidUser.getId().longValue());
       newTicket.setGroupId(GroupId.OPERACIONES);
-      //newTicket.setUniqueExternalId(prepaidUser.getDocumentNumber());
-      newTicket.setUniqueExternalId(prepaidUser.getUuid());
       newTicket.setType(TicketType.DEVOLUCION.getValue());
       newTicket.setSubject(String.format("%s - %s %s",
         TicketType.DEVOLUCION.getValue(), prepaidUser.getName(), prepaidUser.getLastName()));
@@ -1230,6 +1227,7 @@ public final class TestHelpersResource10 extends BaseResource {
       newTicket.setProductId(43000001595L);
       newTicket.addCustomField("cf_id_movimiento", prepaidMovement.getId().toString());
 
+      newTicket.setUniqueExternalId(prepaidUser.getUuid());
       Ticket ticket = FreshdeskServiceHelper.getInstance().getFreshdeskService().createTicket(newTicket);
       if (ticket != null && ticket.getId() != null) {
         log.info("[prepareToRefund][Ticket_Success][ticketId]:"+ticket.getId());

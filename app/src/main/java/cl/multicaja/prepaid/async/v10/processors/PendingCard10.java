@@ -258,12 +258,13 @@ public class PendingCard10 extends BaseProcessor10 {
         String template = getRoute().getParametersUtil().getString("api-prepaid","template_ticket_cola_2","v1.0");
         template = TemplateUtils.freshDeskTemplateColas2(template,"Error al dar de Alta a Cliente",String.format("%s %s",prepaidUser10.getName(),prepaidUser10.getLastName()),prepaidUser10.getDocumentNumber(),prepaidUser10.getId());
 
-        NewTicket newTicket = createTicket("Error al dar de Alta a Cliente",template,prepaidUser10.getDocumentNumber(),data.getPrepaidTopup10().getMessageId(),QueuesNameType.PENDING_EMISSION,req.getReprocesQueue());
+        NewTicket newTicket = createTicket("Error al dar de Alta a Cliente",template,prepaidUser10.getUuid(),data.getPrepaidTopup10().getMessageId(),QueuesNameType.PENDING_EMISSION,req.getReprocesQueue());
 
-        newTicket.setUniqueExternalId(prepaidUser10.getUuid());
         Ticket ticket = FreshdeskServiceHelper.getInstance().getFreshdeskService().createTicket(newTicket);
         if(ticket.getId() != null){
           log.info("[processErrorWithdrawReversal][Ticket_Success][id]:"+ticket.getId());
+        }else{
+          log.info("[processErrorWithdrawReversal][Ticket_Fail][ticketData]:"+newTicket.toString());
         }
 
       } else {
@@ -298,13 +299,12 @@ public class PendingCard10 extends BaseProcessor10 {
 
           NewTicket newTicket = createTicket("Error al obtener datos tarjeta",
             template,
-            prepaidUser10.getDocumentNumber(),
+            prepaidUser10.getUuid(),
             data.getPrepaidTopup10().getMessageId(),
             QueuesNameType.CREATE_CARD,
             req.getReprocesQueue()
           );
 
-          newTicket.setUniqueExternalId(prepaidUser10.getUuid());
           Ticket ticket = FreshdeskServiceHelper.getInstance().getFreshdeskService().createTicket(newTicket);
           if (ticket != null && ticket.getId() != null) {
             log.info("[processErrorCreateCard][Ticket_Success][ticketId]:"+ticket.getId());

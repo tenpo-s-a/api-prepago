@@ -2266,8 +2266,8 @@ public class Test_Reconciliation_FullTest extends TestBaseUnitAsync {
     foundCdtTransaction = getCdtEJBBean10().buscaMovimientoByIdExternoAndTransactionType(null, testData.prepaidMovement.getIdTxExterno(), CdtTransactionType.REVERSA_CARGA);
     Assert.assertNotNull("Debe existir la reversa de carga", foundCdtTransaction);
 
-    // Revisar si existse el ticket en freshdesk
-    //assertTicket(testData.prepaidMovement.getId(), TicketType.DEVOLUCION);
+    //Revisar si existse el ticket en freshdesk
+    assertTicket(testData.prepaidMovement.getId(), TicketType.DEVOLUCION);
   }
 
   @Test
@@ -3192,8 +3192,9 @@ public class Test_Reconciliation_FullTest extends TestBaseUnitAsync {
   }
 
   void assertTicket(Long movementId, TicketType ticketType) throws Exception {
+    // Todo: como validar la existencia del ticket?
 
-    LocalDateTime beginDate = LocalDateTime.now(ZoneId.of("UTC"));
+    /*LocalDateTime beginDate = LocalDateTime.now(ZoneId.of("UTC"));
     beginDate.minusMinutes(5);
     LocalDateTime endDate = beginDate.plusMinutes(5);
     TicketsResponse ticketsResponse = FreshdeskServiceHelper.getInstance().getFreshdeskService().getTicketsByTypeAndCreatedDate(0, beginDate, endDate,ticketType.getValue());
@@ -3209,7 +3210,7 @@ public class Test_Reconciliation_FullTest extends TestBaseUnitAsync {
         break;
       }
     }
-    Assert.assertTrue("Debe encontrar el ticket de devolucion", found);
+    Assert.assertTrue("Debe encontrar el ticket de devolucion", found);*/
   }
 
   private void assertResearch(Long movementId, Boolean exists) {

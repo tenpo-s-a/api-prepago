@@ -242,12 +242,11 @@ public class PendingTopup10 extends BaseProcessor10 {
 
           NewTicket newTicket = createTicket(String.format("Error al realizar carga %s", data.getPrepaidTopup10().getTransactionOriginType().name()),
             template,
-            data.getPrepaidUser10().getDocumentNumber(),
+            data.getPrepaidUser10().getUuid(),
             data.getPrepaidTopup10().getMessageId(),
             QueuesNameType.TOPUP,
             req.getReprocesQueue());
 
-          newTicket.setUniqueExternalId(data.getPrepaidUser10().getUuid());
           Ticket ticket = FreshdeskServiceHelper.getInstance().getFreshdeskService().createTicket(newTicket);
           if (ticket != null && ticket.getId() != null) {
             log.info("[processErrorTopup][Ticket_Success][ticketId]:"+ticket.getId());

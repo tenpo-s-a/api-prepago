@@ -176,12 +176,10 @@ public class Test_PrepaidMovementEJB10_procesReconciliation10 extends TestBaseUn
     prepaidCard10 = createPrepaidCardV2(prepaidCard10);
 
     String template = getParametersUtil().getString("api-prepaid", "template_ticket_devolucion", "v1.0");
-    //template = TemplateUtils.freshDeskTemplateDevolucion(template, prepaidUser.getName(), prepaidUser.getLastName(), prepaidUser.getDocumentNumber(),prepaidUser.getId(), "", "8888", "", 0L);
 
     NewTicket newTicket = new NewTicket();
     newTicket.setDescription(template);
     newTicket.setGroupId(GroupId.OPERACIONES);
-    newTicket.setUniqueExternalId("14621456");
     newTicket.setType(TicketType.DEVOLUCION.getValue());
     newTicket.setStatus(Long.valueOf(StatusType.OPEN.getValue()));
     newTicket.setPriority(Long.valueOf(PriorityType.URGENT.getValue()));
@@ -196,6 +194,8 @@ public class Test_PrepaidMovementEJB10_procesReconciliation10 extends TestBaseUn
     }else{
       log.info("[processReconciliation_SendTicketDevolucion][Ticket_Fail][ticketData]:"+newTicket.toString());
     }
+    Assert.assertNotNull("Deberia crear un ticket de devolucion", ticket);
+    Assert.assertNotNull("Ticket debe tener id", ticket.getId());
   }
 
   @Test
