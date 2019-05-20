@@ -156,7 +156,6 @@ pipeline:
     image: mccontainerregistry.azurecr.io/tools/drone-phoenix:1.0.0
     cluster: staging
     template: kube.staging.yml
-    consul_kv: env/staging.env
     vars:
       - IMAGE=mccontainerregistry.azurecr.io/api-prepago:${DRONE_COMMIT_SHA}
       - DB_NAME=prepago_api_dev
