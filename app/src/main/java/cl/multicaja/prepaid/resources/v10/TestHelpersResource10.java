@@ -22,6 +22,8 @@ import cl.multicaja.prepaid.async.v10.model.PrepaidTopupData10;
 import cl.multicaja.prepaid.async.v10.routes.PrepaidTopupRoute10;
 import cl.multicaja.prepaid.async.v10.routes.TransactionReversalRoute10;
 import cl.multicaja.prepaid.ejb.v10.*;
+import cl.multicaja.prepaid.external.freshdesk.model.NewTicket;
+import cl.multicaja.prepaid.external.freshdesk.model.Ticket;
 import cl.multicaja.prepaid.helpers.freshdesk.model.v10.*;
 import cl.multicaja.prepaid.helpers.tecnocom.TecnocomServiceHelper;
 import cl.multicaja.prepaid.model.v10.*;
@@ -1215,19 +1217,24 @@ public final class TestHelpersResource10 extends BaseResource {
 
 
       NewTicket newTicket = new NewTicket();
-      //newTicket.setRequesterId(prepaidUser.getId().longValue());
       newTicket.setGroupId(GroupId.OPERACIONES);
-      newTicket.setUniqueExternalId(prepaidUser.getDocumentNumber());
-      newTicket.setType(TicketType.DEVOLUCION);
+      newTicket.setType(TicketType.DEVOLUCION.getValue());
       newTicket.setSubject(String.format("%s - %s %s",
         TicketType.DEVOLUCION.getValue(), prepaidUser.getName(), prepaidUser.getLastName()));
       newTicket.setDescription(template);
-      newTicket.setStatus(StatusType.OPEN);
-      newTicket.setPriority(PriorityType.URGENT);
+      newTicket.setStatus(Long.valueOf(StatusType.OPEN.getValue()));
+      newTicket.setPriority(Long.valueOf(PriorityType.URGENT.getValue()));
       newTicket.setProductId(43000001595L);
       newTicket.addCustomField("cf_id_movimiento", prepaidMovement.getId().toString());
 
-      Ticket ticket = null; //getUserClient().createFreshdeskTicket(headersToMap(headers), prepaidUser.getId(), newTicket);
+      newTicket.setUniqueExternalId(prepaidUser.getUuid());
+      Ticket ticket = FreshdeskServiceHelper.getInstance().getFreshdeskService().createTicket(newTicket);
+      if (ticket != null && ticket.getId() != null) {
+        log.info("[prepareToRefund][Ticket_Success][ticketId]:"+ticket.getId());
+      }else{
+        log.info("[prepareToRefund][Ticket_Fail][ticketData]:"+newTicket.toString());
+      }
+
 
       returnResponse = Response.ok(newTicket).status(201).build();
 

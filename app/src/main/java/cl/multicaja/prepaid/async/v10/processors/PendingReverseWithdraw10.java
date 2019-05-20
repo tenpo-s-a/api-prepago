@@ -8,6 +8,9 @@ import cl.multicaja.core.model.Errors;
 import cl.multicaja.prepaid.async.v10.model.PrepaidReverseData10;
 import cl.multicaja.prepaid.async.v10.routes.BaseRoute10;
 import cl.multicaja.prepaid.helpers.freshdesk.model.v10.NewTicket;
+import cl.multicaja.prepaid.external.freshdesk.model.NewTicket;
+import cl.multicaja.prepaid.external.freshdesk.model.Ticket;
+import cl.multicaja.prepaid.helpers.freshdesk.model.v10.FreshdeskServiceHelper;
 import cl.multicaja.prepaid.model.v10.*;
 import cl.multicaja.prepaid.model.v11.Account;
 import cl.multicaja.prepaid.utils.TemplateUtils;
@@ -281,16 +284,18 @@ public class PendingReverseWithdraw10 extends BaseProcessor10  {
 
           NewTicket newTicket = createTicket("Error al realizar reversa de Retiro",
             template,
-            user.getDocumentNumber(),
+            data.getPrepaidUser10().getUuid(),
             data.getPrepaidWithdraw10().getMessageId(),
             QueuesNameType.REVERSE_WITHDRAWAL,
             req.getReprocesQueue());
 
-          /*Ticket ticket = getRoute().getUserClient().createFreshdeskTicket(null,data.getUser().getId(),newTicket);
-          if(ticket.getId() != null){
-            log.info("Ticket Creado Exitosamente");
+          Ticket ticket = FreshdeskServiceHelper.getInstance().getFreshdeskService().createTicket(newTicket);
+          if (ticket != null && ticket.getId() != null) {
+            log.info("[processErrorWithdrawReversal][Ticket_Success][ticketId]:"+ticket.getId());
+          }else{
+            log.info("[processErrorWithdrawReversal][Ticket_Fail][ticketData]:"+newTicket.toString());
           }
-           */
+
         } else {
           Map<String, Object> templateData = new HashMap<>();
           templateData.put("idUsuario", user.getId());
