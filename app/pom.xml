@@ -69,7 +69,11 @@
       <artifactId>tecnocom-gateway</artifactId>
       <version>a1aecab0dfece9e6b216351d34cceeb78f1e079c</version>
     </dependency>
-
+    <dependency>
+      <groupId>cl.multicaja.prepago.external.source.lib</groupId>
+      <artifactId>prepaid-external-source-lib</artifactId>
+      <version>c176cba2d7c63698baf03f03285406b7b12817f9</version>
+    </dependency>
     <dependency>
       <groupId>cl.multicaja.prepago.external.source.lib</groupId>
       <artifactId>prepaid-external-source-lib</artifactId>

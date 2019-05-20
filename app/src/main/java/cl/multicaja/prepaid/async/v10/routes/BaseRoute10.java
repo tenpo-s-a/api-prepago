@@ -5,12 +5,12 @@ import cl.multicaja.accounting.ejb.v10.PrepaidClearingEJBBean10;
 import cl.multicaja.camel.CamelRouteBuilder;
 import cl.multicaja.cdt.ejb.v10.CdtEJBBean10;
 import cl.multicaja.core.utils.ConfigUtils;
-import cl.multicaja.core.utils.EncryptUtil;
 import cl.multicaja.core.utils.NumberUtils;
 import cl.multicaja.core.utils.PdfUtils;
 import cl.multicaja.prepaid.ejb.v10.*;
 import cl.multicaja.prepaid.ejb.v11.PrepaidCardEJBBean11;
 import cl.multicaja.prepaid.ejb.v11.PrepaidMovementEJBBean11;
+import cl.multicaja.prepaid.helpers.EncryptHelper;
 import cl.multicaja.prepaid.helpers.tecnocom.TecnocomServiceHelper;
 import cl.multicaja.prepaid.utils.ParametersUtil;
 import cl.multicaja.tecnocom.TecnocomService;
@@ -71,7 +71,7 @@ public abstract class BaseRoute10 extends CamelRouteBuilder {
 
   private ParametersUtil parametersUtil;
   private ConfigUtils configUtils;
-  private EncryptUtil encryptUtil;
+  private EncryptHelper encryptHelper;
   private PdfUtils pdfUtils;
   private NumberUtils numberUtils;
 
@@ -98,12 +98,14 @@ public abstract class BaseRoute10 extends CamelRouteBuilder {
     return this.configUtils;
   }
 
-  public EncryptUtil getEncryptUtil(){
-    if(this.encryptUtil == null){
-      this.encryptUtil = EncryptUtil.getInstance();
+  public EncryptHelper getEncryptHelper() {
+    if(encryptHelper == null){
+      encryptHelper = EncryptHelper.getInstance();
     }
-    return this.encryptUtil;
+    return encryptHelper;
   }
+
+
 
   public NumberUtils getNumberUtils() {
     if (this.numberUtils == null) {
