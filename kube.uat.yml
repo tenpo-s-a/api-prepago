@@ -68,7 +68,19 @@ spec:
           - name: API_ENVIRONMENT
             value: ${API_ENVIRONMENT}
           - name: TENPO_USER_API_URL
-            value: "http://40.70.68.63:8080/v1/user-management"
+            value: "http://${TENPO_USER_API_HOST}/v1/user-management"
+          - name: TECNOCOM_MOCK_IMPL
+            value: "false"
+          - name: TECNOCOM_API_KEY
+            value: ${TECNOCOM_API_KEY}
+          - name: TECNOCOM_API_URL
+            value: ${TECNOCOM_API_URL}
+          - name: TECNOCOM_CHANNEL
+            value: ${TECNOCOM_CHANNEL}
+          - name: TECNOCOM_CODENT
+            value: ${TECNOCOM_CODENT}
+          - name: TECNOCOM_ORDER
+            value: ${TECNOCOM_ORDER}
       imagePullSecrets:
         - name: container-reg-credentials
 ---

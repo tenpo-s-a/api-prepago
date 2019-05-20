@@ -76,6 +76,7 @@ public class Test_AccountEJBBean10_getPrepaidUserBalance {
     account.setUserId(Long.MAX_VALUE);
 
     doReturn(account).when(accountEJBBean10).findById(Long.MAX_VALUE);
+    doReturn(null).when(prepaidUserEJBBean10).findById(null, Long.MAX_VALUE);
 
     try{
       accountEJBBean10.getBalance(null, Long.MAX_VALUE);
