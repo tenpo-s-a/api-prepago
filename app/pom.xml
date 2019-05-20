@@ -71,12 +71,6 @@
     </dependency>
 
     <dependency>
-      <groupId>cl.multicaja.prepago.external.source.lib</groupId>
-      <artifactId>prepaid-external-source-lib</artifactId>
-      <version>26842eaadad049bc4c99848700e47a171077b85d</version>
-    </dependency>
-
-    <dependency>
       <groupId>org.glassfish.jersey.core</groupId>
       <artifactId>jersey-server</artifactId>
       <version>${jersey.version}</version>

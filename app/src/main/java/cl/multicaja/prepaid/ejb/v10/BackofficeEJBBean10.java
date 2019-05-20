@@ -1,8 +1,7 @@
 package cl.multicaja.prepaid.ejb.v10;
 
 import cl.multicaja.prepaid.async.v10.BackofficeDelegate10;
-import cl.multicaja.prepaid.external.freshdesk.model.Ticket;
-import cl.multicaja.prepaid.helpers.freshdesk.model.v10.FreshdeskServiceHelper;
+import cl.multicaja.prepaid.helpers.freshdesk.model.v10.Ticket;
 import com.opencsv.CSVWriter;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
@@ -43,7 +42,7 @@ public class BackofficeEJBBean10 extends PrepaidBaseEJBBean10 {
     this.mailPrepaidEJBBean10 = mailPrepaidEJBBean10;
   }
 
-  //TODO Esto para que es?.
+
   /*public TicketsResponse getEmergencyTickets(Integer page, LocalDateTime from, LocalDateTime to) throws Exception {
     return UserClient.getInstance().getEmergencyTickets(null, page, from, to);
   }*/
@@ -167,7 +166,7 @@ public class BackofficeEJBBean10 extends PrepaidBaseEJBBean10 {
        * Se evalua el status del ticket:
        *  - Si el ticket esta CLOSED o RESOLVED, se agrega fecha de cierre.
        */
-      if(FreshdeskServiceHelper.getInstance().isClosedOrResolved(t.getStatus())) {
+      if(t.isClosedOrResolved()) {
         ZonedDateTime utcUpdated = t.getUpdatedAtLocalDateTime().atZone(ZoneId.of("UTC"));
         ZonedDateTime localUpdated = ZonedDateTime.ofInstant(utcUpdated.toInstant(), ZoneId.of("America/Santiago"));
         closedDate = localUpdated.format(fileDateFormatter);

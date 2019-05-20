@@ -19,8 +19,6 @@ import cl.multicaja.core.utils.db.RowMapper;
 import cl.multicaja.prepaid.async.v10.MailDelegate10;
 import cl.multicaja.prepaid.async.v10.PrepaidTopupDelegate10;
 import cl.multicaja.prepaid.ejb.v11.PrepaidCardEJBBean11;
-import cl.multicaja.prepaid.external.freshdesk.model.NewTicket;
-import cl.multicaja.prepaid.external.freshdesk.model.Ticket;
 import cl.multicaja.prepaid.helpers.freshdesk.model.v10.*;
 import cl.multicaja.prepaid.helpers.mcRed.McRedReconciliationFileDetail;
 import cl.multicaja.prepaid.model.v10.*;
@@ -59,15 +57,6 @@ import static cl.multicaja.prepaid.helpers.CalculationsHelper.getParametersUtil;
 public class PrepaidMovementEJBBean10 extends PrepaidBaseEJBBean10 implements PrepaidMovementEJB10 {
 
   private static Log log = LogFactory.getLog(PrepaidMovementEJBBean10.class);
-
-  private static final String FIND_MOVEMENT_BY_ID_SQL = String.format("SELECT * FROM %s.prp_movimiento WHERE id = ?", getSchema());
-
-  private static final String INSERT_MOVEMENT_SQL
-    = String.format("INSERT INTO %s.prp_movimiento (id_movimiento_ref, id_usuario, id_tx_externo, tipo_movimiento, monto, " +
-    "estado, estado_de_negocio, estado_con_switch,estado_con_tecnocom,origen_movimiento,fecha_creacion,fecha_actualizacion," +
-    "codent,centalta,cuenta,clamon,indnorcor,tipofac,fecfac,numreffac,pan,clamondiv,impdiv,impfac,cmbapli,numaut,indproaje," +
-    "codcom,codact,impliq,clamonliq,codpais,nompob,numextcta,nummovext,clamone,tipolin,linref,numbencta,numplastico,nomcomred) " +
-    "VALUES(?, ?, ?, ?, ?, ?, ?, ?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?);", getSchema());
 
   @Inject
   private PrepaidTopupDelegate10 delegate;
@@ -109,6 +98,7 @@ public class PrepaidMovementEJBBean10 extends PrepaidBaseEJBBean10 implements Pr
   private ReconciliationFilesEJBBean10 reconciliationFilesEJBBean10;
 
   private ResearchMovementInformationFiles researchMovementInformationFiles;
+
 
   protected String toJson(Object obj) throws JsonProcessingException {
     return new ObjectMapper().writeValueAsString(obj);
@@ -1499,21 +1489,22 @@ public class PrepaidMovementEJBBean10 extends PrepaidBaseEJBBean10 implements Pr
       NewTicket newTicket = new NewTicket();
       newTicket.setDescription(template);
       newTicket.setGroupId(GroupId.OPERACIONES);
-      newTicket.setType(TicketType.DEVOLUCION.getValue());
-      newTicket.setStatus(Long.valueOf(StatusType.OPEN.getValue()));
-      newTicket.setPriority(Long.valueOf(PriorityType.URGENT.getValue()));
+      newTicket.setUniqueExternalId(String.valueOf(prepaidUser10.getDocumentNumber()));
+      newTicket.setType(TicketType.DEVOLUCION);
+      newTicket.setStatus(StatusType.OPEN);
+      newTicket.setPriority(PriorityType.URGENT);
       newTicket.setSubject("Devolucion de carga");
       newTicket.setProductId(43000001595L);
       newTicket.addCustomField("cf_id_movimiento", movFull.getId().toString());
 
-      newTicket.setUniqueExternalId(prepaidUser10.getUuid());
-      Ticket ticket = FreshdeskServiceHelper.getInstance().getFreshdeskService().createTicket(newTicket);
-      if (ticket != null && ticket.getId() != null) {
-        log.info("[processReconciliation][Ticket_Success][ticketId]:"+ticket.getId());
-      }else{
-        log.info("[processReconciliation][Ticket_Fail][ticketData]:"+newTicket.toString());
-      }
+      //FIXME: Implementar creacion de ticket en Freshdesk
+      Ticket ticket = null;//getUserClient().createFreshdeskTicket(null, prepaidUser10.getId(), newTicket);
 
+      if (ticket != null && ticket.getId() != null) {
+        log.info("Ticket Creado Exitosamente");
+      } else {
+        log.info("Error al crear el ticket de devolucion");
+      }
     }
     /**
      * ID 14 - Movimiento (Carga)

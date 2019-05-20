@@ -6,9 +6,8 @@ import cl.multicaja.core.model.Errors;
 import cl.multicaja.core.utils.Utils;
 import cl.multicaja.prepaid.async.v10.model.PrepaidTopupData10;
 import cl.multicaja.prepaid.async.v10.routes.BaseRoute10;
-import cl.multicaja.prepaid.external.freshdesk.model.NewTicket;
-import cl.multicaja.prepaid.external.freshdesk.model.Ticket;
-import cl.multicaja.prepaid.helpers.freshdesk.model.v10.FreshdeskServiceHelper;
+import cl.multicaja.prepaid.helpers.freshdesk.model.v10.NewTicket;
+import cl.multicaja.prepaid.helpers.freshdesk.model.v10.Ticket;
 import cl.multicaja.prepaid.model.v10.*;
 import cl.multicaja.prepaid.model.v11.Account;
 import cl.multicaja.prepaid.utils.TemplateUtils;
@@ -258,15 +257,14 @@ public class PendingCard10 extends BaseProcessor10 {
         String template = getRoute().getParametersUtil().getString("api-prepaid","template_ticket_cola_2","v1.0");
         template = TemplateUtils.freshDeskTemplateColas2(template,"Error al dar de Alta a Cliente",String.format("%s %s",prepaidUser10.getName(),prepaidUser10.getLastName()),prepaidUser10.getDocumentNumber(),prepaidUser10.getId());
 
-        NewTicket newTicket = createTicket("Error al dar de Alta a Cliente",template,prepaidUser10.getUuid(),data.getPrepaidTopup10().getMessageId(),QueuesNameType.PENDING_EMISSION,req.getReprocesQueue());
-
-        Ticket ticket = FreshdeskServiceHelper.getInstance().getFreshdeskService().createTicket(newTicket);
-        if(ticket.getId() != null){
-          log.info("[processErrorWithdrawReversal][Ticket_Success][id]:"+ticket.getId());
-        }else{
-          log.info("[processErrorWithdrawReversal][Ticket_Fail][ticketData]:"+newTicket.toString());
-        }
-
+        NewTicket newTicket = createTicket("Error al dar de Alta a Cliente",template,prepaidUser10.getDocumentNumber(),data.getPrepaidTopup10().getMessageId(),QueuesNameType.PENDING_EMISSION,req.getReprocesQueue());
+        //FIXME: Implementar la generacion de ticket
+        //TODO: Verificar que ID tiene que ir aca
+        //TODO: Revisar como se generaran los Tickets
+        Ticket ticket = null;//getRoute().getUserClient().createFreshdeskTicket(null,prepaidUser10.getId(),newTicket);
+        //if(ticket.getId() != null){
+          //log.info("Ticket Creado Exitosamente");
+        //}
       } else {
         /**
          *  ENVIO DE MAIL ERROR ENVIO DE TARJETA
@@ -299,19 +297,17 @@ public class PendingCard10 extends BaseProcessor10 {
 
           NewTicket newTicket = createTicket("Error al obtener datos tarjeta",
             template,
-            prepaidUser10.getUuid(),
+            prepaidUser10.getDocumentNumber(),
             data.getPrepaidTopup10().getMessageId(),
             QueuesNameType.CREATE_CARD,
             req.getReprocesQueue()
           );
 
-          Ticket ticket = FreshdeskServiceHelper.getInstance().getFreshdeskService().createTicket(newTicket);
-          if (ticket != null && ticket.getId() != null) {
-            log.info("[processErrorCreateCard][Ticket_Success][ticketId]:"+ticket.getId());
-          }else{
-            log.info("[processErrorCreateCard][Ticket_Fail][ticketData]:"+newTicket.toString());
-          }
-
+          //TODO: Verificar si aca deber ir el UUID Tempo
+          //Ticket ticket = getRoute().getUserClient().createFreshdeskTicket(null,prepaidUser10.getId(),newTicket);
+          //if(ticket.getId() != null){
+          //   log.info("Ticket Creado Exitosamente");
+          //}
         } else {
           Map<String, Object> templateData = new HashMap<>();
           templateData.put("idUsuario", prepaidUser10.getId());

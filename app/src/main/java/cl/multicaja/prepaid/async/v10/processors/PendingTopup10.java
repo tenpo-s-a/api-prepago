@@ -6,9 +6,7 @@ import cl.multicaja.cdt.model.v10.CdtTransaction10;
 import cl.multicaja.core.model.Errors;
 import cl.multicaja.prepaid.async.v10.model.PrepaidTopupData10;
 import cl.multicaja.prepaid.async.v10.routes.BaseRoute10;
-import cl.multicaja.prepaid.external.freshdesk.model.NewTicket;
-import cl.multicaja.prepaid.external.freshdesk.model.Ticket;
-import cl.multicaja.prepaid.helpers.freshdesk.model.v10.FreshdeskServiceHelper;
+import cl.multicaja.prepaid.helpers.freshdesk.model.v10.NewTicket;
 import cl.multicaja.prepaid.kafka.events.model.TransactionType;
 import cl.multicaja.prepaid.model.v10.*;
 import cl.multicaja.prepaid.model.v11.Account;
@@ -29,6 +27,7 @@ import java.util.HashMap;
 import java.util.Map;
 
 import static cl.multicaja.prepaid.async.v10.routes.PrepaidTopupRoute10.*;
+import static cl.multicaja.prepaid.model.v10.MailTemplates.TEMPLATE_MAIL_ERROR_TOPUP_TO_USER;
 
 /**
  * @autor vutreras
@@ -40,6 +39,7 @@ public class PendingTopup10 extends BaseProcessor10 {
   public PendingTopup10(BaseRoute10 route) {
     super(route);
   }
+
 
   public ProcessorRoute processPendingTopup() {
     return new ProcessorRoute<ExchangeData<PrepaidTopupData10>, ExchangeData<PrepaidTopupData10>>() {
@@ -242,18 +242,17 @@ public class PendingTopup10 extends BaseProcessor10 {
 
           NewTicket newTicket = createTicket(String.format("Error al realizar carga %s", data.getPrepaidTopup10().getTransactionOriginType().name()),
             template,
-            data.getPrepaidUser10().getUuid(),
+            data.getPrepaidUser10().getDocumentNumber(),
             data.getPrepaidTopup10().getMessageId(),
             QueuesNameType.TOPUP,
             req.getReprocesQueue());
 
-          Ticket ticket = FreshdeskServiceHelper.getInstance().getFreshdeskService().createTicket(newTicket);
-          if (ticket != null && ticket.getId() != null) {
-            log.info("[processErrorTopup][Ticket_Success][ticketId]:"+ticket.getId());
-          }else{
-            log.info("[processErrorTopup][Ticket_Fail][ticketData]:"+newTicket.toString());
+          //FIXME: Implementar creacion de ticket en freshdesk
+         /* Ticket ticket = getRoute().getUserClient().createFreshdeskTicket(null, data.getPrepaidUser10().getUuid(), newTicket);
+          if (ticket.getId() != null) {
+            log.info("Ticket Creado Exitosamente");
           }
-
+          */
         } else if (Errors.ERROR_INDETERMINADO.equals(data.getNumError())) {
           //FIXME: que hacer con los errores indeterminados? deberian devolverse? investigarse?
           // Estos son errores de excepcion no esperados. Probablemente no deberian devolverse

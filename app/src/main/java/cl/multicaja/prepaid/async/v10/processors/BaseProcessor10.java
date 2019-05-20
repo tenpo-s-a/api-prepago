@@ -11,7 +11,6 @@ import cl.multicaja.prepaid.async.v10.model.PrepaidProductChangeData10;
 import cl.multicaja.prepaid.async.v10.model.PrepaidReverseData10;
 import cl.multicaja.prepaid.async.v10.model.PrepaidTopupData10;
 import cl.multicaja.prepaid.async.v10.routes.BaseRoute10;
-import cl.multicaja.prepaid.external.freshdesk.model.*;
 import cl.multicaja.prepaid.helpers.freshdesk.model.v10.*;
 import cl.multicaja.prepaid.model.v10.CdtTransactionType;
 import cl.multicaja.prepaid.model.v10.NewPrepaidBaseTransaction10;
@@ -274,9 +273,9 @@ public abstract class BaseProcessor10 {
     newTicket.setDescription(template);
     newTicket.setGroupId(GroupId.OPERACIONES);
     newTicket.setUniqueExternalId(uniqueExternalId);
-    newTicket.setType(TicketType.COLAS_NEGATIVAS.getValue());
-    newTicket.setStatus(Long.valueOf(StatusType.OPEN.getValue()));
-    newTicket.setPriority(Long.valueOf(PriorityType.URGENT.getValue()));
+    newTicket.setType(TicketType.COLAS_NEGATIVAS);
+    newTicket.setStatus(StatusType.OPEN);
+    newTicket.setPriority(PriorityType.URGENT);
     newTicket.setSubject(subject);
     newTicket.setProductId(43000001595L);
     // Ticket Custom Fields:
