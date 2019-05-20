@@ -152,8 +152,7 @@ public class PendingCardIssuanceFee10 extends BaseProcessor10 {
           return redirectRequest(endpoint, exchange, req, false);
         }
 
-        //String contrato = prepaidCard.getProcessorUserId();
-        String pan = getRoute().getEncryptUtil().decrypt(prepaidCard.getEncryptedPan());
+        String pan = getRoute().getCryptHelper().decryptPan(prepaidCard.getEncryptedPan());
 
         String nomcomred = prepaidTopup.getMerchantName();
         log.info(String.format("Account [%s]",account.getAccountNumber()));

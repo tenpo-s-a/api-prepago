@@ -171,7 +171,6 @@ public class PendingCard10 extends BaseProcessor10 {
 
           prepaidCard10.setNameOnCard(prepaidUser10.getName() + " " + prepaidUser10.getLastName());
           prepaidCard10.setPan(Utils.replacePan(datosTarjetaDTO.getPan()));
-          prepaidCard10.setEncryptedPan(getRoute().getEncryptUtil().encrypt(datosTarjetaDTO.getPan()));
           prepaidCard10.setStatus(PrepaidCardStatus.PENDING);
           prepaidCard10.setExpiration(datosTarjetaDTO.getFeccadtar());
           prepaidCard10.setProducto(datosTarjetaDTO.getProducto());
@@ -181,7 +180,7 @@ public class PendingCard10 extends BaseProcessor10 {
           prepaidCard10.setPan(Utils.replacePan(datosTarjetaDTO.getPan()));
 
           // se encripta el Pan FIXME: Encriptar el pan con el keyvault de azure "cuando este desplegado en los clusters", en test se debe usar el AES.
-          prepaidCard10.setEncryptedPan(getRoute().getEncryptUtil().encrypt(datosTarjetaDTO.getPan()));
+          prepaidCard10.setEncryptedPan(getRoute().getCryptHelper().encryptPan(datosTarjetaDTO.getPan()));
 
           // se guarda un hash del pan utilizando como secret el accountNumber (contrato)
           prepaidCard10.setHashedPan(getRoute().getPrepaidCardEJBBean11().hashPan(account.getAccountNumber(), datosTarjetaDTO.getPan()));

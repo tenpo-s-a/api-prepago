@@ -77,7 +77,7 @@ public class PendingReverseTopup10 extends BaseProcessor10 {
           // El contrato se obtiene desde la cuenta.
           String contrato = account.getAccountNumber();
 
-          String pan = getRoute().getEncryptUtil().decrypt(prepaidCard.getEncryptedPan());
+          String pan = getRoute().getCryptHelper().decryptPan(prepaidCard.getEncryptedPan());
 
           // Busca el movimiento de carga original
           PrepaidMovement10 originalMovement = getRoute().getPrepaidMovementEJBBean10().getPrepaidMovementForReverse(prepaidUser10.getId(),

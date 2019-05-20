@@ -7,7 +7,6 @@ import cl.multicaja.accounting.helpers.mastercard.model.IpmMessage;
 import cl.multicaja.accounting.model.v10.*;
 import cl.multicaja.core.exceptions.BadRequestException;
 import cl.multicaja.core.exceptions.BaseException;
-import cl.multicaja.core.utils.EncryptUtil;
 import cl.multicaja.core.utils.KeyValue;
 import cl.multicaja.core.utils.NumberUtils;
 import cl.multicaja.core.utils.db.InParam;
@@ -19,14 +18,13 @@ import cl.multicaja.prepaid.ejb.v10.PrepaidBaseEJBBean10;
 import cl.multicaja.prepaid.ejb.v10.PrepaidCardEJBBean10;
 import cl.multicaja.prepaid.ejb.v10.PrepaidMovementEJBBean10;
 import cl.multicaja.prepaid.helpers.CalculationsHelper;
+import cl.multicaja.prepaid.helpers.CryptHelper;
 import cl.multicaja.prepaid.model.v10.*;
 import cl.multicaja.tecnocom.constants.*;
 import com.opencsv.CSVWriter;
-import org.apache.commons.io.IOUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
-import org.springframework.util.Base64Utils;
 
 import javax.ejb.*;
 import java.io.*;
@@ -77,14 +75,7 @@ public class PrepaidAccountingEJBBean10 extends PrepaidBaseEJBBean10 implements 
   @EJB
   private PrepaidCardEJBBean10 prepaidCardEJBBean10;
 
-  private EncryptUtil encryptUtil;
-
-  public CalculationsHelper getCalculationsHelper(){
-    if(calculationsHelper == null){
-      calculationsHelper = CalculationsHelper.getInstance();
-    }
-    return calculationsHelper;
-  }
+  private CryptHelper cryptHelper;
 
   public MailPrepaidEJBBean10 getMailPrepaidEJBBean10() {
     return mailPrepaidEJBBean10;
@@ -126,11 +117,11 @@ public class PrepaidAccountingEJBBean10 extends PrepaidBaseEJBBean10 implements 
     this.prepaidCardEJBBean10 = prepaidCardEJBBean10;
   }
 
-  public EncryptUtil getEncryptUtil(){
-    if(encryptUtil == null){
-      encryptUtil = EncryptUtil.getInstance();
+  public CryptHelper getCryptHelper() {
+    if(cryptHelper == null ){
+      cryptHelper = CryptHelper.getInstance();
     }
-    return encryptUtil;
+    return cryptHelper;
   }
 
   public AccountingData10 searchAccountingByIdTrx(Map<String, Object> header, Long  idTrx) throws Exception {
@@ -1038,7 +1029,7 @@ public class PrepaidAccountingEJBBean10 extends PrepaidBaseEJBBean10 implements 
       // Si el movimiento no existe en nuestra BD se agrega  como uno nuevo, si no  se actualiza.
       if(prepaidMovement10 == null) {
         //Se busca la tarjeta correspondiente al movimiento
-        PrepaidCard10 prepaidCard10 = getPrepaidCardEJB10().getPrepaidCardByEncryptedPan(null, getEncryptUtil().encrypt(trx.getPan()));
+        PrepaidCard10 prepaidCard10 = getPrepaidCardEJB10().getPrepaidCardByEncryptedPan(null, getCryptHelper().encryptPan(trx.getPan()));
         // Se agrega movimiento solo si existe la tarjeta.
         if(prepaidCard10 != null){
           PrepaidMovement10 mov = buildMovementAut(prepaidCard10.getIdUser(), prepaidCard10 ,trx,getTipoMovimientoFromAccTxType(acc.getType()),getTipoFacFromAccTxType(acc.getType()));

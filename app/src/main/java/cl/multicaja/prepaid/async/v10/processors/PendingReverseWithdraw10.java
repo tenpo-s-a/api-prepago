@@ -75,8 +75,7 @@ public class PendingReverseWithdraw10 extends BaseProcessor10  {
         }
         //NO SE OBTIENE DE LA TARJETA SI NO QUE DE LA CUENTA.
         String contrato = account.getAccountNumber();
-
-        String pan = getRoute().getEncryptUtil().decrypt(prepaidCard.getEncryptedPan());
+        String pan =  getRoute().getCryptHelper().decryptPan(prepaidCard.getEncryptedPan());
 
         // Busca el movimiento de retiro original
         PrepaidMovement10 originalMovement = getRoute().getPrepaidMovementEJBBean10().getPrepaidMovementForReverse(prepaidUser10.getId(),
