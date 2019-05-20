@@ -33,18 +33,18 @@ import java.util.Map;
 
 public class Test_Reconciliation_FullTest extends TestBaseUnitAsync {
 
-  static Account account;
-  static UserAccount userAccount;
-  static PrepaidUser10 prepaidUser;
-  static PrepaidCard10 prepaidCard;
-  static ReconciliationFile10 topupReconciliationFile10;
-  static ReconciliationFile10 topupReverseReconciliationFile10;
-  static ReconciliationFile10 withdrawReconciliationFile10;
-  static ReconciliationFile10 withdrawReverseReconciliationFile10;
-  static ReconciliationFile10 tecnocomReconciliationFile10;
+  public static Account account;
+  public static UserAccount userAccount;
+  public static PrepaidUser10 prepaidUser;
+  public static PrepaidCard10 prepaidCard;
+  private static ReconciliationFile10 topupReconciliationFile10;
+  private static ReconciliationFile10 topupReverseReconciliationFile10;
+  private static ReconciliationFile10 withdrawReconciliationFile10;
+  private static ReconciliationFile10 withdrawReverseReconciliationFile10;
+  private static ReconciliationFile10 tecnocomReconciliationFile10;
 
-  static String switchNotFoundId = "[No_Encontrado_En_Switch]";
-  static String tecnocomNotFoundId = "[No_Encontrado_En_Tecnocom]";
+  private static String switchNotFoundId = "[No_Encontrado_En_Switch]";
+  private static String tecnocomNotFoundId = "[No_Encontrado_En_Tecnocom]";
 
   @BeforeClass
   public static void prepareDB() {

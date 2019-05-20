@@ -93,7 +93,7 @@ public class PrepaidMovementEJBBean11 extends PrepaidMovementEJBBean10 {
       ps.setObject(8, movement.getConSwitch().toString());
       ps.setObject(9, movement.getConTecnocom().toString());
       ps.setObject(10, movement.getOriginType().toString());
-      ps.setTimestamp(11, Timestamp.valueOf(LocalDateTime.ofInstant(Instant.now(), ZoneId.of("UTC"))));
+      ps.setTimestamp(11, movement.getFechaCreacion() != null ? movement.getFechaCreacion():  Timestamp.valueOf(LocalDateTime.ofInstant(Instant.now(), ZoneId.of("UTC"))));
       ps.setTimestamp(12, Timestamp.valueOf(LocalDateTime.ofInstant(Instant.now(), ZoneId.of("UTC"))));
       ps.setString(13, movement.getCodent());
       ps.setString(14, movement.getCentalta());
@@ -573,27 +573,26 @@ public class PrepaidMovementEJBBean11 extends PrepaidMovementEJBBean10 {
   }
   @Override
   public List<PrepaidMovement10> getMovementsForConciliate(Map<String, Object> headers) throws Exception {
-    String query = "SELECT\n" +
-      "      pm.id as id,\n" +
-      "      pm.estado as estado,\n" +
-      "      pm.estado_de_negocio as estado_de_negocio,\n" +
-      "      pm.estado_con_switch as estado_con_switch,\n" +
-      "      pm.estado_con_tecnocom as estado_con_tecnocom,\n" +
-      "      pm.tipo_movimiento as tipo_movimiento ,\n" +
-      "      pm.indnorcor as indnorcor,\n" +
-      "      pm.fecha_creacion as fecha_creacion,\n" +
-      "      pm.tipofac as tipofac, \n" +
-      "      pm.id_tarjeta as id_tarjeta\n" +
+    String query = String.format("SELECT\n" +
+      "      id,\n" +
+      "      estado,\n" +
+      "      estado_de_negocio,\n" +
+      "      estado_con_switch,\n" +
+      "      estado_con_tecnocom, \n" +
+      "      tipo_movimiento,\n" +
+      "      indnorcor,\n" +
+      "      fecha_creacion,\n" +
+      "      tipofac, \n" +
+      "      id_tarjeta\n" +
       "    FROM\n" +
-      "     prepago.prp_movimiento pm\n" +
-      "      LEFT JOIN prepago.prp_movimiento_conciliado pmc on pm.id = pmc.id_mov_ref\n" +
+      "     %s.prp_movimiento\n" +
       "    WHERE\n" +
-      "      pmc.id_mov_ref is null and -- que no este conciliado\n" +
-      "      pm.estado_con_switch != 'PENDING' and\n" +
-      "      pm.estado_con_tecnocom != 'PENDING' and\n" +
-      "      pm.tipofac != 3003 and\n" +
-      "      pm.tipo_movimiento != 'PURCHASE' and\n" +
-      "      pm.tipo_movimiento != 'SUSCRIPTION'";
+      "      id NOT IN (select id_mov_ref FROM %s.prp_movimiento_conciliado) AND \n"+
+      "      estado_con_switch != 'PENDING' AND\n" +
+      "      estado_con_tecnocom != 'PENDING' AND\n" +
+      "      tipofac != 3003 AND\n" +
+      "      tipo_movimiento != 'PURCHASE' AND\n" +
+      "      tipo_movimiento != 'SUSCRIPTION'",getSchema(),getSchema());
 
     return getDbUtils().getJdbcTemplate().query(query, this.getMovementConciliationMapper());
   }
