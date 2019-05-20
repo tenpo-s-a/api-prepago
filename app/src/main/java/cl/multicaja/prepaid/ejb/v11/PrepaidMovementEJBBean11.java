@@ -6,6 +6,7 @@ import cl.multicaja.accounting.model.v10.ClearingData10;
 import cl.multicaja.core.exceptions.BadRequestException;
 import cl.multicaja.core.exceptions.BaseException;
 import cl.multicaja.core.utils.KeyValue;
+import cl.multicaja.core.utils.db.InParam;
 import cl.multicaja.prepaid.async.v10.KafkaEventDelegate10;
 import cl.multicaja.prepaid.ejb.v10.PrepaidMovementEJBBean10;
 import cl.multicaja.prepaid.kafka.events.TransactionEvent;
@@ -26,11 +27,8 @@ import org.springframework.jdbc.support.KeyHolder;
 import javax.ejb.*;
 import javax.inject.Inject;
 import java.math.BigDecimal;
-import java.sql.Date;
-import java.sql.PreparedStatement;
-import java.sql.ResultSet;
+import java.sql.*;
 import java.text.SimpleDateFormat;
-import java.sql.Timestamp;
 import java.time.Instant;
 import java.time.LocalDateTime;
 import java.time.ZoneId;
@@ -199,6 +197,70 @@ public class PrepaidMovementEJBBean11 extends PrepaidMovementEJBBean10 {
     List<PrepaidMovement10> lst = this.getPrepaidMovements(null, null, idPrepaidUser, null, null, null, null, null, null, tipoFactura, null, numaut, null, null, null, null, codcom);
     return lst != null && !lst.isEmpty() ? lst.get(0) : null;
   }
+  @Override
+  public void processReconciliationRules() throws Exception {
+    List<PrepaidMovement10> lstPrepaidMovement10s = this.getMovementsForConciliate(null);
+    if (lstPrepaidMovement10s == null) {
+      return;
+    }
+
+    log.info(String.format("lstPrepaidMovement10s: %d", lstPrepaidMovement10s.size()));
+    for (PrepaidMovement10 mov : lstPrepaidMovement10s) {
+      try {
+        log.info("[processReconciliation] IN");
+        processReconciliation(mov);
+        log.info("[processReconciliation] OUT");
+      } catch (Exception e) {
+        log.error(e.getMessage());
+        e.printStackTrace();
+        continue;
+      }
+    }
+  }
+  @Override
+  public ReconciliedMovement10 getReconciliedMovementByIdMovRef(Long idMovRef) throws BaseException, SQLException {
+    log.info("[getReonciliedMovementByIdMovRef In Id] : " + idMovRef);
+    if (idMovRef == null) {
+      throw new BadRequestException(PARAMETRO_FALTANTE_$VALUE).setData(new KeyValue("value", "idMov"));
+    }
+    String query = "SELECT\n" +
+      "      id,\n" +
+      "      id_mov_ref,\n" +
+      "      fecha_registro,\n" +
+      "      accion,\n" +
+      "      estado\n" +
+      "    FROM\n" +
+      "      prepago.prp_movimiento_conciliado\n" +
+      "    WHERE\n" +
+      "      id_mov_ref = ?";
+    try {
+      return getDbUtils().getJdbcTemplate().queryForObject(query, this.getReconciliedMovementMapper(), idMovRef);
+    } catch (EmptyResultDataAccessException ex) {
+      log.error(String.format("[getReconciliedMovementByIdMovRef]  Movimiento con idRef [%d] no existe", idMovRef));
+      return null;
+    }
+  }
+
+  public PrepaidMovement10 getPrepaidMovementByIdTxExterno(String idTxExterno, PrepaidMovementType prepaidMovementType, IndicadorNormalCorrector indicadorNormalCorrector) throws Exception {
+    if (idTxExterno == null) {
+      throw new BadRequestException(PARAMETRO_FALTANTE_$VALUE).setData(new KeyValue("value", "idTxExterno"));
+    }
+
+    List<PrepaidMovement10> lst = this.getPrepaidMovements(null, null,  null,  idTxExterno,  prepaidMovementType, null,  null,  null,  indicadorNormalCorrector,  null,  null,  null, null,  null,  null,  null,  null);
+    return lst != null && !lst.isEmpty() ? lst.get(0) : null;
+  }
+
+  private RowMapper<ReconciliedMovement10> getReconciliedMovementMapper() {
+    return (ResultSet rs, int rowNum) -> {
+      ReconciliedMovement10 rm = new ReconciliedMovement10();
+      rm.setId(rs.getLong("id"));
+      rm.setIdMovRef(rs.getLong("id_mov_ref"));
+      rm.setFechaRegistro(rs.getTimestamp("fecha_registro"));
+      rm.setActionType(ReconciliationActionType.valueOfEnum(rs.getString("accion")));
+      rm.setReconciliationStatusType(ReconciliationStatusType.valueOfEnum(rs.getString("estado")));
+      return rm;
+    };
+  }
 
   private RowMapper<PrepaidMovement10> getMovementMapper() {
     return (ResultSet rs, int rowNum) -> {
@@ -250,7 +312,23 @@ public class PrepaidMovementEJBBean11 extends PrepaidMovementEJBBean10 {
       return movement;
     };
   }
+  private RowMapper<PrepaidMovement10> getMovementConciliationMapper() {
+    return (ResultSet rs, int rowNum) -> {
+      PrepaidMovement10 movement = new PrepaidMovement10();
+      movement.setId(rs.getLong("id"));
+      movement.setTipoMovimiento(PrepaidMovementType.valueOfEnum(rs.getString("tipo_movimiento")));
+      movement.setEstado(PrepaidMovementStatus.valueOfEnum(rs.getString("estado")));
+      movement.setEstadoNegocio(BusinessStatusType.valueOfEnum(rs.getString("estado_de_negocio")));
+      movement.setConSwitch(ReconciliationStatusType.valueOfEnum(rs.getString("estado_con_switch")));
+      movement.setConTecnocom(ReconciliationStatusType.valueOfEnum(rs.getString("estado_con_tecnocom")));
+      movement.setFechaCreacion(rs.getTimestamp("fecha_creacion"));
+      movement.setIndnorcor(IndicadorNormalCorrector.fromValue(rs.getInt("indnorcor")));
+      movement.setTipofac(TipoFactura.valueOfEnumByCodeAndCorrector(rs.getInt("tipofac"),rs.getInt("indnorcor")));
+      movement.setCardId(rs.getLong("id_tarjeta"));
 
+      return movement;
+    };
+  }
   public void publishTransactionAuthorizedEvent(String externalUserId, String accountUuid, String cardUuid, PrepaidMovement10 movement, List<PrepaidMovementFee10> feeList, TransactionType type) throws Exception {
     this.publishTransactionEvent(externalUserId, accountUuid, cardUuid, movement, feeList, type, TransactionStatus.AUTHORIZED);
   }
@@ -367,6 +445,8 @@ public class PrepaidMovementEJBBean11 extends PrepaidMovementEJBBean10 {
       throw new BaseException(ERROR_DE_COMUNICACION_CON_BBDD);
     }
   }
+
+
 
   public List<PrepaidMovementFee10> getPrepaidMovementFeesByMovementId(Long movementId) throws BaseException {
     if(movementId == null){
@@ -490,6 +570,32 @@ public class PrepaidMovementEJBBean11 extends PrepaidMovementEJBBean10 {
         transactionType
       );
     }
+  }
+  @Override
+  public List<PrepaidMovement10> getMovementsForConciliate(Map<String, Object> headers) throws Exception {
+    String query = "SELECT\n" +
+      "      pm.id as id,\n" +
+      "      pm.estado as estado,\n" +
+      "      pm.estado_de_negocio as estado_de_negocio,\n" +
+      "      pm.estado_con_switch as estado_con_switch,\n" +
+      "      pm.estado_con_tecnocom as estado_con_tecnocom,\n" +
+      "      pm.tipo_movimiento as tipo_movimiento ,\n" +
+      "      pm.indnorcor as indnorcor,\n" +
+      "      pm.fecha_creacion as fecha_creacion,\n" +
+      "      pm.tipofac as tipofac, \n" +
+      "      pm.id_tarjeta as id_tarjeta\n" +
+      "    FROM\n" +
+      "     prepago.prp_movimiento pm\n" +
+      "      LEFT JOIN prepago.prp_movimiento_conciliado pmc on pm.id = pmc.id_mov_ref\n" +
+      "    WHERE\n" +
+      "      pmc.id_mov_ref is null and -- que no este conciliado\n" +
+      "      pm.estado_con_switch != 'PENDING' and\n" +
+      "      pm.estado_con_tecnocom != 'PENDING' and\n" +
+      "      pm.tipofac != 3003 and\n" +
+      "      pm.tipo_movimiento != 'PURCHASE' and\n" +
+      "      pm.tipo_movimiento != 'SUSCRIPTION'";
+
+    return getDbUtils().getJdbcTemplate().query(query, this.getMovementConciliationMapper());
   }
 
   public List<PrepaidMovement10> searchMovementsForExpire(String movement, int numFiles){

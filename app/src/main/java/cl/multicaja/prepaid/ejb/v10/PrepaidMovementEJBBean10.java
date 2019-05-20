@@ -24,6 +24,7 @@ import cl.multicaja.prepaid.external.freshdesk.model.Ticket;
 import cl.multicaja.prepaid.helpers.freshdesk.model.v10.*;
 import cl.multicaja.prepaid.helpers.mcRed.McRedReconciliationFileDetail;
 import cl.multicaja.prepaid.model.v10.*;
+import cl.multicaja.prepaid.model.v11.Account;
 import cl.multicaja.prepaid.utils.TemplateUtils;
 import cl.multicaja.tecnocom.constants.*;
 import com.fasterxml.jackson.core.JsonProcessingException;
@@ -1170,11 +1171,19 @@ public class PrepaidMovementEJBBean10 extends PrepaidBaseEJBBean10 implements Pr
       PrepaidMovement10 movFull = getPrepaidMovementById(mov.getId());
 
 
-      //TODO: Se deberia buscar el usuario apartir de la tarjeta y Cuenta.
-      PrepaidUser10 prepaidUser10 = getPrepaidUserEJB10().findById(null, movFull.getIdPrepaidUser());
-      log.info(prepaidUser10);
-      if (prepaidUser10 == null) {
-        log.info("prepaidTopup10 null");
+      PrepaidCard10 prepaidCard10 = getPrepaidCardEJB11().getPrepaidCardById(null,movFull.getCardId());
+      if(prepaidCard10 == null ){
+        log.info("PrepaidCard10 NULL ERROR");
+      }
+
+      Account account = getAccountEJBBean10().findById(prepaidCard10.getAccountId());
+      if (account == null) {
+        log.info("account null");
+      }
+
+      PrepaidUser10 prepaidUser10 = getPrepaidUserEJB10().findById(null,account.getUserId());
+      if(prepaidUser10 == null){
+        log.info("prepaidUser10 null");
       }
 
       updatePrepaidMovementStatus(null, mov.getId(), PrepaidMovementStatus.PROCESS_OK);
@@ -1464,11 +1473,19 @@ public class PrepaidMovementEJBBean10 extends PrepaidBaseEJBBean10 implements Pr
 
       // Refund
       //Se busca usuario prepago para obtener user
-      //PrepaidUser10 prepaidUser10 = getPrepaidUserEJB10().getPrepaidUserById(null, movFull.getIdPrepaidUser());
-      PrepaidUser10 prepaidUser10 = getPrepaidUserEJB10().findById(null, movFull.getIdPrepaidUser());
+      PrepaidCard10 prepaidCard10 = getPrepaidCardEJB11().getPrepaidCardById(null,movFull.getCardId());
+      if(prepaidCard10 == null ){
+        log.info("PrepaidCard10 NULL ERROR");
+      }
 
-      if (prepaidUser10 == null) {
-        log.info("prepaidTopup10 null");
+      Account account = getAccountEJBBean10().findById(prepaidCard10.getAccountId());
+      if (account == null) {
+        log.info("account null");
+      }
+
+      PrepaidUser10 prepaidUser10 = getPrepaidUserEJB10().findById(null,account.getUserId());
+      if(prepaidUser10 == null){
+        log.info("prepaidUser10 null");
       }
 
       // Enviar movimiento a REFUND
@@ -1623,10 +1640,6 @@ public class PrepaidMovementEJBBean10 extends PrepaidBaseEJBBean10 implements Pr
 
       List<ResearchMovementInformationFiles> researchMovementInformationFilesList = new ArrayList<>();
       researchMovementInformationFiles = new ResearchMovementInformationFiles();
-      //researchMovementInformationFiles.setIdArchivo();
-      //researchMovementInformationFiles.setIdEnArchivo();
-      //researchMovementInformationFiles.setNombreArchivo();
-      //researchMovementInformationFiles.setTipoArchivo();
       researchMovementInformationFilesList.add(researchMovementInformationFiles);
       createResearchMovement(
         null,

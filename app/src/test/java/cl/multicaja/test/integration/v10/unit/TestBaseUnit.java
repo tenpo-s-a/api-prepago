@@ -1097,7 +1097,6 @@ public class TestBaseUnit extends TestApiBase {
     PrepaidMovement10 prepaidMovement = new PrepaidMovement10();
     prepaidMovement.setIdMovimientoRef(cdtTransaction != null ? cdtTransaction.getTransactionReference() : getUniqueLong());
     prepaidMovement.setIdPrepaidUser(prepaidUser.getId());
-
     prepaidMovement.setIdTxExterno(cdtTransaction != null ? cdtTransaction.getExternalTransactionId() : getUniqueLong().toString());
     prepaidMovement.setTipoMovimiento(type);
     prepaidMovement.setMonto(BigDecimal.valueOf(getUniqueInteger()));
