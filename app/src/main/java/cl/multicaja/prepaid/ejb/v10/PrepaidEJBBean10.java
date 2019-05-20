@@ -285,10 +285,7 @@ public class PrepaidEJBBean10 extends PrepaidBaseEJBBean10 implements PrepaidEJB
   }
 
   public ApiCall getApiCall(){
-    if(apiCall == null){
-      apiCall =  ApiCall.getInstance();
-    }
-    return apiCall;
+    return ApiCall.getInstance();
   }
 
   public PrepaidTopup10 topupUserBalanceV1(Map<String, Object> headers, NewPrepaidTopup10 topupRequest) throws Exception {
