@@ -80,12 +80,11 @@ public class Test_PrepaidEJBBean10_topupUserBalance extends TestBaseUnitAsync {
 
     NewPrepaidTopup10 newPrepaidTopup = buildPrepaidTopup10();
     try {
-
       getPrepaidEJBBean10().topupUserBalance(null, UUID.randomUUID().toString(), newPrepaidTopup,true);
+      Assert.fail("No debe pasar por aqui");
     } catch(NotFoundException nfex) {
       Assert.assertEquals("No debe existir el usuario prepago", CLIENTE_NO_TIENE_PREPAGO.getValue(), nfex.getCode());
     }
-
   }
 
   @Test
@@ -98,9 +97,8 @@ public class Test_PrepaidEJBBean10_topupUserBalance extends TestBaseUnitAsync {
     NewPrepaidTopup10 newPrepaidTopup = buildPrepaidTopup10();
 
     try {
-
       getPrepaidEJBBean10().topupUserBalance(null, prepaidUser.getUuid(),newPrepaidTopup,true);
-
+      Assert.fail("No debe pasar por aqui");
     } catch(ValidationException nfex) {
       Assert.assertEquals("el usuario prepago esta bloqueado", CLIENTE_PREPAGO_BLOQUEADO_O_BORRADO.getValue(), nfex.getCode());
     }
@@ -120,6 +118,7 @@ public class Test_PrepaidEJBBean10_topupUserBalance extends TestBaseUnitAsync {
 
     try {
       getPrepaidEJBBean10().topupUserBalance(null,prepaidUser.getUuid(), newPrepaidTopup,true);
+      Assert.fail("No debe pasar por aqui");
     } catch(ValidationException vex) {
       Assert.assertEquals("Debe lanzar excepcion con error de Tarjeta invalida", TARJETA_INVALIDA_$VALUE.getValue(), vex.getCode());
     }
@@ -138,9 +137,8 @@ public class Test_PrepaidEJBBean10_topupUserBalance extends TestBaseUnitAsync {
     prepaidCard = createPrepaidCard10(prepaidCard);
 
     try {
-
       getPrepaidEJBBean10().topupUserBalance(null,prepaidUser.getUuid(), newPrepaidTopup,true);
-
+      Assert.fail("No debe pasar por aqui");
     } catch(ValidationException vex) {
       Assert.assertEquals("Debe lanzar excepcion con error de Tarjeta invalida", TARJETA_INVALIDA_$VALUE.getValue(), vex.getCode());
     }
