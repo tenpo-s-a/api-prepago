@@ -135,7 +135,7 @@ public class Test_TecnocomReconciliationEJBBean10_insertAutorization extends Tes
 
     // Inserta el movimiento que vino en el archivo IPM (para hacer un match, y reescribir su valor)
     IpmMovement10 ipmMovement10 = buildIpmMovement10();
-    ipmMovement10.setTransactionAmount(movimientoTecnocom10.getImpFac().getValue().multiply(new BigDecimal(0.995))); // Alterar levemente el valor para que se reescriba
+    ipmMovement10.setCardholderBillingAmount(movimientoTecnocom10.getImpFac().getValue().multiply(new BigDecimal(0.995))); // Alterar levemente el valor para que se reescriba
     ipmMovement10.setPan(prepaidCard.getPan());
     ipmMovement10.setMerchantCode(movimientoTecnocom10.getCodCom());
     ipmMovement10.setApprovalCode(movimientoTecnocom10.getNumAut());
@@ -154,22 +154,32 @@ public class Test_TecnocomReconciliationEJBBean10_insertAutorization extends Tes
     Assert.assertEquals("Debe tener estado PENDING", AccountingStatusType.PENDING, acc.getStatus());
     Assert.assertEquals("Debe tener estado OK", AccountingStatusType.OK, acc.getAccountingStatus());
 
-    // Regla de contabilidad 1: El monto_trx_pesos se llenara con el monto del archivo de operacion impfac
+    // Devoluciones: Regla de contabilidad 1: El monto_trx_pesos se llenara con el monto del archivo de operacion impfac
     Assert.assertEquals("impfac de tecnocom debe ser igual al de contabilidad", movimientoTecnocom10.getImpFac(), acc.getAmount());
 
-    // Regla de contabilidad 2: El monto afecto a saldo se llenara con el monto_trx_pesos
+    // Devoluciones: Regla de contabilidad 2: El monto afecto a saldo se llenara con el monto_trx_pesos
     Assert.assertEquals("impfac de tecnocom debe ser igual al de contabilidad", acc.getAmount(), acc.getAmountBalance());
 
-    // Regla de contabilidad 3: cuando pase a OP (osea ahora, porque todas las devoluciones vienen OP) debe guardarse fecha de conciliacion
+    // Devoluciones: Regla de contabilidad 3: cuando pase a OP (osea ahora, porque todas las devoluciones vienen OP) debe guardarse fecha de conciliacion
     Assert.assertTrue("Debe tener fecha de conciliacion reciente", isRecentLocalDateTime(acc.getConciliationDate().toLocalDateTime(), 5));
 
-    // Regla de contabilidad 4: cuando pase a OP (osea ahora, porque todas las devoluciones vienen OP) debe guardarse el monto del IPM en mastercard
-    Assert.assertEquals("Debe tener monto mastercard = monto ipm", ipmMovement10.getCardholderBillingAmount(), acc.getAmountMastercard().getValue());
+    // Devoluciones: Regla de contabilidad 4: cuando pase a OP (osea ahora, porque todas las devoluciones vienen OP) debe guardarse el monto del IPM en mastercard
+    Assert.assertEquals("Debe tener monto mastercard = monto ipm", ipmMovement10.getCardholderBillingAmount().setScale(2, RoundingMode.HALF_UP), acc.getAmountMastercard().getValue());
+
+    // Devoluciones: Regla de contabilidad 5: Los valores de Valor Dolar y Dif tipo de cambio deben ser zero
+    Assert.assertEquals("Debe tener monto dolar = zero", BigDecimal.ZERO, acc.getAmountUsd().getValue().stripTrailingZeros());
+    Assert.assertEquals("Debe tener dif cambio = zero", BigDecimal.ZERO, acc.getExchangeRateDif().stripTrailingZeros());
+
+    // Devoluciones: Regla de contabilidad 6: Todos los valores de fees deben ser zero
+    Assert.assertEquals("Debe tener fee = zero", BigDecimal.ZERO, acc.getFee().stripTrailingZeros());
+    Assert.assertEquals("Debe tener feeIva = zero", BigDecimal.ZERO, acc.getFeeIva().stripTrailingZeros());
+    Assert.assertEquals("Debe tener collectorFee = zero", BigDecimal.ZERO, acc.getCollectorFee().stripTrailingZeros());
+    Assert.assertEquals("Debe tener collectorFeeIva = zero", BigDecimal.ZERO, acc.getCollectorFeeIva().stripTrailingZeros());
 
     ClearingData10 liq = getPrepaidClearingEJBBean10().searchClearingDataByAccountingId(null, acc.getId());
     Assert.assertNotNull("Debe existir en clearing", liq);
     Assert.assertEquals("Debe tener estado PENDING", AccountingStatusType.PENDING, liq.getStatus());
-/*
+
     // Verificar que exista en la cola de eventos transaction_authorized
     Queue qResp = camelFactory.createJMSQueue(KafkaEventsRoute10.TRANSACTION_AUTHORIZED_TOPIC);
     ExchangeData<String> event = (ExchangeData<String>) camelFactory.createJMSMessenger(30000, 60000)
@@ -185,7 +195,7 @@ public class Test_TecnocomReconciliationEJBBean10_insertAutorization extends Tes
     Assert.assertEquals("Debe tener el mismo userId", prepaidUser.getUuid(), transactionEvent.getUserId());
     Assert.assertEquals("Debe tener el mismo transactiontype", "PURCHASE", transactionEvent.getTransaction().getType());
     Assert.assertEquals("Debe tener el mismo status", "AUTHORIZED", transactionEvent.getTransaction().getStatus());
-*/
+
     // Verificar que NO se hayan creado las comisiones del nuevo movimiento
     List<PrepaidMovementFee10> prepaidMovementFee10List = getPrepaidMovementEJBBean11().getPrepaidMovementFeesByMovementId(prepaidMovement10.getId());
     Assert.assertEquals("Debe tener 0 fees asignadas", 0, prepaidMovementFee10List.size());

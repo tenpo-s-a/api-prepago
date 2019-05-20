@@ -493,6 +493,10 @@ public class PrepaidAccountingEJBBean10 extends PrepaidBaseEJBBean10 implements 
       type = AccountingTxType.COMPRA_MONEDA;
       movementType = AccountingMovementType.COMPRA_MONEDA;
       trxOriginType = TransactionOriginType.MASTERCARDINT;
+    } else if (TipoFactura.DEVOLUCION_COMPRA_INTERNACIONAL.equals(movement.getTipofac())) {
+      type = AccountingTxType.DEVOLUCION;
+      movementType = AccountingMovementType.DEVOLUCION_COMPRA;
+      trxOriginType = TransactionOriginType.MASTERCARDINT;
     }
     //FIXME: Verificar todo lo que son devoluciones y anulaciones. ACTION: Validar si se puede con la información del servicio, generar esta verificación.
     AccountingData10 accounting = new AccountingData10();
@@ -552,6 +556,14 @@ public class PrepaidAccountingEJBBean10 extends PrepaidBaseEJBBean10 implements 
           accounting.setCollectorFee(fee);
           accounting.setCollectorFeeIva(feeIva);
         }
+        break;
+      }
+      case REFUND: {
+        // Devolucion no cobra/devuelve ninguna comision
+        accounting.setFee(BigDecimal.ZERO);
+        accounting.setFeeIva(BigDecimal.ZERO);
+        accounting.setCollectorFee(BigDecimal.ZERO);
+        accounting.setCollectorFeeIva(BigDecimal.ZERO);
         break;
       }
       default: {
