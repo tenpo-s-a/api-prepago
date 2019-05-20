@@ -19,7 +19,7 @@ import cl.multicaja.prepaid.async.v10.routes.TransactionReversalRoute10;
 import cl.multicaja.prepaid.ejb.v11.PrepaidCardEJBBean11;
 import cl.multicaja.prepaid.ejb.v11.PrepaidMovementEJBBean11;
 import cl.multicaja.prepaid.helpers.CalculationsHelper;
-import cl.multicaja.prepaid.helpers.CryptHelper;
+import cl.multicaja.prepaid.helpers.EncryptHelper;
 import cl.multicaja.prepaid.helpers.tecnocom.TecnocomServiceHelper;
 import cl.multicaja.prepaid.helpers.tenpo.ApiCall;
 import cl.multicaja.prepaid.helpers.tenpo.model.State;
@@ -139,7 +139,7 @@ public class PrepaidEJBBean10 extends PrepaidBaseEJBBean10 implements PrepaidEJB
 
   private NotificationTecnocom notificationTecnocom;
 
-  private CryptHelper cryptHelper;
+  private EncryptHelper encryptHelper;
 
   public PrepaidTopupDelegate10 getDelegate() {
     return delegate;
@@ -229,11 +229,11 @@ public class PrepaidEJBBean10 extends PrepaidBaseEJBBean10 implements PrepaidEJB
     this.filesEJBBean10 = filesEJBBean10;
   }
 
-  public CryptHelper getCryptHelper() {
-    if(cryptHelper == null){
-      cryptHelper = CryptHelper.getInstance();
+  public EncryptHelper getEncryptHelper() {
+    if(encryptHelper == null){
+      encryptHelper = EncryptHelper.getInstance();
     }
-    return cryptHelper;
+    return encryptHelper;
   }
 
   public CalculationsHelper getCalculationsHelper(){
@@ -462,7 +462,7 @@ public class PrepaidEJBBean10 extends PrepaidBaseEJBBean10 implements PrepaidEJB
     else { // Si es N carga se hace de manera sincrona
       prepaidCard = getPrepaidCardEJB11().getPrepaidCardById(headers, prepaidCard.getId());
 
-      String pan = getCryptHelper().decryptPan(prepaidCard.getEncryptedPan());
+      String pan = getEncryptHelper().decryptPan(prepaidCard.getEncryptedPan());
 
       InclusionMovimientosDTO inclusionMovimientosDTO = getTecnocomServiceHelper().topup(account.getAccountNumber(), pan, prepaidTopup.getMerchantName(), prepaidMovement);
 
@@ -899,7 +899,7 @@ public class PrepaidEJBBean10 extends PrepaidBaseEJBBean10 implements PrepaidEJB
     getPrepaidMovementEJB11().addPrepaidMovementFeeList(feeList); // Se insertan en la BD
 
     String contrato = account.getAccountNumber();
-    String pan = getCryptHelper().decryptPan(prepaidCard.getEncryptedPan());
+    String pan = getEncryptHelper().decryptPan(prepaidCard.getEncryptedPan());
 
     InclusionMovimientosDTO inclusionMovimientosDTO = getTecnocomServiceHelper().withdraw(contrato, pan, prepaidWithdraw.getMerchantName(), prepaidMovement);
     log.info(String.format("Respuesta inclusion [%s] [%s]",inclusionMovimientosDTO.getRetorno(), inclusionMovimientosDTO.getDescRetorno()));

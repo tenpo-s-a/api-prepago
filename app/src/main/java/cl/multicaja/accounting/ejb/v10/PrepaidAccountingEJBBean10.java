@@ -18,7 +18,7 @@ import cl.multicaja.prepaid.ejb.v10.PrepaidBaseEJBBean10;
 import cl.multicaja.prepaid.ejb.v10.PrepaidCardEJBBean10;
 import cl.multicaja.prepaid.ejb.v10.PrepaidMovementEJBBean10;
 import cl.multicaja.prepaid.helpers.CalculationsHelper;
-import cl.multicaja.prepaid.helpers.CryptHelper;
+import cl.multicaja.prepaid.helpers.EncryptHelper;
 import cl.multicaja.prepaid.model.v10.*;
 import cl.multicaja.tecnocom.constants.*;
 import com.opencsv.CSVWriter;
@@ -75,7 +75,7 @@ public class PrepaidAccountingEJBBean10 extends PrepaidBaseEJBBean10 implements 
   @EJB
   private PrepaidCardEJBBean10 prepaidCardEJBBean10;
 
-  private CryptHelper cryptHelper;
+  private EncryptHelper encryptHelper;
 
   public MailPrepaidEJBBean10 getMailPrepaidEJBBean10() {
     return mailPrepaidEJBBean10;
@@ -117,11 +117,11 @@ public class PrepaidAccountingEJBBean10 extends PrepaidBaseEJBBean10 implements 
     this.prepaidCardEJBBean10 = prepaidCardEJBBean10;
   }
 
-  public CryptHelper getCryptHelper() {
-    if(cryptHelper == null ){
-      cryptHelper = CryptHelper.getInstance();
+  public EncryptHelper getEncryptHelper() {
+    if(encryptHelper == null ){
+      encryptHelper = EncryptHelper.getInstance();
     }
-    return cryptHelper;
+    return encryptHelper;
   }
 
   public AccountingData10 searchAccountingByIdTrx(Map<String, Object> header, Long  idTrx) throws Exception {
@@ -1029,7 +1029,7 @@ public class PrepaidAccountingEJBBean10 extends PrepaidBaseEJBBean10 implements 
       // Si el movimiento no existe en nuestra BD se agrega  como uno nuevo, si no  se actualiza.
       if(prepaidMovement10 == null) {
         //Se busca la tarjeta correspondiente al movimiento
-        PrepaidCard10 prepaidCard10 = getPrepaidCardEJB10().getPrepaidCardByEncryptedPan(null, getCryptHelper().encryptPan(trx.getPan()));
+        PrepaidCard10 prepaidCard10 = getPrepaidCardEJB10().getPrepaidCardByEncryptedPan(null, getEncryptHelper().encryptPan(trx.getPan()));
         // Se agrega movimiento solo si existe la tarjeta.
         if(prepaidCard10 != null){
           PrepaidMovement10 mov = buildMovementAut(prepaidCard10.getIdUser(), prepaidCard10 ,trx,getTipoMovimientoFromAccTxType(acc.getType()),getTipoFacFromAccTxType(acc.getType()));

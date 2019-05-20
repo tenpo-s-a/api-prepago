@@ -27,7 +27,6 @@ import java.util.HashMap;
 import java.util.Map;
 
 import static cl.multicaja.prepaid.async.v10.routes.PrepaidTopupRoute10.*;
-import static cl.multicaja.prepaid.model.v10.MailTemplates.TEMPLATE_MAIL_ERROR_TOPUP_TO_USER;
 
 /**
  * @autor vutreras
@@ -96,7 +95,7 @@ public class PendingTopup10 extends BaseProcessor10 {
 
             data.setPrepaidCard10(prepaidCard);
             String nomcomred = prepaidTopup.getMerchantName();
-            String pan = getRoute().getCryptHelper().decryptPan(prepaidCard.getEncryptedPan());
+            String pan = getRoute().getEncryptHelper().decryptPan(prepaidCard.getEncryptedPan());
 
             InclusionMovimientosDTO inclusionMovimientosDTO = getRoute().getTecnocomServiceHelper().topup(account.getAccountNumber(), pan, nomcomred, prepaidMovement);
 

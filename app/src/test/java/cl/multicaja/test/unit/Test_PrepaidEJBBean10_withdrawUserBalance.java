@@ -4,7 +4,6 @@ import cl.multicaja.cdt.ejb.v10.CdtEJBBean10;
 import cl.multicaja.cdt.model.v10.CdtTransaction10;
 import cl.multicaja.core.exceptions.RunTimeValidationException;
 import cl.multicaja.core.utils.Constants;
-import cl.multicaja.core.utils.EncryptUtil;
 import cl.multicaja.prepaid.async.v10.PrepaidTopupDelegate10;
 import cl.multicaja.prepaid.ejb.v10.AccountEJBBean10;
 import cl.multicaja.prepaid.ejb.v10.PrepaidEJBBean10;
@@ -12,12 +11,10 @@ import cl.multicaja.prepaid.ejb.v10.PrepaidMovementEJBBean10;
 import cl.multicaja.prepaid.ejb.v10.PrepaidUserEJBBean10;
 import cl.multicaja.prepaid.ejb.v11.PrepaidCardEJBBean11;
 import cl.multicaja.prepaid.ejb.v11.PrepaidMovementEJBBean11;
-import cl.multicaja.prepaid.helpers.CalculationsHelper;
-import cl.multicaja.prepaid.helpers.CryptHelper;
+import cl.multicaja.prepaid.helpers.EncryptHelper;
 import cl.multicaja.prepaid.helpers.tecnocom.TecnocomServiceHelper;
 import cl.multicaja.prepaid.model.v10.*;
 import cl.multicaja.prepaid.model.v11.Account;
-import cl.multicaja.prepaid.model.v11.IvaType;
 import cl.multicaja.prepaid.utils.ParametersUtil;
 import cl.multicaja.tecnocom.TecnocomService;
 import cl.multicaja.tecnocom.constants.CodigoMoneda;
@@ -31,7 +28,6 @@ import org.junit.BeforeClass;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.InjectMocks;
-import org.mockito.Mock;
 import org.mockito.Mockito;
 import org.mockito.Spy;
 import org.mockito.junit.MockitoJUnitRunner;
@@ -40,7 +36,6 @@ import java.math.BigDecimal;
 import java.sql.Timestamp;
 import java.time.LocalDateTime;
 import java.time.ZonedDateTime;
-import java.util.Collection;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.Map;
@@ -74,7 +69,7 @@ public class Test_PrepaidEJBBean10_withdrawUserBalance {
   private TecnocomService tecnocomService;
 
   @Spy
-  private CryptHelper cryptHelper;
+  private EncryptHelper encryptHelper;
 
   @Spy
   private PrepaidTopupDelegate10 delegate;
@@ -166,7 +161,7 @@ public class Test_PrepaidEJBBean10_withdrawUserBalance {
     Mockito.doReturn(cdtTransaction).when(cdtEJBBean10).addCdtTransaction(Mockito.any(), Mockito.any());
 
     //Encrypt util
-    Mockito.doReturn(prepaidCard10.getPan()).when(cryptHelper).decryptPan(Mockito.anyString());
+    Mockito.doReturn(prepaidCard10.getPan()).when(encryptHelper).decryptPan(Mockito.anyString());
 
     PrepaidMovement10 withdrawMovement = new PrepaidMovement10();
     withdrawMovement.setId(Long.MAX_VALUE);

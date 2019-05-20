@@ -2,23 +2,23 @@ package cl.multicaja.prepaid.helpers;
 
 import cl.multicaja.core.utils.ConfigUtils;
 import cl.multicaja.prepaid.helpers.tecnocom.TecnocomServiceHelper;
-import cl.multicaja.prepaid.utils.AESCryptCardUtilImpl;
-import cl.multicaja.prepaid.utils.AzureCryptCardUtilImpl;
-import cl.multicaja.prepaid.utils.CryptCardUtil;
+import cl.multicaja.prepaid.utils.AESEncryptCardUtilImpl;
+import cl.multicaja.prepaid.utils.AzureEncryptCardUtilImpl;
+import cl.multicaja.prepaid.utils.EncryptCardUtil;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 
-public class CryptHelper {
+public class EncryptHelper {
 
   private static Log log = LogFactory.getLog(TecnocomServiceHelper.class);
   private ConfigUtils configUtils;
-  private static CryptHelper instance;
-  private static CryptCardUtil cryptCardUtil;
+  private static EncryptHelper instance;
+  private static EncryptCardUtil encryptCardUtil;
 
 
-  public static CryptHelper getInstance() {
+  public static EncryptHelper getInstance() {
     if (instance == null) {
-      instance = new CryptHelper();
+      instance = new EncryptHelper();
     }
     return instance;
   }
@@ -38,20 +38,20 @@ public class CryptHelper {
     return  getCryptCardUtil().decryptPan(data,getConfigUtils().getProperty("crypt.password",""));
   }
 
-  private synchronized CryptCardUtil getCryptCardUtil() {
-    if (cryptCardUtil == null) {
+  private synchronized EncryptCardUtil getCryptCardUtil() {
+    if (encryptCardUtil == null) {
       boolean useAzure = getConfigUtils().getPropertyBoolean("azure.clien.enabled", false);
       if (useAzure) {
         String azureClientId = getConfigUtils().getProperty("azure.clien.id","");
         String azureClientSecret = getConfigUtils().getProperty("azure.client.secret","");
         String azureVaultUri = getConfigUtils().getProperty("azure.vault.uri","");
-        cryptCardUtil = new AzureCryptCardUtilImpl(azureClientId,azureClientSecret,azureVaultUri);
+        encryptCardUtil = new AzureEncryptCardUtilImpl(azureClientId,azureClientSecret,azureVaultUri);
       }
       else {
-        cryptCardUtil = new AESCryptCardUtilImpl();
+        encryptCardUtil = new AESEncryptCardUtilImpl();
       }
     }
-    return cryptCardUtil;
+    return encryptCardUtil;
   }
 
 }

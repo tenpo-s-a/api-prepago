@@ -6,7 +6,7 @@ import javax.crypto.spec.SecretKeySpec;
 import javax.xml.bind.DatatypeConverter;
 
 
-public class AESCryptCardUtilImpl implements CryptCardUtil {
+public class AESEncryptCardUtilImpl implements EncryptCardUtil {
     private static final String CIPHER_INSTANCE_NAME = "AES/CBC/PKCS5PADDING";
     private static final String ALGORITHM = "AES";
     private static final byte[] iv = new byte[]{21, -116, 85, -30, 29, -95, 96, -118, -60, 85, -5, -123, -21, -37, 14, -69};
@@ -39,15 +39,15 @@ public class AESCryptCardUtilImpl implements CryptCardUtil {
         }
     }
 
-    private static AESCryptCardUtilImpl instance;
+    private static AESEncryptCardUtilImpl instance;
 
-    public AESCryptCardUtilImpl() {
+    public AESEncryptCardUtilImpl() {
         super();
     }
 
-    public static AESCryptCardUtilImpl getInstance() {
+    public static AESEncryptCardUtilImpl getInstance() {
         if (null == instance)
-            instance = new AESCryptCardUtilImpl();
+            instance = new AESEncryptCardUtilImpl();
         return instance;
     }
 }

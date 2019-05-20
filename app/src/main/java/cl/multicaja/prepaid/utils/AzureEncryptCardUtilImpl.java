@@ -4,10 +4,10 @@ import cl.multicaja.prepaid.external.azure.CryptCardAzureImpl;
 import cl.multicaja.prepaid.util.CryptCard;
 
 
-public class AzureCryptCardUtilImpl implements CryptCardUtil {
+public class AzureEncryptCardUtilImpl implements EncryptCardUtil {
     private CryptCard cryptCard = CryptCardAzureImpl.getInstance();
 
-  public AzureCryptCardUtilImpl(String clientId, String clientKey, String vaulturi) {
+  public AzureEncryptCardUtilImpl(String clientId, String clientKey, String vaulturi) {
     super();
     if (cryptCard instanceof CryptCardAzureImpl) {
       CryptCardAzureImpl cryptCardAzure = (CryptCardAzureImpl) cryptCard;
@@ -31,12 +31,12 @@ public class AzureCryptCardUtilImpl implements CryptCardUtil {
         return getCryptCard().decryptPan(cryptedPan, password);
     }
 
-    private static AzureCryptCardUtilImpl instance;
+    private static AzureEncryptCardUtilImpl instance;
 
 
-    public static AzureCryptCardUtilImpl getInstance() {
+    public static AzureEncryptCardUtilImpl getInstance() {
         if (null == instance)
-            instance = new AzureCryptCardUtilImpl(null, null, null);
+            instance = new AzureEncryptCardUtilImpl(null, null, null);
         return instance;
     }
 }

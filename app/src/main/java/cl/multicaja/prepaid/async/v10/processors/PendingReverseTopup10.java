@@ -24,7 +24,6 @@ import java.util.Map;
 
 import static cl.multicaja.prepaid.async.v10.routes.TransactionReversalRoute10.ERROR_REVERSAL_TOPUP_REQ;
 import static cl.multicaja.prepaid.async.v10.routes.TransactionReversalRoute10.PENDING_REVERSAL_TOPUP_REQ;
-import static cl.multicaja.prepaid.model.v10.MailTemplates.TEMPLATE_MAIL_ERROR_TOPUP_REVERSE;
 
 /**
  * @autor abarazarte
@@ -77,7 +76,7 @@ public class PendingReverseTopup10 extends BaseProcessor10 {
           // El contrato se obtiene desde la cuenta.
           String contrato = account.getAccountNumber();
 
-          String pan = getRoute().getCryptHelper().decryptPan(prepaidCard.getEncryptedPan());
+          String pan = getRoute().getEncryptHelper().decryptPan(prepaidCard.getEncryptedPan());
 
           // Busca el movimiento de carga original
           PrepaidMovement10 originalMovement = getRoute().getPrepaidMovementEJBBean10().getPrepaidMovementForReverse(prepaidUser10.getId(),
