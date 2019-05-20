@@ -163,6 +163,8 @@ pipeline:
       - API_ENVIRONMENT=staging
       - DB_USERNAME=prepago
       - DB_PASSWORD=N8BC2VQ74PrGv4SeXdHvcT8VPT7pTWU2
+      - DB_HOST_FQDN=prepaid-postgresql-staging.postgres.database.azure.com
+      - DB_HOST_NAME=prepaid-postgresql-staging
     when:
       event: [ push ]
       branch: master
