@@ -13,6 +13,7 @@ import cl.multicaja.prepaid.ejb.v10.PrepaidUserEJBBean10;
 import cl.multicaja.prepaid.ejb.v11.PrepaidCardEJBBean11;
 import cl.multicaja.prepaid.ejb.v11.PrepaidMovementEJBBean11;
 import cl.multicaja.prepaid.helpers.CalculationsHelper;
+import cl.multicaja.prepaid.helpers.CryptHelper;
 import cl.multicaja.prepaid.helpers.tecnocom.TecnocomServiceHelper;
 import cl.multicaja.prepaid.model.v10.*;
 import cl.multicaja.prepaid.model.v11.Account;
@@ -73,7 +74,7 @@ public class Test_PrepaidEJBBean10_withdrawUserBalance {
   private TecnocomService tecnocomService;
 
   @Spy
-  private EncryptUtil encryptUtil;
+  private CryptHelper cryptHelper;
 
   @Spy
   private PrepaidTopupDelegate10 delegate;
@@ -165,7 +166,7 @@ public class Test_PrepaidEJBBean10_withdrawUserBalance {
     Mockito.doReturn(cdtTransaction).when(cdtEJBBean10).addCdtTransaction(Mockito.any(), Mockito.any());
 
     //Encrypt util
-    Mockito.doReturn(prepaidCard10.getPan()).when(encryptUtil).decrypt(Mockito.anyString());
+    Mockito.doReturn(prepaidCard10.getPan()).when(cryptHelper).decryptPan(Mockito.anyString());
 
     PrepaidMovement10 withdrawMovement = new PrepaidMovement10();
     withdrawMovement.setId(Long.MAX_VALUE);
