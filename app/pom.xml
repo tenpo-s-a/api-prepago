@@ -73,7 +73,7 @@
     <dependency>
       <groupId>cl.multicaja.prepago.external.source.lib</groupId>
       <artifactId>prepaid-external-source-lib</artifactId>
-      <version>26842eaadad049bc4c99848700e47a171077b85d</version>
+      <version>721cb6babf074f02634a0533a70348c0754d269d</version>
     </dependency>
 
     <dependency>
