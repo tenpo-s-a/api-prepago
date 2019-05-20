@@ -10,10 +10,25 @@ import java.util.stream.Stream;
 
 public enum StatusType {
 
-  OPEN(2),
+  //Antiguos Items - No borrar
+  /*OPEN(2),
   PENDING(3),
   RESOLVED(4),
-  CLOSED(5);
+  CLOSED(5);*/
+
+  //Nuevos Items
+  //3,2,4,5,11,10,13,14,16,17
+  TODOS_LOS_NO_RESUELTOS(3),
+  OPEN(2),
+  PENDING(4),
+  RESOLVED(5),
+  CLOSED(11),
+  PENDIENTE_RESPUESTA_OPERACIONES(10),
+  PENDIENTE_RESPUESTA_PREPAGO(13),
+  PENDIENTE_DEVOLUCION(14),
+  PENDIENTE_CONFIRMACION_DEVOLUCION(16),
+  PENDIENTE_PROCESO_CONTRACARGO_MASTERCOM(17),
+  PENDIENTE_RESPUEST_CONTACT_CENTER(18); //Solo aparece en el filtro de freshdesk
 
   private Integer value;
 

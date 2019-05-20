@@ -2,6 +2,8 @@ package cl.multicaja.test.integration.v10.async;
 
 import cl.multicaja.accounting.model.v10.*;
 import cl.multicaja.cdt.model.v10.CdtTransaction10;
+import cl.multicaja.prepaid.external.freshdesk.model.NewTicket;
+import cl.multicaja.prepaid.external.freshdesk.model.Ticket;
 import cl.multicaja.prepaid.helpers.freshdesk.model.v10.*;
 import cl.multicaja.prepaid.model.v10.*;
 import cl.multicaja.prepaid.model.v11.Account;
@@ -174,22 +176,26 @@ public class Test_PrepaidMovementEJB10_procesReconciliation10 extends TestBaseUn
     prepaidCard10 = createPrepaidCardV2(prepaidCard10);
 
     String template = getParametersUtil().getString("api-prepaid", "template_ticket_devolucion", "v1.0");
-    //template = TemplateUtils.freshDeskTemplateDevolucion(template, prepaidUser.getName(), prepaidUser.getLastName(), prepaidUser.getDocumentNumber(),prepaidUser.getId(), "", "8888", "", 0L);
 
     NewTicket newTicket = new NewTicket();
     newTicket.setDescription(template);
     newTicket.setGroupId(GroupId.OPERACIONES);
-    newTicket.setUniqueExternalId("14621456");
-    newTicket.setType(TicketType.DEVOLUCION);
-    newTicket.setStatus(StatusType.OPEN);
-    newTicket.setPriority(PriorityType.URGENT);
+    newTicket.setType(TicketType.DEVOLUCION.getValue());
+    newTicket.setStatus(Long.valueOf(StatusType.OPEN.getValue()));
+    newTicket.setPriority(Long.valueOf(PriorityType.URGENT.getValue()));
     newTicket.setSubject("Devolucion de carga");
     newTicket.setProductId(43000001595L);
     newTicket.addCustomField("cf_id_movimiento", "123444567");
 
-    //Ticket ticket = getUserClient().createFreshdeskTicket(null, user.getId(), newTicket);
-    //Assert.assertNotNull("Deberia crear un ticket de devolucion", ticket);
-    //Assert.assertNotNull("Ticket debe tener id", ticket.getId());
+    newTicket.setUniqueExternalId(prepaidUser.getUuid());
+    Ticket ticket = FreshdeskServiceHelper.getInstance().getFreshdeskService().createTicket(newTicket);
+    if (ticket != null && ticket.getId() != null) {
+      log.info("[processReconciliation_SendTicketDevolucion][Ticket_Success][ticketId]:"+ticket.getId());
+    }else{
+      log.info("[processReconciliation_SendTicketDevolucion][Ticket_Fail][ticketData]:"+newTicket.toString());
+    }
+    Assert.assertNotNull("Deberia crear un ticket de devolucion", ticket);
+    Assert.assertNotNull("Ticket debe tener id", ticket.getId());
   }
 
   @Test
