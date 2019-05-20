@@ -1,26 +1,26 @@
+{{ $freshdesk_host := key "apps/prepaid/staging/output/freshdesk/host" }}
+{{ $freshdesk_username := key "apps/prepaid/staging/output/freshdesk/username" }}
+{{ $freshdesk_password := key "apps/prepaid/staging/output/freshdesk/password" }}
+
+{{ $activemq_username := key "apps/prepaid/staging/output/activemq/username" }}
+{{ $activemq_password := key "apps/prepaid/staging/output/activemq/password" }}
+
+{{ $sftp_host := key "apps/prepaid/staging/output/sftp/host" }}
+{{ $sftp_username := key "apps/prepaid/staging/output/sftp/username" }}
+{{ $sftp_password := key "apps/prepaid/staging/output/sftp/password" }}
+
+{{ $kafka_host := key "apps/prepaid/staging/output/kafka/host" }}
+
+{{ $tenpo_users_host := key "apps/prepaid/staging/output/kafka/host" }}
+
 #configuracion de la base de datos
 db.jndi=jdbc/prepagoDS
 db.driver=org.postgresql.Driver
-db.url=jdbc:postgresql://localhost:5432/prepago_api_dev
-db.username=postgres
-db.password=postgres
-
-#usado para un activemq embebido (estas configuraciones son ignoradas si "activemq.url" comienza con tcp:)
-activemq.broker.embedded.url=broker:(vm://localhost)
-activemq.broker.embedded.name=prepaid
-activemq.broker.embedded.persistent=true
-activemq.broker.embedded.useJmx=true
-activemq.broker.embedded.schedulerSupport=true
-activemq.broker.embedded.deleteAllMessagesOnStartup=false
-activemq.broker.embedded.addTcpConnector=false
-activemq.broker.embedded.tcpConnector=tcp://localhost:61616
-activemq.broker.embedded.dataDirectory=activemq-data-prepaid
 
 #obliga a usar un activemq externo (tcp:)
-activemq.url=tcp://prepago-mock-activemq-service:61616
-activemq.username=system
-activemq.password=jdxnhyr674Hbf$5cx0
-
+activemq.url=tcp://prepago-activemq-service:61616
+activemq.username={{ $activemq_username }}
+activemq.password={{ $activemq_password }}
 #numero de conexiones mq, por defecto es 10
 activemq.connection.pool.max=10
 
@@ -32,19 +32,18 @@ schema.acc=prepaid_accounting
 prepaid.appname=PREPAGO
 
 #tecnocom-gateway
-#TODO: Estos properties deberiamos trabajarlos con variables de entorno
-tecnocom.apiKey=asdasd
+tecnocom.apiKey=APPKEY
 tecnocom.apiUrl=http://localhost:8080
-tecnocom.codEntity=0730
+tecnocom.codEntity=1234
 tecnocom.channel=CANAL
 tecnocom.service.mock=true
 tecnocom.order=DESC
 
 encrypt.password=WLq79EWIX9pjFgMGI1wI5PzqzaSQ6Sej
 #sftp server config - Mastercard T057 file (Sonda)
-sftp.mastercard.host=sftp
-sftp.mastercard.auth.username=?username=foo
-sftp.mastercard.auth.password=&password=pass
+sftp.mastercard.host={{ $sftp_host }}
+sftp.mastercard.auth.username=?username={{ $sftp_username }}
+sftp.mastercard.auth.password=&password={{ $sftp_password }}
 #Directorio en el cual se aloja archivo T057 - Es escuchado por apache camel
 sftp.mastercard.recived.folder=/prepago/mastercard/T058
 #Directorio en el cual se aloja el archivo procesado de forma exitosa
@@ -63,10 +62,14 @@ sftp.mastercard.reconnectDelay=&reconnectDelay=30000
 #El valor debe estar en true, ya que sino deja pendiente el proceso de deploy en caso de un fallo
 sftp.mastercard.throwExceptionOnConnectFailed=&throwExceptionOnConnectFailed=true
 
+apis.user.url=http://{{ $tenpo_users_host }}/v1/user-management
+
+apis.fees.url=http://prepaid-fee-service/prepaid/processor/calculate_fee/transaction_type/%s/currency_code/%s/amount/%s
+
 #SFTP Multicaja RED
-sftp.multicajared.host=sftp
-sftp.multicajared.auth.username=?username=foo
-sftp.multicajared.auth.password=&password=pass
+sftp.multicajared.host={{ $sftp_host }}
+sftp.multicajared.auth.username=?username={{ $sftp_username }}
+sftp.multicajared.auth.password=&password={{ $sftp_password }}
 #Directorio en el cual se alojan los archivos - Es escuchado por apache camel
 sftp.multicajared.recived.folder=/multicajared
 #Directorio en el cual se aloja el archivo procesado de forma exitosa
@@ -91,9 +94,9 @@ sftp.mastercard.clearing.move.error.folder=&moveFailed=error
 sftp.multicajared.e06_file.folder=/upload/Reportes/Inputs
 
 #sftp server config - Tecnocom
-sftp.tecnocom.host=sftp
-sftp.tecnocom.auth.username=?username=foo
-sftp.tecnocom.auth.password=&password=pass
+sftp.tecnocom.host={{ $sftp_host }}
+sftp.tecnocom.auth.username=?username={{ $sftp_username }}
+sftp.tecnocom.auth.password=&password={{ $sftp_password }}
 #Directorio en el cual se aloja archivo T057 - Es escuchado por apache camel
 sftp.tecnocom.recived.folder=/multicajared
 #Directorio en el cual se aloja el archivo procesado de forma exitosa
@@ -110,14 +113,12 @@ sftp.tecnocom.throwExceptionOnConnectFailed=&throwExceptionOnConnectFailed=true
 accounting.email.support=camila.figueroa@multicaja.cl
 accounting.email=soporte-prepago@multicaja.cl
 
-apis.fees.url=http://prepaid-fee-service/prepaid/processor/calculate_fee/transaction_type/%s/currency_code/%s/amount/%s
-
 #Kafka
 kafka.enabled=true
-kafka.host=my-confluent-oss-cp-kafka-headless.kafka:9092
+kafka.host={{ $kafka_host }}
 
 #FreshDesk
 freshdesk.enabled=true
-freshdesk.endpoint=https://multicaja.freshdesk.com
-freshdesk.user=CEFMK1T4XuXYrBhbuN
-freshdesk.password=X
+freshdesk.endpoint=https://{{ $freshdesk_host }}
+freshdesk.user={{ $freshdesk_username }}
+freshdesk.password={{ $freshdesk_password }}

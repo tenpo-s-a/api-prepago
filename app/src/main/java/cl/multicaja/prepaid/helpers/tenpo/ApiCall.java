@@ -83,8 +83,7 @@ public class ApiCall {
 
 
   public User getUserById(UUID userId) throws TimeoutException, BaseException {
-    final String URI = "users";
-    final String URL = String.format("%s/%s/%s", getApiUrl(), URI, userId);
+    final String URL = String.format("%s/%s", getApiUrl(), userId);
     LOG.info("request route: " + URL);
     LOG.info("******** getUserById IN ********");
     HttpResponse httpResponse = httpUtils.execute(HttpUtils.ACTIONS.GET, null, TIMEOUT, TIMEOUT, URL, null, DEFAULT_HTTP_HEADERS);
