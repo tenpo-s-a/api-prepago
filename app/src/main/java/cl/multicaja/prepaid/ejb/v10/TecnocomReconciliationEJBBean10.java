@@ -557,7 +557,7 @@ public class TecnocomReconciliationEJBBean10 extends PrepaidBaseEJBBean10 implem
 
           // Se consulta al servicio de comisiones y se insertan las comisiones recibidas
           insertMovementFees(prepaidMovement10);
-          // Todo: falta construir la lista de comisiones para TODOS los tipos de trx (Compras, Suscripciones, Refund = sin lista)
+          //FIXME: falta construir la lista de comisiones para TODOS los tipos de trx (Compras, Suscripciones, Refund = sin lista)
           List<PrepaidMovementFee10> feeList = Collections.emptyList();
 
           // Dado que no esta en la BD, se crean tambien sus campos en las tablas de contabilidad
