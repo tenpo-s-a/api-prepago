@@ -1,5 +1,5 @@
 {{ $freshdesk_host := key "apps/prepaid/staging/output/freshdesk/host" }}
-{{ $freshdesk_username := key "apps/prepaid/staging/output/freshdesk/username" }}
+{{ $freshdesk_username := key "apps/prepaid/staging/output/freshdesk/user" }}
 {{ $freshdesk_password := key "apps/prepaid/staging/output/freshdesk/password" }}
 
 {{ $activemq_username := key "apps/prepaid/staging/output/activemq/username" }}
@@ -11,7 +11,7 @@
 
 {{ $kafka_host := key "apps/prepaid/staging/output/kafka/host" }}
 
-{{ $tenpo_users_host := key "apps/prepaid/staging/output/kafka/host" }}
+{{ $tenpo_users_host := key "apps/prepaid/staging/output/api-users/host" }}
 
 #configuracion de la base de datos
 db.jndi=jdbc/prepagoDS
