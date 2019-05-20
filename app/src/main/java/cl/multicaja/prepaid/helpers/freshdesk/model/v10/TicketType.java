@@ -10,11 +10,31 @@ import java.util.stream.Stream;
 
 public enum TicketType {
 
+  //Antiguos Items - No borrar
+  /*
   VALIDACION_IDENTIDAD("Validación de identidad"),
   GENERICO("Genérico"),
   COLAS_NEGATIVAS("Cola Negativa"),
   DEVOLUCION("devolucion"),
   EMERGENCIA("Emergencia");
+   */
+
+  //Nuevos Items
+  GENERICO("Genérico"),
+  EMERGENCIA("Emergencia"),
+  CIERRE_DE_CUENTA("Cierre de cuenta"),
+  CONSULTA("Consulta"),
+  COLAS_NEGATIVAS("Cola Negativa"),
+  DEVOLUCION("devolucion"),
+  RECLAMO_CONTRACARGO("Reclamo Contracargo"),
+  RECLAMO_TARJETA("Reclamo Tarjeta"),
+  CIERRE_TARJETA("Cierre Tarjeta"),
+  VALIDACION_IDENTIDAD("Validacion identidad"),
+  RECARGA_FALLIDA("Recarga Fallida"),
+  CONSULTAS_GENERALES("Consultas Generales"),
+  PROMOCIONES_RECARGAS("Promociones Recargas"),
+  QUIERO_MI_COMPROBANTE("Quiero mi comprobante"),
+  SUGERENCIAS_RECARGAS("Sugerencias Recargas");
 
   private String value;
 
