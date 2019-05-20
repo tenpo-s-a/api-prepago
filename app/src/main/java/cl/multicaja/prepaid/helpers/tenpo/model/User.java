@@ -1,13 +1,15 @@
 package cl.multicaja.prepaid.helpers.tenpo.model;
 
-import cl.multicaja.core.model.BaseModel;
+import java.util.UUID;
+
 import com.fasterxml.jackson.annotation.JsonProperty;
 
-import java.util.UUID;
+import cl.multicaja.core.model.BaseModel;
 
 
 public class User extends BaseModel {
 
+  private static final long serialVersionUID = 8399887731426206305L;
   private String address;
   private String apartment;
   @JsonProperty("countryCode")

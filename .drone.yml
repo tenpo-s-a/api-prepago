@@ -69,6 +69,17 @@ pipeline:
       branch:
         exclude: master
 
+  consul:
+    image: hashicorp/consul-template:alpine
+    commands:
+      - /bin/consul-template -template "./app/src/main/resources/api-prepaid/staging.properties.tmpl:./app/src/main/resources/api-prepaid/staging.properties" -once
+    secrets:
+      - consul_http_addr
+      - consul_http_token
+    when:
+      event: [ push ]
+      branch: master
+
   build:
     image: maven:3.6.0-jdk-8-alpine
     commands:
@@ -148,7 +159,7 @@ pipeline:
     vars:
       - IMAGE=mccontainerregistry.azurecr.io/api-prepago:${DRONE_COMMIT_SHA}
       - DB_NAME=prepago_api_dev
-      - API_ENVIRONMENT=development
+      - API_ENVIRONMENT=staging
       - DB_USERNAME=prepago
       - DB_PASSWORD=N8BC2VQ74PrGv4SeXdHvcT8VPT7pTWU2
       - DB_HOST_FQDN=prepaid-postgresql-staging.postgres.database.azure.com
