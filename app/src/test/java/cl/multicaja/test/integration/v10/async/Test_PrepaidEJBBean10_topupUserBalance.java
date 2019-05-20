@@ -94,6 +94,12 @@ public class Test_PrepaidEJBBean10_topupUserBalance extends TestBaseUnitAsync {
     prepaidUser.setStatus(PrepaidUserStatus.DISABLED);
     prepaidUser = createPrepaidUserV2(prepaidUser);
 
+    Account account = buildAccountFromTecnocom(prepaidUser);
+    account = createAccount(account.getUserId(), account.getAccountNumber());
+
+    PrepaidCard10 card = buildPrepaidCardWithTecnocomData(prepaidUser, account);
+    card = createPrepaidCardV2(card);
+
     NewPrepaidTopup10 newPrepaidTopup = buildPrepaidTopup10();
 
     try {
@@ -112,12 +118,15 @@ public class Test_PrepaidEJBBean10_topupUserBalance extends TestBaseUnitAsync {
     PrepaidUser10 prepaidUser = buildPrepaidUserv2();
     prepaidUser = createPrepaidUserV2(prepaidUser);
 
-    PrepaidCard10 prepaidCard = buildPrepaidCard10(prepaidUser);
-    prepaidCard.setStatus(PrepaidCardStatus.LOCKED_HARD);
-    prepaidCard = createPrepaidCard10(prepaidCard);
+    Account account = buildAccountFromTecnocom(prepaidUser);
+    account = createAccount(account.getUserId(), account.getAccountNumber());
+
+    PrepaidCard10 card = buildPrepaidCardWithTecnocomData(prepaidUser, account);
+    card.setStatus(PrepaidCardStatus.LOCKED_HARD);
+    card = createPrepaidCardV2(card);
 
     try {
-      getPrepaidEJBBean10().topupUserBalance(null,prepaidUser.getUuid(), newPrepaidTopup,true);
+      getPrepaidEJBBean10().topupUserBalance(null, prepaidUser.getUuid(), newPrepaidTopup,true);
       Assert.fail("No debe pasar por aqui");
     } catch(ValidationException vex) {
       Assert.assertEquals("Debe lanzar excepcion con error de Tarjeta invalida", TARJETA_INVALIDA_$VALUE.getValue(), vex.getCode());
@@ -132,9 +141,12 @@ public class Test_PrepaidEJBBean10_topupUserBalance extends TestBaseUnitAsync {
     PrepaidUser10 prepaidUser = buildPrepaidUserv2();
     prepaidUser = createPrepaidUserV2(prepaidUser);
 
-    PrepaidCard10 prepaidCard = buildPrepaidCard10(prepaidUser);
-    prepaidCard.setStatus(PrepaidCardStatus.EXPIRED);
-    prepaidCard = createPrepaidCard10(prepaidCard);
+    Account account = buildAccountFromTecnocom(prepaidUser);
+    account = createAccount(account.getUserId(),account.getAccountNumber());
+
+    PrepaidCard10 card = buildPrepaidCardWithTecnocomData(prepaidUser, account);
+    card.setStatus(PrepaidCardStatus.EXPIRED);
+    card = createPrepaidCardV2(card);
 
     try {
       getPrepaidEJBBean10().topupUserBalance(null,prepaidUser.getUuid(), newPrepaidTopup,true);
