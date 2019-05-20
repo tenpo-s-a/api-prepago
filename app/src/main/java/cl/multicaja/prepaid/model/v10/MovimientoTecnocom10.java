@@ -1,15 +1,20 @@
 package cl.multicaja.prepaid.model.v10;
 
+import cl.multicaja.core.exceptions.BadRequestException;
+import cl.multicaja.prepaid.ejb.v10.TecnocomReconciliationEJBBean10;
 import cl.multicaja.prepaid.helpers.tecnocom.model.TecnocomReconciliationRegisterType;
 import cl.multicaja.tecnocom.constants.CodigoMoneda;
 import cl.multicaja.tecnocom.constants.TipoFactura;
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
 
 import java.io.Serializable;
 import java.math.BigDecimal;
 import java.sql.Timestamp;
 import java.time.LocalDate;
 
-public class MovimientoTecnocom10 implements Serializable{
+public class MovimientoTecnocom10 implements Serializable {
+  private static Log log = LogFactory.getLog(MovimientoTecnocom10.class);
 
   private Long id;
   private Long idArchivo;
@@ -312,7 +317,7 @@ public class MovimientoTecnocom10 implements Serializable{
     this.contrato = contrato;
   }
 
-  public PrepaidMovementType getMovementType() {
+  public PrepaidMovementType getMovementType() throws BadRequestException {
     PrepaidMovementType type = null;
     switch (this.getTipoFac()) {
       case CARGA_EFECTIVO_COMERCIO_MULTICAJA:
@@ -338,6 +343,14 @@ public class MovimientoTecnocom10 implements Serializable{
       case ANULA_COMPRA_INTERNACIONAL:
         type = PrepaidMovementType.PURCHASE;
         break;
+      case DEVOLUCION_COMPRA_INTERNACIONAL:
+      case ANULA_DEVOLUCION_COMPRA_INTERNACIONAL:
+        type = PrepaidMovementType.REFUND;
+        break;
+      default:
+        String msg = String.format("Error - MovimientoTecnocom de tipo %s no tiene asignado movementType", this.getTipoFac().toString());
+        log.error(msg);
+        throw new IllegalStateException();
     }
     return type;
   }

@@ -61,7 +61,7 @@ public class Test_AutoReconciliation_FullTest extends TestBaseUnitAsync {
     DBUtils.getInstance().getJdbcTemplate().execute(String.format("TRUNCATE %s.prp_archivos_conciliacion CASCADE", getSchema()));
 
     try {
-      Test_Reconciliation_FullTest test = new Test_Reconciliation_FullTest();
+      Test_AutoReconciliation_FullTest test = new Test_AutoReconciliation_FullTest();
       //USUARIO
       prepaidUser = test.buildPrepaidUserv2();
       prepaidUser = test.createPrepaidUserV2(prepaidUser);

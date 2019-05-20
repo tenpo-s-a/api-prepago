@@ -1,5 +1,6 @@
 package cl.multicaja.prepaid.helpers.tecnocom;
 
+import cl.multicaja.core.exceptions.BadRequestException;
 import cl.multicaja.core.utils.NumberUtils;
 import cl.multicaja.core.utils.encryption.PgpHelper;
 import cl.multicaja.prepaid.helpers.tecnocom.model.*;
@@ -271,7 +272,7 @@ public class TecnocomFileHelper {
     return file;
   }
 
-  public PrepaidMovement10 buildMovement(Long userId, String pan, MovimientoTecnocom10 batchTrx) {
+  public PrepaidMovement10 buildMovement(Long userId, String pan, MovimientoTecnocom10 batchTrx) throws BadRequestException {
 
     PrepaidMovement10 prepaidMovement = new PrepaidMovement10();
 
