@@ -7,7 +7,6 @@ import cl.multicaja.cdt.model.v10.CdtTransaction10;
 import cl.multicaja.core.model.Errors;
 import cl.multicaja.prepaid.async.v10.model.PrepaidReverseData10;
 import cl.multicaja.prepaid.async.v10.routes.BaseRoute10;
-import cl.multicaja.prepaid.helpers.freshdesk.model.v10.NewTicket;
 import cl.multicaja.prepaid.external.freshdesk.model.NewTicket;
 import cl.multicaja.prepaid.external.freshdesk.model.Ticket;
 import cl.multicaja.prepaid.helpers.freshdesk.model.v10.FreshdeskServiceHelper;
