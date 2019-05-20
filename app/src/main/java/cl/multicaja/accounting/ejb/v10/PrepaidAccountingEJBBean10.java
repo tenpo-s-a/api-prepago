@@ -566,6 +566,10 @@ public class PrepaidAccountingEJBBean10 extends PrepaidBaseEJBBean10 implements 
         accounting.setCollectorFeeIva(BigDecimal.ZERO);
         break;
       }
+      case PURCHASE: {
+        Lis
+        break;
+      }
       default: {
         //FIXME: Se debe verificar. ACTION: Hay que implementar las fees, para compra y suscripción, tener en cuenta las reglas de negocio para esta verificación
         accounting.setFee(BigDecimal.ZERO);
