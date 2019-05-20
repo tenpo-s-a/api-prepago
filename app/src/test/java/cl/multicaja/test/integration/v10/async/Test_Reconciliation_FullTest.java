@@ -7,7 +7,11 @@ import cl.multicaja.accounting.model.v10.UserAccount;
 import cl.multicaja.cdt.model.v10.CdtTransaction10;
 import cl.multicaja.core.exceptions.BaseException;
 import cl.multicaja.core.utils.EncryptUtil;
+import cl.multicaja.core.utils.NumberUtils;
 import cl.multicaja.core.utils.db.DBUtils;
+import cl.multicaja.prepaid.external.freshdesk.model.Ticket;
+import cl.multicaja.prepaid.external.freshdesk.model.TicketsResponse;
+import cl.multicaja.prepaid.helpers.freshdesk.model.v10.FreshdeskServiceHelper;
 import cl.multicaja.prepaid.helpers.freshdesk.model.v10.TicketType;
 import cl.multicaja.prepaid.helpers.mcRed.McRedReconciliationFileDetail;
 import cl.multicaja.prepaid.helpers.tecnocom.TecnocomServiceHelper;
@@ -22,12 +26,10 @@ import java.math.BigDecimal;
 import java.sql.Date;
 import java.sql.SQLException;
 import java.sql.Timestamp;
-import java.time.Instant;
-import java.time.LocalDate;
-import java.time.ZoneId;
-import java.time.ZonedDateTime;
+import java.time.*;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Map;
 
 public class Test_Reconciliation_FullTest extends TestBaseUnitAsync {
 
@@ -2264,7 +2266,7 @@ public class Test_Reconciliation_FullTest extends TestBaseUnitAsync {
     foundCdtTransaction = getCdtEJBBean10().buscaMovimientoByIdExternoAndTransactionType(null, testData.prepaidMovement.getIdTxExterno(), CdtTransactionType.REVERSA_CARGA);
     Assert.assertNotNull("Debe existir la reversa de carga", foundCdtTransaction);
 
-    // Revisar si existse el ticket en freshdesk
+    //Revisar si existse el ticket en freshdesk
     assertTicket(testData.prepaidMovement.getId(), TicketType.DEVOLUCION);
   }
 
@@ -3191,11 +3193,11 @@ public class Test_Reconciliation_FullTest extends TestBaseUnitAsync {
 
   void assertTicket(Long movementId, TicketType ticketType) throws Exception {
     // Todo: como validar la existencia del ticket?
-    /*
-    LocalDateTime beginDate = LocalDateTime.now(ZoneId.of("UTC"));
+
+    /*LocalDateTime beginDate = LocalDateTime.now(ZoneId.of("UTC"));
     beginDate.minusMinutes(5);
     LocalDateTime endDate = beginDate.plusMinutes(5);
-    TicketsResponse ticketsResponse = UserClient.getInstance().getFreshdeskTicketsByTypeAndCreatedDate(null, 0, ticketType, beginDate, endDate);
+    TicketsResponse ticketsResponse = FreshdeskServiceHelper.getInstance().getFreshdeskService().getTicketsByTypeAndCreatedDate(0, beginDate, endDate,ticketType.getValue());
     Assert.assertTrue("Debe tener al menos un ticket", ticketsResponse.getTotal() > 0);
 
     boolean found = false;
@@ -3208,8 +3210,7 @@ public class Test_Reconciliation_FullTest extends TestBaseUnitAsync {
         break;
       }
     }
-    Assert.assertTrue("Debe encontrar el ticket de devolucion", found);
-    */
+    Assert.assertTrue("Debe encontrar el ticket de devolucion", found);*/
   }
 
   private void assertResearch(Long movementId, Boolean exists) {
