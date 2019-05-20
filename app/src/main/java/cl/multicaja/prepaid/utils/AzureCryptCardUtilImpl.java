@@ -2,8 +2,6 @@ package cl.multicaja.prepaid.utils;
 
 import cl.multicaja.prepaid.external.azure.CryptCardAzureImpl;
 import cl.multicaja.prepaid.util.CryptCard;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.beans.factory.annotation.Value;
 
 
 public class AzureCryptCardUtilImpl implements CryptCardUtil {
