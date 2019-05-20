@@ -83,6 +83,7 @@ public class TestBaseUnit extends TestApiBase {
   private static KafkaEventDelegate10 kafkaEventDelegate10;
   private static AccountEJBBean10 accountEJBBean10;
   private static PrepaidCardEJBBean11 prepaidCardEJBBean11;
+  private static IpmEJBBean10 ipmEJBBean10;
 
   protected static CalculationsHelper calculationsHelper = CalculationsHelper.getInstance();
   {
@@ -401,6 +402,13 @@ public class TestBaseUnit extends TestApiBase {
    */
   public static TecnocomService getTecnocomService() {
     return TecnocomServiceHelper.getInstance().getTecnocomService();
+  }
+
+  static IpmEJBBean10 getIpmEJBBean10() {
+    if (ipmEJBBean10 == null) {
+      ipmEJBBean10 = new IpmEJBBean10();
+    }
+    return ipmEJBBean10;
   }
 
   /**
@@ -1781,5 +1789,36 @@ public class TestBaseUnit extends TestApiBase {
   public boolean isRecentLocalDateTime(LocalDateTime localDateTime, Integer minutesInterval) {
     LocalDateTime nowTime = LocalDateTime.now(ZoneId.of("UTC"));
     return nowTime.minusMinutes(minutesInterval).isBefore(localDateTime) && nowTime.plusMinutes(minutesInterval).isAfter(localDateTime);
+  }
+
+  public IpmMovement10 buildIpmMovement10() {
+    IpmMovement10 ipmMovement10 = new IpmMovement10();
+    ipmMovement10.setFileId(RandomUtils.nextLong());
+    ipmMovement10.setMessageType(RandomUtils.nextInt(0, 15));
+    ipmMovement10.setFunctionCode(RandomUtils.nextInt(0, 15));
+    ipmMovement10.setMessageReason(RandomUtils.nextInt(0, 15));
+    ipmMovement10.setMessageNumber(RandomUtils.nextInt(0, 15));
+    ipmMovement10.setPan(getRandomString(12));
+    ipmMovement10.setTransactionAmount(new BigDecimal(RandomUtils.nextInt(3000, 100000)));
+    ipmMovement10.setReconciliationAmount(new BigDecimal(RandomUtils.nextInt(3000, 100000)));
+    ipmMovement10.setCardholderBillingAmount(new BigDecimal(RandomUtils.nextInt(3000, 100000)));
+    ipmMovement10.setReconciliationConversionRate(new BigDecimal(RandomUtils.nextInt(3000, 100000)));
+    ipmMovement10.setCardholderBillingConversionRate(new BigDecimal(RandomUtils.nextInt(3000, 100000)));
+    ipmMovement10.setTransactionLocalDate(LocalDateTime.now(ZoneId.of("UTC")));
+    ipmMovement10.setApprovalCode(getRandomNumericString(6));
+    ipmMovement10.setTransactionCurrencyCode(RandomUtils.nextInt(0, 100));
+    ipmMovement10.setReconciliationCurrencyCode(RandomUtils.nextInt(0, 100));
+    ipmMovement10.setCardholderBillingCurrencyCode(RandomUtils.nextInt(0, 100));
+    ipmMovement10.setMerchantCode(getRandomNumericString(15));
+    ipmMovement10.setMerchantName(getRandomString(12));
+    ipmMovement10.setMerchantState(getRandomString(5));
+    ipmMovement10.setMerchantCountry(getRandomString(2));
+    ipmMovement10.setTransactionLifeCycleId(getRandomNumericString(5));
+    ipmMovement10.setReconciled(false);
+    Timestamps timestamps = new Timestamps();
+    timestamps.setCreatedAt(LocalDateTime.now(ZoneId.of("UTC")));
+    timestamps.setUpdatedAt(LocalDateTime.now(ZoneId.of("UTC")));
+    ipmMovement10.setTimestamps(timestamps);
+    return ipmMovement10;
   }
 }

@@ -37,18 +37,15 @@ metadata:
   namespace: prepaid
   labels:
     app: api-prepaid
-    version: v1
 spec:
   replicas: 1
   selector:
     matchLabels:
       app: api-prepaid
-      version: v1
   template:
     metadata:
       labels:
         app: api-prepaid
-        version: v1
     spec:
       containers:
       - name: api-prepaid
@@ -56,6 +53,9 @@ spec:
         ports:
         - containerPort: 8080
         imagePullPolicy: Always
+        volumeMounts:
+        - name: volume
+          mountPath: /mock/data
         env:
           - name: DB_USERNAME
             value: ${DB_USERNAME}@${DB_HOST_NAME}
@@ -67,37 +67,39 @@ spec:
             value: ${DB_HOST_FQDN}
           - name: API_ENVIRONMENT
             value: ${API_ENVIRONMENT}
+          - name: TECNOCOM_MOCK_DATA_PATH
+            value: /mock/data
       imagePullSecrets:
         - name: container-reg-credentials
+      volumes:
+        - name: volume
+          persistentVolumeClaim:
+            claimName: tcmockfile
 ---
+###################
+# Virtual Service #
+###################
 apiVersion: networking.istio.io/v1alpha3
-kind: ServiceEntry
+kind: VirtualService
 metadata:
-  name: api-prepaid-se-db
+  name: api-prepaid-vts
   namespace: prepaid
 spec:
   hosts:
-  - "prepaid-postgresql-staging.postgres.database.azure.com"
-  location: MESH_EXTERNAL
-  ports:
-  - number: 5432
-    name: tcp-api-prepaid-db
-    protocol: TCP
----
-apiVersion: networking.istio.io/v1alpha3
-kind: ServiceEntry
-metadata:
-  name: api-prepaid-se-tecnocom
-  namespace: prepaid
-spec:
-  hosts:
-  - "200.111.44.187"
-  location: MESH_EXTERNAL
-  ports:
-  - number: 9080
-    name: http-api-prepaid-tecnocom
-    protocol: HTTP
-  resolution: NONE
+  - api.${CLUSTER_ENVIRONMENT}.${CLUSTER_DOMAIN}
+  gateways:
+  - global-gateway.default.svc.cluster.local
+  http:
+  - match:
+    - uri:
+        prefix: /prepaid/1.0
+    rewrite:
+      uri: /api-prepaid-1.0/1.0
+    route:
+    - destination:
+        host: api-prepaid
+        port:
+          number: 80
 ---
 apiVersion: networking.istio.io/v1alpha3
 kind: ServiceEntry
@@ -113,3 +115,17 @@ spec:
     name: tcp-api-prepaid-kafka
     protocol: TCP
   resolution: NONE
+---
+apiVersion: v1
+kind: PersistentVolumeClaim
+metadata:
+  name: tcmockfile
+  namespace: prepaid
+spec:
+  accessModes:
+    - ReadWriteMany
+  storageClassName: azurefile
+  resources:
+    requests:
+      storage: 5Gi
+---
