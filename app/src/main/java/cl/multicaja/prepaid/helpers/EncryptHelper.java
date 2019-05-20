@@ -40,9 +40,9 @@ public class EncryptHelper {
 
   private synchronized EncryptCardUtil getCryptCardUtil() {
     if (encryptCardUtil == null) {
-      boolean useAzure = getConfigUtils().getPropertyBoolean("azure.clien.enabled", false);
+      boolean useAzure = getConfigUtils().getPropertyBoolean("azure.client.enabled", false);
       if (useAzure) {
-        String azureClientId = getConfigUtils().getProperty("azure.clien.id","");
+        String azureClientId = getConfigUtils().getProperty("azure.client.id","");
         String azureClientSecret = getConfigUtils().getProperty("azure.client.secret","");
         String azureVaultUri = getConfigUtils().getProperty("azure.vault.uri","");
         encryptCardUtil = new AzureEncryptCardUtilImpl(azureClientId,azureClientSecret,azureVaultUri);
