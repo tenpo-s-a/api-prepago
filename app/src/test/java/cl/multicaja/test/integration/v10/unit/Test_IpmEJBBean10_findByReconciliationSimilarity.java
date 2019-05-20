@@ -29,7 +29,7 @@ public class Test_IpmEJBBean10_findByReconciliationSimilarity extends TestBaseUn
     veryLowMovement.setPan(insertedMovement.getPan());
     veryLowMovement.setMerchantCode(insertedMovement.getMerchantCode());
     veryLowMovement.setApprovalCode(insertedMovement.getApprovalCode());
-    veryLowMovement.setTransactionAmount(insertedMovement.getTransactionAmount().multiply(new BigDecimal(0.90f)));
+    veryLowMovement.setCardholderBillingAmount(insertedMovement.getTransactionAmount().multiply(new BigDecimal(0.90f)));
     createIpmMovement(veryLowMovement);
 
     // Inserta un movimiento que tiene el 99.0% del valor original
@@ -37,7 +37,7 @@ public class Test_IpmEJBBean10_findByReconciliationSimilarity extends TestBaseUn
     lowMovement.setPan(insertedMovement.getPan());
     lowMovement.setMerchantCode(insertedMovement.getMerchantCode());
     lowMovement.setApprovalCode(insertedMovement.getApprovalCode());
-    lowMovement.setTransactionAmount(insertedMovement.getTransactionAmount().multiply(new BigDecimal(0.99f)));
+    lowMovement.setCardholderBillingAmount(insertedMovement.getTransactionAmount().multiply(new BigDecimal(0.99f)));
     createIpmMovement(lowMovement);
 
     // Inserta un movimiento que tiene el 99.1% del valor original, PERO ya esta conciliado, por lo que no deberia ser elegido
@@ -45,7 +45,7 @@ public class Test_IpmEJBBean10_findByReconciliationSimilarity extends TestBaseUn
     lowReconciledMovement.setPan(insertedMovement.getPan());
     lowReconciledMovement.setMerchantCode(insertedMovement.getMerchantCode());
     lowReconciledMovement.setApprovalCode(insertedMovement.getApprovalCode());
-    lowReconciledMovement.setTransactionAmount(insertedMovement.getTransactionAmount().multiply(new BigDecimal(0.991f)));
+    lowReconciledMovement.setCardholderBillingAmount(insertedMovement.getTransactionAmount().multiply(new BigDecimal(0.991f)));
     lowReconciledMovement.setReconciled(true);
     createIpmMovement(lowReconciledMovement);
 
@@ -54,7 +54,7 @@ public class Test_IpmEJBBean10_findByReconciliationSimilarity extends TestBaseUn
     veryHighMovement.setPan(insertedMovement.getPan());
     veryHighMovement.setMerchantCode(insertedMovement.getMerchantCode());
     veryHighMovement.setApprovalCode(insertedMovement.getApprovalCode());
-    veryHighMovement.setTransactionAmount(insertedMovement.getTransactionAmount().multiply(new BigDecimal(1.10f)));
+    veryHighMovement.setCardholderBillingAmount(insertedMovement.getTransactionAmount().multiply(new BigDecimal(1.10f)));
     createIpmMovement(veryHighMovement);
 
     // Inserta un movimiento que tiene el 101% del valor original
@@ -62,7 +62,7 @@ public class Test_IpmEJBBean10_findByReconciliationSimilarity extends TestBaseUn
     highMovement.setPan(insertedMovement.getPan());
     highMovement.setMerchantCode(insertedMovement.getMerchantCode());
     highMovement.setApprovalCode(insertedMovement.getApprovalCode());
-    highMovement.setTransactionAmount(insertedMovement.getTransactionAmount().multiply(new BigDecimal(1.01f)));
+    highMovement.setCardholderBillingAmount(insertedMovement.getTransactionAmount().multiply(new BigDecimal(1.01f)));
     createIpmMovement(highMovement);
 
     // Buscamos un valor que sea cerca al 99.2% del valor original

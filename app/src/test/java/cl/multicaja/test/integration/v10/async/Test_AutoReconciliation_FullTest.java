@@ -296,7 +296,7 @@ public class Test_AutoReconciliation_FullTest extends TestBaseUnitAsync {
     // Inserta el movimiento que vino en el archivo IPM (para hacer un match, y reescribir su valor)
     IpmMovement10 ipmMovement10 = buildIpmMovement10();
     ipmMovement10.setReconciled(false);
-    ipmMovement10.setTransactionAmount(movimientoTecnocom10.getImpFac().getValue().multiply(new BigDecimal(1.005))); // Alterar levemente el valor para que se reescriba
+    ipmMovement10.setCardholderBillingAmount(movimientoTecnocom10.getImpFac().getValue().multiply(new BigDecimal(1.005))); // Alterar levemente el valor para que se reescriba
     ipmMovement10.setPan(prepaidCard.getPan());
     ipmMovement10.setMerchantCode(movimientoTecnocom10.getCodCom());
     ipmMovement10.setApprovalCode(movimientoTecnocom10.getNumAut());
@@ -310,7 +310,6 @@ public class Test_AutoReconciliation_FullTest extends TestBaseUnitAsync {
     // Verificar que exista en la BD en estado OP
     PrepaidMovement10 prepaidMovement10 = getPrepaidMovement(movimientoTecnocom10.getMovementType(), movimientoTecnocom10.getTipoFac(), movimientoTecnocom10.getNumAut(), prepaidCard.getPan(), movimientoTecnocom10.getCodCom());
     Assert.assertNotNull("Debe exitir el nuevo movimiento en la BD", prepaidMovement10);
-
     Assert.assertEquals("Debe tener estado OK", PrepaidMovementStatus.PROCESS_OK, prepaidMovement10.getEstado());
 
     // Verificar que exista en la tablas de contabilidad (acc y liq) en sus estados (PENDING y OK + fecha de conciliacion tiene que ser "ahora")
@@ -324,7 +323,7 @@ public class Test_AutoReconciliation_FullTest extends TestBaseUnitAsync {
     Assert.assertEquals("Debe tener estado PENDING", AccountingStatusType.PENDING, liq.getStatus());
 
     // El movimiento ha pasado a OP, verificar que su valor de contabilidad mastercard ha sido actualizado con el del IPM
-    Assert.assertEquals("Deben tener mismo valor", ipmMovement10.getTransactionAmount().setScale(2, RoundingMode.HALF_UP), acc.getAmountMastercard().getValue().setScale(2, RoundingMode.HALF_UP));
+    Assert.assertEquals("Deben tener mismo valor", ipmMovement10.getCardholderBillingAmount().setScale(2, RoundingMode.HALF_UP), acc.getAmountMastercard().getValue().setScale(2, RoundingMode.HALF_UP));
 
     // El movimiento en IPM debe pasar a conciliado
     IpmMovement10 foundIpmMovement = getIpmMovementById(ipmMovement10.getId());
@@ -413,7 +412,7 @@ public class Test_AutoReconciliation_FullTest extends TestBaseUnitAsync {
 
     // Inserta el movimiento que vino en el archivo IPM (para hacer un match, y reescribir su valor)
     IpmMovement10 ipmMovement10 = buildIpmMovement10();
-    ipmMovement10.setTransactionAmount(movimientoTecnocom10.getImpFac().getValue().multiply(new BigDecimal(1.005))); // Alterar levemente el valor para que se reescriba
+    ipmMovement10.setCardholderBillingAmount(movimientoTecnocom10.getImpFac().getValue().multiply(new BigDecimal(1.005))); // Alterar levemente el valor para que se reescriba
     ipmMovement10.setPan(prepaidCard.getPan());
     ipmMovement10.setMerchantCode(movimientoTecnocom10.getCodCom());
     ipmMovement10.setApprovalCode(movimientoTecnocom10.getNumAut());
@@ -449,7 +448,7 @@ public class Test_AutoReconciliation_FullTest extends TestBaseUnitAsync {
     Assert.assertEquals("Debe tener estado PENDING", AccountingStatusType.PENDING, liq.getStatus());
 
     // El movimiento ha pasado a OP, verificar que su valor de contabilidad mastercard ha sido actualizado con el del IPM
-    Assert.assertEquals("Deben tener mismo valor", ipmMovement10.getTransactionAmount().setScale(2, RoundingMode.HALF_UP), acc.getAmountMastercard().getValue().setScale(2, RoundingMode.HALF_UP));
+    Assert.assertEquals("Deben tener mismo valor", ipmMovement10.getCardholderBillingAmount().setScale(2, RoundingMode.HALF_UP), acc.getAmountMastercard().getValue().setScale(2, RoundingMode.HALF_UP));
 
     // El movimiento en IPM debe pasar a conciliado
     IpmMovement10 foundIpmMovement = getIpmMovementById(ipmMovement10.getId());
@@ -469,7 +468,7 @@ public class Test_AutoReconciliation_FullTest extends TestBaseUnitAsync {
 
     // Inserta el movimiento que vino en el archivo IPM (para hacer un match, y reescribir su valor)
     IpmMovement10 ipmMovement10 = buildIpmMovement10();
-    ipmMovement10.setTransactionAmount(movimientoTecnocom10.getImpFac().getValue().multiply(new BigDecimal(0.995))); // Alterar levemente el valor para que se reescriba
+    ipmMovement10.setCardholderBillingAmount(movimientoTecnocom10.getImpFac().getValue().multiply(new BigDecimal(0.995))); // Alterar levemente el valor para que se reescriba
     ipmMovement10.setPan(prepaidCard.getPan());
     ipmMovement10.setMerchantCode(movimientoTecnocom10.getCodCom());
     ipmMovement10.setApprovalCode(movimientoTecnocom10.getNumAut());
@@ -516,7 +515,7 @@ public class Test_AutoReconciliation_FullTest extends TestBaseUnitAsync {
     Assert.assertEquals("Debe tener estado PENDING", AccountingStatusType.PENDING, liq.getStatus());
 
     // El movimiento ha pasado a OP, verificar que su valor de contabilidad mastercard ha sido actualizado con el del IPM
-    Assert.assertEquals("Deben tener mismo valor", ipmMovement10.getTransactionAmount().setScale(2, RoundingMode.HALF_UP), acc.getAmountMastercard().getValue().setScale(2, RoundingMode.HALF_UP));
+    Assert.assertEquals("Deben tener mismo valor", ipmMovement10.getCardholderBillingAmount().setScale(2, RoundingMode.HALF_UP), acc.getAmountMastercard().getValue().setScale(2, RoundingMode.HALF_UP));
 
     // El movimiento en IPM debe pasar a conciliado
     IpmMovement10 foundIpmMovement = getIpmMovementById(ipmMovement10.getId());

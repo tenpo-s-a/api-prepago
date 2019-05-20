@@ -629,7 +629,7 @@ public class TecnocomReconciliationEJBBean10 extends PrepaidBaseEJBBean10 implem
           if (ipmMovement10 != null) {
             // Actualizar el valor de mastercard en la tablas de liquidacion
             AccountingData10 accountingData10 = getPrepaidAccountingEJBBean10().searchAccountingByIdTrx(null, prepaidMovement10.getId());
-            accountingData10.getAmountMastercard().setValue(ipmMovement10.getTransactionAmount());
+            accountingData10.getAmountMastercard().setValue(ipmMovement10.getCardholderBillingAmount());
             getPrepaidAccountingEJBBean10().updateAccountingDataFull(null, accountingData10);
 
             // Marcar movimiento tomado en la tabla IPM como conciliado
