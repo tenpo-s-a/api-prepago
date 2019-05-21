@@ -31,11 +31,11 @@ public class EncryptHelper {
   }
 
   public String encryptPan(String data){
-   return  getCryptCardUtil().encryptPan(data,getConfigUtils().getProperty("crypt.password",""));
+   return  getCryptCardUtil().encryptPan(data,getConfigUtils().getProperty("encrypt.password",""));
   }
 
   public String decryptPan(String data){
-    return  getCryptCardUtil().decryptPan(data,getConfigUtils().getProperty("crypt.password",""));
+    return  getCryptCardUtil().decryptPan(data,getConfigUtils().getProperty("encrypt.password",""));
   }
 
   private synchronized EncryptCardUtil getCryptCardUtil() {
