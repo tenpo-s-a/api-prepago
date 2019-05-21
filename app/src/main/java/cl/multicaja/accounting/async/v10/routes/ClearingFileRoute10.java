@@ -37,7 +37,7 @@ public class ClearingFileRoute10 extends BaseRoute10 {
     //TODO: La escucha de la carpeta SFTP debe estar en el proyecto prepaid-batch-router.
     // En este caso se debe escuchar una cola Activemq para procesar dicho archivo.
     //Se agrega ruta para procesar respuesta de Banco
-    //from(getFtpUriResponse()).process(new PendingClearingFile10(this).processClearingBatch());
+    from(getFtpUriResponse()).process(new PendingClearingFile10(this).processClearingBatch());
   }
   /**
    * Creates a Camel FTP URI

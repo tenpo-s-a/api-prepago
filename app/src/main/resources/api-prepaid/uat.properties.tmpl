@@ -49,17 +49,11 @@ sftp.mastercard.host={{ $sftp_host }}
 sftp.mastercard.auth.username=?username={{ $sftp_username }}
 sftp.mastercard.auth.password=&password={{ $sftp_password }}
 #Directorio en el cual se aloja archivo T057 - Es escuchado por apache camel
-sftp.mastercard.recived.folder=/prepago/mastercard/T058
+sftp.mastercard.recived.folder=/uat/mastercard/usd
 #Directorio en el cual se aloja el archivo procesado de forma exitosa
 sftp.mastercard.move.done.folder=&move=done
 #Directorio en el cual se aloja el archivo procesado con error
 sftp.mastercard.move.error.folder=&moveFailed=error
-#Directorio en el cual se deja el archivo de contabilidad de mastercard - Es escuchado por apache camel
-sftp.mastercard.accounting.received.folder=/prepago/mastercard/accounting
-#Directorio en el cual se aloja el archivo procesado de forma exitosa
-sftp.mastercard.accounting.move.done.folder=&move=done
-#Directorio en el cual se aloja el archivo procesado con error
-sftp.mastercard.accounting.move.error.folder=&moveFailed=error
 #Tiempo de espera ante una reconexion, en milisegundos
 sftp.mastercard.reconnectDelay=&reconnectDelay=30000
 #Lanza excepci�n cuando existe un error al conectarse con el servidor SFTP
@@ -75,7 +69,7 @@ sftp.multicajared.host={{ $sftp_host }}
 sftp.multicajared.auth.username=?username={{ $sftp_username }}
 sftp.multicajared.auth.password=&password={{ $sftp_password }}
 #Directorio en el cual se alojan los archivos - Es escuchado por apache camel
-sftp.multicajared.recived.folder=/multicajared
+sftp.multicajared.recived.folder=/staging/switch
 #Directorio en el cual se aloja el archivo procesado de forma exitosa
 sftp.multicajared.move.done.folder=&move=done
 #Directorio en el cual se aloja el archivo procesado con error
@@ -88,39 +82,18 @@ sftp.multicajared.throwExceptionOnConnectFailed=&throwExceptionOnConnectFailed=t
 #Directorio en el cual se alojan los archivos - Es escuchado por apache camel
 sftp.multicajared.clearing_file_upload.folder=/upload/clearing
 #Directorio para archivo de clearing respuesta
-sftp.mastercard.clearing.received.folder=/multicajared/clearing/response
+sftp.mastercard.clearing.received.folder=/uat/clearing/response
 #Directorio en el cual se aloja el archivo procesado de forma exitosa
 sftp.mastercard.clearing.move.done.folder=&move=done
 #Directorio en el cual se aloja el archivo procesado con error
 sftp.mastercard.clearing.move.error.folder=&moveFailed=error
 
 #Directorio en el cual se depositaran los archivos correspondientes al reporte E06
-sftp.multicajared.e06_file.folder=/upload/Reportes/Inputs
-
-#sftp server config - Tecnocom
-sftp.tecnocom.host={{ $sftp_host }}
-sftp.tecnocom.auth.username=?username={{ $sftp_username }}
-sftp.tecnocom.auth.password=&password={{ $sftp_password }}
-#Directorio en el cual se aloja archivo T057 - Es escuchado por apache camel
-sftp.tecnocom.recived.folder=/multicajared
-#Directorio en el cual se aloja el archivo procesado de forma exitosa
-sftp.tecnocom.move.done.folder=&move=done
-#Directorio en el cual se aloja el archivo procesado con error
-sftp.tecnocom.move.error.folder=&moveFailed=error
-#Tiempo de espera ante una reconexion, en milisegundos
-sftp.tecnocom.reconnectDelay=&reconnectDelay=30000
-#Lanza excepci�n cuando existe un error al conectarse con el servidor SFTP
-#El valor debe estar en true, ya que sino deja pendiente el proceso de deploy en caso de un fallo
-sftp.tecnocom.throwExceptionOnConnectFailed=&throwExceptionOnConnectFailed=true
-
-#Accounting email
-accounting.email.support=camila.figueroa@multicaja.cl
-accounting.email=soporte-prepago@multicaja.cl
+sftp.multicajared.e06_file.folder=/uat/Reportes/Inputs
 
 #Kafka
 kafka.enabled=true
 kafka.host={{ $kafka_host }}
-
 
 #Crypto Config
 azure.client.enabled=false
