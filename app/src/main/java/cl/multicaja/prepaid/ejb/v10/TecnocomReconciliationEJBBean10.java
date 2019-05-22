@@ -627,9 +627,10 @@ public class TecnocomReconciliationEJBBean10 extends PrepaidBaseEJBBean10 implem
           // Se busca el registro "mas parecido" en la tabla IPM
           IpmMovement10 ipmMovement10 = ipmEJBBean10.findByReconciliationSimilarity(prepaidCard10.getPan(), trx.getCodCom(), trx.getImpFac().getValue(), trx.getNumAut());
           if (ipmMovement10 != null) {
-            // Actualizar el valor de mastercard en la tablas de liquidacion
+            // Actualizar el valor de mastercard en la tablas de contabilidad
             AccountingData10 accountingData10 = getPrepaidAccountingEJBBean10().searchAccountingByIdTrx(null, prepaidMovement10.getId());
             accountingData10.getAmountMastercard().setValue(ipmMovement10.getCardholderBillingAmount());
+            accountingData10.setConciliationDate(Timestamp.valueOf(LocalDateTime.now(ZoneId.of("UTC"))));
             getPrepaidAccountingEJBBean10().updateAccountingDataFull(null, accountingData10);
 
             // Marcar movimiento tomado en la tabla IPM como conciliado
@@ -747,20 +748,20 @@ public class TecnocomReconciliationEJBBean10 extends PrepaidBaseEJBBean10 implem
     prepaidMovement.setCuenta(batchTrx.getCuenta());
     prepaidMovement.setClamon(batchTrx.getImpFac().getCurrencyCode());
     prepaidMovement.setIndnorcor(IndicadorNormalCorrector.fromValue(batchTrx.getIndNorCor()));
-    prepaidMovement.setTipofac(batchTrx.getTipoFac());
+    prepaidMovement.setTipofac(TipoFactura.valueOfEnumByCodeAndCorrector(batchTrx.getTipoFac().getCode(), batchTrx.getIndNorCor()));
     prepaidMovement.setFecfac(new Date(batchTrx.getFecTrn().getTime()));
     prepaidMovement.setNumreffac(""); //se debe actualizar despues, es el id de PrepaidMovement10
     prepaidMovement.setPan(pan);
-    prepaidMovement.setClamondiv(0);
+    prepaidMovement.setClamondiv(batchTrx.getImpDiv().getCurrencyCode().getValue());
     prepaidMovement.setImpdiv(batchTrx.getImpDiv().getValue());
     prepaidMovement.setImpfac(batchTrx.getImpautcon().getValue());
-    prepaidMovement.setCmbapli(0);
+    prepaidMovement.setCmbapli(batchTrx.getCmbApli().intValue());
     prepaidMovement.setNumaut(batchTrx.getNumAut());
     prepaidMovement.setIndproaje(IndicadorPropiaAjena.AJENA);
     prepaidMovement.setCodcom(batchTrx.getCodCom());
     prepaidMovement.setCodact(NumberUtils.getInstance().toInteger(batchTrx.getCodAct()));
-    prepaidMovement.setImpliq(BigDecimal.ZERO);
-    prepaidMovement.setClamonliq(0);
+    prepaidMovement.setImpliq(batchTrx.getImpLiq().getValue());
+    prepaidMovement.setClamonliq(batchTrx.getImpLiq().getCurrencyCode().getValue());
     prepaidMovement.setCodpais(CodigoPais.fromValue(NumberUtils.getInstance().toInteger(batchTrx.getCodPais())));
     prepaidMovement.setNompob("");
     prepaidMovement.setNumextcta(NumberUtils.getInstance().toInteger(batchTrx.getNumExtCta()));

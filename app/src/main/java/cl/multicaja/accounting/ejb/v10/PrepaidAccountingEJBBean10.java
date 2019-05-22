@@ -18,8 +18,10 @@ import cl.multicaja.prepaid.ejb.v10.MailPrepaidEJBBean10;
 import cl.multicaja.prepaid.ejb.v10.PrepaidBaseEJBBean10;
 import cl.multicaja.prepaid.ejb.v10.PrepaidCardEJBBean10;
 import cl.multicaja.prepaid.ejb.v10.PrepaidMovementEJBBean10;
+import cl.multicaja.prepaid.ejb.v11.PrepaidMovementEJBBean11;
 import cl.multicaja.prepaid.helpers.CalculationsHelper;
 import cl.multicaja.prepaid.model.v10.*;
+import cl.multicaja.prepaid.model.v11.PrepaidMovementFeeType;
 import cl.multicaja.tecnocom.constants.*;
 import com.opencsv.CSVWriter;
 import org.apache.commons.io.IOUtils;
@@ -72,7 +74,7 @@ public class PrepaidAccountingEJBBean10 extends PrepaidBaseEJBBean10 implements 
   private PrepaidAccountingFileEJBBean10 prepaidAccountingFileEJBBean10;
 
   @EJB
-  private PrepaidMovementEJBBean10 prepaidMovementEJBBean10;
+  private PrepaidMovementEJBBean11 prepaidMovementEJBBean11;
 
   @EJB
   private PrepaidCardEJBBean10 prepaidCardEJBBean10;
@@ -110,12 +112,12 @@ public class PrepaidAccountingEJBBean10 extends PrepaidBaseEJBBean10 implements 
     this.prepaidAccountingFileEJBBean10 = prepaidAccountingFileEJBBean10;
   }
 
-  public PrepaidMovementEJBBean10 getPrepaidMovementEJBBean10() {
-    return prepaidMovementEJBBean10;
+  public PrepaidMovementEJBBean11 getPrepaidMovementEJBBean11() {
+    return prepaidMovementEJBBean11;
   }
 
-  public void setPrepaidMovementEJBBean10(PrepaidMovementEJBBean10 prepaidMovementEJBBean10) {
-    this.prepaidMovementEJBBean10 = prepaidMovementEJBBean10;
+  public void setPrepaidMovementEJBBean11(PrepaidMovementEJBBean11 prepaidMovementEJBBean11) {
+    this.prepaidMovementEJBBean11 = prepaidMovementEJBBean11;
   }
 
   public PrepaidCardEJBBean10 getPrepaidCardEJB10() {
@@ -463,7 +465,7 @@ public class PrepaidAccountingEJBBean10 extends PrepaidBaseEJBBean10 implements 
     }
   }
 
-  public AccountingData10 buildAccounting10(PrepaidAccountingMovement accountingMovement, AccountingStatusType status, AccountingStatusType accountingStatus) {
+  public AccountingData10 buildAccounting10(PrepaidAccountingMovement accountingMovement, AccountingStatusType status, AccountingStatusType accountingStatus) throws BaseException {
     AccountingTxType type = AccountingTxType.RETIRO_WEB;
     AccountingMovementType movementType = AccountingMovementType.RETIRO_WEB;
     TransactionOriginType trxOriginType = TransactionOriginType.WEB;
@@ -485,11 +487,15 @@ public class PrepaidAccountingEJBBean10 extends PrepaidBaseEJBBean10 implements 
       type = AccountingTxType.COMPRA_SUSCRIPCION;
       movementType = AccountingMovementType.SUSCRIPCION;
       trxOriginType = TransactionOriginType.MASTERCARDINT;
-    } else if (TipoFactura.COMPRA_INTERNACIONAL.equals(movement.getTipofac()) && movement.getClamondiv().equals(CodigoMoneda.CHILE_CLP)) {
+    } else if (TipoFactura.COMPRA_INTERNACIONAL.equals(movement.getTipofac()) && movement.getClamondiv().equals(CodigoMoneda.CHILE_CLP.getValue())) {
       type = AccountingTxType.COMPRA_PESOS;
       movementType = AccountingMovementType.COMPRA_PESOS;
       trxOriginType = TransactionOriginType.MASTERCARDINT;
-    } else if (TipoFactura.COMPRA_INTERNACIONAL.equals(movement.getTipofac()) && !movement.getClamondiv().equals(CodigoMoneda.CHILE_CLP)) {
+    } else if (TipoFactura.COMPRA_INTERNACIONAL.equals(movement.getTipofac()) && !movement.getClamondiv().equals(CodigoMoneda.CHILE_CLP.getValue())) {
+      type = AccountingTxType.COMPRA_MONEDA;
+      movementType = AccountingMovementType.COMPRA_MONEDA;
+      trxOriginType = TransactionOriginType.MASTERCARDINT;
+    } else if (TipoFactura.ANULA_COMPRA_INTERNACIONAL.equals(movement.getTipofac())) {
       type = AccountingTxType.COMPRA_MONEDA;
       movementType = AccountingMovementType.COMPRA_MONEDA;
       trxOriginType = TransactionOriginType.MASTERCARDINT;
@@ -566,12 +572,35 @@ public class PrepaidAccountingEJBBean10 extends PrepaidBaseEJBBean10 implements 
         accounting.setCollectorFeeIva(BigDecimal.ZERO);
         break;
       }
+      case SUSCRIPTION:
       case PURCHASE: {
-        Lis
+        List<PrepaidMovementFee10> feeList = getPrepaidMovementEJBBean11().getPrepaidMovementFeesByMovementId(accountingMovement.getPrepaidMovement10().getId());
+
+        // Sumar comissiones y e iva por separado
+        for (PrepaidMovementFee10 storedFee : feeList) {
+          if (PrepaidMovementFeeType.IVA.equals(storedFee.getFeeType())) {
+            feeIva = feeIva.add(storedFee.getAmount());
+          } else {
+            fee = fee.add(storedFee.getAmount());
+          }
+        }
+
+        // De acuerdo al tipo de moneda se almacena en la tabla de contabilidad
+        if (movement.getClamondiv().equals(CodigoMoneda.CHILE_CLP.getValue())) {
+          accounting.setFee(fee);
+          accounting.setFeeIva(feeIva);
+          accounting.setExchangeRateDif(BigDecimal.ZERO);
+        } else {
+          accounting.setFee(BigDecimal.ZERO);
+          accounting.setFeeIva(BigDecimal.ZERO);
+          accounting.setExchangeRateDif(fee);
+        }
+
+        accounting.setCollectorFee(BigDecimal.ZERO);
+        accounting.setCollectorFeeIva(BigDecimal.ZERO);
         break;
       }
       default: {
-        //FIXME: Se debe verificar. ACTION: Hay que implementar las fees, para compra y suscripción, tener en cuenta las reglas de negocio para esta verificación
         accounting.setFee(BigDecimal.ZERO);
         accounting.setFeeIva(BigDecimal.ZERO);
         accounting.setCollectorFee(BigDecimal.ZERO);
@@ -588,10 +617,10 @@ public class PrepaidAccountingEJBBean10 extends PrepaidBaseEJBBean10 implements 
     NewAmountAndCurrency10 amountToBalance = new NewAmountAndCurrency10();
     amountToBalance.setCurrencyCode(CodigoMoneda.CHILE_CLP);
 
-    if(TipoFactura.RETIRO_EFECTIVO_COMERCIO_MULTICJA.equals(movement.getTipofac()) || TipoFactura.RETIRO_TRANSFERENCIA.equals(movement.getTipofac())) {
-      amountToBalance.setValue(movement.getImpfac().add(fee).add(feeIva));
-    } else {
+    if (TipoFactura.CARGA_TRANSFERENCIA.equals(movement.getTipofac()) || TipoFactura.CARGA_EFECTIVO_COMERCIO_MULTICAJA.equals(movement.getTipofac())) {
       amountToBalance.setValue(movement.getImpfac().subtract(fee).subtract(feeIva));
+    } else {
+      amountToBalance.setValue(movement.getImpfac().add(fee).add(feeIva));
     }
 
     accounting.setAmountBalance(amountToBalance);
@@ -961,7 +990,7 @@ public class PrepaidAccountingEJBBean10 extends PrepaidBaseEJBBean10 implements 
       PrepaidMovement10 prepaidMovement10 = null;
       try {
         // Se cambian los * por X que es como esta en nuestra BD.
-        prepaidMovement10 = getPrepaidMovementEJBBean10().getPrepaidMovementByNumAutAndPan(trx.getPan().replace("*","X"),String.valueOf(trx.getApprovalCode()),MovementOriginType.OPE);
+        prepaidMovement10 = getPrepaidMovementEJBBean11().getPrepaidMovementByNumAutAndPan(trx.getPan().replace("*","X"),String.valueOf(trx.getApprovalCode()),MovementOriginType.OPE);
       } catch (Exception e) {
         log.error("PrepaidMovement10 Not Found");
       }
@@ -1075,11 +1104,11 @@ public class PrepaidAccountingEJBBean10 extends PrepaidBaseEJBBean10 implements 
         ClearingData10 clearingData10 = getPrepaidClearingEJBBean10().searchClearingDataByAccountingId(headers,acc.getId());
         getPrepaidClearingEJBBean10().updateClearingData(headers,clearingData10.getId(),AccountingStatusType.PENDING);
         // Movimiento actualizado a procesado OK
-        getPrepaidMovementEJBBean10().updatePrepaidMovementStatus(headers,prepaidMovement10.getId(),PrepaidMovementStatus.PROCESS_OK);
+        getPrepaidMovementEJBBean11().updatePrepaidMovementStatus(headers,prepaidMovement10.getId(),PrepaidMovementStatus.PROCESS_OK);
       }
     }
     // Se añaden los movimientos que no llegaron desde un Archivo de operaciones diarias.
-    this.getPrepaidMovementEJBBean10().addPrepaidMovement(headers,movement10s);
+    this.getPrepaidMovementEJBBean11().addPrepaidMovement(headers,movement10s);
     // Se guarda data en Accounting
     this.saveAccountingData(null, transactions);
     // Se guarda la data en Clearing.
