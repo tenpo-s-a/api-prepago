@@ -565,9 +565,15 @@ public class PrepaidAccountingEJBBean10 extends PrepaidBaseEJBBean10 implements 
       }
       case SUSCRIPTION:
       case PURCHASE: {
-        List<PrepaidMovementFee10> feeList = getPrepaidMovementEJBBean11().getPrepaidMovementFeesByMovementId(accountingMovement.getPrepaidMovement10().getId());
+        // Rescatar la lista de fees almacenadas en la BD
+        List<PrepaidMovementFee10> feeList;
+        try {
+          feeList = getPrepaidMovementEJBBean11().getPrepaidMovementFeesByMovementId(accountingMovement.getPrepaidMovement10().getId());
+        } catch (Exception e) {
+          feeList = Collections.emptyList();
+        }
 
-        // Sumar comissiones y e iva por separado
+        // Sumar comisiones e iva por separado
         for (PrepaidMovementFee10 storedFee : feeList) {
           if (PrepaidMovementFeeType.IVA.equals(storedFee.getFeeType())) {
             feeIva = feeIva.add(storedFee.getAmount());
@@ -1158,7 +1164,7 @@ public class PrepaidAccountingEJBBean10 extends PrepaidBaseEJBBean10 implements 
     prepaidMovement.setTipofac(tipoFactura);// Revisar
     prepaidMovement.setIndnorcor(IndicadorNormalCorrector.fromValue(tipoFactura.getCorrector()));
 
-    prepaidMovement.setFecfac(java.sql.Date.valueOf(batchTrx.getTransactionLocalDate().toLocalDate()));
+    prepaidMovement.setFecfac(Date.from(batchTrx.getTransactionLocalDate().toInstant()));
     prepaidMovement.setNumreffac(""); //se debe actualizar despues, es el id de PrepaidMovement10
     prepaidMovement.setPan(batchTrx.getPan());
     prepaidMovement.setClamondiv(batchTrx.getTransactionCurrencyCode());
@@ -1184,6 +1190,7 @@ public class PrepaidAccountingEJBBean10 extends PrepaidBaseEJBBean10 implements 
     prepaidMovement.setCodcom(batchTrx.getCardAcceptorId());
     prepaidMovement.setNomcomred(batchTrx.getMerchantName());
     prepaidMovement.setOriginType(MovementOriginType.OPE);
+    prepaidMovement.setCardId(prepaidCard.getId());
 
     //Tecnocom No conciliado
     prepaidMovement.setConTecnocom(ReconciliationStatusType.RECONCILED);
