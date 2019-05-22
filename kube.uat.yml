@@ -71,13 +71,13 @@ spec:
             value: "http://${TENPO_USER_API_HOST}/v1/user-management"
           - name: TECNOCOM_MOCK_IMPL
             value: "false"
-          - name: TECNOCOM_API_KEY
+          - name: TECNOCOM_APIKEY
             value: ${TECNOCOM_API_KEY}
-          - name: TECNOCOM_API_URL
+          - name: TECNOCOM_APIURL
             value: ${TECNOCOM_API_URL}
           - name: TECNOCOM_CHANNEL
             value: ${TECNOCOM_CHANNEL}
-          - name: TECNOCOM_CODENT
+          - name: TECNOCOM_CODENTITY
             value: ${TECNOCOM_CODENT}
           - name: TECNOCOM_ORDER
             value: ${TECNOCOM_ORDER}
