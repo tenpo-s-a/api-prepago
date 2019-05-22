@@ -924,6 +924,7 @@ public class TecnocomReconciliationEJBBean10 extends PrepaidBaseEJBBean10 implem
       movimientoTecnocom10.setOriginOpe(rs.getString("originope"));
       movimientoTecnocom10.setContrato(rs.getString("contrato"));
       movimientoTecnocom10.setTipoReg(TecnocomReconciliationRegisterType.valueOfEnum(rs.getString("tiporeg")));
+      movimientoTecnocom10.setNomcomred(rs.getString("nomcomred"));
       return movimientoTecnocom10;
     };
   }

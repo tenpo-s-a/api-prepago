@@ -560,6 +560,7 @@ public class Test_AutoReconciliation_FullTest extends TestBaseUnitAsync {
     registroTecnocom.setOriginOpe(OriginOpeType.AUT_ORIGIN.getValue());
     registroTecnocom.setTipoLin(getRandomString(4));
     registroTecnocom.setTipoReg(TecnocomReconciliationRegisterType.OP);
+    registroTecnocom.setNomcomred("PruebaNombre");
     return registroTecnocom;
   }
 
