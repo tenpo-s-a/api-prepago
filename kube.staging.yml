@@ -70,7 +70,7 @@ spec:
           - name: TECNOCOM_MOCK_DATA_PATH
             value: /mock/data
           - name: TENPO_USER_API_URL
-            value: "http://40.70.68.63:8080/v1/user-management"
+            value: "http://${TENPO_USER_API_HOST}/v1/user-management"
       imagePullSecrets:
         - name: container-reg-credentials
       volumes:

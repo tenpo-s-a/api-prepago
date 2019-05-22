@@ -15,9 +15,6 @@ public class ConciliationMcRedRoute10 extends BaseRoute10 {
 
   @Override
   public void configure() throws Exception {
-    /**
-     * Extrae valor dolar
-     */
     //FIXME: La escucha de la carpeta SFTP debe estar en el proyecto prepaid-batch-router.
     // En este caso se debe escuchar una cola Activemq para procesar dicho archivo.
 
