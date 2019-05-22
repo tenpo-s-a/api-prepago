@@ -308,7 +308,7 @@ public class TecnocomReconciliationEJBBean10 extends PrepaidBaseEJBBean10 implem
     movimientoTecnocom10.setNumMovExt(0L);
     movimientoTecnocom10.setClamone(CodigoMoneda.CHILE_CLP);
     movimientoTecnocom10.setCodCom("Cualquiera");
-    movimientoTecnocom10.setNomcomred(detail.getNomComRed());
+    movimientoTecnocom10.setNomcomred("Cualquiera");
 
     return movimientoTecnocom10;
   }
