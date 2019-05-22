@@ -9,7 +9,6 @@ import cl.multicaja.core.exceptions.BadRequestException;
 import cl.multicaja.core.exceptions.BaseException;
 import cl.multicaja.core.exceptions.ValidationException;
 import cl.multicaja.core.model.ZONEID;
-import cl.multicaja.core.utils.EncryptUtil;
 import cl.multicaja.core.utils.KeyValue;
 import cl.multicaja.core.utils.NumberUtils;
 import cl.multicaja.core.utils.db.InParam;
@@ -31,7 +30,6 @@ import cl.multicaja.prepaid.model.v11.Account;
 import cl.multicaja.prepaid.model.v11.PrepaidMovementFeeType;
 import cl.multicaja.tecnocom.constants.*;
 import com.fasterxml.jackson.databind.ObjectMapper;
-
 import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
@@ -44,9 +42,13 @@ import javax.ejb.*;
 import javax.inject.Inject;
 import java.io.InputStream;
 import java.math.BigDecimal;
+<<<<<<< HEAD
 import java.math.RoundingMode;
 import java.sql.*;
+=======
+>>>>>>> master
 import java.sql.Date;
+import java.sql.*;
 import java.text.SimpleDateFormat;
 import java.time.*;
 import java.time.format.DateTimeFormatter;
@@ -69,8 +71,6 @@ public class TecnocomReconciliationEJBBean10 extends PrepaidBaseEJBBean10 implem
   private static DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd HH.mm.ss Z");
   private static DateTimeFormatter dbFormatter = DateTimeFormatter.ofPattern("yyyyMMdd");
   private static ZoneId here = ZoneId.of("America/Santiago");
-  private EncryptUtil encryptUtil;
-
   private static final String INSERT_MOVEMENT_SQL = "INSERT INTO %s.%s (" +
   "idArchivo, cuenta, pan, codent, centalta, clamon, indnorcor, tipofac, fecfac, numreffac, clamondiv, impdiv, " +
   "impfac, cmbapli, numaut, indproaje, codcom, codact, impliq, clamonliq, codpais, nompob, numextcta, nummovext, " +
@@ -179,13 +179,6 @@ public class TecnocomReconciliationEJBBean10 extends PrepaidBaseEJBBean10 implem
   public IpmEJBBean10 getIpmEJBBean10() { return ipmEJBBean10; }
 
   public void setIpmEJBBean10(IpmEJBBean10 ipmEJBBean10) { this.ipmEJBBean10 = ipmEJBBean10; }
-
-  private EncryptUtil getEncryptUtil(){
-    if(encryptUtil == null){
-      encryptUtil = EncryptUtil.getInstance();
-    }
-    return encryptUtil;
-  }
 
   public void setFeeService(FeeService feeService) { this.feeService = feeService; }
 
