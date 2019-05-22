@@ -22,10 +22,10 @@ public final class CurrencyConvertionRoute10 extends BaseRoute10 {
      */
     //FIXME: La escucha de la carpeta SFTP debe estar en el proyecto prepaid-batch-router.
     // En este caso se debe escuchar una cola Activemq para procesar dicho archivo.
-    //if(ConfigUtils.isEnvTest()) {
-    //  from(SFTP_HOST_ENDPOINT)
-    //    .process(new PendingCurrencyModification10(this).processCurrencyConvertionFile());
-    //}
+    if(ConfigUtils.isEnvTest()) {
+      from(SFTP_HOST_ENDPOINT)
+        .process(new PendingCurrencyModification10(this).processCurrencyConvertionFile());
+    }
   }
 
   private String getSftpEndpoint() {
