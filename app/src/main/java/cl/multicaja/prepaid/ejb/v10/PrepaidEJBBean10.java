@@ -655,15 +655,13 @@ public class PrepaidEJBBean10 extends PrepaidBaseEJBBean10 implements PrepaidEJB
     TipoFactura tipoFacReverse = TransactionOriginType.WEB.equals(topupRequest.getTransactionOriginType()) ? TipoFactura.ANULA_CARGA_TRANSFERENCIA : TipoFactura.ANULA_CARGA_EFECTIVO_COMERCIO_MULTICAJA;
 
     // Se verifica si ya se tiene una reversa con los mismos datos
-    PrepaidMovement10 previousReverse = this.getPrepaidMovementEJB10().getPrepaidMovementForReverse(prepaidUser.getId(),
-      topupRequest.getTransactionId(), PrepaidMovementType.TOPUP,
-      tipoFacReverse);
+    PrepaidMovement10 previousReverse = this.getPrepaidMovementEJB11().getPrepaidMovementForReverse(prepaidCard.getId(), topupRequest.getTransactionId(),
+      PrepaidMovementType.TOPUP, tipoFacReverse);
 
     if(previousReverse == null) {
 
       // Busca el movimiento de carga original
-      PrepaidMovement10 originalTopup = this.getPrepaidMovementEJB10().getPrepaidMovementForReverse(prepaidUser.getId(),
-        topupRequest.getTransactionId(), PrepaidMovementType.TOPUP, tipoFacTopup);
+      PrepaidMovement10 originalTopup = this.getPrepaidMovementEJB11().getPrepaidMovementForReverse(prepaidCard.getId(), topupRequest.getTransactionId(), PrepaidMovementType.TOPUP, tipoFacTopup);
 
       // Verifica si existe la carga original topup
       if(originalTopup != null) {
@@ -726,7 +724,7 @@ public class PrepaidEJBBean10 extends PrepaidBaseEJBBean10 implements PrepaidEJB
         // Se coloca conciliada contra tecnocom, ya que nunca se hace la reversa y por lo tanto no vendra en el archivo de operaciones diarias
         prepaidMovement.setConTecnocom(ReconciliationStatusType.RECONCILED);
         prepaidMovement = this.getPrepaidMovementEJB10().addPrepaidMovement(headers, prepaidMovement);
-        this.getPrepaidMovementEJB10().updatePrepaidMovementStatus(headers, prepaidMovement.getId(), PrepaidMovementStatus.PROCESS_OK);
+        this.getPrepaidMovementEJB11().updatePrepaidMovementStatus(headers, prepaidMovement.getId(), PrepaidMovementStatus.PROCESS_OK);
 
         throw new ReverseOriginalMovementNotFoundException();
       }

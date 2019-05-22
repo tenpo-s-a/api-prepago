@@ -837,7 +837,7 @@ public class PrepaidMovementEJBBean10 extends PrepaidBaseEJBBean10 implements Pr
     }
   }
 
-  private void createReconciliationResearchMovement(PrepaidMovement10 prepaidMovement, ResearchMovementResponsibleStatusType responsible, ResearchMovementDescriptionType description, Boolean insertSwitchFile, Boolean insertTecnocomFile) throws Exception {
+  protected void createReconciliationResearchMovement(PrepaidMovement10 prepaidMovement, ResearchMovementResponsibleStatusType responsible, ResearchMovementDescriptionType description, Boolean insertSwitchFile, Boolean insertTecnocomFile) throws Exception {
     createResearchMovement(prepaidMovement, responsible, description, insertSwitchFile, insertTecnocomFile, ReconciliationOriginType.MOTOR);
   }
 
@@ -2214,7 +2214,7 @@ public class PrepaidMovementEJBBean10 extends PrepaidBaseEJBBean10 implements Pr
     }
   }
 
-  private boolean isRetryErrorStatus(PrepaidMovementStatus status) {
+  protected boolean isRetryErrorStatus(PrepaidMovementStatus status) {
     return PrepaidMovementStatus.ERROR_TECNOCOM_REINTENTABLE.equals(status) ||
       PrepaidMovementStatus.ERROR_TIMEOUT_CONEXION.equals(status) ||
       PrepaidMovementStatus.ERROR_TIMEOUT_RESPONSE.equals(status);

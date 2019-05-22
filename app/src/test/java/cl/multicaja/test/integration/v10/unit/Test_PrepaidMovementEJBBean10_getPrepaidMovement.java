@@ -85,16 +85,16 @@ public class Test_PrepaidMovementEJBBean10_getPrepaidMovement extends TestBaseUn
 
     Assert.assertNull("debe retornar una lista", lst);
 
-    PrepaidMovement10 prepaidMovement1_1 = getPrepaidMovementEJBBean10().getPrepaidMovementById(prepaidMovement1.getId());
+    PrepaidMovement10 prepaidMovement1_1 = getPrepaidMovementEJBBean11().getPrepaidMovementById(prepaidMovement1.getId());
     Assert.assertEquals("deben ser iguales", prepaidMovement1, prepaidMovement1_1);
 
-    PrepaidMovement10 prepaidMovement1_2 = getPrepaidMovementEJBBean10().getPrepaidMovementById(prepaidMovement2.getId());
+    PrepaidMovement10 prepaidMovement1_2 = getPrepaidMovementEJBBean11().getPrepaidMovementById(prepaidMovement2.getId());
     Assert.assertEquals("deben ser iguales", prepaidMovement2, prepaidMovement1_2);
 
-    PrepaidMovement10 prepaidMovement1_3 = getPrepaidMovementEJBBean10().getPrepaidMovementByIdTxExterno(prepaidMovement1_2.getIdTxExterno(), prepaidMovement1_2.getTipoMovimiento(), prepaidMovement1_2.getIndnorcor());
+    PrepaidMovement10 prepaidMovement1_3 = getPrepaidMovementEJBBean11().getPrepaidMovementByIdTxExterno(prepaidMovement1_2.getIdTxExterno(), prepaidMovement1_2.getTipoMovimiento(), prepaidMovement1_2.getIndnorcor());
     Assert.assertEquals("deben ser iguales",  prepaidMovement1_2,prepaidMovement1_3);
 
-    PrepaidMovement10 prepaidMovement2_1 = getPrepaidMovementEJBBean10().getPrepaidMovementForTecnocomReconciliation(prepaidUser.getId(), prepaidMovement2.getNumaut(), new java.sql.Date(prepaidMovement2.getFecfac().getTime()), prepaidMovement2.getTipofac());
+    PrepaidMovement10 prepaidMovement2_1 = getPrepaidMovementEJBBean11().getPrepaidMovementForTecnocomReconciliationV2(prepaidUser.getId(), prepaidMovement2.getNumaut(), new java.sql.Date(prepaidMovement2.getFecfac().getTime()), prepaidMovement2.getTipofac());
     Assert.assertEquals("deben ser iguales",  prepaidMovement2,prepaidMovement2_1);
   }
 

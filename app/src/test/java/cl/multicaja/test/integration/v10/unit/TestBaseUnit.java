@@ -19,6 +19,7 @@ import cl.multicaja.prepaid.ejb.v10.*;
 import cl.multicaja.prepaid.ejb.v11.PrepaidCardEJBBean11;
 import cl.multicaja.prepaid.ejb.v11.PrepaidMovementEJBBean11;
 import cl.multicaja.prepaid.helpers.CalculationsHelper;
+import cl.multicaja.prepaid.helpers.EncryptHelper;
 import cl.multicaja.prepaid.helpers.tecnocom.TecnocomServiceHelper;
 import cl.multicaja.prepaid.model.v10.*;
 import cl.multicaja.prepaid.model.v11.*;
@@ -619,7 +620,7 @@ public class TestBaseUnit extends TestApiBase {
     prepaidCard.setIdUser(user.getId());
     prepaidCard.setProcessorUserId("");
     prepaidCard.setPan(Utils.replacePan(datosTarjetaDTO.getPan()));
-    prepaidCard.setEncryptedPan(encryptUtil.encrypt(datosTarjetaDTO.getPan()));
+    prepaidCard.setEncryptedPan(EncryptHelper.getInstance().encryptPan(datosTarjetaDTO.getPan()));
     prepaidCard.setStatus(PrepaidCardStatus.ACTIVE);
     prepaidCard.setExpiration(datosTarjetaDTO.getFeccadtar());
     prepaidCard.setNameOnCard(user.getName() + " " + user.getLastName());

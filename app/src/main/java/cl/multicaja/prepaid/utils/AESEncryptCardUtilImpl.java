@@ -7,7 +7,7 @@ import javax.xml.bind.DatatypeConverter;
 
 
 public class AESEncryptCardUtilImpl implements EncryptCardUtil {
-    private static final String CIPHER_INSTANCE_NAME = "AES/CBC/PKCS5PADDING";
+    private static final String CIPHER_INSTANCE_NAME = "AES/CBC/NoPadding";
     private static final String ALGORITHM = "AES";
     private static final byte[] iv = new byte[]{21, -116, 85, -30, 29, -95, 96, -118, -60, 85, -5, -123, -21, -37, 14, -69};
 

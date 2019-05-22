@@ -6,12 +6,8 @@ import cl.multicaja.accounting.model.v10.ClearingData10;
 import cl.multicaja.accounting.model.v10.UserAccount;
 import cl.multicaja.cdt.model.v10.CdtTransaction10;
 import cl.multicaja.core.exceptions.BaseException;
-import cl.multicaja.core.utils.EncryptUtil;
-import cl.multicaja.core.utils.NumberUtils;
 import cl.multicaja.core.utils.db.DBUtils;
-import cl.multicaja.prepaid.external.freshdesk.model.Ticket;
-import cl.multicaja.prepaid.external.freshdesk.model.TicketsResponse;
-import cl.multicaja.prepaid.helpers.freshdesk.model.v10.FreshdeskServiceHelper;
+import cl.multicaja.prepaid.helpers.EncryptHelper;
 import cl.multicaja.prepaid.helpers.freshdesk.model.v10.TicketType;
 import cl.multicaja.prepaid.helpers.mcRed.McRedReconciliationFileDetail;
 import cl.multicaja.prepaid.helpers.tecnocom.TecnocomServiceHelper;
@@ -26,10 +22,12 @@ import java.math.BigDecimal;
 import java.sql.Date;
 import java.sql.SQLException;
 import java.sql.Timestamp;
-import java.time.*;
+import java.time.Instant;
+import java.time.LocalDate;
+import java.time.ZoneId;
+import java.time.ZonedDateTime;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Map;
 
 public class Test_Reconciliation_FullTest extends TestBaseUnitAsync {
 
@@ -46,8 +44,7 @@ public class Test_Reconciliation_FullTest extends TestBaseUnitAsync {
   private static String switchNotFoundId = "[No_Encontrado_En_Switch]";
   private static String tecnocomNotFoundId = "[No_Encontrado_En_Tecnocom]";
 
-  @BeforeClass
-  public static void prepareDB() {
+  private static void clearDBData(){
     DBUtils.getInstance().getJdbcTemplate().execute(String.format("TRUNCATE %s.prp_movimiento_investigar CASCADE", getSchema()));
     DBUtils.getInstance().getJdbcTemplate().execute(String.format("TRUNCATE %s.prp_movimiento_conciliado CASCADE", getSchema()));
     DBUtils.getInstance().getJdbcTemplate().execute(String.format("TRUNCATE %s.prp_movimiento CASCADE", getSchema()));
@@ -59,6 +56,9 @@ public class Test_Reconciliation_FullTest extends TestBaseUnitAsync {
     DBUtils.getInstance().getJdbcTemplate().execute(String.format("TRUNCATE %s.prp_movimientos_tecnocom CASCADE", getSchema()));
     DBUtils.getInstance().getJdbcTemplate().execute(String.format("TRUNCATE %s.prp_movimientos_tecnocom_hist CASCADE", getSchema()));
     DBUtils.getInstance().getJdbcTemplate().execute(String.format("TRUNCATE %s.prp_archivos_conciliacion CASCADE", getSchema()));
+  }
+  @BeforeClass
+  public static void prepareDB() {
 
     try {
       Test_Reconciliation_FullTest test = new Test_Reconciliation_FullTest();
@@ -76,7 +76,7 @@ public class Test_Reconciliation_FullTest extends TestBaseUnitAsync {
 
       String contrato = account.getAccountNumber();
       String nomcomred = "Multi test";
-      String pan = EncryptUtil.getInstance().decrypt(prepaidCard.getEncryptedPan());
+      String pan = EncryptHelper.getInstance().decryptPan(prepaidCard.getEncryptedPan());
 
       PrepaidTopup10 prepaidTopup = test.buildPrepaidTopup10();
       prepaidTopup.getAmount().setValue(new BigDecimal(200000));
@@ -160,16 +160,7 @@ public class Test_Reconciliation_FullTest extends TestBaseUnitAsync {
 
   @AfterClass
   public static void clearDB() {
-    DBUtils.getInstance().getJdbcTemplate().execute(String.format("TRUNCATE %s.prp_movimiento_investigar CASCADE", getSchema()));
-    DBUtils.getInstance().getJdbcTemplate().execute(String.format("TRUNCATE %s.prp_movimiento_conciliado CASCADE", getSchema()));
-    DBUtils.getInstance().getJdbcTemplate().execute(String.format("TRUNCATE %s.prp_movimiento CASCADE", getSchema()));
-    DBUtils.getInstance().getJdbcTemplate().execute(String.format("TRUNCATE %s.clearing CASCADE", getSchemaAccounting()));
-    DBUtils.getInstance().getJdbcTemplate().execute(String.format("TRUNCATE %s.accounting CASCADE", getSchemaAccounting()));
-    DBUtils.getInstance().getJdbcTemplate().execute(String.format("TRUNCATE %s.accounting_files CASCADE", getSchemaAccounting()));
-    DBUtils.getInstance().getJdbcTemplate().execute(String.format("TRUNCATE %s.prp_movimiento_switch CASCADE", getSchema()));
-    DBUtils.getInstance().getJdbcTemplate().execute(String.format("TRUNCATE %s.prp_movimiento_switch_hist CASCADE", getSchema()));
-    DBUtils.getInstance().getJdbcTemplate().execute(String.format("TRUNCATE %s.prp_movimientos_tecnocom CASCADE", getSchema()));
-    DBUtils.getInstance().getJdbcTemplate().execute(String.format("TRUNCATE %s.prp_movimientos_tecnocom_hist CASCADE", getSchema()));
+    clearDBData();
   }
 
   @Override
