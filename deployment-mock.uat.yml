@@ -25,6 +25,9 @@ spec:
         ports:
         - containerPort: 8080
         imagePullPolicy: Always
+        volumeMounts:
+        - name: volume
+          mountPath: /mock/data
         env:
           - name: DB_USERNAME
             value: ${DB_USERNAME}@${DB_HOST_NAME}
@@ -41,7 +44,24 @@ spec:
           - name: TECNOCOM_MOCK_IMPL
             value: "true"
           - name: TECNOCOM_MOCK_DATA_PATH
-            value: "/opt/payara5"
+            value: "/mock/data"
       imagePullSecrets:
         - name: container-reg-credentials
+      volumes:
+        - name: volume
+          persistentVolumeClaim:
+            claimName: tcmockfile
+---
+apiVersion: v1
+kind: PersistentVolumeClaim
+metadata:
+  name: tcmockfile
+  namespace: prepaid
+spec:
+  accessModes:
+    - ReadWriteMany
+  storageClassName: azurefile
+  resources:
+    requests:
+      storage: 1Gi
 ---
