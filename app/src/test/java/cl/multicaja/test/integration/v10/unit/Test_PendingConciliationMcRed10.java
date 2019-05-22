@@ -81,7 +81,7 @@ public class Test_PendingConciliationMcRed10 extends TestBaseUnitAsync {
     int reconciledCount = 0;
     int notReconcilidedCount = 0;
     for(PrepaidMovement10 mov : movimientos){
-      PrepaidMovement10 movTmp = getPrepaidMovementEJBBean10().getPrepaidMovementById(mov.getId());
+      PrepaidMovement10 movTmp = getPrepaidMovementEJBBean11().getPrepaidMovementById(mov.getId());
       if (movTmp != null) {
         if (movTmp.getConSwitch().equals(ReconciliationStatusType.RECONCILED)) {
           Assert.assertTrue("Conciliado OK", true);
@@ -119,7 +119,7 @@ public class Test_PendingConciliationMcRed10 extends TestBaseUnitAsync {
     int notReconcilidedCount = 0;
     int movementIndex = 0;
     for(PrepaidMovement10 mov : movimientos) {
-      PrepaidMovement10 movTmp = getPrepaidMovementEJBBean10().getPrepaidMovementById(mov.getId());
+      PrepaidMovement10 movTmp = getPrepaidMovementEJBBean11().getPrepaidMovementById(mov.getId());
       if (movTmp != null) {
         if (movTmp.getConSwitch().equals(ReconciliationStatusType.RECONCILED)) {
           Assert.fail("Nada debe estar conciliado");
@@ -153,7 +153,7 @@ public class Test_PendingConciliationMcRed10 extends TestBaseUnitAsync {
 
     int reconciledCount = 0;
     for (PrepaidMovement10 mov : movimientos) {
-      PrepaidMovement10 movTmp = getPrepaidMovementEJBBean10().getPrepaidMovementById(mov.getId());
+      PrepaidMovement10 movTmp = getPrepaidMovementEJBBean11().getPrepaidMovementById(mov.getId());
       if (movTmp != null) {
         if (movTmp.getConSwitch().equals(ReconciliationStatusType.RECONCILED)) {
           Assert.assertTrue("Conciliado OK", true);
@@ -170,7 +170,7 @@ public class Test_PendingConciliationMcRed10 extends TestBaseUnitAsync {
         // No existe el movimiento con es id, la conciliacion deberia haberlo insertado
         PrepaidMovement10 restoredMovement = null;
         for(int i = 0; i < 20; i++) {
-          restoredMovement = getPrepaidMovementEJBBean10().getPrepaidMovementByIdTxExterno(mov.getIdTxExterno(), mov.getTipoMovimiento(), mov.getIndnorcor());
+          restoredMovement = getPrepaidMovementEJBBean11().getPrepaidMovementByIdTxExterno(mov.getIdTxExterno(), mov.getTipoMovimiento(), mov.getIndnorcor());
           if(restoredMovement != null) {
             break;
           }
@@ -307,7 +307,7 @@ public class Test_PendingConciliationMcRed10 extends TestBaseUnitAsync {
     int reconciledCount = 0;
     int notReconcilidedCount = 0;
     for(PrepaidMovement10 mov : movimientos){
-      PrepaidMovement10 movTmp = getPrepaidMovementEJBBean10().getPrepaidMovementById(mov.getId());
+      PrepaidMovement10 movTmp = getPrepaidMovementEJBBean11().getPrepaidMovementById(mov.getId());
       if (movTmp != null) {
         if (movTmp.getConSwitch().equals(ReconciliationStatusType.RECONCILED)) {
           Assert.assertTrue("Conciliado OK", true);
