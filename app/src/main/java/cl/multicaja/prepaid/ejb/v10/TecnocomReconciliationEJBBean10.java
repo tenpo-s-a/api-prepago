@@ -42,6 +42,7 @@ import javax.ejb.*;
 import javax.inject.Inject;
 import java.io.InputStream;
 import java.math.BigDecimal;
+import java.math.RoundingMode;
 import java.sql.Date;
 import java.sql.*;
 import java.text.SimpleDateFormat;
