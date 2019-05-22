@@ -36,8 +36,12 @@ spec:
             value: ${DB_HOST_FQDN}
           - name: API_ENVIRONMENT
             value: ${API_ENVIRONMENT}
+          - name: TENPO_USER_API_URL
+            value: "http://${TENPO_USER_API_HOST}/v1/user-management"
+          - name: TECNOCOM_MOCK_IMPL
+            value: "true"
           - name: TECNOCOM_MOCK_DATA_PATH
-            value: /opt/payara5
+            value: "/opt/payara5"
       imagePullSecrets:
         - name: container-reg-credentials
 ---
