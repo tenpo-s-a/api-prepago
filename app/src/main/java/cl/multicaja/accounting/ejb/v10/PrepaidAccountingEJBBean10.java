@@ -486,16 +486,16 @@ public class PrepaidAccountingEJBBean10 extends PrepaidBaseEJBBean10 implements 
       type = AccountingTxType.COMPRA_MONEDA;
       movementType = AccountingMovementType.COMPRA_MONEDA;
       trxOriginType = TransactionOriginType.MASTERCARDINT;
-    } else if (TipoFactura.ANULA_COMPRA_INTERNACIONAL.equals(movement.getTipofac())) {
-      type = AccountingTxType.COMPRA_MONEDA;
-      movementType = AccountingMovementType.COMPRA_MONEDA;
+    } else if (TipoFactura.ANULA_COMPRA_INTERNACIONAL.equals(movement.getTipofac()) ||
+               TipoFactura.ANULA_SUSCRIPCION_INTERNACIONAL.equals(movement.getTipofac())) {
+      type = AccountingTxType.ANULACION;
+      movementType = AccountingMovementType.ABONO_ANULACION;
       trxOriginType = TransactionOriginType.MASTERCARDINT;
     } else if (TipoFactura.DEVOLUCION_COMPRA_INTERNACIONAL.equals(movement.getTipofac())) {
       type = AccountingTxType.DEVOLUCION;
-      movementType = AccountingMovementType.DEVOLUCION_COMPRA;
+      movementType = AccountingMovementType.ABONO_DEVOLUCION;
       trxOriginType = TransactionOriginType.MASTERCARDINT;
     }
-    //FIXME: Verificar todo lo que son devoluciones y anulaciones. ACTION: Validar si se puede con la información del servicio, generar esta verificación.
     AccountingData10 accounting = new AccountingData10();
     accounting.setIdTransaction(movement.getId());
     accounting.setOrigin(AccountingOriginType.MOVEMENT);

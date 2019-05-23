@@ -16,7 +16,8 @@ public enum AccountingMovementType {
   CARGA_POS("Abono por carga POS"),
   RETIRO_WEB("Cargo por retiro TEF"),
   RETIRO_POS("Cargo por retiro POS"),
-  DEVOLUCION_COMPRA("Devolucion de compra");
+  ABONO_ANULACION("Abono por anulacion"),
+  ABONO_DEVOLUCION("Devolucion de compra");
 
 
   AccountingMovementType(String value) {
