@@ -369,6 +369,11 @@ public class PrepaidEJBBean10 extends PrepaidBaseEJBBean10 implements PrepaidEJB
     prepaidTopup.setUserId(user.getId());
     prepaidTopup.setStatus("exitoso");
 
+    //TODO: Se debe corregir cuando se deje de utilizar el campo RUT
+    if(prepaidTopup.getRut() == null) {
+      prepaidTopup.setRut(user.getRut());
+    }
+
     /*
       Calcular monto a cargar y comisiones
     */
@@ -819,6 +824,11 @@ public class PrepaidEJBBean10 extends PrepaidBaseEJBBean10 implements PrepaidEJB
     PrepaidWithdraw10 prepaidWithdraw = new PrepaidWithdraw10(withdrawRequest);
     prepaidWithdraw.setUserId(prepaidUser.getId());
     prepaidWithdraw.setStatus("exitoso");
+
+    //TODO: Se debe corregir cuando se deje de utilizar el campo RUT
+    if(prepaidWithdraw.getRut() == null) {
+      prepaidWithdraw.setRut(prepaidUser.getRut());
+    }
 
     /*
       Calcular monto a cargar y comisiones
