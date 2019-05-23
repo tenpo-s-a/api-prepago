@@ -56,6 +56,7 @@ public class Test_TecnocomReconciliationEJBBean10_insertaMovimientos extends Tes
     Assert.assertEquals("Deben ser iguales getNumAut",movTec.getNumAut(),movTec2.get(0).getNumAut());
     Assert.assertEquals("Deben ser iguales getImpFac",movTec.getImpFac().getValue().longValue(),movTec2.get(0).getImpFac().getValue().longValue());
     Assert.assertEquals("Deben ser iguales getFecFac",movTec.getFecFac(),movTec2.get(0).getFecFac());
+    Assert.assertEquals("Deben ser iguales getNomComRed",movTec.getNomcomred(),movTec2.get(0).getNomcomred());
   }
 
   @Test (expected = BadRequestException.class)
