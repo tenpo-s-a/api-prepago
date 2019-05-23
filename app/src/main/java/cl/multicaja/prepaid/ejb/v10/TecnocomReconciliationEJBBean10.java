@@ -42,13 +42,9 @@ import javax.ejb.*;
 import javax.inject.Inject;
 import java.io.InputStream;
 import java.math.BigDecimal;
-<<<<<<< HEAD
 import java.math.RoundingMode;
 import java.sql.*;
-=======
->>>>>>> master
 import java.sql.Date;
-import java.sql.*;
 import java.text.SimpleDateFormat;
 import java.time.*;
 import java.time.format.DateTimeFormatter;
