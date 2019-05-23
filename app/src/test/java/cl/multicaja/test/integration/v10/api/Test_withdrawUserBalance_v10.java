@@ -82,9 +82,6 @@ public class Test_withdrawUserBalance_v10 extends TestBaseUnitApi {
     Assert.assertNotNull("Deberia ser un PrepaidWithdraw10",withdraw);
     Assert.assertNotNull("Deberia tener timestamps", withdraw.getTimestamps());
     Assert.assertNotNull("Deberia tener id", withdraw.getId());
-    Assert.assertNotNull("Deberia tener userId", withdraw.getUserId());
-    Assert.assertFalse("Deberia tener status", StringUtils.isBlank(withdraw.getStatus()));
-    Assert.assertEquals("Deberia tener status = exitoso", "exitoso", withdraw.getStatus());
     Assert.assertNull("No deberia tener rut", withdraw.getRut());
     Assert.assertNull("No deberia tener password", withdraw.getPassword());
 
@@ -101,6 +98,14 @@ public class Test_withdrawUserBalance_v10 extends TestBaseUnitApi {
     Assert.assertEquals("Deberia tener el atributo name = amount_paid","amount_paid", variableData.get("name"));
     Assert.assertTrue("Deberia tener el atributo value", variableData.containsKey("value"));
     Assert.assertNotNull("Deberia tener el atributo value", variableData.get("value"));
+
+    Map<String, String> rutData = withdraw.getMcVoucherData().get(1);
+    Assert.assertNotNull("Deberia tener rutData", rutData);
+    Assert.assertTrue("Deberia tener el atributo name", rutData.containsKey("name"));
+    Assert.assertFalse("Deberia tener el atributo", StringUtils.isAllBlank(rutData.get("name")));
+    Assert.assertEquals("Deberia tener el atributo name = rut","rut", rutData.get("name"));
+    Assert.assertTrue("Deberia tener el atributo value", rutData.containsKey("value"));
+    Assert.assertNotNull("Deberia tener el atributo value", rutData.get("value"));
 
     PrepaidMovement10 dbPrepaidMovement = getPrepaidMovementEJBBean10().getLastPrepaidMovementByIdPrepaidUserAndOneStatus(prepaidUser.getId(), PrepaidMovementStatus.PROCESS_OK);
     Assert.assertNotNull("Deberia tener un movimiento", dbPrepaidMovement);
@@ -139,9 +144,6 @@ public class Test_withdrawUserBalance_v10 extends TestBaseUnitApi {
     Assert.assertNotNull("Deberia ser un PrepaidWithdraw10",withdraw);
     Assert.assertNotNull("Deberia tener timestamps", withdraw.getTimestamps());
     Assert.assertNotNull("Deberia tener id", withdraw.getId());
-    Assert.assertNotNull("Deberia tener userId", withdraw.getUserId());
-    Assert.assertFalse("Deberia tener status", StringUtils.isBlank(withdraw.getStatus()));
-    Assert.assertEquals("Deberia tener status = exitoso", "exitoso", withdraw.getStatus());
     Assert.assertNull("No deberia tener rut", withdraw.getRut());
     Assert.assertNull("No deberia tener password", withdraw.getPassword());
 
@@ -198,9 +200,6 @@ public class Test_withdrawUserBalance_v10 extends TestBaseUnitApi {
     Assert.assertNotNull("Deberia ser un PrepaidWithdraw10",withdraw);
     Assert.assertNotNull("Deberia tener timestamps", withdraw.getTimestamps());
     Assert.assertNotNull("Deberia tener id", withdraw.getId());
-    Assert.assertNotNull("Deberia tener userId", withdraw.getUserId());
-    Assert.assertFalse("Deberia tener status", StringUtils.isBlank(withdraw.getStatus()));
-    Assert.assertEquals("Deberia tener status = exitoso", "exitoso", withdraw.getStatus());
     Assert.assertNull("No deberia tener rut", withdraw.getRut());
     Assert.assertNull("No deberia tener password", withdraw.getPassword());
 
@@ -217,6 +216,15 @@ public class Test_withdrawUserBalance_v10 extends TestBaseUnitApi {
     Assert.assertEquals("Deberia tener el atributo name = amount_paid","amount_paid", variableData.get("name"));
     Assert.assertTrue("Deberia tener el atributo value", variableData.containsKey("value"));
     Assert.assertNotNull("Deberia tener el atributo value", variableData.get("value"));
+
+    Map<String, String> rutData = withdraw.getMcVoucherData().get(1);
+    Assert.assertNotNull("Deberia tener rutData", rutData);
+
+    Assert.assertTrue("Deberia tener el atributo name", rutData.containsKey("name"));
+    Assert.assertNotNull("Deberia tener el atributo", rutData.get("name"));
+    Assert.assertEquals("Deberia tener el atributo name = rut","rut", rutData.get("name"));
+    Assert.assertTrue("Deberia tener el atributo value", rutData.containsKey("value"));
+    Assert.assertNotNull("Deberia tener el atributo value", rutData.get("value"));
 
     PrepaidMovement10 dbPrepaidMovement = getPrepaidMovementEJBBean10().getLastPrepaidMovementByIdPrepaidUserAndOneStatus(prepaidUser.getId(), PrepaidMovementStatus.PROCESS_OK);
     Assert.assertNotNull("Deberia tener un movimiento", dbPrepaidMovement);
@@ -255,9 +263,6 @@ public class Test_withdrawUserBalance_v10 extends TestBaseUnitApi {
     Assert.assertNotNull("Deberia ser un PrepaidWithdraw10",withdraw);
     Assert.assertNotNull("Deberia tener timestamps", withdraw.getTimestamps());
     Assert.assertNotNull("Deberia tener id", withdraw.getId());
-    Assert.assertNotNull("Deberia tener userId", withdraw.getUserId());
-    Assert.assertFalse("Deberia tener status", StringUtils.isBlank(withdraw.getStatus()));
-    Assert.assertEquals("Deberia tener status = exitoso", "exitoso", withdraw.getStatus());
     Assert.assertNull("No deberia tener rut", withdraw.getRut());
     Assert.assertNull("No deberia tener password", withdraw.getPassword());
 
@@ -274,6 +279,15 @@ public class Test_withdrawUserBalance_v10 extends TestBaseUnitApi {
     Assert.assertEquals("Deberia tener el atributo name = amount_paid","amount_paid", variableData.get("name"));
     Assert.assertTrue("Deberia tener el atributo value", variableData.containsKey("value"));
     Assert.assertNotNull("Deberia tener el atributo value", variableData.get("value"));
+
+    Map<String, String> rutData = withdraw.getMcVoucherData().get(1);
+    Assert.assertNotNull("Deberia tener rutData", rutData);
+
+    Assert.assertTrue("Deberia tener el atributo name", rutData.containsKey("name"));
+    Assert.assertNotNull("Deberia tener el atributo", rutData.get("name"));
+    Assert.assertEquals("Deberia tener el atributo name = rut","rut", rutData.get("name"));
+    Assert.assertTrue("Deberia tener el atributo value", rutData.containsKey("value"));
+    Assert.assertNotNull("Deberia tener el atributo value", rutData.get("value"));
 
     PrepaidMovement10 dbPrepaidMovement = getPrepaidMovementEJBBean10().getLastPrepaidMovementByIdPrepaidUserAndOneStatus(prepaidUser.getId(), PrepaidMovementStatus.PROCESS_OK);
     Assert.assertNotNull("Deberia tener un movimiento", dbPrepaidMovement);
@@ -812,9 +826,6 @@ public class Test_withdrawUserBalance_v10 extends TestBaseUnitApi {
       Assert.assertNotNull("Deberia ser un PrepaidWithdraw10",withdraw);
       Assert.assertNotNull("Deberia tener timestamps", withdraw.getTimestamps());
       Assert.assertNotNull("Deberia tener id", withdraw.getId());
-      Assert.assertNotNull("Deberia tener userId", withdraw.getUserId());
-      Assert.assertFalse("Deberia tener status", StringUtils.isBlank(withdraw.getStatus()));
-      Assert.assertEquals("Deberia tener status = exitoso", "exitoso", withdraw.getStatus());
 
       // Segunda vez
       HttpResponse resp1 = withdrawUserBalance(prepaidUser.getUuid(), prepaidWithdraw);
@@ -851,9 +862,6 @@ public class Test_withdrawUserBalance_v10 extends TestBaseUnitApi {
       Assert.assertNotNull("Deberia ser un PrepaidWithdraw10",withdraw);
       Assert.assertNotNull("Deberia tener timestamps", withdraw.getTimestamps());
       Assert.assertNotNull("Deberia tener id", withdraw.getId());
-      Assert.assertNotNull("Deberia tener userId", withdraw.getUserId());
-      Assert.assertFalse("Deberia tener status", StringUtils.isBlank(withdraw.getStatus()));
-      Assert.assertEquals("Deberia tener status = exitoso", "exitoso", withdraw.getStatus());
       Assert.assertNull("No deberia tener rut", withdraw.getRut());
       Assert.assertNull("No deberia tener password", withdraw.getPassword());
 
@@ -902,9 +910,6 @@ public class Test_withdrawUserBalance_v10 extends TestBaseUnitApi {
     Assert.assertNotNull("Deberia ser un PrepaidWithdraw10",withdraw);
     Assert.assertNotNull("Deberia tener timestamps", withdraw.getTimestamps());
     Assert.assertNotNull("Deberia tener id", withdraw.getId());
-    Assert.assertNotNull("Deberia tener userId", withdraw.getUserId());
-    Assert.assertFalse("Deberia tener status", StringUtils.isBlank(withdraw.getStatus()));
-    Assert.assertEquals("Deberia tener status = exitoso", "exitoso", withdraw.getStatus());
     Assert.assertNull("No deberia tener rut", withdraw.getRut());
     Assert.assertNull("No deberia tener password", withdraw.getPassword());
 
@@ -973,9 +978,6 @@ public class Test_withdrawUserBalance_v10 extends TestBaseUnitApi {
     Assert.assertNotNull("Deberia ser un PrepaidWithdraw10",withdraw);
     Assert.assertNotNull("Deberia tener timestamps", withdraw.getTimestamps());
     Assert.assertNotNull("Deberia tener id", withdraw.getId());
-    Assert.assertNotNull("Deberia tener userId", withdraw.getUserId());
-    Assert.assertFalse("Deberia tener status", StringUtils.isBlank(withdraw.getStatus()));
-    Assert.assertEquals("Deberia tener status = exitoso", "exitoso", withdraw.getStatus());
     Assert.assertNull("No deberia tener rut", withdraw.getRut());
     Assert.assertNull("No deberia tener password", withdraw.getPassword());
 
@@ -1038,9 +1040,6 @@ public class Test_withdrawUserBalance_v10 extends TestBaseUnitApi {
     Assert.assertNotNull("Deberia ser un PrepaidWithdraw10",withdraw);
     Assert.assertNotNull("Deberia tener timestamps", withdraw.getTimestamps());
     Assert.assertNotNull("Deberia tener id", withdraw.getId());
-    Assert.assertNotNull("Deberia tener userId", withdraw.getUserId());
-    Assert.assertFalse("Deberia tener status", StringUtils.isBlank(withdraw.getStatus()));
-    Assert.assertEquals("Deberia tener status = exitoso", "exitoso", withdraw.getStatus());
     Assert.assertNull("No deberia tener rut", withdraw.getRut());
     Assert.assertNull("No deberia tener password", withdraw.getPassword());
 

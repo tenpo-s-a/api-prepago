@@ -288,9 +288,19 @@ public class Test_AutoReconciliation_FullTest extends TestBaseUnitAsync {
 
   @Test
   public void processTecnocomTableData_whenMovNotInDBAndFileStateIsOP_movIsInsertedAndLiqAccMustExistInInitialState() throws Exception {
+    // Inserta el movimiento que vino en el archivo OP
     MovimientoTecnocom10 movimientoTecnocom10 = createMovimientoTecnocom(tecnocomReconciliationFile10.getId());
     movimientoTecnocom10.setTipoReg(TecnocomReconciliationRegisterType.OP);
     movimientoTecnocom10 = getTecnocomReconciliationEJBBean10().insertaMovimientoTecnocom(movimientoTecnocom10);
+
+    // Inserta el movimiento que vino en el archivo IPM (para hacer un match, y reescribir su valor)
+    IpmMovement10 ipmMovement10 = buildIpmMovement10();
+    ipmMovement10.setReconciled(false);
+    ipmMovement10.setCardholderBillingAmount(movimientoTecnocom10.getImpFac().getValue().multiply(new BigDecimal(1.005))); // Alterar levemente el valor para que se reescriba
+    ipmMovement10.setPan(prepaidCard.getPan());
+    ipmMovement10.setMerchantCode(movimientoTecnocom10.getCodCom());
+    ipmMovement10.setApprovalCode(movimientoTecnocom10.getNumAut());
+    ipmMovement10 = createIpmMovement(ipmMovement10);
 
     // Prepara un mock del servicio de fees, para que retornes las fees esperadas
     prepareCalculateFeesMock(movimientoTecnocom10.getImpFac().getValue());
@@ -300,7 +310,6 @@ public class Test_AutoReconciliation_FullTest extends TestBaseUnitAsync {
     // Verificar que exista en la BD en estado OP
     PrepaidMovement10 prepaidMovement10 = getPrepaidMovement(movimientoTecnocom10.getMovementType(), movimientoTecnocom10.getTipoFac(), movimientoTecnocom10.getNumAut(), prepaidCard.getPan(), movimientoTecnocom10.getCodCom());
     Assert.assertNotNull("Debe exitir el nuevo movimiento en la BD", prepaidMovement10);
-
     Assert.assertEquals("Debe tener estado OK", PrepaidMovementStatus.PROCESS_OK, prepaidMovement10.getEstado());
 
     // Verificar que exista en la tablas de contabilidad (acc y liq) en sus estados (PENDING y OK + fecha de conciliacion tiene que ser "ahora")
@@ -312,6 +321,13 @@ public class Test_AutoReconciliation_FullTest extends TestBaseUnitAsync {
     ClearingData10 liq = getPrepaidClearingEJBBean10().searchClearingDataByAccountingId(null, acc.getId());
     Assert.assertNotNull("Debe existir en clearing", liq);
     Assert.assertEquals("Debe tener estado PENDING", AccountingStatusType.PENDING, liq.getStatus());
+
+    // El movimiento ha pasado a OP, verificar que su valor de contabilidad mastercard ha sido actualizado con el del IPM
+    Assert.assertEquals("Deben tener mismo valor", ipmMovement10.getCardholderBillingAmount().setScale(2, RoundingMode.HALF_UP), acc.getAmountMastercard().getValue().setScale(2, RoundingMode.HALF_UP));
+
+    // El movimiento en IPM debe pasar a conciliado
+    IpmMovement10 foundIpmMovement = getIpmMovementById(ipmMovement10.getId());
+    Assert.assertTrue("Debe estar en estado reconciled", foundIpmMovement.getReconciled());
 
     // Verificar que exista en la cola de eventos transaction_authorized
     Queue qResp = camelFactory.createJMSQueue(KafkaEventsRoute10.TRANSACTION_AUTHORIZED_TOPIC);
@@ -387,11 +403,20 @@ public class Test_AutoReconciliation_FullTest extends TestBaseUnitAsync {
   public void processTecnocomTableData_whenMovInDBIsNotifiedAndFileIsOP_movIsInsertedAndLiqAccIsInsertedMustPendingOKState() throws Exception {
     PrepaidTopup10 topup = buildPrepaidTopup10();
 
+    // Inserta el movimiento que vino en el archivo OP
     MovimientoTecnocom10 movimientoTecnocom10 = createMovimientoTecnocom(tecnocomReconciliationFile10.getId());
     movimientoTecnocom10.setTipoReg(TecnocomReconciliationRegisterType.OP);
     movimientoTecnocom10.setTipoFac(TipoFactura.SUSCRIPCION_INTERNACIONAL);
     movimientoTecnocom10.setIndNorCor(movimientoTecnocom10.getTipoFac().getCorrector());
     movimientoTecnocom10 = getTecnocomReconciliationEJBBean10().insertaMovimientoTecnocom(movimientoTecnocom10);
+
+    // Inserta el movimiento que vino en el archivo IPM (para hacer un match, y reescribir su valor)
+    IpmMovement10 ipmMovement10 = buildIpmMovement10();
+    ipmMovement10.setCardholderBillingAmount(movimientoTecnocom10.getImpFac().getValue().multiply(new BigDecimal(1.005))); // Alterar levemente el valor para que se reescriba
+    ipmMovement10.setPan(prepaidCard.getPan());
+    ipmMovement10.setMerchantCode(movimientoTecnocom10.getCodCom());
+    ipmMovement10.setApprovalCode(movimientoTecnocom10.getNumAut());
+    ipmMovement10 = createIpmMovement(ipmMovement10);
 
     // Se inserta un movimiento en estado NOTIFIED
     PrepaidMovement10 insertedMovement = buildPrepaidMovementV2(prepaidUser, topup, prepaidCard, null, PrepaidMovementType.TOPUP);
@@ -402,6 +427,7 @@ public class Test_AutoReconciliation_FullTest extends TestBaseUnitAsync {
     insertedMovement.setNumaut(movimientoTecnocom10.getNumAut());
     insertedMovement.setCodcom(movimientoTecnocom10.getCodCom());
     insertedMovement.setCuenta(movimientoTecnocom10.getCuenta());
+    insertedMovement.setNomcomred("PruebaComercioNombre");
     insertedMovement = createPrepaidMovement11(insertedMovement);
 
     getTecnocomReconciliationEJBBean10().processTecnocomTableData(tecnocomReconciliationFile10.getId());
@@ -421,17 +447,33 @@ public class Test_AutoReconciliation_FullTest extends TestBaseUnitAsync {
     ClearingData10 liq = getPrepaidClearingEJBBean10().searchClearingDataByAccountingId(null, acc.getId());
     Assert.assertNotNull("Debe existir en clearing", liq);
     Assert.assertEquals("Debe tener estado PENDING", AccountingStatusType.PENDING, liq.getStatus());
+
+    // El movimiento ha pasado a OP, verificar que su valor de contabilidad mastercard ha sido actualizado con el del IPM
+    Assert.assertEquals("Deben tener mismo valor", ipmMovement10.getCardholderBillingAmount().setScale(2, RoundingMode.HALF_UP), acc.getAmountMastercard().getValue().setScale(2, RoundingMode.HALF_UP));
+
+    // El movimiento en IPM debe pasar a conciliado
+    IpmMovement10 foundIpmMovement = getIpmMovementById(ipmMovement10.getId());
+    Assert.assertTrue("Debe estar en estado reconciled", foundIpmMovement.getReconciled());
   }
 
   @Test
   public void processTecnocomTableData_whenMovInDBIsAuthorizedAndFileIsOP_movIsUpdatedAndLiqAccIsInsertedMustPendingOKState() throws Exception {
     PrepaidTopup10 topup = buildPrepaidTopup10();
 
+    // Inserta el movimiento que vino en el archivo OP
     MovimientoTecnocom10 movimientoTecnocom10 = createMovimientoTecnocom(tecnocomReconciliationFile10.getId());
     movimientoTecnocom10.setTipoReg(TecnocomReconciliationRegisterType.OP);
     movimientoTecnocom10.setTipoFac(TipoFactura.SUSCRIPCION_INTERNACIONAL);
     movimientoTecnocom10.setIndNorCor(movimientoTecnocom10.getTipoFac().getCorrector());
     movimientoTecnocom10 = getTecnocomReconciliationEJBBean10().insertaMovimientoTecnocom(movimientoTecnocom10);
+
+    // Inserta el movimiento que vino en el archivo IPM (para hacer un match, y reescribir su valor)
+    IpmMovement10 ipmMovement10 = buildIpmMovement10();
+    ipmMovement10.setCardholderBillingAmount(movimientoTecnocom10.getImpFac().getValue().multiply(new BigDecimal(0.995))); // Alterar levemente el valor para que se reescriba
+    ipmMovement10.setPan(prepaidCard.getPan());
+    ipmMovement10.setMerchantCode(movimientoTecnocom10.getCodCom());
+    ipmMovement10.setApprovalCode(movimientoTecnocom10.getNumAut());
+    ipmMovement10 = createIpmMovement(ipmMovement10);
 
     // Se inserta un movimiento en estado AUTHORIZED
     PrepaidMovement10 insertedMovement = buildPrepaidMovementV2(prepaidUser, topup, prepaidCard, null, PrepaidMovementType.TOPUP);
@@ -472,6 +514,13 @@ public class Test_AutoReconciliation_FullTest extends TestBaseUnitAsync {
     ClearingData10 liq = getPrepaidClearingEJBBean10().searchClearingDataByAccountingId(null, acc.getId());
     Assert.assertNotNull("Debe existir en clearing", liq);
     Assert.assertEquals("Debe tener estado PENDING", AccountingStatusType.PENDING, liq.getStatus());
+
+    // El movimiento ha pasado a OP, verificar que su valor de contabilidad mastercard ha sido actualizado con el del IPM
+    Assert.assertEquals("Deben tener mismo valor", ipmMovement10.getCardholderBillingAmount().setScale(2, RoundingMode.HALF_UP), acc.getAmountMastercard().getValue().setScale(2, RoundingMode.HALF_UP));
+
+    // El movimiento en IPM debe pasar a conciliado
+    IpmMovement10 foundIpmMovement = getIpmMovementById(ipmMovement10.getId());
+    Assert.assertTrue("Debe estar en estado reconciled", foundIpmMovement.getReconciled());
   }
 
   private void prepareCalculateFeesMock(BigDecimal amount) throws TimeoutException, BaseException {
@@ -559,6 +608,7 @@ public class Test_AutoReconciliation_FullTest extends TestBaseUnitAsync {
     registroTecnocom.setOriginOpe(OriginOpeType.AUT_ORIGIN.getValue());
     registroTecnocom.setTipoLin(getRandomString(4));
     registroTecnocom.setTipoReg(TecnocomReconciliationRegisterType.OP);
+    registroTecnocom.setNomcomred("PruebaNombre");
     return registroTecnocom;
   }
 

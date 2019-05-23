@@ -42,8 +42,9 @@ import javax.ejb.*;
 import javax.inject.Inject;
 import java.io.InputStream;
 import java.math.BigDecimal;
-import java.sql.Date;
+import java.math.RoundingMode;
 import java.sql.*;
+import java.sql.Date;
 import java.text.SimpleDateFormat;
 import java.time.*;
 import java.time.format.DateTimeFormatter;
@@ -69,8 +70,8 @@ public class TecnocomReconciliationEJBBean10 extends PrepaidBaseEJBBean10 implem
   private static final String INSERT_MOVEMENT_SQL = "INSERT INTO %s.%s (" +
   "idArchivo, cuenta, pan, codent, centalta, clamon, indnorcor, tipofac, fecfac, numreffac, clamondiv, impdiv, " +
   "impfac, cmbapli, numaut, indproaje, codcom, codact, impliq, clamonliq, codpais, nompob, numextcta, nummovext, " +
-  "clamone, tipolin, linref, fectrn, impautcon, originope, fecha_creacion, fecha_actualizacion, contrato, tiporeg" +
-  ") VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?);";
+  "clamone, tipolin, linref, fectrn, impautcon, originope, fecha_creacion, fecha_actualizacion, contrato, tiporeg, nomcomred" +
+  ") VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?);";
 
   @EJB
   private PrepaidCardEJBBean11 prepaidCardEJBBean11;
@@ -95,6 +96,9 @@ public class TecnocomReconciliationEJBBean10 extends PrepaidBaseEJBBean10 implem
 
   @EJB
   private AccountEJBBean10 accountEJBBean10;
+
+  @EJB
+  private IpmEJBBean10 ipmEJBBean10;
 
   @Inject
   private PrepaidInvoiceDelegate10 prepaidInvoiceDelegate10;
@@ -167,6 +171,10 @@ public class TecnocomReconciliationEJBBean10 extends PrepaidBaseEJBBean10 implem
   public void setAccountEJBBean10(AccountEJBBean10 accountEJBBean10) {
     this.accountEJBBean10 = accountEJBBean10;
   }
+
+  public IpmEJBBean10 getIpmEJBBean10() { return ipmEJBBean10; }
+
+  public void setIpmEJBBean10(IpmEJBBean10 ipmEJBBean10) { this.ipmEJBBean10 = ipmEJBBean10; }
 
   public void setFeeService(FeeService feeService) { this.feeService = feeService; }
 
@@ -308,6 +316,7 @@ public class TecnocomReconciliationEJBBean10 extends PrepaidBaseEJBBean10 implem
     movimientoTecnocom10.setNumMovExt(0L);
     movimientoTecnocom10.setClamone(CodigoMoneda.CHILE_CLP);
     movimientoTecnocom10.setCodCom("Cualquiera");
+    movimientoTecnocom10.setNomcomred("Cualquiera");
 
     return movimientoTecnocom10;
   }
@@ -493,7 +502,7 @@ public class TecnocomReconciliationEJBBean10 extends PrepaidBaseEJBBean10 implem
     for (MovimientoTecnocom10 trx : trxs) {
       try {
 
-        //Se obtiene el pan
+        //Se obtiene el hashed pan
         String hashedPan = trx.getPan();
         System.out.println(String.format("[%s]  [%s]", hashedPan, trx.getContrato()));
 
@@ -579,19 +588,24 @@ public class TecnocomReconciliationEJBBean10 extends PrepaidBaseEJBBean10 implem
           prepaidInvoiceDelegate10.sendInvoice(prepaidInvoiceDelegate10.buildInvoiceData(prepaidMovement10,null));
         }
 
-        // Todo: Logica de la actualizacion del valor IPM
-        // Liquidacion IPM - Actualiza el valor de monto mastercard en la tabla de contabilidad
-        // Si el movimiento viene en estado OP (conciliado), se actualiza su valor de acuerdo al IPM
+        // Si el movimiento viene en estado OP (conciliado), se actualiza su valor de acuerdo al archivo IPM
         if (TecnocomReconciliationRegisterType.OP.equals(trx.getTipoReg())) {
-          // Se buscan los registros que coincidan en la tabla IPM
-          // Mismo PAN, mismo codcom, mismo, mismo num aut, monto 2.5% aproximado y que no hayan sido ya conciliados
-          // Si hay mas de uno, se elige el mas cercano
+          // Se busca el registro "mas parecido" en la tabla IPM
+          IpmMovement10 ipmMovement10 = ipmEJBBean10.findByReconciliationSimilarity(prepaidCard10.getPan(), trx.getCodCom(), trx.getImpFac().getValue(), trx.getNumAut());
+          if (ipmMovement10 != null) {
+            // Actualizar el valor de mastercard en la tablas de liquidacion
+            AccountingData10 accountingData10 = getPrepaidAccountingEJBBean10().searchAccountingByIdTrx(null, prepaidMovement10.getId());
+            accountingData10.getAmountMastercard().setValue(ipmMovement10.getCardholderBillingAmount());
+            getPrepaidAccountingEJBBean10().updateAccountingDataFull(null, accountingData10);
 
-          // Actualizar el valor en la tablas de liquidacion
-
-          // Marcar movimiento tomado en la tabla IPM como conciliado
+            // Marcar movimiento tomado en la tabla IPM como conciliado
+            getIpmEJBBean10().updateIpmMovementReconciledStatus(ipmMovement10.getId(), true);
+          } else {
+            String msg = String.format("Error while searching for similar to IPM movement similar to movement [id:%s][truncatedPan: %s][codcom:%s][impFac:%s][numaut:%s], not found", prepaidMovement10.getId(), prepaidCard10.getPan(), trx.getCodCom(), trx.getImpFac().getValue().setScale(2, RoundingMode.HALF_UP).toString(), trx.getNumAut());
+            log.error(msg);
+            throw new ValidationException(ERROR_DATA_NOT_FOUND.getValue(), msg);
+          }
         }
-
       } catch (Exception ex) {
         ex.printStackTrace();
         log.error(String.format("Error processing transaction [%s]", trx.getNumAut()));
@@ -599,16 +613,22 @@ public class TecnocomReconciliationEJBBean10 extends PrepaidBaseEJBBean10 implem
           trx.setErrorDetails(ex.getMessage());
         }
         processErrorTrx(fileId, trx);
-        throw ex; // Todo: borrar este throw, solo para tests
       }
     }
     log.info("INSERT AUT OUT");
   }
 
   private void insertMovementFees(PrepaidMovement10 prepaidMovement10) throws Exception {
-    // Pide la lista de comisiones al servicio
-    Fee fees = getFeeService().calculateFees(prepaidMovement10.getTipoMovimiento(), prepaidMovement10.getClamon(), prepaidMovement10.getImpfac().longValue());
-    List<Charge> feeCharges = fees.getCharges();
+    List<Charge> feeCharges;
+    try {
+      // Pide la lista de comisiones al servicio
+      Fee fees = getFeeService().calculateFees(prepaidMovement10.getTipoMovimiento(), prepaidMovement10.getClamon(), prepaidMovement10.getImpfac().longValue());
+      feeCharges = fees.getCharges();
+    } catch (Exception e) {
+      e.printStackTrace();
+      log.error(String.format("Error consuming fee service for movement [TipoMovimiento:%s][Clamon:%s][ImpFac:%s]", prepaidMovement10.getTipoMovimiento(), prepaidMovement10.getClamon(), prepaidMovement10.getImpfac().longValue()));
+      return;
+    }
 
     if (feeCharges != null) {
       // Por cada comision, almacenarla en la BD
@@ -718,7 +738,7 @@ public class TecnocomReconciliationEJBBean10 extends PrepaidBaseEJBBean10 implem
     prepaidMovement.setConTecnocom(ReconciliationStatusType.PENDING);
     // Switch Conciliado ya que no pasa por switch
     prepaidMovement.setConSwitch(ReconciliationStatusType.RECONCILED);
-    prepaidMovement.setNomcomred(""); //FIXME: MovimientoTecnocom debe traer el merchant name. Si lo debe traer. Se agrego el campo en la tabla prp_movimiento_tecnocom
+    prepaidMovement.setNomcomred(batchTrx.getNomcomred()); //FIXME: MovimientoTecnocom debe traer el merchant name. Si lo debe traer. Se agrego el campo en la tabla prp_movimiento_tecnocom
     prepaidMovement.setCardId(cardId);
 
     return prepaidMovement;
@@ -841,9 +861,10 @@ public class TecnocomReconciliationEJBBean10 extends PrepaidBaseEJBBean10 implem
     sqlQuery.append(" fecha_creacion, ");
     sqlQuery.append(" fecha_actualizacion, ");
     sqlQuery.append(" contrato, ");
-    sqlQuery.append(" tiporeg ");
+    sqlQuery.append(" tiporeg, ");
+    sqlQuery.append(" nomcomred ");
     sqlQuery.append(  String.format(" FROM %s.%s ", getSchema(), tableName));
-    sqlQuery.append("WHERE ");
+    sqlQuery.append(" WHERE ");
     sqlQuery.append(  fileId != null ?        String.format("idArchivo = %d   AND ", fileId) : "");
     sqlQuery.append(  originOpeType != null ? String.format("originope = '%s' AND ", originOpeType.getValue()) : "");
     sqlQuery.append(  encryptedPan != null ?  String.format("pan = '%s'       AND ", encryptedPan) : "");
@@ -921,6 +942,7 @@ public class TecnocomReconciliationEJBBean10 extends PrepaidBaseEJBBean10 implem
       movimientoTecnocom10.setOriginOpe(rs.getString("originope"));
       movimientoTecnocom10.setContrato(rs.getString("contrato"));
       movimientoTecnocom10.setTipoReg(TecnocomReconciliationRegisterType.valueOfEnum(rs.getString("tiporeg")));
+      movimientoTecnocom10.setNomcomred(rs.getString("nomcomred"));
       return movimientoTecnocom10;
     };
   }
@@ -1030,6 +1052,7 @@ public class TecnocomReconciliationEJBBean10 extends PrepaidBaseEJBBean10 implem
       ps.setTimestamp(32, Timestamp.valueOf(LocalDateTime.now(ZoneId.of("UTC"))));
       ps.setString(33, movTc.getContrato());
       ps.setString(34, movTc.getTipoReg() != null ? movTc.getTipoReg().getValue() : "");
+      ps.setString(35, movTc.getNomcomred() != null ? movTc.getNomcomred() : "");
       return ps;
     });
   }

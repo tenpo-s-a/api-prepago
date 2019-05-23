@@ -51,9 +51,6 @@ public class Test_topupUserBalance_v11 extends TestBaseUnitApi {
     Assert.assertNotNull("Deberia ser un PrepaidTopup10",topup);
     Assert.assertNotNull("Deberia tener timestamps", topup.getTimestamps());
     Assert.assertNotNull("Deberia tener id", topup.getId());
-    Assert.assertNotNull("Deberia tener userId", topup.getUserId());
-    Assert.assertFalse("Deberia tener status", StringUtils.isBlank(topup.getStatus()));
-    Assert.assertEquals("Deberia tener status = exitoso", "exitoso", topup.getStatus());
     Assert.assertNull("No deberia tener rut", topup.getRut());
 
     Assert.assertNotNull("Deberia tener el tipo de voucher", topup.getMcVoucherType());
@@ -77,7 +74,7 @@ public class Test_topupUserBalance_v11 extends TestBaseUnitApi {
     Assert.assertNotNull("Deberia tener el atributo", rutData.get("name"));
     Assert.assertEquals("Deberia tener el atributo name = rut","rut", rutData.get("name"));
     Assert.assertTrue("Deberia tener el atributo value", rutData.containsKey("value"));
-    //Assert.assertNotNull("Deberia tener el atributo value", rutData.get("value"));
+    Assert.assertNotNull("Deberia tener el atributo value", rutData.get("value"));
     //Assert.assertEquals("Deberia tener el atributo value", RutUtils.getInstance().format(prepaidTopup.getRut(), null), rutData.get("value"));
   }
 
@@ -100,9 +97,6 @@ public class Test_topupUserBalance_v11 extends TestBaseUnitApi {
     Assert.assertNotNull("Deberia ser un PrepaidTopup10",topup);
     Assert.assertNotNull("Deberia tener timestamps", topup.getTimestamps());
     Assert.assertNotNull("Deberia tener id", topup.getId());
-    Assert.assertNotNull("Deberia tener userId", topup.getUserId());
-    Assert.assertFalse("Deberia tener status", StringUtils.isBlank(topup.getStatus()));
-    Assert.assertEquals("Deberia tener status = exitoso", "exitoso", topup.getStatus());
     Assert.assertNull("No deberia tener rut", topup.getRut());
 
     Assert.assertNotNull("Deberia tener el tipo de voucher", topup.getMcVoucherType());
@@ -126,7 +120,7 @@ public class Test_topupUserBalance_v11 extends TestBaseUnitApi {
     Assert.assertNotNull("Deberia tener el atributo", rutData.get("name"));
     Assert.assertEquals("Deberia tener el atributo name = rut","rut", rutData.get("name"));
     Assert.assertTrue("Deberia tener el atributo value", rutData.containsKey("value"));
-    //Assert.assertNotNull("Deberia tener el atributo value", rutData.get("value"));
+    Assert.assertNotNull("Deberia tener el atributo value", rutData.get("value"));
     //Assert.assertEquals("Deberia tener el atributo value", RutUtils.getInstance().format(prepaidTopup.getRut(), null), rutData.get("value"));
   }
 
@@ -150,9 +144,6 @@ public class Test_topupUserBalance_v11 extends TestBaseUnitApi {
     Assert.assertNotNull("Deberia ser un PrepaidTopup10",topup);
     Assert.assertNotNull("Deberia tener timestamps", topup.getTimestamps());
     Assert.assertNotNull("Deberia tener id", topup.getId());
-    Assert.assertNotNull("Deberia tener userId", topup.getUserId());
-    Assert.assertFalse("Deberia tener status", StringUtils.isBlank(topup.getStatus()));
-    Assert.assertEquals("Deberia tener status = exitoso", "exitoso", topup.getStatus());
     Assert.assertNull("No deberia tener rut", topup.getRut());
 
     Assert.assertNotNull("Deberia tener el tipo de voucher", topup.getMcVoucherType());
@@ -176,7 +167,7 @@ public class Test_topupUserBalance_v11 extends TestBaseUnitApi {
     Assert.assertNotNull("Deberia tener el atributo", rutData.get("name"));
     Assert.assertEquals("Deberia tener el atributo name = rut","rut", rutData.get("name"));
     Assert.assertTrue("Deberia tener el atributo value", rutData.containsKey("value"));
-    //Assert.assertNotNull("Deberia tener el atributo value", rutData.get("value"));
+    Assert.assertNotNull("Deberia tener el atributo value", rutData.get("value"));
     //Assert.assertEquals("Deberia tener el atributo value", RutUtils.getInstance().format(prepaidTopup.getRut(), null), rutData.get("value"));
 
     PrepaidMovement10 dbMovement = getPrepaidMovementEJBBean10().getPrepaidMovementById(topup.getId());
@@ -203,9 +194,6 @@ public class Test_topupUserBalance_v11 extends TestBaseUnitApi {
     Assert.assertNotNull("Deberia ser un PrepaidTopup10",topup);
     Assert.assertNotNull("Deberia tener timestamps", topup.getTimestamps());
     Assert.assertNotNull("Deberia tener id", topup.getId());
-    Assert.assertNotNull("Deberia tener userId", topup.getUserId());
-    Assert.assertFalse("Deberia tener status", StringUtils.isBlank(topup.getStatus()));
-    Assert.assertEquals("Deberia tener status = exitoso", "exitoso", topup.getStatus());
     Assert.assertNull("No deberia tener rut", topup.getRut());
 
     Assert.assertNotNull("Deberia tener el tipo de voucher", topup.getMcVoucherType());
@@ -229,7 +217,7 @@ public class Test_topupUserBalance_v11 extends TestBaseUnitApi {
     Assert.assertNotNull("Deberia tener el atributo", rutData.get("name"));
     Assert.assertEquals("Deberia tener el atributo name = rut","rut", rutData.get("name"));
     Assert.assertTrue("Deberia tener el atributo value", rutData.containsKey("value"));
-    //Assert.assertNotNull("Deberia tener el atributo value", rutData.get("value"));
+    Assert.assertNotNull("Deberia tener el atributo value", rutData.get("value"));
     //Assert.assertEquals("Deberia tener el atributo value", RutUtils.getInstance().format(prepaidTopup.getRut(), null), rutData.get("value"));
 
     PrepaidMovement10 dbMovement = getPrepaidMovementEJBBean10().getPrepaidMovementById(topup.getId());
@@ -584,9 +572,6 @@ public class Test_topupUserBalance_v11 extends TestBaseUnitApi {
       Assert.assertNotNull("Deberia ser un PrepaidTopup10",topup);
       Assert.assertNotNull("Deberia tener timestamps", topup.getTimestamps());
       Assert.assertNotNull("Deberia tener id", topup.getId());
-      Assert.assertNotNull("Deberia tener userId", topup.getUserId());
-      Assert.assertFalse("Deberia tener status", StringUtils.isBlank(topup.getStatus()));
-      Assert.assertEquals("Deberia tener status = exitoso", "exitoso", topup.getStatus());
       Assert.assertNull("No deberia tener rut", topup.getRut());
 
       // Segunda vez
@@ -617,9 +602,6 @@ public class Test_topupUserBalance_v11 extends TestBaseUnitApi {
       Assert.assertNotNull("Deberia ser un PrepaidTopup10",topup);
       Assert.assertNotNull("Deberia tener timestamps", topup.getTimestamps());
       Assert.assertNotNull("Deberia tener id", topup.getId());
-      Assert.assertNotNull("Deberia tener userId", topup.getUserId());
-      Assert.assertFalse("Deberia tener status", StringUtils.isBlank(topup.getStatus()));
-      Assert.assertEquals("Deberia tener status = exitoso", "exitoso", topup.getStatus());
       Assert.assertNull("No deberia tener rut", topup.getRut());
 
       // Segunda vez
@@ -656,9 +638,6 @@ public class Test_topupUserBalance_v11 extends TestBaseUnitApi {
       Assert.assertNotNull("Deberia ser un PrepaidTopup10",topup);
       Assert.assertNotNull("Deberia tener timestamps", topup.getTimestamps());
       Assert.assertNotNull("Deberia tener id", topup.getId());
-      Assert.assertNotNull("Deberia tener userId", topup.getUserId());
-      Assert.assertFalse("Deberia tener status", StringUtils.isBlank(topup.getStatus()));
-      Assert.assertEquals("Deberia tener status = exitoso", "exitoso", topup.getStatus());
       Assert.assertNull("No deberia tener rut", topup.getRut());
 
       Assert.assertNotNull("Deberia tener el tipo de voucher", topup.getMcVoucherType());
@@ -682,7 +661,7 @@ public class Test_topupUserBalance_v11 extends TestBaseUnitApi {
       Assert.assertNotNull("Deberia tener el atributo", rutData.get("name"));
       Assert.assertEquals("Deberia tener el atributo name = rut","rut", rutData.get("name"));
       Assert.assertTrue("Deberia tener el atributo value", rutData.containsKey("value"));
-      //Assert.assertNotNull("Deberia tener el atributo value", rutData.get("value"));
+      Assert.assertNotNull("Deberia tener el atributo value", rutData.get("value"));
       //Assert.assertEquals("Deberia tener el atributo value", RutUtils.getInstance().format(prepaidTopup.getRut(), null), rutData.get("value"));
     }
 
@@ -708,9 +687,6 @@ public class Test_topupUserBalance_v11 extends TestBaseUnitApi {
       Assert.assertNotNull("Deberia ser un PrepaidTopup10",topup);
       Assert.assertNotNull("Deberia tener timestamps", topup.getTimestamps());
       Assert.assertNotNull("Deberia tener id", topup.getId());
-      Assert.assertNotNull("Deberia tener userId", topup.getUserId());
-      Assert.assertFalse("Deberia tener status", StringUtils.isBlank(topup.getStatus()));
-      Assert.assertEquals("Deberia tener status = exitoso", "exitoso", topup.getStatus());
       Assert.assertNull("No deberia tener rut", topup.getRut());
 
       Assert.assertNotNull("Deberia tener el tipo de voucher", topup.getMcVoucherType());
@@ -734,7 +710,7 @@ public class Test_topupUserBalance_v11 extends TestBaseUnitApi {
       Assert.assertNotNull("Deberia tener el atributo", rutData.get("name"));
       Assert.assertEquals("Deberia tener el atributo name = rut","rut", rutData.get("name"));
       Assert.assertTrue("Deberia tener el atributo value", rutData.containsKey("value"));
-      //Assert.assertNotNull("Deberia tener el atributo value", rutData.get("value"));
+      Assert.assertNotNull("Deberia tener el atributo value", rutData.get("value"));
       //Assert.assertEquals("Deberia tener el atributo value", RutUtils.getInstance().format(prepaidTopup.getRut(), null), rutData.get("value"));
     }
   }

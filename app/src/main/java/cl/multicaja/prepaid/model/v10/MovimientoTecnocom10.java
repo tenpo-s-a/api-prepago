@@ -45,6 +45,8 @@ public class MovimientoTecnocom10 implements Serializable{
   private Boolean hasError;
   private String errorDetails;
   private String originOpe;
+  // Corrige nombre comercio
+  private String nomcomred;
 
   private TecnocomReconciliationRegisterType tipoReg;
 
@@ -310,6 +312,14 @@ public class MovimientoTecnocom10 implements Serializable{
 
   public void setContrato(String contrato) {
     this.contrato = contrato;
+  }
+
+  public String getNomcomred() {
+    return nomcomred;
+  }
+
+  public void setNomcomred(String nomcomred) {
+    this.nomcomred = nomcomred;
   }
 
   public PrepaidMovementType getMovementType() {

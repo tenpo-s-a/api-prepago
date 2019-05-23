@@ -10,6 +10,7 @@ import java.util.Map;
  */
 public class PrepaidTopup10 extends NewPrepaidTopup10 implements IPrepaidTransaction10 {
 
+  @JsonIgnore
   private String status;
   private Timestamps timestamps;
   @JsonIgnore
@@ -23,6 +24,7 @@ public class PrepaidTopup10 extends NewPrepaidTopup10 implements IPrepaidTransac
 
   // Utilizados para la respuesta al POS/switch
   private Long id;
+  @JsonIgnore
   private Long userId;
   private String mcVoucherType;
   private List<Map<String, String>> mcVoucherData;

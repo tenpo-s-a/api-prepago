@@ -78,7 +78,7 @@ spec:
           - name: TECNOCOM_CHANNEL
             value: ${TECNOCOM_CHANNEL}
           - name: TECNOCOM_CODENTITY
-            value: ${TECNOCOM_CODENT}
+            value: "${TECNOCOM_CODENT}"
           - name: TECNOCOM_ORDER
             value: ${TECNOCOM_ORDER}
       imagePullSecrets:
@@ -108,6 +108,8 @@ metadata:
   namespace: prepaid
 spec:
   hosts:
+  - "users.uat.multicajadigital"
+  addresses:
   - "40.70.68.63"
   location: MESH_EXTERNAL
   ports:
