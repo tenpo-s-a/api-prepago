@@ -70,8 +70,8 @@ public class TecnocomReconciliationEJBBean10 extends PrepaidBaseEJBBean10 implem
   private static final String INSERT_MOVEMENT_SQL = "INSERT INTO %s.%s (" +
   "idArchivo, cuenta, pan, codent, centalta, clamon, indnorcor, tipofac, fecfac, numreffac, clamondiv, impdiv, " +
   "impfac, cmbapli, numaut, indproaje, codcom, codact, impliq, clamonliq, codpais, nompob, numextcta, nummovext, " +
-  "clamone, tipolin, linref, fectrn, impautcon, originope, fecha_creacion, fecha_actualizacion, contrato, tiporeg" +
-  ") VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?);";
+  "clamone, tipolin, linref, fectrn, impautcon, originope, fecha_creacion, fecha_actualizacion, contrato, tiporeg, nomcomred" +
+  ") VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?);";
 
   @EJB
   private PrepaidCardEJBBean11 prepaidCardEJBBean11;
@@ -316,6 +316,7 @@ public class TecnocomReconciliationEJBBean10 extends PrepaidBaseEJBBean10 implem
     movimientoTecnocom10.setNumMovExt(0L);
     movimientoTecnocom10.setClamone(CodigoMoneda.CHILE_CLP);
     movimientoTecnocom10.setCodCom("Cualquiera");
+    movimientoTecnocom10.setNomcomred("Cualquiera");
 
     return movimientoTecnocom10;
   }
@@ -738,7 +739,7 @@ public class TecnocomReconciliationEJBBean10 extends PrepaidBaseEJBBean10 implem
     prepaidMovement.setConTecnocom(ReconciliationStatusType.PENDING);
     // Switch Conciliado ya que no pasa por switch
     prepaidMovement.setConSwitch(ReconciliationStatusType.RECONCILED);
-    prepaidMovement.setNomcomred(""); //FIXME: MovimientoTecnocom debe traer el merchant name. Si lo debe traer. Se agrego el campo en la tabla prp_movimiento_tecnocom
+    prepaidMovement.setNomcomred(batchTrx.getNomcomred()); //FIXME: MovimientoTecnocom debe traer el merchant name. Si lo debe traer. Se agrego el campo en la tabla prp_movimiento_tecnocom
     prepaidMovement.setCardId(cardId);
 
     return prepaidMovement;
@@ -861,9 +862,10 @@ public class TecnocomReconciliationEJBBean10 extends PrepaidBaseEJBBean10 implem
     sqlQuery.append(" fecha_creacion, ");
     sqlQuery.append(" fecha_actualizacion, ");
     sqlQuery.append(" contrato, ");
-    sqlQuery.append(" tiporeg ");
+    sqlQuery.append(" tiporeg, ");
+    sqlQuery.append(" nomcomred ");
     sqlQuery.append(  String.format(" FROM %s.%s ", getSchema(), tableName));
-    sqlQuery.append("WHERE ");
+    sqlQuery.append(" WHERE ");
     sqlQuery.append(  fileId != null ?        String.format("idArchivo = %d   AND ", fileId) : "");
     sqlQuery.append(  originOpeType != null ? String.format("originope = '%s' AND ", originOpeType.getValue()) : "");
     sqlQuery.append(  encryptedPan != null ?  String.format("pan = '%s'       AND ", encryptedPan) : "");
@@ -941,6 +943,7 @@ public class TecnocomReconciliationEJBBean10 extends PrepaidBaseEJBBean10 implem
       movimientoTecnocom10.setOriginOpe(rs.getString("originope"));
       movimientoTecnocom10.setContrato(rs.getString("contrato"));
       movimientoTecnocom10.setTipoReg(TecnocomReconciliationRegisterType.valueOfEnum(rs.getString("tiporeg")));
+      movimientoTecnocom10.setNomcomred(rs.getString("nomcomred"));
       return movimientoTecnocom10;
     };
   }
@@ -1050,6 +1053,7 @@ public class TecnocomReconciliationEJBBean10 extends PrepaidBaseEJBBean10 implem
       ps.setTimestamp(32, Timestamp.valueOf(LocalDateTime.now(ZoneId.of("UTC"))));
       ps.setString(33, movTc.getContrato());
       ps.setString(34, movTc.getTipoReg() != null ? movTc.getTipoReg().getValue() : "");
+      ps.setString(35, movTc.getNomcomred() != null ? movTc.getNomcomred() : "");
       return ps;
     });
   }
