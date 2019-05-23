@@ -73,11 +73,6 @@ public class Test_PendingTecnocomReconciliationFileAut10 extends TestBaseUnit {
   @Test
   public void processApiTransactions_statusProcessOk() throws Exception {
 
-    List<PrepaidMovement10> movements = getPrepaidMovementEJBBean10().getPrepaidMovements(null, null, null, null, null, null,
-      null, null, null, null, null, null);
-
-    Assert.assertNull("No debe tener movimientos", movements);
-
     Long fileId = null;
     final String filename = "PLJ61110.FINT0004";
     try {
@@ -90,15 +85,15 @@ public class Test_PendingTecnocomReconciliationFileAut10 extends TestBaseUnit {
     // Procesa los datos insertados en la tabla
     getTecnocomReconciliationEJBBean10().processTecnocomTableData(fileId);
 
-    List<PrepaidMovement10> purchase = getPrepaidMovementEJBBean10().getPrepaidMovements(null, null, null, null, PrepaidMovementType.PURCHASE, null,
-      null, null, null, null, null, null, null, null, MovementOriginType.OPE,null);
+    List<PrepaidMovement10> purchase = getPrepaidMovementEJBBean11().getPrepaidMovements(null, null, null, null, PrepaidMovementType.PURCHASE,
+      null, null, null, null, null, null,null, null, null, MovementOriginType.OPE, null, null, null);
 
     Assert.assertNotNull("Debe tener movimientos de compra", purchase);
     Assert.assertFalse("Debe tener movimientos de compra", purchase.isEmpty());
     Assert.assertEquals("Debe tener 16 movimientos de compra", 13, purchase.size());
 
-    List<PrepaidMovement10> suscriptions = getPrepaidMovementEJBBean10().getPrepaidMovements(null, null, null, null, PrepaidMovementType.SUSCRIPTION, null,
-      null, null, null, null, null, null, null, null, MovementOriginType.OPE,null);
+    List<PrepaidMovement10> suscriptions = getPrepaidMovementEJBBean11().getPrepaidMovements(null, null, null, null, PrepaidMovementType.SUSCRIPTION,
+      null, null, null, null, null, null,null, null, null, MovementOriginType.OPE, null, null, null);
 
     Assert.assertNotNull("Debe tener movimientos de suscripcion", suscriptions);
     Assert.assertFalse("Debe tener movimientos de suscripcion", suscriptions.isEmpty());

@@ -227,7 +227,7 @@ public class Test_PrepaidMovementEJB10_procesReconciliation10 extends TestBaseUn
     // crea los movimientos de accounting y clearing correspondientes
     addAccountingAndClearing(prepaidMovement10);
 
-    getPrepaidMovementEJBBean10().processReconciliation(prepaidMovement10);
+    getPrepaidMovementEJBBean11().processReconciliation(prepaidMovement10);
 
     List cdtTransaction10s = getCdtEJBBean10().buscaListaMovimientoByIdExterno(null, prepaidMovement10.getIdTxExterno());
     System.out.println(cdtTransaction10s);
