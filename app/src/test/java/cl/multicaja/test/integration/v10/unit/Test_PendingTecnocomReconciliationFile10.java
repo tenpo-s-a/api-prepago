@@ -92,7 +92,7 @@ public class Test_PendingTecnocomReconciliationFile10 extends TestBaseUnitAsync 
 
   @Test
   public void processOnlineTransactions() throws Exception {
-    List<PrepaidMovement10> movements = getPrepaidMovementEJBBean10().getPrepaidMovements(null, null, null, null, null, null,
+    List<PrepaidMovement10> movements = getPrepaidMovementEJBBean11().getPrepaidMovements(null, null, null, null, null, null,
       null, null, null, null, null, null);
 
     Assert.assertNull("No debe tener movimientos", movements);
@@ -110,7 +110,7 @@ public class Test_PendingTecnocomReconciliationFile10 extends TestBaseUnitAsync 
     // Procesa los datos insertados en la tabla
     getTecnocomReconciliationEJBBean10().processTecnocomTableData(fileId);
 
-    movements = getPrepaidMovementEJBBean10().getPrepaidMovements(null, null, null, null, null, null,
+    movements = getPrepaidMovementEJBBean11().getPrepaidMovements(null, null, null, null, null, null,
       null, null, null, null, null, null, ReconciliationStatusType.PENDING, ReconciliationStatusType.RECONCILED, MovementOriginType.SAT,null);
 
     Assert.assertNotNull("Debe tener movimientos", movements);
@@ -129,7 +129,7 @@ public class Test_PendingTecnocomReconciliationFile10 extends TestBaseUnitAsync 
   @Test
   public void processOnlineExistingTransactions() throws Exception {
 
-    List<PrepaidMovement10> movements = getPrepaidMovementEJBBean10().getPrepaidMovements(null, null, null, null, null, null,
+    List<PrepaidMovement10> movements = getPrepaidMovementEJBBean11().getPrepaidMovements(null, null, null, null, null, null,
       null, null, null, null, null, null);
 
     Assert.assertNull("No debe tener movimientos", movements);
@@ -167,11 +167,16 @@ public class Test_PendingTecnocomReconciliationFile10 extends TestBaseUnitAsync 
       movement10.setEstado(PrepaidMovementStatus.PROCESS_OK);
       movement10.setIdMovimientoRef(Long.valueOf(0));
       movement10.setIdTxExterno("");
-      getPrepaidMovementEJBBean10().addPrepaidMovement(null, movement10);
+      movement10.setFecfac(new Date(System.currentTimeMillis()));
+
+      PrepaidCard10 prepaidCard10 = getPrepaidCardEJBBean11().getPrepaidCardByPanAndUserId(pan,userId);
+      movement10.setCardId(prepaidCard10.getId());
+
+      getPrepaidMovementEJBBean11().addPrepaidMovement(null, movement10);
 
     }
 
-    movements = getPrepaidMovementEJBBean10().getPrepaidMovements(null, null, null, null, null, null,
+    movements = getPrepaidMovementEJBBean11().getPrepaidMovements(null, null, null, null, null, null,
       null, null, null, null, null, null, ReconciliationStatusType.PENDING, ReconciliationStatusType.PENDING, MovementOriginType.API,null);
 
     Assert.assertNotNull("Debe tener movimientos", movements);
@@ -193,7 +198,7 @@ public class Test_PendingTecnocomReconciliationFile10 extends TestBaseUnitAsync 
     // Procesa los datos insertados en la tabla
     getTecnocomReconciliationEJBBean10().processTecnocomTableData(fileId);
 
-    movements = getPrepaidMovementEJBBean10().getPrepaidMovements(null, null, null, null, null, null,
+    movements = getPrepaidMovementEJBBean11().getPrepaidMovements(null, null, null, null, null, null,
       null, null, null, null, null, null, ReconciliationStatusType.PENDING, ReconciliationStatusType.RECONCILED, MovementOriginType.API,null);
 
     Assert.assertNotNull("Debe tener movimientos", movements);
@@ -214,7 +219,7 @@ public class Test_PendingTecnocomReconciliationFile10 extends TestBaseUnitAsync 
   @Test
   public void processOnlineExistingTransactions_differentAmount() throws Exception {
 
-    List<PrepaidMovement10> movements = getPrepaidMovementEJBBean10().getPrepaidMovements(null, null, null, null, null, null,
+    List<PrepaidMovement10> movements = getPrepaidMovementEJBBean11().getPrepaidMovements(null, null, null, null, null, null,
       null, null, null, null, null, null);
 
     Assert.assertNull("No debe tener movimientos", movements);
@@ -254,12 +259,17 @@ public class Test_PendingTecnocomReconciliationFile10 extends TestBaseUnitAsync 
       movement10.setEstado(PrepaidMovementStatus.PROCESS_OK);
       movement10.setIdMovimientoRef(Long.valueOf(0));
       movement10.setIdTxExterno("");
+      PrepaidCard10 prepaidCard10 = getPrepaidCardEJBBean11().getPrepaidCardByPanAndUserId(pan,userId);
+      movement10.setCardId(prepaidCard10.getId());
+
+      movement10.setFecfac(new Date(System.currentTimeMillis()));
+
       movement10.setMonto(movement10.getMonto().add(BigDecimal.valueOf(500)));
-      getPrepaidMovementEJBBean10().addPrepaidMovement(null, movement10);
+      getPrepaidMovementEJBBean11().addPrepaidMovement(null, movement10);
 
     }
 
-    movements = getPrepaidMovementEJBBean10().getPrepaidMovements(null, null, null, null, null, null,
+    movements = getPrepaidMovementEJBBean11().getPrepaidMovements(null, null, null, null, null, null,
       null, null, null, null, null, null, ReconciliationStatusType.PENDING, ReconciliationStatusType.PENDING, MovementOriginType.API,null);
 
     Assert.assertNotNull("Debe tener movimientos", movements);
@@ -281,7 +291,7 @@ public class Test_PendingTecnocomReconciliationFile10 extends TestBaseUnitAsync 
     // Procesa los datos insertados en la tabla
     getTecnocomReconciliationEJBBean10().processTecnocomTableData(fileId);
 
-    movements = getPrepaidMovementEJBBean10().getPrepaidMovements(null, null, null, null, null, null,
+    movements = getPrepaidMovementEJBBean11().getPrepaidMovements(null, null, null, null, null, null,
       null, null, null, null, null, null, ReconciliationStatusType.PENDING, ReconciliationStatusType.NOT_RECONCILED, MovementOriginType.API,null);
 
     Assert.assertNotNull("Debe tener movimientos", movements);
@@ -299,7 +309,7 @@ public class Test_PendingTecnocomReconciliationFile10 extends TestBaseUnitAsync 
   @Test
   public void processApiTransactions_statusProcessOk() throws Exception {
 
-    List<PrepaidMovement10> movements = getPrepaidMovementEJBBean10().getPrepaidMovements(null, null, null, null, null, null,
+    List<PrepaidMovement10> movements = getPrepaidMovementEJBBean11().getPrepaidMovements(null, null, null, null, null, null,
       null, null, null, null, null, null);
 
     Assert.assertNull("No debe tener movimientos", movements);
@@ -340,12 +350,17 @@ public class Test_PendingTecnocomReconciliationFile10 extends TestBaseUnitAsync 
       movement10.setEstado(PrepaidMovementStatus.PROCESS_OK);
       movement10.setIdMovimientoRef(Long.valueOf(0));
       movement10.setIdTxExterno("");
-      getPrepaidMovementEJBBean10().addPrepaidMovement(null, movement10);
+      PrepaidCard10 prepaidCard10 = getPrepaidCardEJBBean11().getPrepaidCardByPanAndUserId(pan,userId);
+      movement10.setCardId(prepaidCard10.getId());
+      movement10.setFecfac(new Date(System.currentTimeMillis()));
+      getPrepaidMovementEJBBean11().addPrepaidMovement(null, movement10);
 
     }
 
-    movements = getPrepaidMovementEJBBean10().getPrepaidMovements(null, null, null, null, null, PrepaidMovementStatus.PROCESS_OK,
-      null, null, null, null, null, null, ReconciliationStatusType.PENDING, ReconciliationStatusType.PENDING, MovementOriginType.API,null);
+
+    movements = getPrepaidMovementEJBBean11().getPrepaidMovements(null, null, null, null, null,
+      PrepaidMovementStatus.PROCESS_OK, null, null, null, null, null, null,
+      ReconciliationStatusType.PENDING, ReconciliationStatusType.PENDING, MovementOriginType.API, null, null);
 
     Assert.assertNotNull("Debe tener movimientos", movements);
     Assert.assertFalse("Debe tener movimientos", movements.isEmpty());
@@ -366,8 +381,9 @@ public class Test_PendingTecnocomReconciliationFile10 extends TestBaseUnitAsync 
     // Procesa los datos insertados en la tabla
     getTecnocomReconciliationEJBBean10().processTecnocomTableData(fileId);
 
-    movements = getPrepaidMovementEJBBean10().getPrepaidMovements(null, null, null, null, null, null,
-      null, null, null, null, null, null, ReconciliationStatusType.PENDING, ReconciliationStatusType.RECONCILED, MovementOriginType.API,null);
+    movements = getPrepaidMovementEJBBean11().getPrepaidMovements(null, null, null, null, null,
+      null, null, null, null, null, null, null,
+      ReconciliationStatusType.PENDING, ReconciliationStatusType.RECONCILED, MovementOriginType.API, null, null);
 
     Assert.assertNotNull("Debe tener movimientos", movements);
     Assert.assertFalse("Debe tener movimientos", movements.isEmpty());
@@ -386,7 +402,7 @@ public class Test_PendingTecnocomReconciliationFile10 extends TestBaseUnitAsync 
 
   @Test
   public void processApiTransactions_statusErrorTecnocomReintentable() throws Exception {
-    List<PrepaidMovement10> movements = getPrepaidMovementEJBBean10().getPrepaidMovements(null, null, null, null, null, null,
+    List<PrepaidMovement10> movements = getPrepaidMovementEJBBean11().getPrepaidMovements(null, null, null, null, null, null,
       null, null, null, null, null, null);
 
     Assert.assertNull("No debe tener movimientos", movements);
@@ -426,14 +442,17 @@ public class Test_PendingTecnocomReconciliationFile10 extends TestBaseUnitAsync 
       movement10.setEstado(PrepaidMovementStatus.ERROR_TECNOCOM_REINTENTABLE);
       movement10.setIdMovimientoRef(Long.valueOf(0));
       movement10.setIdTxExterno("");
-      getPrepaidMovementEJBBean10().addPrepaidMovement(null, movement10);
+      PrepaidCard10 prepaidCard10 = getPrepaidCardEJBBean11().getPrepaidCardByPanAndUserId(pan,userId);
+      movement10.setCardId(prepaidCard10.getId());
+      movement10.setFecfac(new Date(System.currentTimeMillis()));
+      getPrepaidMovementEJBBean11().addPrepaidMovement(null, movement10);
 
     }
 
+    movements = getPrepaidMovementEJBBean11().getPrepaidMovements(null, null, null, null, null,
+      PrepaidMovementStatus.ERROR_TECNOCOM_REINTENTABLE, null, null, null, null, null, null,
+      ReconciliationStatusType.PENDING, ReconciliationStatusType.PENDING, MovementOriginType.API, null, null);
 
-
-    movements = getPrepaidMovementEJBBean10().getPrepaidMovements(null, null, null, null, null, PrepaidMovementStatus.ERROR_TECNOCOM_REINTENTABLE,
-      null, null, null, null, null, null, ReconciliationStatusType.PENDING, ReconciliationStatusType.PENDING, MovementOriginType.API,null);
 
     Assert.assertNotNull("Debe tener movimientos", movements);
     Assert.assertFalse("Debe tener movimientos", movements.isEmpty());
@@ -456,8 +475,10 @@ public class Test_PendingTecnocomReconciliationFile10 extends TestBaseUnitAsync 
     // Se procesa lo guardado en la tabla de Tecnocom
     getTecnocomReconciliationEJBBean10().processTecnocomTableData(fileId);
 
-    movements = getPrepaidMovementEJBBean10().getPrepaidMovements(null, null, null, null, null, null,
-      null, null, null, null, null, null, ReconciliationStatusType.PENDING, ReconciliationStatusType.RECONCILED, MovementOriginType.API,null);
+    movements = getPrepaidMovementEJBBean11().getPrepaidMovements(null, null, null, null, null,
+      null, null, null, null, null, null, null,
+      ReconciliationStatusType.PENDING, ReconciliationStatusType.RECONCILED, MovementOriginType.API, null, null);
+
 
     Assert.assertNotNull("Debe tener movimientos", movements);
     Assert.assertFalse("Debe tener movimientos", movements.isEmpty());
@@ -476,7 +497,7 @@ public class Test_PendingTecnocomReconciliationFile10 extends TestBaseUnitAsync 
 
   @Test
   public void processApiTransactions_statusErrorTimeoutRequest() throws Exception {
-    List<PrepaidMovement10> movements = getPrepaidMovementEJBBean10().getPrepaidMovements(null, null, null, null, null, null,
+    List<PrepaidMovement10> movements = getPrepaidMovementEJBBean11().getPrepaidMovements(null, null, null, null, null, null,
       null, null, null, null, null, null);
 
     Assert.assertNull("No debe tener movimientos", movements);
@@ -517,12 +538,16 @@ public class Test_PendingTecnocomReconciliationFile10 extends TestBaseUnitAsync 
       movement10.setEstado(PrepaidMovementStatus.ERROR_TIMEOUT_CONEXION);
       movement10.setIdMovimientoRef(Long.valueOf(0));
       movement10.setIdTxExterno("");
-      getPrepaidMovementEJBBean10().addPrepaidMovement(null, movement10);
+      PrepaidCard10 prepaidCard10 = getPrepaidCardEJBBean11().getPrepaidCardByPanAndUserId(pan,userId);
+      movement10.setCardId(prepaidCard10.getId());
+      movement10.setFecfac(new Date(System.currentTimeMillis()));
+      getPrepaidMovementEJBBean11().addPrepaidMovement(null, movement10);
 
     }
 
-    movements = getPrepaidMovementEJBBean10().getPrepaidMovements(null, null, null, null, null, null,
-      null, null, null, null, null, null, ReconciliationStatusType.PENDING, ReconciliationStatusType.PENDING, MovementOriginType.API,null);
+    movements = getPrepaidMovementEJBBean11().getPrepaidMovements(null, null, null, null, null,
+      null, null, null, null, null, null, null,
+      ReconciliationStatusType.PENDING, ReconciliationStatusType.PENDING, MovementOriginType.API, null, null);
 
     Assert.assertNotNull("Debe tener movimientos", movements);
     Assert.assertFalse("Debe tener movimientos", movements.isEmpty());
@@ -543,8 +568,9 @@ public class Test_PendingTecnocomReconciliationFile10 extends TestBaseUnitAsync 
     // Procesa los datos insertados en la tabla
     getTecnocomReconciliationEJBBean10().processTecnocomTableData(fileId);
 
-    movements = getPrepaidMovementEJBBean10().getPrepaidMovements(null, null, null, null, null, null,
-      null, null, null, null, null, null, ReconciliationStatusType.PENDING, ReconciliationStatusType.RECONCILED, MovementOriginType.API,null);
+    movements = getPrepaidMovementEJBBean11().getPrepaidMovements(null, null, null, null, null,
+      null, null, null, null, null, null, null,
+      ReconciliationStatusType.PENDING, ReconciliationStatusType.RECONCILED, MovementOriginType.API, null, null);
 
     Assert.assertNotNull("Debe tener movimientos", movements);
     Assert.assertFalse("Debe tener movimientos", movements.isEmpty());
@@ -563,7 +589,7 @@ public class Test_PendingTecnocomReconciliationFile10 extends TestBaseUnitAsync 
 
   @Test
   public void processApiTransactions_statusErrorTimeoutResponse() throws Exception {
-    List<PrepaidMovement10> movements = getPrepaidMovementEJBBean10().getPrepaidMovements(null, null, null, null, null, null,
+    List<PrepaidMovement10> movements = getPrepaidMovementEJBBean11().getPrepaidMovements(null, null, null, null, null, null,
       null, null, null, null, null, null);
 
     Assert.assertNull("No debe tener movimientos", movements);
@@ -603,11 +629,14 @@ public class Test_PendingTecnocomReconciliationFile10 extends TestBaseUnitAsync 
       movement10.setEstado(PrepaidMovementStatus.ERROR_TIMEOUT_RESPONSE);
       movement10.setIdMovimientoRef(Long.valueOf(0));
       movement10.setIdTxExterno("");
-      getPrepaidMovementEJBBean10().addPrepaidMovement(null, movement10);
+      PrepaidCard10 prepaidCard10 = getPrepaidCardEJBBean11().getPrepaidCardByPanAndUserId(pan,userId);
+      movement10.setCardId(prepaidCard10.getId());
+      movement10.setFecfac(new Date(System.currentTimeMillis()));
+      getPrepaidMovementEJBBean11().addPrepaidMovement(null, movement10);
 
     }
 
-    movements = getPrepaidMovementEJBBean10().getPrepaidMovements(null, null, null, null, null, PrepaidMovementStatus.ERROR_TIMEOUT_RESPONSE,
+    movements = getPrepaidMovementEJBBean11().getPrepaidMovements(null, null, null, null, null, PrepaidMovementStatus.ERROR_TIMEOUT_RESPONSE,
       null, null, null, null, null, null, ReconciliationStatusType.PENDING, ReconciliationStatusType.PENDING, MovementOriginType.API,null);
 
     Assert.assertNotNull("Debe tener movimientos", movements);
@@ -629,7 +658,7 @@ public class Test_PendingTecnocomReconciliationFile10 extends TestBaseUnitAsync 
     // Procesa los datos insertados en la tabla
     getTecnocomReconciliationEJBBean10().processTecnocomTableData(fileId);
 
-    movements = getPrepaidMovementEJBBean10().getPrepaidMovements(null, null, null, null, null, null,
+    movements = getPrepaidMovementEJBBean11().getPrepaidMovements(null, null, null, null, null, null,
       null, null, null, null, null, null, ReconciliationStatusType.PENDING, ReconciliationStatusType.RECONCILED, MovementOriginType.API,null);
 
     Assert.assertNotNull("Debe tener movimientos", movements);
@@ -650,7 +679,7 @@ public class Test_PendingTecnocomReconciliationFile10 extends TestBaseUnitAsync 
   @Test
   public void processApiTransactions_NotReConciled() throws Exception {
 
-    List<PrepaidMovement10> movements = getPrepaidMovementEJBBean10().getPrepaidMovements(null, null, null, null, null, null,
+    List<PrepaidMovement10> movements = getPrepaidMovementEJBBean11().getPrepaidMovements(null, null, null, null, null, null,
       null, null, null, null, null, null);
 
     Assert.assertNull("No debe tener movimientos", movements);
@@ -691,7 +720,12 @@ public class Test_PendingTecnocomReconciliationFile10 extends TestBaseUnitAsync 
       movement10.setEstado(PrepaidMovementStatus.PROCESS_OK);
       movement10.setIdMovimientoRef(Long.valueOf(0));
       movement10.setIdTxExterno("");
-      getPrepaidMovementEJBBean10().addPrepaidMovement(null, movement10);
+      movement10.setFecfac(new Date(System.currentTimeMillis()));
+
+      PrepaidCard10 prepaidCard10 = getPrepaidCardEJBBean11().getPrepaidCardByPanAndUserId(pan,userId);
+      movement10.setCardId(prepaidCard10.getId());
+
+      getPrepaidMovementEJBBean11().addPrepaidMovement(null, movement10);
 
     }
 
@@ -721,58 +755,58 @@ public class Test_PendingTecnocomReconciliationFile10 extends TestBaseUnitAsync 
 
     TipoFactura type = TipoFactura.CARGA_TRANSFERENCIA;
     prepaidMovement10 = createPrepaidMovement10(prepaidMovement10);
-    prepaidMovement10 = getPrepaidMovementEJBBean10().getPrepaidMovementById(prepaidMovement10.getId());
+    prepaidMovement10 = getPrepaidMovementEJBBean11().getPrepaidMovementById(prepaidMovement10.getId());
     changeMovement(prepaidMovement10.getId(), newDate, type.getCode(), IndicadorNormalCorrector.NORMAL.getValue());
     inserted.put(prepaidMovement10.getId(), type);
 
     type = TipoFactura.CARGA_EFECTIVO_COMERCIO_MULTICAJA;
     prepaidMovement10 = createPrepaidMovement10(prepaidMovement10);
-    prepaidMovement10 = getPrepaidMovementEJBBean10().getPrepaidMovementById(prepaidMovement10.getId());
+    prepaidMovement10 = getPrepaidMovementEJBBean11().getPrepaidMovementById(prepaidMovement10.getId());
     changeMovement(prepaidMovement10.getId(), newDate, type.getCode(), IndicadorNormalCorrector.NORMAL.getValue());
     inserted.put(prepaidMovement10.getId(), type);
 
     type = TipoFactura.ANULA_CARGA_EFECTIVO_COMERCIO_MULTICAJA;
     prepaidMovement10 = createPrepaidMovement10(prepaidMovement10);
-    prepaidMovement10 = getPrepaidMovementEJBBean10().getPrepaidMovementById(prepaidMovement10.getId());
+    prepaidMovement10 = getPrepaidMovementEJBBean11().getPrepaidMovementById(prepaidMovement10.getId());
     changeMovement(prepaidMovement10.getId(), newDate, type.getCode(), IndicadorNormalCorrector.NORMAL.getValue());
     inserted.put(prepaidMovement10.getId(), type);
 
     type = TipoFactura.ANULA_CARGA_TRANSFERENCIA;
     prepaidMovement10 = createPrepaidMovement10(prepaidMovement10);
-    prepaidMovement10 = getPrepaidMovementEJBBean10().getPrepaidMovementById(prepaidMovement10.getId());
+    prepaidMovement10 = getPrepaidMovementEJBBean11().getPrepaidMovementById(prepaidMovement10.getId());
     changeMovement(prepaidMovement10.getId(), newDate, type.getCode(), IndicadorNormalCorrector.NORMAL.getValue());
     inserted.put(prepaidMovement10.getId(), type);
 
     type = TipoFactura.RETIRO_TRANSFERENCIA;
     prepaidMovement10 = createPrepaidMovement10(prepaidMovement10);
-    prepaidMovement10 = getPrepaidMovementEJBBean10().getPrepaidMovementById(prepaidMovement10.getId());
+    prepaidMovement10 = getPrepaidMovementEJBBean11().getPrepaidMovementById(prepaidMovement10.getId());
     changeMovement(prepaidMovement10.getId(), newDate, type.getCode(), IndicadorNormalCorrector.NORMAL.getValue());
     inserted.put(prepaidMovement10.getId(), type);
 
     type = TipoFactura.RETIRO_EFECTIVO_COMERCIO_MULTICJA;
     prepaidMovement10 = createPrepaidMovement10(prepaidMovement10);
-    prepaidMovement10 = getPrepaidMovementEJBBean10().getPrepaidMovementById(prepaidMovement10.getId());
+    prepaidMovement10 = getPrepaidMovementEJBBean11().getPrepaidMovementById(prepaidMovement10.getId());
     changeMovement(prepaidMovement10.getId(), newDate, type.getCode(), IndicadorNormalCorrector.NORMAL.getValue());
     inserted.put(prepaidMovement10.getId(), type);
 
     type = TipoFactura.ANULA_RETIRO_EFECTIVO_COMERCIO_MULTICJA;
     prepaidMovement10 = createPrepaidMovement10(prepaidMovement10);
-    prepaidMovement10 = getPrepaidMovementEJBBean10().getPrepaidMovementById(prepaidMovement10.getId());
+    prepaidMovement10 = getPrepaidMovementEJBBean11().getPrepaidMovementById(prepaidMovement10.getId());
     changeMovement(prepaidMovement10.getId(), newDate, type.getCode(), IndicadorNormalCorrector.NORMAL.getValue());
     inserted.put(prepaidMovement10.getId(), type);
 
     type = TipoFactura.ANULA_RETIRO_TRANSFERENCIA;
     prepaidMovement10 = createPrepaidMovement10(prepaidMovement10);
-    prepaidMovement10 = getPrepaidMovementEJBBean10().getPrepaidMovementById(prepaidMovement10.getId());
+    prepaidMovement10 = getPrepaidMovementEJBBean11().getPrepaidMovementById(prepaidMovement10.getId());
     changeMovement(prepaidMovement10.getId(), newDate, type.getCode(), IndicadorNormalCorrector.NORMAL.getValue());
     inserted.put(prepaidMovement10.getId(), type);
 
     newDate = getNewDateForPastMovement(date, time, Calendar.HOUR_OF_DAY, -3);
     prepaidMovement10 = createPrepaidMovement10(prepaidMovement10);
-    prepaidMovement10 = getPrepaidMovementEJBBean10().getPrepaidMovementById(prepaidMovement10.getId());
+    prepaidMovement10 = getPrepaidMovementEJBBean11().getPrepaidMovementById(prepaidMovement10.getId());
     changeMovement(prepaidMovement10.getId(), newDate, TipoFactura.CARGA_EFECTIVO_COMERCIO_MULTICAJA.getCode(), IndicadorNormalCorrector.NORMAL.getValue());
 
-    movements = getPrepaidMovementEJBBean10().getPrepaidMovements(null, null, null, null, null, PrepaidMovementStatus.PROCESS_OK,
+    movements = getPrepaidMovementEJBBean11().getPrepaidMovements(null, null, null, null, null, PrepaidMovementStatus.PROCESS_OK,
       null, null, null, null, null, null, ReconciliationStatusType.PENDING, ReconciliationStatusType.PENDING, MovementOriginType.API,null);
 
     Assert.assertNotNull("Debe tener movimientos", movements);
@@ -796,7 +830,7 @@ public class Test_PendingTecnocomReconciliationFile10 extends TestBaseUnitAsync 
     getTecnocomReconciliationEJBBean10().processTecnocomTableData(fileId);
 
     // Verifica movimientos NO conciliados
-    movements = getPrepaidMovementEJBBean10().getPrepaidMovements(null, null, null, null, null, null,
+    movements = getPrepaidMovementEJBBean11().getPrepaidMovements(null, null, null, null, null, null,
       null, null, null, null, null, null, ReconciliationStatusType.PENDING, ReconciliationStatusType.NOT_RECONCILED, MovementOriginType.API,null);
 
     Assert.assertNotNull("Debe tener movimientos", movements);

@@ -658,7 +658,7 @@ public class PrepaidMovementEJBBean11 extends PrepaidMovementEJBBean10 {
     }
 
     List<PrepaidMovement10> lst = this.getPrepaidMovements(null, null, null, null, null,
-      null, null, null, null, tipofac, fecfac, numaut, null, null, null, null, null,cardId);
+      null, null, null, IndicadorNormalCorrector.fromValue(tipofac.getCorrector()), tipofac, fecfac, numaut, null, null, null, null, null,cardId);
 
     return lst != null && !lst.isEmpty() ? lst.get(0) : null;
   }

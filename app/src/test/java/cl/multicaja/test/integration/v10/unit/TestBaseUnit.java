@@ -905,7 +905,12 @@ public class TestBaseUnit extends TestApiBase {
   public PrepaidMovement10 buildPrepaidMovement10(PrepaidUser10 prepaidUser, PrepaidTopup10 prepaidTopup) {
     return buildPrepaidMovement10(prepaidUser, prepaidTopup, null, null, PrepaidMovementType.TOPUP);
   }
-
+  public PrepaidMovement10 buildPrepaidMovement11(PrepaidUser10 prepaidUser, PrepaidTopup10 prepaidTopup,PrepaidCard10 prepaidCard10) throws Exception {
+    return buildPrepaidMovement11(prepaidUser, prepaidTopup, prepaidCard10, null, PrepaidMovementType.TOPUP);
+  }
+  public PrepaidMovement10 buildPrepaidMovement11(PrepaidUser10 prepaidUser, PrepaidTopup10 prepaidTopup) throws Exception {
+    return buildPrepaidMovement11(prepaidUser, prepaidTopup, null, null, PrepaidMovementType.TOPUP);
+  }
   /**
    *
    * @param prepaidUser
@@ -954,8 +959,13 @@ public class TestBaseUnit extends TestApiBase {
    * @param prepaidWithdraw
    * @return
    */
+  @Deprecated
   public PrepaidMovement10 buildPrepaidMovement10(PrepaidUser10 prepaidUser, PrepaidWithdraw10 prepaidWithdraw) {
     return buildPrepaidMovement10(prepaidUser, prepaidWithdraw, null, null, PrepaidMovementType.WITHDRAW);
+  }
+
+  public PrepaidMovement10 buildPrepaidMovement11(PrepaidUser10 prepaidUser, PrepaidWithdraw10 prepaidWithdraw) throws Exception {
+    return buildPrepaidMovement11(prepaidUser, prepaidWithdraw, null, null, PrepaidMovementType.WITHDRAW);
   }
 
   /**
@@ -976,10 +986,93 @@ public class TestBaseUnit extends TestApiBase {
    * @param cdtTransaction
    * @return
    */
+  @Deprecated
   public PrepaidMovement10 buildPrepaidMovement10(PrepaidUser10 prepaidUser, PrepaidWithdraw10 prepaidWithdraw, CdtTransaction10 cdtTransaction) {
     return buildPrepaidMovement10(prepaidUser, prepaidWithdraw, null, cdtTransaction, PrepaidMovementType.WITHDRAW);
   }
 
+
+  public PrepaidMovement10 buildPrepaidMovement11(PrepaidUser10 prepaidUser, NewPrepaidBaseTransaction10 prepaidTopup, PrepaidCard10 prepaidCard, CdtTransaction10 cdtTransaction, PrepaidMovementType type) throws Exception {
+
+    String codent = null;
+    try {
+      codent = parametersUtil.getString("api-prepaid", "cod_entidad", "v10");
+    } catch (SQLException e) {
+      codent = getConfigUtils().getProperty("tecnocom.codEntity");
+    }
+
+    TipoFactura tipoFactura;
+    if(PrepaidMovementType.TOPUP.equals(type)) {
+      tipoFactura = TipoFactura.CARGA_TRANSFERENCIA;
+    } else {
+      tipoFactura = TipoFactura.RETIRO_TRANSFERENCIA;
+    }
+
+    if (prepaidTopup != null) {
+      if (TransactionOriginType.POS.equals(prepaidTopup.getTransactionOriginType())) {
+        if (PrepaidMovementType.TOPUP.equals(type)) {
+          tipoFactura = TipoFactura.CARGA_EFECTIVO_COMERCIO_MULTICAJA;
+        } else {
+          tipoFactura = TipoFactura.RETIRO_EFECTIVO_COMERCIO_MULTICJA;
+        }
+      }
+    }
+
+    Account account = getAccountEJBBean10().findByUserId(prepaidUser.getId());
+    String centalta = "";
+    String cuenta = "";
+    if(account != null && !StringUtils.isBlank(account.getAccountNumber())) {
+      String accountNumber = account.getAccountNumber();
+      centalta = accountNumber.substring(4, 8);
+      cuenta = accountNumber.substring(12);
+    }
+    PrepaidMovement10 prepaidMovement = new PrepaidMovement10();
+    prepaidMovement.setIdMovimientoRef(cdtTransaction != null ? cdtTransaction.getTransactionReference() : getUniqueLong());
+    prepaidMovement.setIdPrepaidUser(prepaidUser.getId());
+
+    prepaidMovement.setIdTxExterno(cdtTransaction != null ? cdtTransaction.getExternalTransactionId() : getUniqueLong().toString());
+    prepaidMovement.setTipoMovimiento(type);
+    prepaidMovement.setMonto(BigDecimal.valueOf(getUniqueInteger()));
+    prepaidMovement.setEstado(PrepaidMovementStatus.PENDING);
+    prepaidMovement.setEstadoNegocio(BusinessStatusType.IN_PROCESS);
+    prepaidMovement.setCodent(codent);
+    prepaidMovement.setCentalta(centalta); //contrato (Numeros del 5 al 8) - se debe actualizar despues
+    prepaidMovement.setCuenta(cuenta); ////contrato (Numeros del 9 al 20) - se debe actualizar despues
+    prepaidMovement.setClamon(CodigoMoneda.CHILE_CLP);
+    prepaidMovement.setIndnorcor(IndicadorNormalCorrector.fromValue(tipoFactura.getCorrector())); //0-Normal
+    prepaidMovement.setTipofac(tipoFactura);
+    prepaidMovement.setFecfac(new Date(System.currentTimeMillis()));
+    prepaidMovement.setNumreffac(""); //se debe actualizar despues, es el id de PrepaidMovement10
+    prepaidMovement.setPan(prepaidCard != null ? prepaidCard.getPan() : ""); // se debe actualizar despues
+    prepaidMovement.setClamondiv(0);
+    prepaidMovement.setImpdiv(BigDecimal.ZERO);
+    prepaidMovement.setImpfac(prepaidTopup != null ? prepaidTopup.getAmount().getValue() : null);
+    prepaidMovement.setCmbapli(0); // se debe actualizar despues
+    prepaidMovement.setNumaut(""); // se debe actualizar despues con los 6 ultimos digitos de NumFacturaRef
+    prepaidMovement.setIndproaje(IndicadorPropiaAjena.AJENA); // A-Ajena
+    prepaidMovement.setCodcom(prepaidTopup != null ? prepaidTopup.getMerchantCode() : null);
+    prepaidMovement.setCodact(prepaidTopup != null ? prepaidTopup.getMerchantCategory() : null);
+    prepaidMovement.setImpliq(BigDecimal.ZERO); // se debe actualizar despues
+    prepaidMovement.setClamonliq(0); // se debe actualizar despues
+    prepaidMovement.setCodpais(CodigoPais.CHILE);
+    prepaidMovement.setNompob(""); // se debe actualizar despues
+    prepaidMovement.setNumextcta(0); // se debe actualizar despues
+    prepaidMovement.setNummovext(0); // se debe actualizar despues
+    prepaidMovement.setClamone(0); // se debe actualizar despues
+    prepaidMovement.setTipolin(""); // se debe actualizar despues
+    prepaidMovement.setLinref(0); // se debe actualizar despues
+    prepaidMovement.setNumbencta(1); // se debe actualizar despues
+    prepaidMovement.setNumplastico(0L); // se debe actualizar despues
+    prepaidMovement.setConTecnocom(ReconciliationStatusType.PENDING);
+    prepaidMovement.setConSwitch(ReconciliationStatusType.PENDING);
+    prepaidMovement.setOriginType(MovementOriginType.API);
+    prepaidMovement.setEstadoNegocio(BusinessStatusType.IN_PROCESS);
+    prepaidMovement.setNomcomred(prepaidTopup != null ? prepaidTopup.getMerchantName() != null ? prepaidTopup.getMerchantName() : getRandomString(10) : getRandomString(10));
+    prepaidMovement.setCardId(prepaidCard == null ? 0 : prepaidCard.getId());
+    return prepaidMovement;
+  }
+
+  @Deprecated
   public PrepaidMovement10 buildPrepaidMovement10(PrepaidUser10 prepaidUser, NewPrepaidBaseTransaction10 prepaidTopup, PrepaidCard10 prepaidCard, CdtTransaction10 cdtTransaction, PrepaidMovementType type) {
 
     String codent = null;
@@ -1216,7 +1309,12 @@ public class TestBaseUnit extends TestApiBase {
   public PrepaidMovement10 buildReversePrepaidMovement10(PrepaidUser10 prepaidUser, NewPrepaidTopup10 reverseRequest) {
     return buildReversePrepaidMovement10(prepaidUser, reverseRequest, null, PrepaidMovementType.TOPUP);
   }
-
+  public PrepaidMovement10 buildReversePrepaidMovement11(PrepaidUser10 prepaidUser, NewPrepaidTopup10 reverseRequest,PrepaidCard10 prepaidCard10) throws Exception {
+    return buildReversePrepaidMovement11(prepaidUser, reverseRequest, prepaidCard10, PrepaidMovementType.TOPUP);
+  }
+  public PrepaidMovement10 buildReversePrepaidMovement11(PrepaidUser10 prepaidUser, NewPrepaidTopup10 reverseRequest) throws Exception {
+    return buildReversePrepaidMovement11(prepaidUser, reverseRequest, null, PrepaidMovementType.TOPUP);
+  }
   public PrepaidMovement10 buildReversePrepaidMovement10(PrepaidUser10 prepaidUser, NewPrepaidWithdraw10 reverseRequest) {
     return buildReversePrepaidMovement10(prepaidUser, reverseRequest, null, PrepaidMovementType.WITHDRAW);
   }
@@ -1290,7 +1388,86 @@ public class TestBaseUnit extends TestApiBase {
 
     return prepaidMovement;
   }
+  public PrepaidMovement10 buildReversePrepaidMovement11(PrepaidUser10 prepaidUser, NewPrepaidBaseTransaction10 reverseRequest, PrepaidCard10 prepaidCard, PrepaidMovementType type) throws Exception {
 
+    String codent = null;
+    try {
+      codent = parametersUtil.getString("api-prepaid", "cod_entidad", "v10");
+    } catch (SQLException e) {
+      codent = getConfigUtils().getProperty("tecnocom.codEntity");
+    }
+
+    TipoFactura tipoFactura;
+    if(PrepaidMovementType.TOPUP.equals(type)){
+      tipoFactura = TipoFactura.ANULA_CARGA_TRANSFERENCIA;
+    } else {
+      tipoFactura = TipoFactura.ANULA_RETIRO_TRANSFERENCIA;
+    }
+
+    if (reverseRequest != null) {
+      if (TransactionOriginType.POS.equals(reverseRequest.getTransactionOriginType())) {
+        if(PrepaidMovementType.TOPUP.equals(type)){
+          tipoFactura = TipoFactura.ANULA_CARGA_EFECTIVO_COMERCIO_MULTICAJA;
+        } else {
+          tipoFactura = TipoFactura.ANULA_RETIRO_EFECTIVO_COMERCIO_MULTICJA;
+        }
+      }
+    }
+    Account account = getAccountEJBBean10().findByUserId(prepaidUser.getId());
+    String centalta = "";
+    String cuenta = "";
+    if(account != null && !StringUtils.isBlank(account.getAccountNumber())) {
+      String accountNumber = account.getAccountNumber();
+      centalta = accountNumber.substring(4, 8);
+      cuenta = accountNumber.substring(12);
+    }
+    if(prepaidCard == null){
+      prepaidCard = getPrepaidCardEJBBean11().getPrepaidCardByAccountId(account.getId());
+    }
+    PrepaidMovement10 prepaidMovement = new PrepaidMovement10();
+    prepaidMovement.setIdMovimientoRef(getUniqueLong());
+    prepaidMovement.setCardId(prepaidCard == null ? 0 : prepaidCard.getId());
+    prepaidMovement.setIdPrepaidUser(prepaidUser.getId());
+    prepaidMovement.setIdTxExterno(reverseRequest.getTransactionId());
+    prepaidMovement.setTipoMovimiento(type);
+    prepaidMovement.setMonto(BigDecimal.valueOf(getUniqueInteger()));
+    prepaidMovement.setEstado(PrepaidMovementStatus.PENDING);
+    prepaidMovement.setEstadoNegocio(BusinessStatusType.IN_PROCESS);
+    prepaidMovement.setCodent(codent);
+    prepaidMovement.setCentalta(centalta); //contrato (Numeros del 5 al 8) - se debe actualizar despues
+    prepaidMovement.setCuenta(cuenta); ////contrato (Numeros del 9 al 20) - se debe actualizar despues
+    prepaidMovement.setClamon(CodigoMoneda.CHILE_CLP);
+    prepaidMovement.setIndnorcor(IndicadorNormalCorrector.CORRECTORA); //0-Normal
+    prepaidMovement.setTipofac(tipoFactura);
+    prepaidMovement.setFecfac(new Date(System.currentTimeMillis()));
+    prepaidMovement.setNumreffac(""); //se debe actualizar despues, es el id de PrepaidMovement10
+    prepaidMovement.setPan(prepaidCard != null ? prepaidCard.getPan() : ""); // se debe actualizar despues
+    prepaidMovement.setClamondiv(0);
+    prepaidMovement.setImpdiv(BigDecimal.ZERO);
+    prepaidMovement.setImpfac(reverseRequest != null ? reverseRequest.getAmount().getValue() : null);
+    prepaidMovement.setCmbapli(0); // se debe actualizar despues
+    prepaidMovement.setNumaut(getRandomNumericString(6)); // se debe actualizar despues con los 6 ultimos digitos de NumFacturaRef
+    prepaidMovement.setIndproaje(IndicadorPropiaAjena.AJENA); // A-Ajena
+    prepaidMovement.setCodcom(reverseRequest != null ? reverseRequest.getMerchantCode() : null);
+    prepaidMovement.setCodact(reverseRequest != null ? reverseRequest.getMerchantCategory() : null);
+    prepaidMovement.setImpliq(BigDecimal.ZERO); // se debe actualizar despues
+    prepaidMovement.setClamonliq(0); // se debe actualizar despues
+    prepaidMovement.setCodpais(CodigoPais.CHILE);
+    prepaidMovement.setNompob(""); // se debe actualizar despues
+    prepaidMovement.setNumextcta(0); // se debe actualizar despues
+    prepaidMovement.setNummovext(0); // se debe actualizar despues
+    prepaidMovement.setClamone(0); // se debe actualizar despues
+    prepaidMovement.setTipolin(""); // se debe actualizar despues
+    prepaidMovement.setLinref(0); // se debe actualizar despues
+    prepaidMovement.setNumbencta(1); // se debe actualizar despues
+    prepaidMovement.setNumplastico(0L); // se debe actualizar despues
+    prepaidMovement.setConTecnocom(ReconciliationStatusType.PENDING);
+    prepaidMovement.setConSwitch(ReconciliationStatusType.PENDING);
+    prepaidMovement.setOriginType(MovementOriginType.API);
+    prepaidMovement.setNomcomred(reverseRequest != null ? reverseRequest.getMerchantName() != null ? reverseRequest.getMerchantName() : getRandomString(10) : getRandomString(10));
+
+    return prepaidMovement;
+  }
   /**
    *
    * @param prepaidMovement10

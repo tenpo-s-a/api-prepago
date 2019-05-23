@@ -259,8 +259,8 @@ public class Test_reverseTopupUserBalance_v10 extends TestBaseUnitApi {
     prepaidTopup.getAmount().setValue(BigDecimal.valueOf(5000));
 
     
-    PrepaidMovement10 prepaidMovement = buildReversePrepaidMovement10(prepaidUser, prepaidTopup);
-    prepaidMovement = createPrepaidMovement10(prepaidMovement);
+    PrepaidMovement10 prepaidMovement = buildReversePrepaidMovement11(prepaidUser, prepaidTopup,prepaidCard10);
+    prepaidMovement = createPrepaidMovement11(prepaidMovement);
 
     HttpResponse resp = reverseTopupUserBalance(prepaidUser.getUuid(),prepaidTopup);
 
@@ -270,7 +270,7 @@ public class Test_reverseTopupUserBalance_v10 extends TestBaseUnitApi {
     Assert.assertNotNull("Deberia tener error", errorObj);
     Assert.assertEquals("Deberia tener error code = 130003", REVERSA_RECIBIDA_PREVIAMENTE.getValue(), errorObj.get("code"));
 
-    List<PrepaidMovement10> movement = getPrepaidMovementEJBBean10().getPrepaidMovements(null, null,
+    List<PrepaidMovement10> movement = getPrepaidMovementEJBBean11().getPrepaidMovements(null, null,
       prepaidUser.getId(), prepaidTopup.getTransactionId(), PrepaidMovementType.TOPUP, null, null, null, IndicadorNormalCorrector.CORRECTORA, TipoFactura.ANULA_CARGA_EFECTIVO_COMERCIO_MULTICAJA, null, null);
 
     Assert.assertNotNull("Debe tener 1 movimiento de reversa", movement);
@@ -294,8 +294,8 @@ public class Test_reverseTopupUserBalance_v10 extends TestBaseUnitApi {
     prepaidTopup.setMerchantCode(NewPrepaidBaseTransaction10.WEB_MERCHANT_CODE);
     prepaidTopup.getAmount().setValue(BigDecimal.valueOf(500));
 
-    PrepaidMovement10 prepaidMovement = buildReversePrepaidMovement10(prepaidUser, prepaidTopup);
-    prepaidMovement = createPrepaidMovement10(prepaidMovement);
+    PrepaidMovement10 prepaidMovement = buildReversePrepaidMovement11(prepaidUser, prepaidTopup,prepaidCard10);
+    prepaidMovement = createPrepaidMovement11(prepaidMovement);
 
     HttpResponse resp = reverseTopupUserBalance(prepaidUser.getUuid(), prepaidTopup);
 
@@ -395,10 +395,10 @@ public class Test_reverseTopupUserBalance_v10 extends TestBaseUnitApi {
     prepaidTopup.setMerchantCode(getRandomNumericString(15));
     prepaidTopup.getAmount().setValue(BigDecimal.valueOf(500));
 
-    PrepaidMovement10 originalTopup = buildPrepaidMovement10(prepaidUser, new PrepaidTopup10(prepaidTopup));
+    PrepaidMovement10 originalTopup = buildPrepaidMovement11(prepaidUser, new PrepaidTopup10(prepaidTopup),prepaidCard10);
     originalTopup.setIdTxExterno(prepaidTopup.getTransactionId());
     originalTopup.setMonto(prepaidTopup.getAmount().getValue());
-    originalTopup = createPrepaidMovement10(originalTopup);
+    originalTopup = createPrepaidMovement11(originalTopup);
 
     Assert.assertNotNull("Debe tener id", originalTopup.getId());
     Assert.assertTrue("Debe tener id", originalTopup.getId() > 0);
@@ -414,7 +414,7 @@ public class Test_reverseTopupUserBalance_v10 extends TestBaseUnitApi {
     Assert.assertEquals("Deberia tener error code = 130004", REVERSA_TIEMPO_EXPIRADO.getValue(), errorObj.get("code"));
 
     // Se verifica que se tenga un registro de reversa
-    List<PrepaidMovement10> movement = getPrepaidMovementEJBBean10().getPrepaidMovements(null, null,
+    List<PrepaidMovement10> movement = getPrepaidMovementEJBBean11().getPrepaidMovements(null, null,
       prepaidUser.getId(), prepaidTopup.getTransactionId(), PrepaidMovementType.TOPUP, PrepaidMovementStatus.PROCESS_OK, null, null, IndicadorNormalCorrector.CORRECTORA, TipoFactura.ANULA_CARGA_EFECTIVO_COMERCIO_MULTICAJA, null, null);
 
     Assert.assertNull("No debe tener movimientos de reversa", movement);
@@ -436,10 +436,10 @@ public class Test_reverseTopupUserBalance_v10 extends TestBaseUnitApi {
     prepaidTopup.setMerchantCode(NewPrepaidBaseTransaction10.WEB_MERCHANT_CODE);
     prepaidTopup.getAmount().setValue(BigDecimal.valueOf(500));
 
-    PrepaidMovement10 originalTopup = buildPrepaidMovement10(prepaidUser, new PrepaidTopup10(prepaidTopup));
+    PrepaidMovement10 originalTopup = buildPrepaidMovement11(prepaidUser, new PrepaidTopup10(prepaidTopup),prepaidCard10);
     originalTopup.setMonto(prepaidTopup.getAmount().getValue());
     originalTopup.setIdTxExterno(prepaidTopup.getTransactionId());
-    originalTopup = createPrepaidMovement10(originalTopup);
+    originalTopup = createPrepaidMovement11(originalTopup);
 
     Assert.assertNotNull("Debe tener id", originalTopup.getId());
     Assert.assertTrue("Debe tener id", originalTopup.getId() > 0);
@@ -455,7 +455,7 @@ public class Test_reverseTopupUserBalance_v10 extends TestBaseUnitApi {
     Assert.assertEquals("Deberia tener error code = 130004", REVERSA_TIEMPO_EXPIRADO.getValue(), errorObj.get("code"));
 
     // Se verifica que se tenga un registro de reversa
-    List<PrepaidMovement10> movement = getPrepaidMovementEJBBean10().getPrepaidMovements(null, null,
+    List<PrepaidMovement10> movement = getPrepaidMovementEJBBean11().getPrepaidMovements(null, null,
       prepaidUser.getId(), prepaidTopup.getTransactionId(), PrepaidMovementType.TOPUP, PrepaidMovementStatus.PROCESS_OK, null, null, IndicadorNormalCorrector.CORRECTORA, TipoFactura.ANULA_CARGA_TRANSFERENCIA, null, null);
 
     Assert.assertNull("No debe tener movimientos de reversa", movement);
@@ -477,10 +477,10 @@ public class Test_reverseTopupUserBalance_v10 extends TestBaseUnitApi {
     prepaidTopup.setMerchantCode(getRandomNumericString(15));
     prepaidTopup.getAmount().setValue(BigDecimal.valueOf(500));
 
-    PrepaidMovement10 originalTopup = buildPrepaidMovement10(prepaidUser, new PrepaidTopup10(prepaidTopup));
+    PrepaidMovement10 originalTopup = buildPrepaidMovement11(prepaidUser, new PrepaidTopup10(prepaidTopup),prepaidCard10);
     originalTopup.setIdTxExterno(prepaidTopup.getTransactionId());
     originalTopup.setMonto(prepaidTopup.getAmount().getValue());
-    originalTopup = createPrepaidMovement10(originalTopup);
+    originalTopup = createPrepaidMovement11(originalTopup);
 
     Assert.assertNotNull("Debe tener id", originalTopup.getId());
     Assert.assertTrue("Debe tener id", originalTopup.getId() > 0);
@@ -491,7 +491,7 @@ public class Test_reverseTopupUserBalance_v10 extends TestBaseUnitApi {
 
     // Se verifica que se tenga un registro de reversa
 
-    List<PrepaidMovement10> movement = getPrepaidMovementEJBBean10().getPrepaidMovements(null, null,
+    List<PrepaidMovement10> movement = getPrepaidMovementEJBBean11().getPrepaidMovements(null, null,
       prepaidUser.getId(), prepaidTopup.getTransactionId(), PrepaidMovementType.TOPUP, PrepaidMovementStatus.PENDING, null, null, IndicadorNormalCorrector.CORRECTORA, TipoFactura.ANULA_CARGA_EFECTIVO_COMERCIO_MULTICAJA, null, null);
 
     Assert.assertNotNull("Debe tener movimientos de reversa", movement);
@@ -514,10 +514,10 @@ public class Test_reverseTopupUserBalance_v10 extends TestBaseUnitApi {
     prepaidTopup.setMerchantCode(NewPrepaidBaseTransaction10.WEB_MERCHANT_CODE);
     prepaidTopup.getAmount().setValue(BigDecimal.valueOf(500));
 
-    PrepaidMovement10 originalTopup = buildPrepaidMovement10(prepaidUser, new PrepaidTopup10(prepaidTopup));
+    PrepaidMovement10 originalTopup = buildPrepaidMovement11(prepaidUser, new PrepaidTopup10(prepaidTopup),prepaidCard10);
     originalTopup.setMonto(prepaidTopup.getAmount().getValue());
     originalTopup.setIdTxExterno(prepaidTopup.getTransactionId());
-    originalTopup = createPrepaidMovement10(originalTopup);
+    originalTopup = createPrepaidMovement11(originalTopup);
 
     Assert.assertNotNull("Debe tener id", originalTopup.getId());
     Assert.assertTrue("Debe tener id", originalTopup.getId() > 0);
@@ -527,7 +527,7 @@ public class Test_reverseTopupUserBalance_v10 extends TestBaseUnitApi {
     Assert.assertEquals("status 201", 201, resp.getStatus());
 
     // Se verifica que se tenga un registro de reversa
-    List<PrepaidMovement10> movement = getPrepaidMovementEJBBean10().getPrepaidMovements(null, null,
+    List<PrepaidMovement10> movement = getPrepaidMovementEJBBean11().getPrepaidMovements(null, null,
       prepaidUser.getId(), prepaidTopup.getTransactionId(), PrepaidMovementType.TOPUP, PrepaidMovementStatus.PENDING, null, null, IndicadorNormalCorrector.CORRECTORA, TipoFactura.ANULA_CARGA_TRANSFERENCIA, null, null);
 
     Assert.assertNotNull("Debe tener movimientos de reversa", movement);
@@ -550,10 +550,11 @@ public class Test_reverseTopupUserBalance_v10 extends TestBaseUnitApi {
     prepaidTopup.setMerchantCode(getRandomNumericString(15));
     prepaidTopup.getAmount().setValue(BigDecimal.valueOf(500));
 
-    PrepaidMovement10 originalTopup = buildPrepaidMovement10(prepaidUser, new PrepaidTopup10(prepaidTopup));
+    PrepaidMovement10 originalTopup = buildPrepaidMovement11(prepaidUser, new PrepaidTopup10(prepaidTopup));
+    originalTopup.setCardId(prepaidCard10.getId());
     originalTopup.setIdTxExterno(prepaidTopup.getTransactionId());
     originalTopup.setMonto(prepaidTopup.getAmount().getValue());
-    originalTopup = createPrepaidMovement10(originalTopup);
+    originalTopup = createPrepaidMovement11(originalTopup);
 
     Assert.assertNotNull("Debe tener id", originalTopup.getId());
     Assert.assertTrue("Debe tener id", originalTopup.getId() > 0);
@@ -569,7 +570,7 @@ public class Test_reverseTopupUserBalance_v10 extends TestBaseUnitApi {
     Assert.assertEquals("Deberia tener error code = 130002", REVERSA_INFORMACION_NO_CONCUERDA.getValue(), errorObj.get("code"));
 
     // Se verifica que se tenga un registro de reversa
-    List<PrepaidMovement10> movement = getPrepaidMovementEJBBean10().getPrepaidMovements(null, null,
+    List<PrepaidMovement10> movement = getPrepaidMovementEJBBean11().getPrepaidMovements(null, null,
       prepaidUser.getId(), prepaidTopup.getTransactionId(), PrepaidMovementType.TOPUP, PrepaidMovementStatus.PROCESS_OK, null, null, IndicadorNormalCorrector.CORRECTORA, TipoFactura.RETIRO_EFECTIVO_COMERCIO_MULTICJA, null, null);
 
     Assert.assertNull("No debe tener movimiento de reversa", movement);
@@ -591,10 +592,10 @@ public class Test_reverseTopupUserBalance_v10 extends TestBaseUnitApi {
     prepaidTopup.setMerchantCode(NewPrepaidBaseTransaction10.WEB_MERCHANT_CODE);
     prepaidTopup.getAmount().setValue(BigDecimal.valueOf(500));
 
-    PrepaidMovement10 originalTopup = buildPrepaidMovement10(prepaidUser, new PrepaidTopup10(prepaidTopup));
+    PrepaidMovement10 originalTopup = buildPrepaidMovement11(prepaidUser, new PrepaidTopup10(prepaidTopup),prepaidCard10);
     originalTopup.setMonto(prepaidTopup.getAmount().getValue());
     originalTopup.setIdTxExterno(prepaidTopup.getTransactionId());
-    originalTopup = createPrepaidMovement10(originalTopup);
+    originalTopup = createPrepaidMovement11(originalTopup);
 
     Assert.assertNotNull("Debe tener id", originalTopup.getId());
     Assert.assertTrue("Debe tener id", originalTopup.getId() > 0);
@@ -610,7 +611,7 @@ public class Test_reverseTopupUserBalance_v10 extends TestBaseUnitApi {
     Assert.assertEquals("Deberia tener error code = 130002", REVERSA_INFORMACION_NO_CONCUERDA.getValue(), errorObj.get("code"));
 
     // Se verifica que se tenga un registro de reversa
-    List<PrepaidMovement10> movement = getPrepaidMovementEJBBean10().getPrepaidMovements(null, null,
+    List<PrepaidMovement10> movement = getPrepaidMovementEJBBean11().getPrepaidMovements(null, null,
       prepaidUser.getId(), prepaidTopup.getTransactionId(), PrepaidMovementType.TOPUP, PrepaidMovementStatus.PROCESS_OK, null, null, IndicadorNormalCorrector.CORRECTORA, TipoFactura.RETIRO_TRANSFERENCIA, null, null);
 
     Assert.assertNull("No debe tener movimiento de reversa", movement);
@@ -641,10 +642,10 @@ public class Test_reverseTopupUserBalance_v10 extends TestBaseUnitApi {
     prepaidTopup.setRut(Integer.parseInt(prepaidUser.getDocumentNumber()));
 
 
-    PrepaidMovement10 originalTopup = buildPrepaidMovement10(prepaidUser, new PrepaidTopup10(prepaidTopup));
+    PrepaidMovement10 originalTopup = buildPrepaidMovement11(prepaidUser, new PrepaidTopup10(prepaidTopup),prepaidCard10);
     originalTopup.setIdTxExterno(prepaidTopup.getTransactionId());
     originalTopup.setMonto(prepaidTopup.getAmount().getValue());
-    originalTopup = createPrepaidMovement10(originalTopup);
+    originalTopup = createPrepaidMovement11(originalTopup);
 
     Assert.assertNotNull("Debe tener id", originalTopup.getId());
     Assert.assertTrue("Debe tener id", originalTopup.getId() > 0);
@@ -655,11 +656,13 @@ public class Test_reverseTopupUserBalance_v10 extends TestBaseUnitApi {
 
     // Se verifica que se tenga un registro de reversa
 
-    List<PrepaidMovement10> movement = getPrepaidMovementEJBBean10().getPrepaidMovements(null, null,
+    List<PrepaidMovement10> movement = getPrepaidMovementEJBBean11().getPrepaidMovements(null, null,
       prepaidUser.getId(), prepaidTopup.getTransactionId(), PrepaidMovementType.TOPUP, PrepaidMovementStatus.PENDING, null, null, IndicadorNormalCorrector.CORRECTORA, TipoFactura.ANULA_CARGA_EFECTIVO_COMERCIO_MULTICAJA, null, null);
 
     Assert.assertNotNull("Debe tener movimientos de reversa", movement);
     Assert.assertEquals("Debe tener movimientos de reversa", 1,movement.size());
   }
+
+
 
 }

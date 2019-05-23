@@ -32,7 +32,7 @@ public class Test_PrepaidEJBBean10_reverseTopupUserBalance extends TestBaseUnitA
     prepaidTopup.setMerchantCode(getRandomNumericString(15));
     prepaidTopup.getAmount().setValue(BigDecimal.valueOf(500));
 
-    PrepaidMovement10 originalTopup = buildPrepaidMovement10(prepaidUser, new PrepaidTopup10(prepaidTopup));
+    PrepaidMovement10 originalTopup = buildPrepaidMovement11(prepaidUser, new PrepaidTopup10(prepaidTopup),prepaidCard10);
     originalTopup.setIdTxExterno(prepaidTopup.getTransactionId());
     originalTopup.setMonto(prepaidTopup.getAmount().getValue());
     originalTopup = createPrepaidMovement10(originalTopup);
