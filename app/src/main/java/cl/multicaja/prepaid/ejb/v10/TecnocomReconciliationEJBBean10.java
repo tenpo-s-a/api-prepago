@@ -42,8 +42,9 @@ import javax.ejb.*;
 import javax.inject.Inject;
 import java.io.InputStream;
 import java.math.BigDecimal;
-import java.sql.Date;
+import java.math.RoundingMode;
 import java.sql.*;
+import java.sql.Date;
 import java.text.SimpleDateFormat;
 import java.time.*;
 import java.time.format.DateTimeFormatter;
@@ -95,6 +96,9 @@ public class TecnocomReconciliationEJBBean10 extends PrepaidBaseEJBBean10 implem
 
   @EJB
   private AccountEJBBean10 accountEJBBean10;
+
+  @EJB
+  private IpmEJBBean10 ipmEJBBean10;
 
   @Inject
   private PrepaidInvoiceDelegate10 prepaidInvoiceDelegate10;
@@ -167,6 +171,10 @@ public class TecnocomReconciliationEJBBean10 extends PrepaidBaseEJBBean10 implem
   public void setAccountEJBBean10(AccountEJBBean10 accountEJBBean10) {
     this.accountEJBBean10 = accountEJBBean10;
   }
+
+  public IpmEJBBean10 getIpmEJBBean10() { return ipmEJBBean10; }
+
+  public void setIpmEJBBean10(IpmEJBBean10 ipmEJBBean10) { this.ipmEJBBean10 = ipmEJBBean10; }
 
   public void setFeeService(FeeService feeService) { this.feeService = feeService; }
 
@@ -494,7 +502,7 @@ public class TecnocomReconciliationEJBBean10 extends PrepaidBaseEJBBean10 implem
     for (MovimientoTecnocom10 trx : trxs) {
       try {
 
-        //Se obtiene el pan
+        //Se obtiene el hashed pan
         String hashedPan = trx.getPan();
         System.out.println(String.format("[%s]  [%s]", hashedPan, trx.getContrato()));
 
@@ -580,19 +588,24 @@ public class TecnocomReconciliationEJBBean10 extends PrepaidBaseEJBBean10 implem
           prepaidInvoiceDelegate10.sendInvoice(prepaidInvoiceDelegate10.buildInvoiceData(prepaidMovement10,null));
         }
 
-        // Todo: Logica de la actualizacion del valor IPM
-        // Liquidacion IPM - Actualiza el valor de monto mastercard en la tabla de contabilidad
-        // Si el movimiento viene en estado OP (conciliado), se actualiza su valor de acuerdo al IPM
+        // Si el movimiento viene en estado OP (conciliado), se actualiza su valor de acuerdo al archivo IPM
         if (TecnocomReconciliationRegisterType.OP.equals(trx.getTipoReg())) {
-          // Se buscan los registros que coincidan en la tabla IPM
-          // Mismo PAN, mismo codcom, mismo, mismo num aut, monto 2.5% aproximado y que no hayan sido ya conciliados
-          // Si hay mas de uno, se elige el mas cercano
+          // Se busca el registro "mas parecido" en la tabla IPM
+          IpmMovement10 ipmMovement10 = ipmEJBBean10.findByReconciliationSimilarity(prepaidCard10.getPan(), trx.getCodCom(), trx.getImpFac().getValue(), trx.getNumAut());
+          if (ipmMovement10 != null) {
+            // Actualizar el valor de mastercard en la tablas de liquidacion
+            AccountingData10 accountingData10 = getPrepaidAccountingEJBBean10().searchAccountingByIdTrx(null, prepaidMovement10.getId());
+            accountingData10.getAmountMastercard().setValue(ipmMovement10.getCardholderBillingAmount());
+            getPrepaidAccountingEJBBean10().updateAccountingDataFull(null, accountingData10);
 
-          // Actualizar el valor en la tablas de liquidacion
-
-          // Marcar movimiento tomado en la tabla IPM como conciliado
+            // Marcar movimiento tomado en la tabla IPM como conciliado
+            getIpmEJBBean10().updateIpmMovementReconciledStatus(ipmMovement10.getId(), true);
+          } else {
+            String msg = String.format("Error while searching for similar to IPM movement similar to movement [id:%s][truncatedPan: %s][codcom:%s][impFac:%s][numaut:%s], not found", prepaidMovement10.getId(), prepaidCard10.getPan(), trx.getCodCom(), trx.getImpFac().getValue().setScale(2, RoundingMode.HALF_UP).toString(), trx.getNumAut());
+            log.error(msg);
+            throw new ValidationException(ERROR_DATA_NOT_FOUND.getValue(), msg);
+          }
         }
-
       } catch (Exception ex) {
         ex.printStackTrace();
         log.error(String.format("Error processing transaction [%s]", trx.getNumAut()));
@@ -600,16 +613,22 @@ public class TecnocomReconciliationEJBBean10 extends PrepaidBaseEJBBean10 implem
           trx.setErrorDetails(ex.getMessage());
         }
         processErrorTrx(fileId, trx);
-        throw ex; // Todo: borrar este throw, solo para tests
       }
     }
     log.info("INSERT AUT OUT");
   }
 
   private void insertMovementFees(PrepaidMovement10 prepaidMovement10) throws Exception {
-    // Pide la lista de comisiones al servicio
-    Fee fees = getFeeService().calculateFees(prepaidMovement10.getTipoMovimiento(), prepaidMovement10.getClamon(), prepaidMovement10.getImpfac().longValue());
-    List<Charge> feeCharges = fees.getCharges();
+    List<Charge> feeCharges;
+    try {
+      // Pide la lista de comisiones al servicio
+      Fee fees = getFeeService().calculateFees(prepaidMovement10.getTipoMovimiento(), prepaidMovement10.getClamon(), prepaidMovement10.getImpfac().longValue());
+      feeCharges = fees.getCharges();
+    } catch (Exception e) {
+      e.printStackTrace();
+      log.error(String.format("Error consuming fee service for movement [TipoMovimiento:%s][Clamon:%s][ImpFac:%s]", prepaidMovement10.getTipoMovimiento(), prepaidMovement10.getClamon(), prepaidMovement10.getImpfac().longValue()));
+      return;
+    }
 
     if (feeCharges != null) {
       // Por cada comision, almacenarla en la BD

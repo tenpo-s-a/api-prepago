@@ -32,13 +32,14 @@ public class IpmEJBBean10 extends PrepaidBaseEJBBean10 {
   private static Log log = LogFactory.getLog(IpmEJBBean10.class);
 
   private static final String FIND_IPM_MOVEMENT_BY_RECONCILIATION_SIMILARITY =
-    String.format("SELECT * FROM %s.ipm_file_data " +
+    String.format("SELECT * FROM " +
+                     "  %s.ipm_file_data " +
                      "WHERE " +
                      "  pan = ? AND " +
                      "  merchant_code = ? AND " +
                      "  approval_code = ? AND " +
                      "  reconciled = FALSE AND " +
-                     "  transaction_amount >= ? AND transaction_amount <= ?", getSchemaAccounting());
+                     "  cardholder_billing_amount >= ? AND cardholder_billing_amount <= ?", getSchemaAccounting());
 
   private static final String UPDATE_IPM_MOVEMENT_RECONCILED_STATUS = "UPDATE %s.ipm_file_data SET reconciled = %b WHERE id = %s";
 
@@ -49,6 +50,7 @@ public class IpmEJBBean10 extends PrepaidBaseEJBBean10 {
    *      - Mismo numaut
    *      - No este conciliado
    *      - Tenga 2.5% de diferencia en el monto (Entre 97.5% y 102.5%)
+   *      - Si hay mas de uno, elige el mas cercano al monto original (100.0%)
    * @param truncatedPan
    * @param codcom
    * @param amount
@@ -86,7 +88,7 @@ public class IpmEJBBean10 extends PrepaidBaseEJBBean10 {
       BigDecimal minDelta = BigDecimal.valueOf(Double.MAX_VALUE);
       IpmMovement10 minFound = null;
       for (IpmMovement10 foundMovement : ipmMovement10List) {
-        BigDecimal amountDelta = amount.subtract(foundMovement.getTransactionAmount()).abs(); // Buscar diferencia con el amount
+        BigDecimal amountDelta = amount.subtract(foundMovement.getCardholderBillingAmount()).abs(); // Buscar diferencia con el cardholder_billing_amount
         if (amountDelta.compareTo(minDelta) < 0) { // Esta mas cerca que el actual?
           minDelta = amountDelta;
           minFound = foundMovement; // Nuevo candidato

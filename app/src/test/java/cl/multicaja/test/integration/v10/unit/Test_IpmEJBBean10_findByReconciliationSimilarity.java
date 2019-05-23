@@ -22,48 +22,48 @@ public class Test_IpmEJBBean10_findByReconciliationSimilarity extends TestBaseUn
   public void findByReconciliationSimilarity_findOk() throws Exception {
     // Inserta un movimiento original (100%)
     IpmMovement10 insertedMovement = buildIpmMovement10();
-    insertIpmMovement(insertedMovement);
+    createIpmMovement(insertedMovement);
 
     // Inserta un movimiento que tiene el 90% del valor original
     IpmMovement10 veryLowMovement = buildIpmMovement10();
     veryLowMovement.setPan(insertedMovement.getPan());
     veryLowMovement.setMerchantCode(insertedMovement.getMerchantCode());
     veryLowMovement.setApprovalCode(insertedMovement.getApprovalCode());
-    veryLowMovement.setTransactionAmount(insertedMovement.getTransactionAmount().multiply(new BigDecimal(0.90f)));
-    insertIpmMovement(veryLowMovement);
+    veryLowMovement.setCardholderBillingAmount(insertedMovement.getTransactionAmount().multiply(new BigDecimal(0.90f)));
+    createIpmMovement(veryLowMovement);
 
     // Inserta un movimiento que tiene el 99.0% del valor original
     IpmMovement10 lowMovement = buildIpmMovement10();
     lowMovement.setPan(insertedMovement.getPan());
     lowMovement.setMerchantCode(insertedMovement.getMerchantCode());
     lowMovement.setApprovalCode(insertedMovement.getApprovalCode());
-    lowMovement.setTransactionAmount(insertedMovement.getTransactionAmount().multiply(new BigDecimal(0.99f)));
-    insertIpmMovement(lowMovement);
+    lowMovement.setCardholderBillingAmount(insertedMovement.getTransactionAmount().multiply(new BigDecimal(0.99f)));
+    createIpmMovement(lowMovement);
 
     // Inserta un movimiento que tiene el 99.1% del valor original, PERO ya esta conciliado, por lo que no deberia ser elegido
     IpmMovement10 lowReconciledMovement = buildIpmMovement10();
     lowReconciledMovement.setPan(insertedMovement.getPan());
     lowReconciledMovement.setMerchantCode(insertedMovement.getMerchantCode());
     lowReconciledMovement.setApprovalCode(insertedMovement.getApprovalCode());
-    lowReconciledMovement.setTransactionAmount(insertedMovement.getTransactionAmount().multiply(new BigDecimal(0.991f)));
+    lowReconciledMovement.setCardholderBillingAmount(insertedMovement.getTransactionAmount().multiply(new BigDecimal(0.991f)));
     lowReconciledMovement.setReconciled(true);
-    insertIpmMovement(lowReconciledMovement);
+    createIpmMovement(lowReconciledMovement);
 
     // Inserta un movimiento que tiene el 110% del valor original
     IpmMovement10 veryHighMovement = buildIpmMovement10();
     veryHighMovement.setPan(insertedMovement.getPan());
     veryHighMovement.setMerchantCode(insertedMovement.getMerchantCode());
     veryHighMovement.setApprovalCode(insertedMovement.getApprovalCode());
-    veryHighMovement.setTransactionAmount(insertedMovement.getTransactionAmount().multiply(new BigDecimal(1.10f)));
-    insertIpmMovement(veryHighMovement);
+    veryHighMovement.setCardholderBillingAmount(insertedMovement.getTransactionAmount().multiply(new BigDecimal(1.10f)));
+    createIpmMovement(veryHighMovement);
 
     // Inserta un movimiento que tiene el 101% del valor original
     IpmMovement10 highMovement = buildIpmMovement10();
     highMovement.setPan(insertedMovement.getPan());
     highMovement.setMerchantCode(insertedMovement.getMerchantCode());
     highMovement.setApprovalCode(insertedMovement.getApprovalCode());
-    highMovement.setTransactionAmount(insertedMovement.getTransactionAmount().multiply(new BigDecimal(1.01f)));
-    insertIpmMovement(highMovement);
+    highMovement.setCardholderBillingAmount(insertedMovement.getTransactionAmount().multiply(new BigDecimal(1.01f)));
+    createIpmMovement(highMovement);
 
     // Buscamos un valor que sea cerca al 99.2% del valor original
     IpmMovement10 ipmMovement10 = getIpmEJBBean10().findByReconciliationSimilarity(insertedMovement.getPan(), insertedMovement.getMerchantCode(), insertedMovement.getTransactionAmount().multiply(new BigDecimal(0.992)), insertedMovement.getApprovalCode());
@@ -99,85 +99,5 @@ public class Test_IpmEJBBean10_findByReconciliationSimilarity extends TestBaseUn
     Assert.assertEquals("Debe tener mismo reconciled", expected.getReconciled(), found.getReconciled());
     Assert.assertTrue("Debe tener mismo created_at", isRecentLocalDateTime(found.getTimestamps().getCreatedAt(), 5));
     Assert.assertTrue("Debe tener mismo updated_at", isRecentLocalDateTime(found.getTimestamps().getUpdatedAt(), 5));
-  }
-
-  public void insertIpmMovement(IpmMovement10 ipmMovement10) throws Exception {
-    String insertQuery = String.format(
-      "INSERT INTO %s.ipm_file_data (" +
-        "  file_id, " +
-        "  message_type, " +
-        "  function_code, " +
-        "  message_reason, " +
-        "  message_number, " +
-        "  pan, " +
-        "  transaction_amount, " +
-        "  reconciliation_amount, " +
-        "  cardholder_billing_amount, " +
-        "  reconciliation_conversion_rate, " +
-        "  cardholder_billing_conversion_rate, " +
-        "  transaction_local_date, " +
-        "  approval_code, " +
-        "  transaction_currency_code, " +
-        "  reconciliation_currency_code, " +
-        "  cardholder_billing_currency_code, " +
-        "  merchant_code, " +
-        "  merchant_name, " +
-        "  merchant_state, " +
-        "  merchant_country, " +
-        "  transaction_life_cycle_id, " +
-        "  reconciled, " +
-        "  created_at, " +
-        "  updated_at " +
-        ") VALUES (" +
-        "  %s, " +
-        "  %s, " +
-        "  %s, " +
-        "  %s, " +
-        "  %s, " +
-        "  '%s', " +
-        "  %s, " +
-        "  %s, " +
-        "  %s, " +
-        "  %s, " +
-        "  %s, " +
-        "  timezone('utc', now()), " +
-        "  '%s', " +
-        "  %s, " +
-        "  %s, " +
-        "  %s, " +
-        "  '%s', " +
-        "  '%s', " +
-        "  '%s', " +
-        "  '%s', " +
-        "  '%s', " +
-        "  %b, " +
-        "  timezone('utc', now()), " +
-        "  timezone('utc', now()) " +
-        ")",
-        getSchemaAccounting(),
-        ipmMovement10.getFileId(),
-        ipmMovement10.getMessageType(),
-        ipmMovement10.getFunctionCode(),
-        ipmMovement10.getMessageReason(),
-        ipmMovement10.getMessageNumber(),
-        ipmMovement10.getPan(),
-        ipmMovement10.getTransactionAmount(),
-        ipmMovement10.getReconciliationAmount(),
-        ipmMovement10.getCardholderBillingAmount(),
-        ipmMovement10.getReconciliationConversionRate(),
-        ipmMovement10.getCardholderBillingConversionRate(),
-        ipmMovement10.getApprovalCode(),
-        ipmMovement10.getTransactionCurrencyCode(),
-        ipmMovement10.getReconciliationCurrencyCode(),
-        ipmMovement10.getCardholderBillingCurrencyCode(),
-        ipmMovement10.getMerchantCode(),
-        ipmMovement10.getMerchantName(),
-        ipmMovement10.getMerchantState(),
-        ipmMovement10.getMerchantCountry(),
-        ipmMovement10.getTransactionLifeCycleId(),
-        ipmMovement10.getReconciled()
-    );
-
-    getDbUtils().getJdbcTemplate().execute(insertQuery);
   }
 }
