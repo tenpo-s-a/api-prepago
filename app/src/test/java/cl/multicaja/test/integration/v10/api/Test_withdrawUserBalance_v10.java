@@ -104,12 +104,11 @@ public class Test_withdrawUserBalance_v10 extends TestBaseUnitApi {
 
     Map<String, String> rutData = withdraw.getMcVoucherData().get(1);
     Assert.assertNotNull("Deberia tener rutData", rutData);
-    Assert.assertTrue("Deberia tener el atributo name", variableData.containsKey("name"));
-    Assert.assertFalse("Deberia tener el atributo", StringUtils.isAllBlank(variableData.get("name")));
-    Assert.assertEquals("Deberia tener el atributo name = rut","rut", variableData.get("name"));
-    Assert.assertTrue("Deberia tener el atributo value", variableData.containsKey("value"));
-    Assert.assertNotNull("Deberia tener el atributo value", variableData.get("value"));
-    Assert.assertEquals("Deberia tener el atributo name = rut", prepaidUser.getDocumentNumber(), variableData.get("value"));
+    Assert.assertTrue("Deberia tener el atributo name", rutData.containsKey("name"));
+    Assert.assertFalse("Deberia tener el atributo", StringUtils.isAllBlank(rutData.get("name")));
+    Assert.assertEquals("Deberia tener el atributo name = rut","rut", rutData.get("name"));
+    Assert.assertTrue("Deberia tener el atributo value", rutData.containsKey("value"));
+    Assert.assertNotNull("Deberia tener el atributo value", rutData.get("value"));
 
     PrepaidMovement10 dbPrepaidMovement = getPrepaidMovementEJBBean10().getLastPrepaidMovementByIdPrepaidUserAndOneStatus(prepaidUser.getId(), PrepaidMovementStatus.PROCESS_OK);
     Assert.assertNotNull("Deberia tener un movimiento", dbPrepaidMovement);
@@ -232,7 +231,7 @@ public class Test_withdrawUserBalance_v10 extends TestBaseUnitApi {
 
     Assert.assertTrue("Deberia tener el atributo name", rutData.containsKey("name"));
     Assert.assertNotNull("Deberia tener el atributo", rutData.get("name"));
-    Assert.assertEquals("Deberia tener el atributo name = rut","rut", variableData.get("name"));
+    Assert.assertEquals("Deberia tener el atributo name = rut","rut", rutData.get("name"));
     Assert.assertTrue("Deberia tener el atributo value", rutData.containsKey("value"));
     Assert.assertNotNull("Deberia tener el atributo value", rutData.get("value"));
 
@@ -298,7 +297,7 @@ public class Test_withdrawUserBalance_v10 extends TestBaseUnitApi {
 
     Assert.assertTrue("Deberia tener el atributo name", rutData.containsKey("name"));
     Assert.assertNotNull("Deberia tener el atributo", rutData.get("name"));
-    Assert.assertEquals("Deberia tener el atributo name = rut","rut", variableData.get("name"));
+    Assert.assertEquals("Deberia tener el atributo name = rut","rut", rutData.get("name"));
     Assert.assertTrue("Deberia tener el atributo value", rutData.containsKey("value"));
     Assert.assertNotNull("Deberia tener el atributo value", rutData.get("value"));
 
