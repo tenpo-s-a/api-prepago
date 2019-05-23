@@ -129,6 +129,7 @@ pipeline:
     repo: mccontainerregistry.azurecr.io/api-prepago
     tags:
       - ${DRONE_COMMIT_SHA}
+      - ${DRONE_TAG}
       - latest
     secrets: [ docker_username, docker_password ]
     when:
