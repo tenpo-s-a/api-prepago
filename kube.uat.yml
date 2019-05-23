@@ -68,7 +68,7 @@ spec:
           - name: API_ENVIRONMENT
             value: ${API_ENVIRONMENT}
           - name: TENPO_USER_API_URL
-            value: "http://${TENPO_USER_API_HOST}/v1/user-management"
+            value: http://${TENPO_USER_API_HOST}/v1/user-management
           - name: TECNOCOM_MOCK_IMPL
             value: "false"
           - name: TECNOCOM_APIKEY
