@@ -11,6 +11,7 @@ import java.util.Map;
  */
 public class PrepaidWithdraw10 extends NewPrepaidWithdraw10 implements IPrepaidTransaction10 {
 
+  @JsonIgnore
   private String status;
   private Timestamps timestamps;
   @JsonIgnore
