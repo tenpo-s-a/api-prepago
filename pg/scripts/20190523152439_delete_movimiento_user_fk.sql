@@ -14,14 +14,14 @@
 --    limitations under the License.
 --
 
--- // alter_table_card_drop_constrain
+-- // delete_movimiento_user_fk
 -- Migration SQL that makes the change goes here.
 
-prp_tarjeta_id_usuario_fkey
+ALTER TABLE  ${schema}.prp_movimiento
+  DROP CONSTRAINT prp_movimiento_id_usuario_fkey;
+
+
 -- //@UNDO
 -- SQL to undo the change goes here.
 
---ALTER TABLE prepago.prp_tarjeta
-  --ADD CONSTRAINT prp_tarjeta_id_usuario_fkey FOREIGN KEY (id_usuario)
-    --  REFERENCES prepago.prp_usuario (id) MATCH SIMPLE
-      --ON UPDATE NO ACTION ON DELETE NO ACTION;
+

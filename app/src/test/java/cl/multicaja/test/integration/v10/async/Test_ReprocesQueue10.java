@@ -151,7 +151,9 @@ public class Test_ReprocesQueue10 extends TestBaseUnitAsync {
     cdtTransaction = createCdtTransaction10(cdtTransaction);
 
     PrepaidMovement10 prepaidMovement = buildPrepaidMovement10(prepaidUser, prepaidTopup, cdtTransaction);
-    prepaidMovement = createPrepaidMovement10(prepaidMovement);
+    prepaidMovement.setCardId(0L);
+
+    prepaidMovement = createPrepaidMovement11(prepaidMovement);
 
     tc.getTecnocomService().setAutomaticError(true);
     tc.getTecnocomService().setRetorno(CodigoRetorno._1010);
@@ -335,11 +337,11 @@ public class Test_ReprocesQueue10 extends TestBaseUnitAsync {
 
     PrepaidWithdraw10 withdraw10 = new PrepaidWithdraw10(prepaidWithdraw);
 
-    PrepaidMovement10 originalWithdraw = buildPrepaidMovement10(prepaidUser, withdraw10);
+    PrepaidMovement10 originalWithdraw = buildPrepaidMovement11(prepaidUser, withdraw10);
     originalWithdraw.setEstado(PrepaidMovementStatus.PROCESS_OK);
     originalWithdraw.setIdTxExterno(withdraw10.getTransactionId());
     originalWithdraw.setMonto(withdraw10.getAmount().getValue());
-    originalWithdraw = createPrepaidMovement10(originalWithdraw);
+    originalWithdraw = createPrepaidMovement11(originalWithdraw);
 
     PrepaidMovement10 reverse = buildReversePrepaidMovement10(prepaidUser, prepaidWithdraw);
     reverse.setIdTxExterno(withdraw10.getTransactionId());

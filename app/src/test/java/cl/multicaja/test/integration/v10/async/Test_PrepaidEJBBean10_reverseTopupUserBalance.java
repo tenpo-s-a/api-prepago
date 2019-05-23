@@ -27,7 +27,7 @@ public class Test_PrepaidEJBBean10_reverseTopupUserBalance extends TestBaseUnitA
 
     PrepaidCard10 prepaidCard10 = buildPrepaidCardWithTecnocomData(prepaidUser, account);
     prepaidCard10 = createPrepaidCardV2(prepaidCard10);
-    System.out.println(prepaidCard10.getId());
+
     NewPrepaidTopup10 prepaidTopup = buildNewPrepaidTopup10();
     prepaidTopup.setMerchantCode(getRandomNumericString(15));
     prepaidTopup.getAmount().setValue(BigDecimal.valueOf(500));
@@ -35,7 +35,7 @@ public class Test_PrepaidEJBBean10_reverseTopupUserBalance extends TestBaseUnitA
     PrepaidMovement10 originalTopup = buildPrepaidMovement11(prepaidUser, new PrepaidTopup10(prepaidTopup),prepaidCard10);
     originalTopup.setIdTxExterno(prepaidTopup.getTransactionId());
     originalTopup.setMonto(prepaidTopup.getAmount().getValue());
-    originalTopup = createPrepaidMovement10(originalTopup);
+    originalTopup = createPrepaidMovement11(originalTopup);
 
     Assert.assertNotNull("Debe tener id", originalTopup.getId());
     Assert.assertTrue("Debe tener id", originalTopup.getId() > 0);

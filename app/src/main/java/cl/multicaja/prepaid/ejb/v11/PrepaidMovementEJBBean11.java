@@ -199,6 +199,18 @@ public class PrepaidMovementEJBBean11 extends PrepaidMovementEJBBean10 {
     }
   }
 
+  @Override
+  public List<PrepaidMovement10> getPrepaidMovementByIdPrepaidUserAndEstado(Long cardId, PrepaidMovementStatus estado) throws Exception {
+    if (cardId == null) {
+      throw new BadRequestException(PARAMETRO_FALTANTE_$VALUE).setData(new KeyValue("value", "cardId"));
+    }
+    if (estado == null) {
+      throw new BadRequestException(PARAMETRO_FALTANTE_$VALUE).setData(new KeyValue("value", "estado"));
+    }
+    return this.getPrepaidMovements(null, null, null, null, null, estado, null,
+      null, null, null, null, null, null, null, null, null, null,cardId);
+  }
+
   public PrepaidMovement10 getPrepaidMovementForAut(Long idPrepaidUser, TipoFactura tipoFactura, String numaut, String codcom) throws Exception {
     if (idPrepaidUser == null) {
       throw new BadRequestException(PARAMETRO_FALTANTE_$VALUE).setData(new KeyValue("value", "idPrepaidUser"));
