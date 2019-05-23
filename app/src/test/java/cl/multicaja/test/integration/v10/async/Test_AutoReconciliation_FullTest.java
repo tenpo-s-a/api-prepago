@@ -130,7 +130,7 @@ public class Test_AutoReconciliation_FullTest extends TestBaseUnitAsync {
   }
 
   @Test
-  public void processTecnocomTableData_expireNotified() throws Exception {
+  public void processTecnocomTableData_expireNotifiedSuscription() throws Exception {
     PrepaidTopup10 topup = buildPrepaidTopup10();
 
     // Se inserta un movimiento en estado NOTIFIED
@@ -186,7 +186,63 @@ public class Test_AutoReconciliation_FullTest extends TestBaseUnitAsync {
   }
 
   @Test
-  public void processTecnocomTableData_expireAuthorized() throws Exception {
+  public void processTecnocomTableData_expireNotifiedPurchase() throws Exception {
+    PrepaidTopup10 topup = buildPrepaidTopup10();
+
+    // Se inserta un movimiento en estado NOTIFIED
+    PrepaidMovement10 insertedMovement = buildPrepaidMovementV2(prepaidUser, topup, prepaidCard, null, PrepaidMovementType.TOPUP);
+    insertedMovement.setEstado(PrepaidMovementStatus.NOTIFIED);
+    insertedMovement.setTipoMovimiento(PrepaidMovementType.PURCHASE);
+    insertedMovement.setTipofac(TipoFactura.COMPRA_INTERNACIONAL);
+    insertedMovement = createPrepaidMovement11(insertedMovement);
+
+    // Crea 1 archivo extra para que se expire el movimiento
+    List<ReconciliationFile10> createdFiles = createReconciliationFiles(1);
+
+    // Se inserta un movimiento extra en estado NOTIFIED, este no debe expirar, ya que solo tendra 1 archivo
+    PrepaidMovement10 doNotExpireMovement = buildPrepaidMovementV2(prepaidUser, topup, prepaidCard, null, PrepaidMovementType.TOPUP);
+    doNotExpireMovement.setEstado(PrepaidMovementStatus.NOTIFIED);
+    doNotExpireMovement.setTipoMovimiento(PrepaidMovementType.PURCHASE);
+    doNotExpireMovement.setTipofac(TipoFactura.COMPRA_INTERNACIONAL);
+    doNotExpireMovement = createPrepaidMovement11(doNotExpireMovement);
+
+    // Crea 1 archivo extra para que se expire el movimiento
+    List<ReconciliationFile10> extraFiles = createReconciliationFiles(1);
+
+    // Como hay dos archivos tecnocom en la tabla, debe expirar el primer movimiento NOTIFIED
+    getTecnocomReconciliationEJBBean10().processTecnocomTableData(tecnocomReconciliationFile10.getId());
+
+    PrepaidMovement10 foundMovement = getPrepaidMovementEJBBean11().getPrepaidMovementById(insertedMovement.getId());
+    Assert.assertEquals("Debe haber cambiado estado con tecnocom a NOT_RECONCILED", ReconciliationStatusType.NOT_RECONCILED, foundMovement.getConTecnocom());
+    Assert.assertEquals("Debe haber cambiado a estado EXPIRED", PrepaidMovementStatus.EXPIRED, foundMovement.getEstado());
+
+    // Este movimiento no debe cambiar sus estados, dado que no han pasado suficientes archivos (solo 1)
+    PrepaidMovement10 foundNotExpiredMovement = getPrepaidMovementEJBBean11().getPrepaidMovementById(doNotExpireMovement.getId());
+    Assert.assertEquals("Debe seguir en estado_con_ecnocom PENDING", ReconciliationStatusType.PENDING, foundNotExpiredMovement.getConTecnocom());
+    Assert.assertEquals("Debe seguir en estado NOTIFIED", PrepaidMovementStatus.NOTIFIED, foundNotExpiredMovement.getEstado());
+
+    // Revisar que exista el evento reversado
+    Queue qResp = camelFactory.createJMSQueue(KafkaEventsRoute10.TRANSACTION_REVERSED_TOPIC);
+    ExchangeData<String> event = (ExchangeData<String>) camelFactory.createJMSMessenger(30000, 60000)
+      .getMessage(qResp, foundMovement.getIdTxExterno());
+
+    Assert.assertNotNull("Deberia existir un evento de transaccion reversada", event);
+    Assert.assertNotNull("Deberia existir un evento de transaccion reversada", event.getData());
+
+    TransactionEvent transactionEvent = getJsonParser().fromJson(event.getData(), TransactionEvent.class);
+
+    Assert.assertEquals("Debe tener el mismo id", foundMovement.getIdTxExterno(), transactionEvent.getTransaction().getRemoteTransactionId());
+    Assert.assertEquals("Debe tener el mismo accountId", account.getUuid(), transactionEvent.getAccountId());
+    Assert.assertEquals("Debe tener el mismo userId", prepaidUser.getUuid(), transactionEvent.getUserId());
+    Assert.assertEquals("Debe tener el mismo transactiontype", "PURCHASE", transactionEvent.getTransaction().getType());
+    Assert.assertEquals("Debe tener el mismo status", "REVERSED", transactionEvent.getTransaction().getStatus());
+
+    deleteReconciliationFiles(createdFiles);
+    deleteReconciliationFiles(extraFiles);
+  }
+
+  @Test
+  public void processTecnocomTableData_expireAuthorizedSuscription() throws Exception {
     PrepaidTopup10 topup = buildPrepaidTopup10();
 
     // Se inserta un movimiento en estado NOTIFIED
@@ -253,6 +309,80 @@ public class Test_AutoReconciliation_FullTest extends TestBaseUnitAsync {
     Assert.assertEquals("Debe tener el mismo accountId", account.getUuid(), transactionEvent.getAccountId());
     Assert.assertEquals("Debe tener el mismo userId", prepaidUser.getUuid(), transactionEvent.getUserId());
     Assert.assertEquals("Debe tener el mismo transactiontype", "SUSCRIPTION", transactionEvent.getTransaction().getType());
+    Assert.assertEquals("Debe tener el mismo status", "REVERSED", transactionEvent.getTransaction().getStatus());
+
+    deleteReconciliationFiles(createdFiles);
+    deleteReconciliationFiles(extraFiles);
+  }
+
+  @Test
+  public void processTecnocomTableData_expireAuthorizedPurchase() throws Exception {
+    PrepaidTopup10 topup = buildPrepaidTopup10();
+
+    // Se inserta un movimiento en estado NOTIFIED
+    PrepaidMovement10 insertedMovement = buildPrepaidMovementV2(prepaidUser, topup, prepaidCard, null, PrepaidMovementType.TOPUP);
+    insertedMovement.setEstado(PrepaidMovementStatus.AUTHORIZED);
+    insertedMovement.setTipoMovimiento(PrepaidMovementType.PURCHASE);
+    insertedMovement.setTipofac(TipoFactura.COMPRA_INTERNACIONAL);
+    insertedMovement = createPrepaidMovement11(insertedMovement);
+
+    AccountingData10 accdata = buildRandomAccouting();
+    accdata.setIdTransaction(insertedMovement.getId());
+    accdata.setStatus(AccountingStatusType.PENDING);
+    accdata.setAccountingStatus(AccountingStatusType.PENDING);
+    getPrepaidAccountingEJBBean10().saveAccountingData(null, accdata);
+
+    ClearingData10 liqInsert = createClearingData(accdata, AccountingStatusType.INITIAL);
+    getPrepaidClearingEJBBean10().insertClearingData(null, liqInsert);
+
+    // Crea 1 archivos extra para que se expire el movimiento
+    List<ReconciliationFile10> createdFiles = createReconciliationFiles(1);
+
+    // Se inserta un movimiento en estado AUTHORIZED que no expirarara, ya que solo tiene 6 archivos entre medio
+    PrepaidMovement10 doNotExpireMovement = buildPrepaidMovementV2(prepaidUser, topup, prepaidCard, null, PrepaidMovementType.TOPUP);
+    doNotExpireMovement.setEstado(PrepaidMovementStatus.AUTHORIZED);
+    doNotExpireMovement.setTipoMovimiento(PrepaidMovementType.PURCHASE);
+    doNotExpireMovement.setTipofac(TipoFactura.COMPRA_INTERNACIONAL);
+    doNotExpireMovement = createPrepaidMovement11(doNotExpireMovement);
+
+    // Crea 6 archivos extra para que se expire el movimiento original
+    List<ReconciliationFile10> extraFiles = createReconciliationFiles(6);
+
+    // Como hay 7 archivos tecnocom en la tabla, debe expirar el movimiento original AUTHORIZED
+    getTecnocomReconciliationEJBBean10().processTecnocomTableData(tecnocomReconciliationFile10.getId());
+
+    PrepaidMovement10 foundMovement = getPrepaidMovementEJBBean11().getPrepaidMovementById(insertedMovement.getId());
+    Assert.assertEquals("Debe haber cambiado estado con tecnocom a NOT_RECONCILED", ReconciliationStatusType.NOT_RECONCILED, foundMovement.getConTecnocom());
+    Assert.assertEquals("Debe haber cambiado a estado EXPIRED", PrepaidMovementStatus.EXPIRED, foundMovement.getEstado());
+
+    // Este movimiento no debe cambiar sus estados, dado que no han pasado suficientes archivos (solo 1)
+    PrepaidMovement10 foundNotExpiredMovement = getPrepaidMovementEJBBean11().getPrepaidMovementById(doNotExpireMovement.getId());
+    Assert.assertEquals("Debe seguir en estado_con_ecnocom PENDING", ReconciliationStatusType.PENDING, foundNotExpiredMovement.getConTecnocom());
+    Assert.assertEquals("Debe seguir en estado AUTHORIZED", PrepaidMovementStatus.AUTHORIZED, foundNotExpiredMovement.getEstado());
+
+    // Verificar que exista en la tablas de contabilidad (acc y liq) en sus estados (INITIAL y PENDING)
+    AccountingData10 acc = getPrepaidAccountingEJBBean10().searchAccountingByIdTrx(null,foundMovement.getId());
+    Assert.assertNotNull("Debe existir en accounting", acc);
+    Assert.assertEquals("Debe tener estado NOT_OK", AccountingStatusType.NOT_OK, acc.getAccountingStatus());
+
+    ClearingData10 liq = getPrepaidClearingEJBBean10().searchClearingDataByAccountingId(null, acc.getId());
+    Assert.assertNotNull("Debe existir en clearing", liq);
+    Assert.assertEquals("Debe tener estado NOT_SEND", AccountingStatusType.NOT_SEND, liq.getStatus());
+
+    // Verificar que exista en la cola de eventos transaction_reversed
+    Queue qResp = camelFactory.createJMSQueue(KafkaEventsRoute10.TRANSACTION_REVERSED_TOPIC);
+    ExchangeData<String> event = (ExchangeData<String>) camelFactory.createJMSMessenger(30000, 60000)
+      .getMessage(qResp, foundMovement.getIdTxExterno());
+
+    Assert.assertNotNull("Deberia existir un evento de transaccion reversada", event);
+    Assert.assertNotNull("Deberia existir un evento de transaccion reversada", event.getData());
+
+    TransactionEvent transactionEvent = getJsonParser().fromJson(event.getData(), TransactionEvent.class);
+
+    Assert.assertEquals("Debe tener el mismo id", foundMovement.getIdTxExterno(), transactionEvent.getTransaction().getRemoteTransactionId());
+    Assert.assertEquals("Debe tener el mismo accountId", account.getUuid(), transactionEvent.getAccountId());
+    Assert.assertEquals("Debe tener el mismo userId", prepaidUser.getUuid(), transactionEvent.getUserId());
+    Assert.assertEquals("Debe tener el mismo transactiontype", "PURCHASE", transactionEvent.getTransaction().getType());
     Assert.assertEquals("Debe tener el mismo status", "REVERSED", transactionEvent.getTransaction().getStatus());
 
     deleteReconciliationFiles(createdFiles);
