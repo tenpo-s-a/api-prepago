@@ -17,9 +17,7 @@
 -- // delete_movimiento_user_fk
 -- Migration SQL that makes the change goes here.
 
-ALTER TABLE  ${schema}.prp_movimiento
-  DROP CONSTRAINT prp_movimiento_id_usuario_fkey;
-
+  ALTER TABLE  ${schema}.prp_movimiento DROP CONSTRAINT prp_movimiento_id_usuario_fkey;
 
 -- //@UNDO
 -- SQL to undo the change goes here.

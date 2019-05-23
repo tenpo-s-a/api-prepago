@@ -190,7 +190,7 @@ public class PrepaidMovementEJBBean11 extends PrepaidMovementEJBBean10 {
     query.append(cardId != null ? String.format("id_tarjeta = %d AND ",cardId) : "");
     query.append("1 = 1");
     log.info(String.format("[getPrepaidMovements] Buscando movimiento [id: %d]", id));
-
+    log.info("[getPrepaidMovements Query]  "+query.toString());
     try {
       return getDbUtils().getJdbcTemplate().query(query.toString(), this.getMovementMapper());
     } catch (EmptyResultDataAccessException ex) {

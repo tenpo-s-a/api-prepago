@@ -17,7 +17,9 @@
 -- // alter_table_card_drop_constrain
 -- Migration SQL that makes the change goes here.
 
-prp_tarjeta_id_usuario_fkey
+ALTER TABLE  ${schema}.prp_tarjeta
+  DROP CONSTRAINT prp_tarjeta_id_usuario_fkey;
+
 -- //@UNDO
 -- SQL to undo the change goes here.
 
