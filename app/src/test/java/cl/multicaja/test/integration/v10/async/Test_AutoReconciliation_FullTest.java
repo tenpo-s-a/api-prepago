@@ -1,42 +1,32 @@
 package cl.multicaja.test.integration.v10.async;
 
-import cl.multicaja.accounting.model.v10.AccountingData10;
-import cl.multicaja.accounting.model.v10.AccountingStatusType;
-import cl.multicaja.accounting.model.v10.ClearingData10;
-import cl.multicaja.accounting.model.v10.UserAccount;
+import cl.multicaja.accounting.model.v10.*;
 import cl.multicaja.camel.ExchangeData;
 import cl.multicaja.cdt.model.v10.CdtTransaction10;
 import cl.multicaja.core.exceptions.BaseException;
 import cl.multicaja.core.utils.EncryptUtil;
-import cl.multicaja.core.utils.Utils;
 import cl.multicaja.core.utils.db.DBUtils;
 import cl.multicaja.prepaid.async.v10.routes.KafkaEventsRoute10;
 import cl.multicaja.prepaid.helpers.fees.FeeService;
 import cl.multicaja.prepaid.helpers.fees.model.Charge;
 import cl.multicaja.prepaid.helpers.fees.model.ChargeType;
 import cl.multicaja.prepaid.helpers.fees.model.Fee;
-import cl.multicaja.prepaid.helpers.mcRed.McRedReconciliationFileDetail;
 import cl.multicaja.prepaid.helpers.tecnocom.TecnocomServiceHelper;
 import cl.multicaja.prepaid.helpers.tecnocom.model.TecnocomReconciliationRegisterType;
 import cl.multicaja.prepaid.kafka.events.TransactionEvent;
-import cl.multicaja.prepaid.kafka.events.model.TransactionType;
 import cl.multicaja.prepaid.model.v10.*;
 import cl.multicaja.prepaid.model.v11.Account;
 import cl.multicaja.prepaid.model.v11.PrepaidMovementFeeType;
 import cl.multicaja.tecnocom.constants.*;
-import org.apache.commons.lang3.StringUtils;
 import org.junit.AfterClass;
 import org.junit.Assert;
 import org.junit.BeforeClass;
 import org.junit.Test;
 import org.mockito.Mockito;
-import org.netbeans.modules.schema2beans.ValidateException;
 
 import javax.jms.Queue;
 import java.math.BigDecimal;
 import java.math.RoundingMode;
-import java.sql.Date;
-import java.sql.Time;
 import java.sql.Timestamp;
 import java.time.*;
 import java.util.ArrayList;
@@ -390,12 +380,15 @@ public class Test_AutoReconciliation_FullTest extends TestBaseUnitAsync {
   }
 
   @Test
-  public void processTecnocomTableData_whenMovNotInDBAndFileStateIsAU_movIsInsertedAndLiqAccMustExistInInitialState() throws Exception {
+  public void processTecnocomTableData_whenMovPurchaseInForeignCoin_NotInDBAndFileStateIsAU_movIsInsertedAndLiqAccMustExistInInitialState() throws Exception {
     MovimientoTecnocom10 movimientoTecnocom10 = createMovimientoTecnocom(tecnocomReconciliationFile10.getId());
     movimientoTecnocom10.setTipoReg(TecnocomReconciliationRegisterType.AU);
+    movimientoTecnocom10.setTipoFac(TipoFactura.COMPRA_INTERNACIONAL);
+    movimientoTecnocom10.setIndNorCor(IndicadorNormalCorrector.NORMAL.getValue());
+    movimientoTecnocom10.setClamone(CodigoMoneda.USA_USD);
     movimientoTecnocom10 = getTecnocomReconciliationEJBBean10().insertaMovimientoTecnocom(movimientoTecnocom10);
 
-    // Prepara un mock del servicio de fees, para que retornes las fees esperadas
+    // Prepara un mock del servicio de fees, para que retorne las fees esperadas
     prepareCalculateFeesMock(movimientoTecnocom10.getImpFac().getValue());
 
     getTecnocomReconciliationEJBBean10().processTecnocomTableData(tecnocomReconciliationFile10.getId());
@@ -410,11 +403,15 @@ public class Test_AutoReconciliation_FullTest extends TestBaseUnitAsync {
     Assert.assertNotNull("Debe existir en accounting", acc);
     Assert.assertEquals("Debe tener estado PENDING", AccountingStatusType.PENDING, acc.getStatus());
     Assert.assertEquals("Debe tener estado PENDING", AccountingStatusType.PENDING, acc.getAccountingStatus());
+    Assert.assertEquals("Debe ser del tipo COMPRA_OTRA_MONEDA", AccountingTxType.COMPRA_OTRA_MONEDA, acc.getType());
+    Assert.assertEquals("Debe ser del tipo mov COMPRA_OTRA_MONEDA", AccountingMovementType.COMPRA_OTRA_MONEDA, acc.getAccountingMovementType());
+
+    // Compras Internacionales en moneda extranjera: Regla de contabilidad 1:
 
     ClearingData10 liq = getPrepaidClearingEJBBean10().searchClearingDataByAccountingId(null, acc.getId());
     Assert.assertNotNull("Debe existir en clearing", liq);
     Assert.assertEquals("Debe tener estado INITIAL", AccountingStatusType.INITIAL, liq.getStatus());
-
+/*
     // Verificar que exista en la cola de eventos transaction_authorized
     Queue qResp = camelFactory.createJMSQueue(KafkaEventsRoute10.TRANSACTION_AUTHORIZED_TOPIC);
     ExchangeData<String> event = (ExchangeData<String>) camelFactory.createJMSMessenger(30000, 60000)
@@ -430,7 +427,7 @@ public class Test_AutoReconciliation_FullTest extends TestBaseUnitAsync {
     Assert.assertEquals("Debe tener el mismo userId", prepaidUser.getUuid(), transactionEvent.getUserId());
     Assert.assertEquals("Debe tener el mismo transactiontype", "PURCHASE", transactionEvent.getTransaction().getType());
     Assert.assertEquals("Debe tener el mismo status", "AUTHORIZED", transactionEvent.getTransaction().getStatus());
-
+*/
     // Verificar que se hayan creado las comisiones del nuevo movimiento
     List<PrepaidMovementFee10> prepaidMovementFee10List = getPrepaidMovementEJBBean11().getPrepaidMovementFeesByMovementId(prepaidMovement10.getId());
     Assert.assertEquals("Debe tener 2 fees asignadas", 2, prepaidMovementFee10List.size());

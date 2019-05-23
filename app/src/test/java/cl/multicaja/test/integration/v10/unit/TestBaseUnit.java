@@ -28,7 +28,6 @@ import cl.multicaja.tecnocom.constants.*;
 import cl.multicaja.tecnocom.dto.AltaClienteDTO;
 import cl.multicaja.tecnocom.dto.DatosTarjetaDTO;
 import cl.multicaja.tecnocom.dto.InclusionMovimientosDTO;
-import cl.multicaja.accounting.model.v10.UserAccountNew;
 import org.apache.commons.lang3.RandomUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.junit.Assert;
@@ -1522,7 +1521,7 @@ public class TestBaseUnit extends TestApiBase {
     accounting10.setExchangeRateDif(new BigDecimal(getUniqueInteger()));
 
     accounting10.setConciliationDate(new Timestamp((new Date()).getTime()));
-    accounting10.setAccountingMovementType(AccountingMovementType.COMPRA_MONEDA);
+    accounting10.setAccountingMovementType(AccountingMovementType.COMPRA_OTRA_MONEDA);
     accounting10.setCollectorFee(new BigDecimal(getUniqueInteger()));
     accounting10.setCollectorFeeIva(new BigDecimal(getUniqueInteger()));
 
@@ -1561,7 +1560,7 @@ public class TestBaseUnit extends TestApiBase {
     accounting10.setExchangeRateDif(new BigDecimal(getUniqueInteger()));
 
     accounting10.setConciliationDate(new Timestamp((new Date()).getTime()));
-    accounting10.setAccountingMovementType(AccountingMovementType.COMPRA_MONEDA);
+    accounting10.setAccountingMovementType(AccountingMovementType.COMPRA_OTRA_MONEDA);
     accounting10.setCollectorFee(new BigDecimal(getUniqueInteger()));
     accounting10.setCollectorFeeIva(new BigDecimal(getUniqueInteger()));
 
@@ -1603,7 +1602,7 @@ public class TestBaseUnit extends TestApiBase {
          accounting10.setExchangeRateDif(new BigDecimal(getUniqueInteger()));
 
          accounting10.setConciliationDate(new Timestamp((new Date()).getTime()));
-         accounting10.setAccountingMovementType(AccountingMovementType.COMPRA_MONEDA);
+         accounting10.setAccountingMovementType(AccountingMovementType.COMPRA_OTRA_MONEDA);
          accounting10.setCollectorFee(new BigDecimal(getUniqueInteger()));
          accounting10.setCollectorFeeIva(new BigDecimal(getUniqueInteger()));
 
@@ -1655,7 +1654,7 @@ public class TestBaseUnit extends TestApiBase {
            accounting10.setAmount(amountUsd);
 
            accounting10.setConciliationDate(new Timestamp((new Date()).getTime()));
-           accounting10.setAccountingMovementType(AccountingMovementType.COMPRA_MONEDA);
+           accounting10.setAccountingMovementType(AccountingMovementType.COMPRA_OTRA_MONEDA);
            accounting10.setCollectorFee(new BigDecimal(getUniqueInteger()));
            accounting10.setCollectorFeeIva(new BigDecimal(getUniqueInteger()));
 
@@ -1692,7 +1691,7 @@ public class TestBaseUnit extends TestApiBase {
            accounting10.setAmount(amountUsd);
 
            accounting10.setConciliationDate(new Timestamp((new Date()).getTime()));
-           accounting10.setAccountingMovementType(AccountingMovementType.COMPRA_MONEDA);
+           accounting10.setAccountingMovementType(AccountingMovementType.COMPRA_OTRA_MONEDA);
            accounting10.setCollectorFee(new BigDecimal(getUniqueInteger()));
            accounting10.setCollectorFeeIva(new BigDecimal(getUniqueInteger()));
 
@@ -1729,7 +1728,7 @@ public class TestBaseUnit extends TestApiBase {
            accounting10.setAmount(amountUsd);
 
            accounting10.setConciliationDate(new Timestamp((new Date()).getTime()));
-           accounting10.setAccountingMovementType(AccountingMovementType.COMPRA_MONEDA);
+           accounting10.setAccountingMovementType(AccountingMovementType.COMPRA_OTRA_MONEDA);
            accounting10.setCollectorFee(new BigDecimal(getUniqueInteger()));
            accounting10.setCollectorFeeIva(new BigDecimal(getUniqueInteger()));
 
@@ -1765,7 +1764,7 @@ public class TestBaseUnit extends TestApiBase {
            accounting10.setAmount(amountUsd);
 
            accounting10.setConciliationDate(new Timestamp((new Date()).getTime()));
-           accounting10.setAccountingMovementType(AccountingMovementType.COMPRA_MONEDA);
+           accounting10.setAccountingMovementType(AccountingMovementType.COMPRA_OTRA_MONEDA);
            accounting10.setCollectorFee(new BigDecimal(getUniqueInteger()));
            accounting10.setCollectorFeeIva(new BigDecimal(getUniqueInteger()));
 

@@ -16,7 +16,6 @@ import cl.multicaja.core.utils.db.RowMapper;
 import cl.multicaja.prepaid.ejb.v10.MailPrepaidEJBBean10;
 import cl.multicaja.prepaid.ejb.v10.PrepaidBaseEJBBean10;
 import cl.multicaja.prepaid.ejb.v10.PrepaidCardEJBBean10;
-import cl.multicaja.prepaid.ejb.v10.PrepaidMovementEJBBean10;
 import cl.multicaja.prepaid.ejb.v11.PrepaidMovementEJBBean11;
 import cl.multicaja.prepaid.helpers.CalculationsHelper;
 import cl.multicaja.prepaid.helpers.EncryptHelper;
@@ -483,8 +482,8 @@ public class PrepaidAccountingEJBBean10 extends PrepaidBaseEJBBean10 implements 
       movementType = AccountingMovementType.COMPRA_PESOS;
       trxOriginType = TransactionOriginType.MASTERCARDINT;
     } else if (TipoFactura.COMPRA_INTERNACIONAL.equals(movement.getTipofac()) && !movement.getClamondiv().equals(CodigoMoneda.CHILE_CLP.getValue())) {
-      type = AccountingTxType.COMPRA_MONEDA;
-      movementType = AccountingMovementType.COMPRA_MONEDA;
+      type = AccountingTxType.COMPRA_OTRA_MONEDA;
+      movementType = AccountingMovementType.COMPRA_OTRA_MONEDA;
       trxOriginType = TransactionOriginType.MASTERCARDINT;
     } else if (TipoFactura.ANULA_COMPRA_INTERNACIONAL.equals(movement.getTipofac()) ||
                TipoFactura.ANULA_SUSCRIPCION_INTERNACIONAL.equals(movement.getTipofac())) {
@@ -1052,7 +1051,7 @@ public class PrepaidAccountingEJBBean10 extends PrepaidBaseEJBBean10 implements 
             .add(getCalculationsHelper().calculatePercentageValue(percentage, BigDecimal.valueOf(this.getCalculationsHelper().getCalculatorParameter10().getIVA())));
 
           break;
-        case COMPRA_MONEDA:
+        case COMPRA_OTRA_MONEDA:
           //Monto fijo
           fee = this.getCalculationsHelper().getCalculatorParameter10().getOTHER_CURRENCY_PURCHASE_FEE_AMOUNT();
 
@@ -1118,7 +1117,7 @@ public class PrepaidAccountingEJBBean10 extends PrepaidBaseEJBBean10 implements 
     PrepaidMovementType movementType = null;
     switch (txType) {
       case COMPRA_PESOS:
-      case COMPRA_MONEDA:
+      case COMPRA_OTRA_MONEDA:
         movementType = PrepaidMovementType.PURCHASE;
         break;
       case COMPRA_SUSCRIPCION:
@@ -1131,7 +1130,7 @@ public class PrepaidAccountingEJBBean10 extends PrepaidBaseEJBBean10 implements 
     TipoFactura tipoFactura = null;
     switch (txType) {
       case COMPRA_PESOS:
-      case COMPRA_MONEDA:
+      case COMPRA_OTRA_MONEDA:
         tipoFactura = TipoFactura.COMPRA_INTERNACIONAL;
         break;
       case COMPRA_SUSCRIPCION:
@@ -1237,7 +1236,7 @@ public class PrepaidAccountingEJBBean10 extends PrepaidBaseEJBBean10 implements 
     } else if(CodigoMoneda.CHILE_CLP.getValue().equals(trx.getTransactionCurrencyCode())) {
       return AccountingTxType.COMPRA_PESOS;
     } else {
-      return AccountingTxType.COMPRA_MONEDA;
+      return AccountingTxType.COMPRA_OTRA_MONEDA;
     }
   }
 
@@ -1259,7 +1258,7 @@ public class PrepaidAccountingEJBBean10 extends PrepaidBaseEJBBean10 implements 
     } else if(CodigoMoneda.CHILE_CLP.getValue().equals(trx.getTransactionCurrencyCode())) {
       return AccountingMovementType.COMPRA_PESOS;
     } else {
-      return AccountingMovementType.COMPRA_MONEDA;
+      return AccountingMovementType.COMPRA_OTRA_MONEDA;
     }
   }
 

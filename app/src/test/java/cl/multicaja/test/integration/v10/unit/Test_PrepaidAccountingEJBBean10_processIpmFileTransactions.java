@@ -126,7 +126,7 @@ public class Test_PrepaidAccountingEJBBean10_processIpmFileTransactions extends 
 
       for(AccountingData10 trx : trxs) {
         Assert.assertNotNull(String.format("Debe tener id [%s]", trx.getId()), trx.getId());
-        Assert.assertEquals("Debe tener type [COMPRA_MONEDA]", AccountingTxType.COMPRA_MONEDA, trx.getType());
+        Assert.assertEquals("Debe tener type [COMPRA_OTRA_MONEDA]", AccountingTxType.COMPRA_OTRA_MONEDA, trx.getType());
         Assert.assertEquals("Debe origin [IPM]", AccountingOriginType.IPM, trx.getOrigin());
 
         BigDecimal amountBalance = BigDecimal.ZERO
