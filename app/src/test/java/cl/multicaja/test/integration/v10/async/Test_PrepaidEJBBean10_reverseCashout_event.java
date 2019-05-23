@@ -37,7 +37,7 @@ public class Test_PrepaidEJBBean10_reverseCashout_event extends TestBaseUnitAsyn
     originalTopup.setIdTxExterno(prepaidWithdraw.getTransactionId());
     originalTopup.setMonto(prepaidWithdraw.getAmount().getValue());
     originalTopup.setCardId(prepaidCard10.getId());
-    originalTopup = createPrepaidMovement10(originalTopup);
+    originalTopup = createPrepaidMovement11(originalTopup);
 
     Assert.assertNotNull("Debe tener id", originalTopup.getId());
     Assert.assertTrue("Debe tener id", originalTopup.getId() > 0);
