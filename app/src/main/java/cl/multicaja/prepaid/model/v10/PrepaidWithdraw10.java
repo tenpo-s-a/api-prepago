@@ -24,6 +24,7 @@ public class PrepaidWithdraw10 extends NewPrepaidWithdraw10 implements IPrepaidT
 
   // Utilizados para la respuesta al POS/switch
   private Long id;
+  @JsonIgnore
   private Long userId;
   private String mcVoucherType;
   private List<Map<String, String>> mcVoucherData;

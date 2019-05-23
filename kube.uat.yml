@@ -108,6 +108,8 @@ metadata:
   namespace: prepaid
 spec:
   hosts:
+  - "users.uat.multicajadigital"
+  addresses:
   - "40.70.68.63"
   location: MESH_EXTERNAL
   ports:
