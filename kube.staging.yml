@@ -69,6 +69,8 @@ spec:
             value: ${API_ENVIRONMENT}
           - name: TECNOCOM_MOCK_DATA_PATH
             value: /mock/data
+          - name: TENPO_USER_API_URL
+            value: "http://${TENPO_USER_API_HOST}/v1/user-management"
       imagePullSecrets:
         - name: container-reg-credentials
       volumes:
@@ -113,6 +115,21 @@ spec:
   ports:
   - number: 9092
     name: tcp-api-prepaid-kafka
+    protocol: TCP
+  resolution: NONE
+---
+apiVersion: networking.istio.io/v1alpha3
+kind: ServiceEntry
+metadata:
+  name: api-prepaid-user-management
+  namespace: prepaid
+spec:
+  hosts:
+  - "40.70.68.63"
+  location: MESH_EXTERNAL
+  ports:
+  - number: 8080
+    name: tcp-api-prepaid-user-management
     protocol: TCP
   resolution: NONE
 ---

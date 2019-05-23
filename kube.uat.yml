@@ -67,6 +67,20 @@ spec:
             value: ${DB_HOST_FQDN}
           - name: API_ENVIRONMENT
             value: ${API_ENVIRONMENT}
+          - name: TENPO_USER_API_URL
+            value: "http://${TENPO_USER_API_HOST}/v1/user-management"
+          - name: TECNOCOM_MOCK_IMPL
+            value: "false"
+          - name: TECNOCOM_APIKEY
+            value: ${TECNOCOM_API_KEY}
+          - name: TECNOCOM_APIURL
+            value: ${TECNOCOM_API_URL}
+          - name: TECNOCOM_CHANNEL
+            value: ${TECNOCOM_CHANNEL}
+          - name: TECNOCOM_CODENTITY
+            value: "${TECNOCOM_CODENT}"
+          - name: TECNOCOM_ORDER
+            value: ${TECNOCOM_ORDER}
       imagePullSecrets:
         - name: container-reg-credentials
 ---
@@ -86,3 +100,21 @@ spec:
     name: http-api-prepaid-tecnocom
     protocol: HTTP
   resolution: NONE
+---
+apiVersion: networking.istio.io/v1alpha3
+kind: ServiceEntry
+metadata:
+  name: api-prepaid-user-management
+  namespace: prepaid
+spec:
+  hosts:
+  - "users.uat.multicajadigital"
+  addresses:
+  - "40.70.68.63"
+  location: MESH_EXTERNAL
+  ports:
+  - number: 8080
+    name: tcp-api-prepaid-user-management
+    protocol: TCP
+  resolution: NONE
+---

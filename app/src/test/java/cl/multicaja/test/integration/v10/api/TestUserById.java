@@ -15,7 +15,7 @@ public class TestUserById {
 
   @Test
   public void testSuccess() throws TimeoutException, BaseException {
-    ApiCall apiCall = new ApiCall();
+    ApiCall apiCall = ApiCall.getInstance();
     apiCall.setApiUrl(URL);
     UUID id = UUID.fromString("774284d0-b07c-4aab-9bef-727bb4283ee8");
     User user = apiCall.getUserById(id);
@@ -25,7 +25,7 @@ public class TestUserById {
 
   @Test
   public void testNotFound() throws TimeoutException, BaseException {
-    ApiCall apiCall = new ApiCall();
+    ApiCall apiCall = ApiCall.getInstance();
     apiCall.setApiUrl(URL);
     UUID id = UUID.fromString("956c767f-7a8c-4ddb-ada5-f01886ffa451");
     User user = apiCall.getUserById(id);

@@ -96,7 +96,7 @@ public class PendingTopup10 extends BaseProcessor10 {
 
             data.setPrepaidCard10(prepaidCard);
             String nomcomred = prepaidTopup.getMerchantName();
-            String pan = getRoute().getEncryptUtil().decrypt(prepaidCard.getEncryptedPan());
+            String pan = getRoute().getEncryptHelper().decryptPan(prepaidCard.getEncryptedPan());
 
             InclusionMovimientosDTO inclusionMovimientosDTO = getRoute().getTecnocomServiceHelper().topup(account.getAccountNumber(), pan, nomcomred, prepaidMovement);
 
