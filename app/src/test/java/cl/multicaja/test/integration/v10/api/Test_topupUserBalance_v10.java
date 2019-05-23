@@ -50,9 +50,6 @@ public class Test_topupUserBalance_v10 extends TestBaseUnitApi {
     Assert.assertNotNull("Deberia ser un PrepaidTopup10",topup);
     Assert.assertNotNull("Deberia tener timestamps", topup.getTimestamps());
     Assert.assertNotNull("Deberia tener id", topup.getId());
-    Assert.assertNotNull("Deberia tener userId", topup.getUserId());
-    Assert.assertFalse("Deberia tener status", StringUtils.isBlank(topup.getStatus()));
-    Assert.assertEquals("Deberia tener status = exitoso", "exitoso", topup.getStatus());
     Assert.assertNull("No deberia tener rut", topup.getRut());
 
     Assert.assertNotNull("Deberia tener el tipo de voucher", topup.getMcVoucherType());
@@ -100,9 +97,6 @@ public class Test_topupUserBalance_v10 extends TestBaseUnitApi {
     Assert.assertNotNull("Deberia ser un PrepaidTopup10",topup);
     Assert.assertNotNull("Deberia tener timestamps", topup.getTimestamps());
     Assert.assertNotNull("Deberia tener id", topup.getId());
-    Assert.assertNotNull("Deberia tener userId", topup.getUserId());
-    Assert.assertFalse("Deberia tener status", StringUtils.isBlank(topup.getStatus()));
-    Assert.assertEquals("Deberia tener status = exitoso", "exitoso", topup.getStatus());
     Assert.assertNull("No deberia tener rut", topup.getRut());
 
     Assert.assertNotNull("Deberia tener el tipo de voucher", topup.getMcVoucherType());
@@ -151,9 +145,6 @@ public class Test_topupUserBalance_v10 extends TestBaseUnitApi {
     Assert.assertNotNull("Deberia ser un PrepaidTopup10",topup);
     Assert.assertNotNull("Deberia tener timestamps", topup.getTimestamps());
     Assert.assertNotNull("Deberia tener id", topup.getId());
-    Assert.assertNotNull("Deberia tener userId", topup.getUserId());
-    Assert.assertFalse("Deberia tener status", StringUtils.isBlank(topup.getStatus()));
-    Assert.assertEquals("Deberia tener status = exitoso", "exitoso", topup.getStatus());
     Assert.assertNull("No deberia tener rut", topup.getRut());
 
     Assert.assertNotNull("Deberia tener el tipo de voucher", topup.getMcVoucherType());
@@ -204,9 +195,6 @@ public class Test_topupUserBalance_v10 extends TestBaseUnitApi {
     Assert.assertNotNull("Deberia ser un PrepaidTopup10",topup);
     Assert.assertNotNull("Deberia tener timestamps", topup.getTimestamps());
     Assert.assertNotNull("Deberia tener id", topup.getId());
-    Assert.assertNotNull("Deberia tener userId", topup.getUserId());
-    Assert.assertFalse("Deberia tener status", StringUtils.isBlank(topup.getStatus()));
-    Assert.assertEquals("Deberia tener status = exitoso", "exitoso", topup.getStatus());
     Assert.assertNull("No deberia tener rut", topup.getRut());
 
     Assert.assertNotNull("Deberia tener el tipo de voucher", topup.getMcVoucherType());
@@ -596,9 +584,6 @@ public class Test_topupUserBalance_v10 extends TestBaseUnitApi {
       Assert.assertNotNull("Deberia ser un PrepaidTopup10",topup);
       Assert.assertNotNull("Deberia tener timestamps", topup.getTimestamps());
       Assert.assertNotNull("Deberia tener id", topup.getId());
-      Assert.assertNotNull("Deberia tener userId", topup.getUserId());
-      Assert.assertFalse("Deberia tener status", StringUtils.isBlank(topup.getStatus()));
-      Assert.assertEquals("Deberia tener status = exitoso", "exitoso", topup.getStatus());
       Assert.assertNull("No deberia tener rut", topup.getRut());
 
       // Segunda vez
@@ -630,9 +615,6 @@ public class Test_topupUserBalance_v10 extends TestBaseUnitApi {
       Assert.assertNotNull("Deberia ser un PrepaidTopup10",topup);
       Assert.assertNotNull("Deberia tener timestamps", topup.getTimestamps());
       Assert.assertNotNull("Deberia tener id", topup.getId());
-      Assert.assertNotNull("Deberia tener userId", topup.getUserId());
-      Assert.assertFalse("Deberia tener status", StringUtils.isBlank(topup.getStatus()));
-      Assert.assertEquals("Deberia tener status = exitoso", "exitoso", topup.getStatus());
       Assert.assertNull("No deberia tener rut", topup.getRut());
 
       // Segunda vez
@@ -670,9 +652,6 @@ public class Test_topupUserBalance_v10 extends TestBaseUnitApi {
       Assert.assertNotNull("Deberia ser un PrepaidTopup10",topup);
       Assert.assertNotNull("Deberia tener timestamps", topup.getTimestamps());
       Assert.assertNotNull("Deberia tener id", topup.getId());
-      Assert.assertNotNull("Deberia tener userId", topup.getUserId());
-      Assert.assertFalse("Deberia tener status", StringUtils.isBlank(topup.getStatus()));
-      Assert.assertEquals("Deberia tener status = exitoso", "exitoso", topup.getStatus());
       Assert.assertNull("No deberia tener rut", topup.getRut());
 
       Assert.assertNotNull("Deberia tener el tipo de voucher", topup.getMcVoucherType());
@@ -723,9 +702,6 @@ public class Test_topupUserBalance_v10 extends TestBaseUnitApi {
       Assert.assertNotNull("Deberia ser un PrepaidTopup10",topup);
       Assert.assertNotNull("Deberia tener timestamps", topup.getTimestamps());
       Assert.assertNotNull("Deberia tener id", topup.getId());
-      Assert.assertNotNull("Deberia tener userId", topup.getUserId());
-      Assert.assertFalse("Deberia tener status", StringUtils.isBlank(topup.getStatus()));
-      Assert.assertEquals("Deberia tener status = exitoso", "exitoso", topup.getStatus());
       Assert.assertNull("No deberia tener rut", topup.getRut());
 
       Assert.assertNotNull("Deberia tener el tipo de voucher", topup.getMcVoucherType());

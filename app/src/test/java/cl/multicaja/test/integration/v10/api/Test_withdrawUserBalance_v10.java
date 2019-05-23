@@ -82,9 +82,6 @@ public class Test_withdrawUserBalance_v10 extends TestBaseUnitApi {
     Assert.assertNotNull("Deberia ser un PrepaidWithdraw10",withdraw);
     Assert.assertNotNull("Deberia tener timestamps", withdraw.getTimestamps());
     Assert.assertNotNull("Deberia tener id", withdraw.getId());
-    Assert.assertNotNull("Deberia tener userId", withdraw.getUserId());
-    Assert.assertFalse("Deberia tener status", StringUtils.isBlank(withdraw.getStatus()));
-    Assert.assertEquals("Deberia tener status = exitoso", "exitoso", withdraw.getStatus());
     Assert.assertNull("No deberia tener rut", withdraw.getRut());
     Assert.assertNull("No deberia tener password", withdraw.getPassword());
 
@@ -147,9 +144,6 @@ public class Test_withdrawUserBalance_v10 extends TestBaseUnitApi {
     Assert.assertNotNull("Deberia ser un PrepaidWithdraw10",withdraw);
     Assert.assertNotNull("Deberia tener timestamps", withdraw.getTimestamps());
     Assert.assertNotNull("Deberia tener id", withdraw.getId());
-    Assert.assertNotNull("Deberia tener userId", withdraw.getUserId());
-    Assert.assertFalse("Deberia tener status", StringUtils.isBlank(withdraw.getStatus()));
-    Assert.assertEquals("Deberia tener status = exitoso", "exitoso", withdraw.getStatus());
     Assert.assertNull("No deberia tener rut", withdraw.getRut());
     Assert.assertNull("No deberia tener password", withdraw.getPassword());
 
@@ -206,9 +200,6 @@ public class Test_withdrawUserBalance_v10 extends TestBaseUnitApi {
     Assert.assertNotNull("Deberia ser un PrepaidWithdraw10",withdraw);
     Assert.assertNotNull("Deberia tener timestamps", withdraw.getTimestamps());
     Assert.assertNotNull("Deberia tener id", withdraw.getId());
-    Assert.assertNotNull("Deberia tener userId", withdraw.getUserId());
-    Assert.assertFalse("Deberia tener status", StringUtils.isBlank(withdraw.getStatus()));
-    Assert.assertEquals("Deberia tener status = exitoso", "exitoso", withdraw.getStatus());
     Assert.assertNull("No deberia tener rut", withdraw.getRut());
     Assert.assertNull("No deberia tener password", withdraw.getPassword());
 
@@ -272,9 +263,6 @@ public class Test_withdrawUserBalance_v10 extends TestBaseUnitApi {
     Assert.assertNotNull("Deberia ser un PrepaidWithdraw10",withdraw);
     Assert.assertNotNull("Deberia tener timestamps", withdraw.getTimestamps());
     Assert.assertNotNull("Deberia tener id", withdraw.getId());
-    Assert.assertNotNull("Deberia tener userId", withdraw.getUserId());
-    Assert.assertFalse("Deberia tener status", StringUtils.isBlank(withdraw.getStatus()));
-    Assert.assertEquals("Deberia tener status = exitoso", "exitoso", withdraw.getStatus());
     Assert.assertNull("No deberia tener rut", withdraw.getRut());
     Assert.assertNull("No deberia tener password", withdraw.getPassword());
 
@@ -838,9 +826,6 @@ public class Test_withdrawUserBalance_v10 extends TestBaseUnitApi {
       Assert.assertNotNull("Deberia ser un PrepaidWithdraw10",withdraw);
       Assert.assertNotNull("Deberia tener timestamps", withdraw.getTimestamps());
       Assert.assertNotNull("Deberia tener id", withdraw.getId());
-      Assert.assertNotNull("Deberia tener userId", withdraw.getUserId());
-      Assert.assertFalse("Deberia tener status", StringUtils.isBlank(withdraw.getStatus()));
-      Assert.assertEquals("Deberia tener status = exitoso", "exitoso", withdraw.getStatus());
 
       // Segunda vez
       HttpResponse resp1 = withdrawUserBalance(prepaidUser.getUuid(), prepaidWithdraw);
@@ -877,9 +862,6 @@ public class Test_withdrawUserBalance_v10 extends TestBaseUnitApi {
       Assert.assertNotNull("Deberia ser un PrepaidWithdraw10",withdraw);
       Assert.assertNotNull("Deberia tener timestamps", withdraw.getTimestamps());
       Assert.assertNotNull("Deberia tener id", withdraw.getId());
-      Assert.assertNotNull("Deberia tener userId", withdraw.getUserId());
-      Assert.assertFalse("Deberia tener status", StringUtils.isBlank(withdraw.getStatus()));
-      Assert.assertEquals("Deberia tener status = exitoso", "exitoso", withdraw.getStatus());
       Assert.assertNull("No deberia tener rut", withdraw.getRut());
       Assert.assertNull("No deberia tener password", withdraw.getPassword());
 
@@ -928,9 +910,6 @@ public class Test_withdrawUserBalance_v10 extends TestBaseUnitApi {
     Assert.assertNotNull("Deberia ser un PrepaidWithdraw10",withdraw);
     Assert.assertNotNull("Deberia tener timestamps", withdraw.getTimestamps());
     Assert.assertNotNull("Deberia tener id", withdraw.getId());
-    Assert.assertNotNull("Deberia tener userId", withdraw.getUserId());
-    Assert.assertFalse("Deberia tener status", StringUtils.isBlank(withdraw.getStatus()));
-    Assert.assertEquals("Deberia tener status = exitoso", "exitoso", withdraw.getStatus());
     Assert.assertNull("No deberia tener rut", withdraw.getRut());
     Assert.assertNull("No deberia tener password", withdraw.getPassword());
 
@@ -999,9 +978,6 @@ public class Test_withdrawUserBalance_v10 extends TestBaseUnitApi {
     Assert.assertNotNull("Deberia ser un PrepaidWithdraw10",withdraw);
     Assert.assertNotNull("Deberia tener timestamps", withdraw.getTimestamps());
     Assert.assertNotNull("Deberia tener id", withdraw.getId());
-    Assert.assertNotNull("Deberia tener userId", withdraw.getUserId());
-    Assert.assertFalse("Deberia tener status", StringUtils.isBlank(withdraw.getStatus()));
-    Assert.assertEquals("Deberia tener status = exitoso", "exitoso", withdraw.getStatus());
     Assert.assertNull("No deberia tener rut", withdraw.getRut());
     Assert.assertNull("No deberia tener password", withdraw.getPassword());
 
@@ -1064,9 +1040,6 @@ public class Test_withdrawUserBalance_v10 extends TestBaseUnitApi {
     Assert.assertNotNull("Deberia ser un PrepaidWithdraw10",withdraw);
     Assert.assertNotNull("Deberia tener timestamps", withdraw.getTimestamps());
     Assert.assertNotNull("Deberia tener id", withdraw.getId());
-    Assert.assertNotNull("Deberia tener userId", withdraw.getUserId());
-    Assert.assertFalse("Deberia tener status", StringUtils.isBlank(withdraw.getStatus()));
-    Assert.assertEquals("Deberia tener status = exitoso", "exitoso", withdraw.getStatus());
     Assert.assertNull("No deberia tener rut", withdraw.getRut());
     Assert.assertNull("No deberia tener password", withdraw.getPassword());
 
