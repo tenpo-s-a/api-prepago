@@ -76,7 +76,7 @@ public class Test_topupUserBalance_v10 extends TestBaseUnitApi {
     Assert.assertNotNull("Deberia tener el atributo", rutData.get("name"));
     Assert.assertEquals("Deberia tener el atributo name = rut","rut", rutData.get("name"));
     Assert.assertTrue("Deberia tener el atributo value", rutData.containsKey("value"));
-    //Assert.assertNotNull("Deberia tener el atributo value", rutData.get("value"));
+    Assert.assertNotNull("Deberia tener el atributo value", rutData.get("value"));
     //Assert.assertEquals("Deberia tener el atributo value", RutUtils.getInstance().format(prepaidTopup.getRut(), null), rutData.get("value"));
   }
 
@@ -126,7 +126,7 @@ public class Test_topupUserBalance_v10 extends TestBaseUnitApi {
     Assert.assertNotNull("Deberia tener el atributo", rutData.get("name"));
     Assert.assertEquals("Deberia tener el atributo name = rut","rut", rutData.get("name"));
     Assert.assertTrue("Deberia tener el atributo value", rutData.containsKey("value"));
-    //Assert.assertNotNull("Deberia tener el atributo value", rutData.get("value"));
+    Assert.assertNotNull("Deberia tener el atributo value", rutData.get("value"));
     //Assert.assertEquals("Deberia tener el atributo value", RutUtils.getInstance().format(prepaidTopup.getRut(), null), rutData.get("value"));
   }
 
@@ -177,7 +177,7 @@ public class Test_topupUserBalance_v10 extends TestBaseUnitApi {
     Assert.assertNotNull("Deberia tener el atributo", rutData.get("name"));
     Assert.assertEquals("Deberia tener el atributo name = rut","rut", rutData.get("name"));
     Assert.assertTrue("Deberia tener el atributo value", rutData.containsKey("value"));
-    //Assert.assertNotNull("Deberia tener el atributo value", rutData.get("value"));
+    Assert.assertNotNull("Deberia tener el atributo value", rutData.get("value"));
     //Assert.assertEquals("Deberia tener el atributo value", RutUtils.getInstance().format(prepaidTopup.getRut(), null), rutData.get("value"));
 
     PrepaidMovement10 dbMovement = getPrepaidMovementEJBBean10().getPrepaidMovementById(topup.getId());
@@ -230,7 +230,7 @@ public class Test_topupUserBalance_v10 extends TestBaseUnitApi {
     Assert.assertNotNull("Deberia tener el atributo", rutData.get("name"));
     Assert.assertEquals("Deberia tener el atributo name = rut","rut", rutData.get("name"));
     Assert.assertTrue("Deberia tener el atributo value", rutData.containsKey("value"));
-    //Assert.assertNotNull("Deberia tener el atributo value", rutData.get("value"));
+    Assert.assertNotNull("Deberia tener el atributo value", rutData.get("value"));
     //Assert.assertEquals("Deberia tener el atributo value", RutUtils.getInstance().format(prepaidTopup.getRut(), null), rutData.get("value"));
 
     PrepaidMovement10 dbMovement = getPrepaidMovementEJBBean10().getPrepaidMovementById(topup.getId());
@@ -749,7 +749,7 @@ public class Test_topupUserBalance_v10 extends TestBaseUnitApi {
       Assert.assertNotNull("Deberia tener el atributo", rutData.get("name"));
       Assert.assertEquals("Deberia tener el atributo name = rut","rut", rutData.get("name"));
       Assert.assertTrue("Deberia tener el atributo value", rutData.containsKey("value"));
-      //Assert.assertNotNull("Deberia tener el atributo value", rutData.get("value"));
+      Assert.assertNotNull("Deberia tener el atributo value", rutData.get("value"));
       //Assert.assertEquals("Deberia tener el atributo value", RutUtils.getInstance().format(prepaidTopup.getRut(), null), rutData.get("value"));
     }
   }
