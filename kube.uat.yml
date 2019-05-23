@@ -78,7 +78,7 @@ spec:
           - name: TECNOCOM_CHANNEL
             value: ${TECNOCOM_CHANNEL}
           - name: TECNOCOM_CODENTITY
-            value: ${TECNOCOM_CODENT}
+            value: "${TECNOCOM_CODENT}"
           - name: TECNOCOM_ORDER
             value: ${TECNOCOM_ORDER}
       imagePullSecrets:
