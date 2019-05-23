@@ -16,6 +16,7 @@
 {{ $azure_keyvault_client_id := key "apps/prepaid/uat/output/keyvault/clientid" }}
 {{ $azure_keyvault_client_secret := key "apps/prepaid/uat/output/keyvault/clientkey" }}
 {{ $azure_keyvault_url := key "apps/prepaid/uat/output/keyvault/vaulturi" }}
+{{ $azure_keyvault_key_name := key "apps/uat/production/output/keyvault/key-name" }}
 
 #configuracion de la base de datos
 db.jndi=jdbc/prepagoDS
@@ -43,7 +44,9 @@ tecnocom.channel=CANAL
 tecnocom.service.mock=false
 tecnocom.order=DESC
 
-encrypt.password=WLq79EWIX9pjFgMGI1wI5PzqzaSQ6Sej
+# Cuando se habilita Azure se tiene que poner el nombre del Secreto
+encrypt.password={{ $azure_keyvault_key_name }}
+
 #sftp server config - Mastercard T057 file (Sonda)
 sftp.mastercard.host={{ $sftp_host }}
 sftp.mastercard.auth.username=?username={{ $sftp_username }}
