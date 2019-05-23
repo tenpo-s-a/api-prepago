@@ -73,6 +73,8 @@ pipeline:
     image: hashicorp/consul-template:alpine
     commands:
       - /bin/consul-template -template "./app/src/main/resources/api-prepaid/staging.properties.tmpl:./app/src/main/resources/api-prepaid/staging.properties" -once
+      - /bin/consul-template -template "./app/src/main/resources/api-prepaid/uat.properties.tmpl:./app/src/main/resources/api-prepaid/uat.properties" -once
+      - /bin/consul-template -template "./app/src/main/resources/api-prepaid/uat_mock.properties.tmpl:./app/src/main/resources/api-prepaid/uat_mock.properties" -once
     secrets:
       - consul_http_addr
       - consul_http_token
@@ -145,9 +147,6 @@ pipeline:
       - cd pg
       - ./db-create.sh -Denv=uat_mock
       - ./migrate-up.sh -Denv=uat_mock
-      - ./migrate-down.sh 1000 -Denv=uat_mock
-      - ./migrate-up.sh -Denv=uat_mock
-      - ./migrate-bootstrap.sh --force -Denv=uat_mock
     when:
       event: [ tag ]
       ref: refs/tags/snapshot*
