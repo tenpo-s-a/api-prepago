@@ -61,7 +61,7 @@ public class Test_AutoReconciliation_FullTest extends TestBaseUnitAsync {
     DBUtils.getInstance().getJdbcTemplate().execute(String.format("TRUNCATE %s.prp_archivos_conciliacion CASCADE", getSchema()));
 
     try {
-      Test_Reconciliation_FullTest test = new Test_Reconciliation_FullTest();
+      Test_AutoReconciliation_FullTest test = new Test_AutoReconciliation_FullTest();
       //USUARIO
       prepaidUser = test.buildPrepaidUserv2();
       prepaidUser = test.createPrepaidUserV2(prepaidUser);
@@ -191,7 +191,7 @@ public class Test_AutoReconciliation_FullTest extends TestBaseUnitAsync {
 
     getPrepaidClearingEJBBean10().insertClearingData(null, liqInsert);
 
-    // Crea 7 archivos extra para que se expire el movimiento
+    // Crea 7 archivos extra
     List<ReconciliationFile10> createdFiles = createReconciliationFiles(7);
 
     // Como hay 7 archivos tecnocom en la tabla, debe expirar los movimientos AUTHORIZED

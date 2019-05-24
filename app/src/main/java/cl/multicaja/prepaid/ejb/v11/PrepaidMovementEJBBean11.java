@@ -220,14 +220,15 @@ public class PrepaidMovementEJBBean11 extends PrepaidMovementEJBBean10 {
       null, null, null, null, null, null, null, null, null, null,cardId);
   }
 
-  public PrepaidMovement10 getPrepaidMovementForAut(Long idPrepaidUser, TipoFactura tipoFactura, String numaut, String codcom) throws Exception {
+
+  public PrepaidMovement10 getPrepaidMovementForAut(Long idPrepaidUser, TipoFactura tipoFactura, IndicadorNormalCorrector indnorcor, String numaut, String codcom) throws Exception {
     if (idPrepaidUser == null) {
       throw new BadRequestException(PARAMETRO_FALTANTE_$VALUE).setData(new KeyValue("value", "idPrepaidUser"));
     }
     if (numaut == null) {
       throw new BadRequestException(PARAMETRO_FALTANTE_$VALUE).setData(new KeyValue("value", "numaut"));
     }
-    List<PrepaidMovement10> lst = this.getPrepaidMovements(null, null, idPrepaidUser, null, null, null, null, null, null, tipoFactura, null, numaut, null, null, null, null, codcom);
+    List<PrepaidMovement10> lst = this.getPrepaidMovements(null, null, idPrepaidUser, null, null, null, null, null, indnorcor, tipoFactura, null, numaut, null, null, null, null, codcom);
     return lst != null && !lst.isEmpty() ? lst.get(0) : null;
   }
   @Override

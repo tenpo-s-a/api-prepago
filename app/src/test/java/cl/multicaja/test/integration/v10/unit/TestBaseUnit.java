@@ -355,7 +355,7 @@ public class TestBaseUnit extends TestApiBase {
       prepaidAccountingEJBBean10.setPrepaidAccountingFileEJBBean10(getPrepaidAccountingFileEJBBean10());
 
       prepaidAccountingEJBBean10.setPrepaidCardEJB10(getPrepaidCardEJBBean10());
-      prepaidAccountingEJBBean10.setPrepaidMovementEJBBean10(getPrepaidMovementEJBBean10());
+      prepaidAccountingEJBBean10.setPrepaidMovementEJBBean11(getPrepaidMovementEJBBean11());
     }
     return prepaidAccountingEJBBean10;
   }

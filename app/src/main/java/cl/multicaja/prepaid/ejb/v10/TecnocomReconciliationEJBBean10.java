@@ -43,8 +43,8 @@ import javax.inject.Inject;
 import java.io.InputStream;
 import java.math.BigDecimal;
 import java.math.RoundingMode;
-import java.sql.*;
 import java.sql.Date;
+import java.sql.*;
 import java.text.SimpleDateFormat;
 import java.time.*;
 import java.time.format.DateTimeFormatter;
@@ -533,7 +533,7 @@ public class TecnocomReconciliationEJBBean10 extends PrepaidBaseEJBBean10 implem
           throw new ValidationException(ERROR_PROCESSING_FILE.getValue(), msg);
         }
 
-        PrepaidMovement10 prepaidMovement10 = getPrepaidMovementEJBBean11().getPrepaidMovementForAut(account.getUserId(), trx.getTipoFac(), trx.getNumAut(), trx.getCodCom());
+        PrepaidMovement10 prepaidMovement10 = getPrepaidMovementEJBBean11().getPrepaidMovementForAut(account.getUserId(), trx.getTipoFac(), IndicadorNormalCorrector.fromValue(trx.getIndNorCor()), trx.getNumAut(), trx.getCodCom());
 
         if (prepaidMovement10 == null) {
           // No existe en nuestra tabla, debe insertarlo
@@ -545,7 +545,7 @@ public class TecnocomReconciliationEJBBean10 extends PrepaidBaseEJBBean10 implem
           prepaidMovement10 = getPrepaidMovementEJBBean10().addPrepaidMovement(null, prepaidMovement10);
 
           // Se consulta al servicio de comisiones y se insertan las comisiones recibidas
-          insertMovementFees(prepaidMovement10);
+          List<PrepaidMovementFee10> feeList = insertMovementFees(prepaidMovement10);
 
           // Dado que no esta en la BD, se crean tambien sus campos en las tablas de contabilidad
           insertIntoAccoutingAndClearing(trx.getTipoReg(), prepaidMovement10);
@@ -556,8 +556,29 @@ public class TecnocomReconciliationEJBBean10 extends PrepaidBaseEJBBean10 implem
           // Como no se encontro en la BD este movimiento no pasó por el callback
           // Por lo que es necesario levantar el evento de transaccion
           PrepaidUser10 prepaidUser10 = getPrepaidUserEJBBean10().findById(null, account.getUserId());
-          TransactionType transactionType = prepaidMovement10.getTipoMovimiento().equals(PrepaidMovementType.SUSCRIPTION) ? TransactionType.SUSCRIPTION : TransactionType.PURCHASE;
-          getPrepaidMovementEJBBean11().publishTransactionAuthorizedEvent(prepaidUser10.getUuid(), account.getUuid(), prepaidCard10.getUuid(), prepaidMovement10, Collections.emptyList(), transactionType);
+          TransactionType transactionType;
+          switch (prepaidMovement10.getTipoMovimiento()) {
+            case PURCHASE:
+              transactionType = TransactionType.PURCHASE;
+              break;
+            case SUSCRIPTION:
+              transactionType = TransactionType.SUSCRIPTION;
+              break;
+            case REFUND:
+              transactionType = TransactionType.REFUND;
+              break;
+            default:
+              String msg = String.format("Error - Transaction of type %s came as AUTO in OP file", prepaidMovement10.getTipoMovimiento().toString());
+              log.error(msg);
+              throw new ValidationException(ERROR_PROCESSING_FILE.getValue(), msg);
+          }
+
+          // Determinar que tipo de transaccion es, y levantar el evento apropiado
+          if (IndicadorNormalCorrector.NORMAL.getValue().equals(trx.getIndNorCor())) {
+            getPrepaidMovementEJBBean11().publishTransactionAuthorizedEvent(prepaidUser10.getUuid(), account.getUuid(), prepaidCard10.getUuid(), prepaidMovement10, feeList, transactionType);
+          } else {
+            getPrepaidMovementEJBBean11().publishTransactionReversedEvent(prepaidUser10.getUuid(), account.getUuid(), prepaidCard10.getUuid(), prepaidMovement10, feeList, transactionType);
+          }
         } else {
           PrepaidMovementStatus originalStatus = prepaidMovement10.getEstado();
 
@@ -576,8 +597,7 @@ public class TecnocomReconciliationEJBBean10 extends PrepaidBaseEJBBean10 implem
             LocalDateTime localDateTime = LocalDateTime.now(ZoneId.of("UTC"));
             DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss");
             String formattedDate = localDateTime.format(formatter);
-
-            // TODO: En vez de sacarlo y actualizarlo, podria hacerse una funcion que actualiza by IdTrx
+            
             AccountingData10 accountingData10 = getPrepaidAccountingEJBBean10().searchAccountingByIdTrx(null, prepaidMovement10.getId());
             getPrepaidAccountingEJBBean10().updateAccountingStatusAndConciliationDate(null, accountingData10.getId(), AccountingStatusType.OK, formattedDate);
 
@@ -593,9 +613,10 @@ public class TecnocomReconciliationEJBBean10 extends PrepaidBaseEJBBean10 implem
           // Se busca el registro "mas parecido" en la tabla IPM
           IpmMovement10 ipmMovement10 = ipmEJBBean10.findByReconciliationSimilarity(prepaidCard10.getPan(), trx.getCodCom(), trx.getImpFac().getValue(), trx.getNumAut());
           if (ipmMovement10 != null) {
-            // Actualizar el valor de mastercard en la tablas de liquidacion
+            // Actualizar el valor de mastercard en la tablas de contabilidad
             AccountingData10 accountingData10 = getPrepaidAccountingEJBBean10().searchAccountingByIdTrx(null, prepaidMovement10.getId());
             accountingData10.getAmountMastercard().setValue(ipmMovement10.getCardholderBillingAmount());
+            accountingData10.setConciliationDate(Timestamp.valueOf(LocalDateTime.now(ZoneId.of("UTC"))));
             getPrepaidAccountingEJBBean10().updateAccountingDataFull(null, accountingData10);
 
             // Marcar movimiento tomado en la tabla IPM como conciliado
@@ -618,19 +639,26 @@ public class TecnocomReconciliationEJBBean10 extends PrepaidBaseEJBBean10 implem
     log.info("INSERT AUT OUT");
   }
 
-  private void insertMovementFees(PrepaidMovement10 prepaidMovement10) throws Exception {
+  private List<PrepaidMovementFee10> insertMovementFees(PrepaidMovement10 prepaidMovement10) throws Exception {
+    // Por negocio las devoluciones no generan comisiones de ningun tipo
+    if (PrepaidMovementType.REFUND.equals(prepaidMovement10.getTipoMovimiento())) {
+      return Collections.emptyList();
+    }
+
+    // Pide la lista de comisiones al servicio
     List<Charge> feeCharges;
     try {
-      // Pide la lista de comisiones al servicio
       Fee fees = getFeeService().calculateFees(prepaidMovement10.getTipoMovimiento(), prepaidMovement10.getClamon(), prepaidMovement10.getImpfac().longValue());
       feeCharges = fees.getCharges();
     } catch (Exception e) {
       e.printStackTrace();
       log.error(String.format("Error consuming fee service for movement [TipoMovimiento:%s][Clamon:%s][ImpFac:%s]", prepaidMovement10.getTipoMovimiento(), prepaidMovement10.getClamon(), prepaidMovement10.getImpfac().longValue()));
-      return;
+      return Collections.emptyList();
     }
 
-    if (feeCharges != null) {
+    if (feeCharges != null && !feeCharges.isEmpty()) {
+      List<PrepaidMovementFee10> feeList = new ArrayList<>();
+
       // Por cada comision, almacenarla en la BD
       for (Charge feeCharge : feeCharges) {
         PrepaidMovementFee10 prepaidFee = new PrepaidMovementFee10();
@@ -659,7 +687,12 @@ public class TecnocomReconciliationEJBBean10 extends PrepaidBaseEJBBean10 implem
 
         // Insertar Fee en BD
         getPrepaidMovementEJBBean11().addPrepaidMovementFee(prepaidFee);
+        feeList.add(prepaidFee);
       }
+
+      return feeList;
+    } else {
+      return Collections.emptyList();
     }
   }
 
@@ -693,7 +726,7 @@ public class TecnocomReconciliationEJBBean10 extends PrepaidBaseEJBBean10 implem
     getPrepaidClearingEJBBean10().insertClearingData(null,clearingData10);
   }
 
-  private PrepaidMovement10 buildMovementAut(Long userId, String pan, MovimientoTecnocom10 batchTrx, Long cardId) {
+  private PrepaidMovement10 buildMovementAut(Long userId, String pan, MovimientoTecnocom10 batchTrx, Long cardId) throws BadRequestException {
 
     PrepaidMovement10 prepaidMovement = new PrepaidMovement10();
     prepaidMovement.setIdMovimientoRef(0L);
@@ -707,21 +740,21 @@ public class TecnocomReconciliationEJBBean10 extends PrepaidBaseEJBBean10 implem
     prepaidMovement.setCentalta(batchTrx.getCentAlta());
     prepaidMovement.setCuenta(batchTrx.getCuenta());
     prepaidMovement.setClamon(batchTrx.getImpFac().getCurrencyCode());
-    prepaidMovement.setIndnorcor(IndicadorNormalCorrector.fromValue(batchTrx.getTipoFac().getCorrector()));
-    prepaidMovement.setTipofac(batchTrx.getTipoFac());
+    prepaidMovement.setIndnorcor(IndicadorNormalCorrector.fromValue(batchTrx.getIndNorCor()));
+    prepaidMovement.setTipofac(TipoFactura.valueOfEnumByCodeAndCorrector(batchTrx.getTipoFac().getCode(), batchTrx.getIndNorCor()));
     prepaidMovement.setFecfac(new Date(batchTrx.getFecTrn().getTime()));
     prepaidMovement.setNumreffac(""); //se debe actualizar despues, es el id de PrepaidMovement10
     prepaidMovement.setPan(pan);
-    prepaidMovement.setClamondiv(0);
+    prepaidMovement.setClamondiv(batchTrx.getImpDiv().getCurrencyCode().getValue());
     prepaidMovement.setImpdiv(batchTrx.getImpDiv().getValue());
     prepaidMovement.setImpfac(batchTrx.getImpautcon().getValue());
-    prepaidMovement.setCmbapli(0);
+    prepaidMovement.setCmbapli(batchTrx.getCmbApli().intValue());
     prepaidMovement.setNumaut(batchTrx.getNumAut());
     prepaidMovement.setIndproaje(IndicadorPropiaAjena.AJENA);
     prepaidMovement.setCodcom(batchTrx.getCodCom());
     prepaidMovement.setCodact(NumberUtils.getInstance().toInteger(batchTrx.getCodAct()));
-    prepaidMovement.setImpliq(BigDecimal.ZERO);
-    prepaidMovement.setClamonliq(0);
+    prepaidMovement.setImpliq(batchTrx.getImpLiq().getValue());
+    prepaidMovement.setClamonliq(batchTrx.getImpLiq().getCurrencyCode().getValue());
     prepaidMovement.setCodpais(CodigoPais.fromValue(NumberUtils.getInstance().toInteger(batchTrx.getCodPais())));
     prepaidMovement.setNompob("");
     prepaidMovement.setNumextcta(NumberUtils.getInstance().toInteger(batchTrx.getNumExtCta()));
