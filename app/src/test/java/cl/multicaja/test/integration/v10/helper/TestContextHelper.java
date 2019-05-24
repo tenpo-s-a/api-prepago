@@ -2,7 +2,6 @@ package cl.multicaja.test.integration.v10.helper;
 
 import cl.multicaja.camel.CamelFactory;
 import cl.multicaja.prepaid.async.v10.routes.*;
-import cl.multicaja.prepaid.helpers.CalculationsHelper;
 import cl.multicaja.test.integration.TestSuite;
 import cl.multicaja.test.integration.v10.unit.TestBaseUnit;
 import org.apache.activemq.broker.BrokerService;

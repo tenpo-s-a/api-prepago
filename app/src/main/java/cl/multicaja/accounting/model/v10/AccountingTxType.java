@@ -16,6 +16,7 @@ public enum AccountingTxType {
   CARGA_POS("CARGA_POS"),
   RETIRO_WEB("RETIRO_WEB"),
   RETIRO_POS("RETIRO_POS"),
+  ANULACION("ANULACION"),
   DEVOLUCION("DEVOLUCION");
 
   AccountingTxType(String value) {

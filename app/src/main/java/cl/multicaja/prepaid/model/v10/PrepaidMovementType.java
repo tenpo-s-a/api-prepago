@@ -8,7 +8,8 @@ public enum PrepaidMovementType {
   TOPUP,
   WITHDRAW,
   SUSCRIPTION,
-  PURCHASE;
+  PURCHASE,
+  REFUND;
 
   public static PrepaidMovementType valueOfEnum(String name) {
     try {

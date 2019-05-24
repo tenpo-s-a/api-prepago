@@ -6,6 +6,7 @@ public enum TransactionType {
   CASH_OUT_MULTICAJA,
   CASH_OUT_WEB,
   SUSCRIPTION,
-  PURCHASE;
+  PURCHASE,
+  REFUND
 
 }
