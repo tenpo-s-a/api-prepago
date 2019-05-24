@@ -512,14 +512,20 @@ public class PrepaidMovementEJBBean11 extends PrepaidMovementEJBBean10 {
 
   public void closingStatusForAccountingAndClearing(List<PrepaidMovement10> movement10s) throws Exception {
     for (PrepaidMovement10 movement: movement10s) {
-      PrepaidCard10 prepaidCard10 = getPrepaidCardEJB11().getPrepaidCardById(null, movement.getCardId());
-      AccountingData10 acc = getPrepaidAccountingEJB10().searchAccountingByIdTrx(null,movement.getId());
-      ClearingData10 clearingData10 = getPrepaidClearingEJB10().searchClearingDataByAccountingId(null, acc.getId());
+      AccountingData10 accountingData10 = getPrepaidAccountingEJB10().searchAccountingByIdTrx(null,movement.getId());
+      if (accountingData10 == null) {
+        log.error(String.format("Error - Movimiento AUTHORIZED expirado [id:%d] no tiene registro en tabla de contabilidad", movement.getId()));
+        continue;
+      }
+      ClearingData10 clearingData10 = getPrepaidClearingEJB10().searchClearingDataByAccountingId(null, accountingData10.getId());
+      if (clearingData10 == null) {
+        log.error(String.format("Error - Movimiento AUTHORIZED expirado [id:%d, accountingId:%d] no tiene registro en tabla de liquidacion", movement.getId(), accountingData10.getId()));
+        continue;
+      }
 
       // Al expirar los movimientos en acc y liq se deben cerrar estos (not_ok y not_send respectivamente)
-      getPrepaidAccountingEJB10().updateAccountingStatus(null, acc.getId(), AccountingStatusType.NOT_OK);
+      getPrepaidAccountingEJB10().updateAccountingStatus(null, accountingData10.getId(), AccountingStatusType.NOT_OK);
       getPrepaidClearingEJB10().updateClearingData(null, clearingData10.getId(), AccountingStatusType.NOT_SEND);
-
     }
   }
 }
