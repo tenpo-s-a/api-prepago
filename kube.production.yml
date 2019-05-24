@@ -65,7 +65,7 @@ spec:
           - name: API_ENVIRONMENT
             value: ${API_ENVIRONMENT}
           - name: TENPO_USER_API_URL
-            value: "http://${TENPO_USER_API_HOST_IP}/v1/user-management"
+            value: "http://${TENPO_USER_API_HOST_IP}/v1/user-management/users"
           - name: TECNOCOM_MOCK_IMPL
             value: "false"
           - name: TECNOCOM_APIKEY
@@ -153,6 +153,16 @@ spec:
         exact: /prepaid/1.0/prepaid/Queue
     rewrite:
       uri: /api-prepaid-1.0/1.0/prepaid/Queue
+    route:
+    - destination:
+        host: api-prepaid
+        port:
+          number: 80
+  - match:
+    - uri:
+        exact: /prepaid/1.0/prepaid/ping
+    rewrite:
+      uri: /api-prepaid-1.0/1.0/prepaid/ping
     route:
     - destination:
         host: api-prepaid
