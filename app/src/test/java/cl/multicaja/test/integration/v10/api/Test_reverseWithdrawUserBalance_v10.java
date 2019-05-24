@@ -13,6 +13,7 @@ import org.junit.Assert;
 import org.junit.Test;
 
 import java.math.BigDecimal;
+import java.sql.Date;
 import java.util.List;
 import java.util.Map;
 
@@ -285,8 +286,8 @@ public class Test_reverseWithdrawUserBalance_v10 extends TestBaseUnitApi {
     prepaidWithdraw.getAmount().setValue(BigDecimal.valueOf(500));
     prepaidWithdraw.setPassword("1235");
 
-    PrepaidMovement10 prepaidMovement = buildReversePrepaidMovement10(prepaidUser, prepaidWithdraw);
-    createPrepaidMovement10(prepaidMovement);
+    PrepaidMovement10 prepaidMovement = buildReversePrepaidMovement11(prepaidUser, prepaidWithdraw);
+    createPrepaidMovement11(prepaidMovement);
 
     HttpResponse resp = reverseWithdrawUserBalance(prepaidUser.getUuid(), prepaidWithdraw);
 
@@ -296,8 +297,9 @@ public class Test_reverseWithdrawUserBalance_v10 extends TestBaseUnitApi {
     Assert.assertNotNull("Deberia tener error", errorObj);
     Assert.assertEquals("Deberia tener error code = 130003", REVERSA_RECIBIDA_PREVIAMENTE.getValue(), errorObj.get("code"));
 
-    List<PrepaidMovement10> movement = getPrepaidMovementEJBBean10().getPrepaidMovements(null, null,
-      prepaidUser.getId(), prepaidWithdraw.getTransactionId(), PrepaidMovementType.WITHDRAW, null, null, null, IndicadorNormalCorrector.CORRECTORA, TipoFactura.ANULA_RETIRO_EFECTIVO_COMERCIO_MULTICJA, null, null);
+    List<PrepaidMovement10> movement = getPrepaidMovementEJBBean11().getPrepaidMovements(null, null, null, prepaidWithdraw.getTransactionId(),  PrepaidMovementType.WITHDRAW,
+      null, null, null, IndicadorNormalCorrector.CORRECTORA, TipoFactura.ANULA_RETIRO_EFECTIVO_COMERCIO_MULTICJA, null, null,
+      null, null, null,  null, null,prepaidCard10.getId());
 
     Assert.assertNotNull("Debe tener 1 movimiento de reversa", movement);
     Assert.assertEquals("Debe tener 1 movimiento de reversa", 1, movement.size());
@@ -318,8 +320,8 @@ public class Test_reverseWithdrawUserBalance_v10 extends TestBaseUnitApi {
     prepaidWithdraw.getAmount().setValue(BigDecimal.valueOf(500));
     prepaidWithdraw.setPassword("1235");
 
-    PrepaidMovement10 prepaidMovement = buildReversePrepaidMovement10(prepaidUser, prepaidWithdraw);
-    createPrepaidMovement10(prepaidMovement);
+    PrepaidMovement10 prepaidMovement = buildReversePrepaidMovement11(prepaidUser, prepaidWithdraw);
+    createPrepaidMovement11(prepaidMovement);
 
     HttpResponse resp = reverseWithdrawUserBalance(prepaidUser.getUuid(), prepaidWithdraw);
 
@@ -329,8 +331,9 @@ public class Test_reverseWithdrawUserBalance_v10 extends TestBaseUnitApi {
     Assert.assertNotNull("Deberia tener error", errorObj);
     Assert.assertEquals("Deberia tener error code = 130003", REVERSA_RECIBIDA_PREVIAMENTE.getValue(), errorObj.get("code"));
 
-    List<PrepaidMovement10> movement = getPrepaidMovementEJBBean10().getPrepaidMovements(null, null,
-      prepaidUser.getId(), prepaidWithdraw.getTransactionId(), PrepaidMovementType.WITHDRAW, null, null, null, IndicadorNormalCorrector.CORRECTORA, TipoFactura.ANULA_RETIRO_TRANSFERENCIA, null, null);
+    List<PrepaidMovement10> movement = getPrepaidMovementEJBBean11().getPrepaidMovements(null, null, null, prepaidWithdraw.getTransactionId(),  PrepaidMovementType.WITHDRAW,
+      null, null, null, IndicadorNormalCorrector.CORRECTORA, TipoFactura.ANULA_RETIRO_TRANSFERENCIA, null, null,
+      null, null, null,  null, null,prepaidCard10.getId());
 
     Assert.assertNotNull("Debe tener 1 movimiento de reversa", movement);
     Assert.assertEquals("Debe tener 1 movimiento de reversa", 1, movement.size());
@@ -416,7 +419,7 @@ public class Test_reverseWithdrawUserBalance_v10 extends TestBaseUnitApi {
     PrepaidMovement10 originalWithdraw = buildPrepaidMovement11(prepaidUser, new PrepaidWithdraw10(prepaidWithdraw));
     originalWithdraw.setIdTxExterno(prepaidWithdraw.getTransactionId());
     originalWithdraw.setMonto(prepaidWithdraw.getAmount().getValue());
-    originalWithdraw = createPrepaidMovement10(originalWithdraw);
+    originalWithdraw = createPrepaidMovement11(originalWithdraw);
 
     Assert.assertNotNull("Debe tener id", originalWithdraw.getId());
     Assert.assertTrue("Debe tener id", originalWithdraw.getId() > 0);
@@ -432,10 +435,12 @@ public class Test_reverseWithdrawUserBalance_v10 extends TestBaseUnitApi {
     Assert.assertEquals("Deberia tener error code = 130002", REVERSA_INFORMACION_NO_CONCUERDA.getValue(), errorObj.get("code"));
 
     // Se verifica que se tenga un registro de reversa
-    List<PrepaidMovement10> movement = getPrepaidMovementEJBBean11().getPrepaidMovements(null, null,
-      prepaidUser.getId(), prepaidWithdraw.getTransactionId(), PrepaidMovementType.WITHDRAW, PrepaidMovementStatus.PROCESS_OK, null, null, IndicadorNormalCorrector.CORRECTORA, TipoFactura.ANULA_RETIRO_EFECTIVO_COMERCIO_MULTICJA, null, null);
+    List<PrepaidMovement10> movement = getPrepaidMovementEJBBean11().getPrepaidMovements(null, null, null, prepaidWithdraw.getTransactionId(),  PrepaidMovementType.WITHDRAW,
+      PrepaidMovementStatus.PROCESS_OK, null, null, IndicadorNormalCorrector.CORRECTORA, TipoFactura.ANULA_RETIRO_EFECTIVO_COMERCIO_MULTICJA, null, null,
+      null, null, null,  null, null,prepaidCard10.getId());
 
-    Assert.assertNull("No debe tener movimiento de reversa", movement);
+
+    Assert.assertEquals("No debe tener movimiento de reversa",0, movement.size());
   }
 
   @Test
@@ -454,10 +459,10 @@ public class Test_reverseWithdrawUserBalance_v10 extends TestBaseUnitApi {
     prepaidWithdraw.getAmount().setValue(BigDecimal.valueOf(500));
     prepaidWithdraw.setPassword("1235");
 
-    PrepaidMovement10 originalWithdraw = buildPrepaidMovement10(prepaidUser, new PrepaidWithdraw10(prepaidWithdraw));
+    PrepaidMovement10 originalWithdraw = buildPrepaidMovement11(prepaidUser, new PrepaidWithdraw10(prepaidWithdraw));
     originalWithdraw.setMonto(prepaidWithdraw.getAmount().getValue());
     originalWithdraw.setIdTxExterno(prepaidWithdraw.getTransactionId());
-    originalWithdraw = createPrepaidMovement10(originalWithdraw);
+    originalWithdraw = createPrepaidMovement11(originalWithdraw);
 
     Assert.assertNotNull("Debe tener id", originalWithdraw.getId());
     Assert.assertTrue("Debe tener id", originalWithdraw.getId() > 0);
@@ -472,11 +477,13 @@ public class Test_reverseWithdrawUserBalance_v10 extends TestBaseUnitApi {
     Assert.assertNotNull("Deberia tener error", errorObj);
     Assert.assertEquals("Deberia tener error code = 130002", REVERSA_INFORMACION_NO_CONCUERDA.getValue(), errorObj.get("code"));
 
-    // Se verifica que se tenga un registro de reversa
-    List<PrepaidMovement10> movement = getPrepaidMovementEJBBean10().getPrepaidMovements(null, null,
-      prepaidUser.getId(), prepaidWithdraw.getTransactionId(), PrepaidMovementType.WITHDRAW, PrepaidMovementStatus.PROCESS_OK, null, null, IndicadorNormalCorrector.CORRECTORA, TipoFactura.ANULA_RETIRO_TRANSFERENCIA, null, null);
 
-    Assert.assertNull("No debe tener movimiento de reversa", movement);
+    // Se verifica que se tenga un registro de reversa
+    List<PrepaidMovement10> movement = getPrepaidMovementEJBBean11().getPrepaidMovements(null, null, null, prepaidWithdraw.getTransactionId(),  PrepaidMovementType.WITHDRAW,
+      PrepaidMovementStatus.PROCESS_OK, null, null, IndicadorNormalCorrector.CORRECTORA, TipoFactura.ANULA_RETIRO_TRANSFERENCIA, null, null,
+      null, null, null,  null, null,prepaidCard10.getId());
+
+    Assert.assertEquals("No debe tener movimiento de reversa",0, movement.size());
   }
 
   @Test
@@ -494,10 +501,10 @@ public class Test_reverseWithdrawUserBalance_v10 extends TestBaseUnitApi {
     prepaidWithdraw.getAmount().setValue(BigDecimal.valueOf(500));
     prepaidWithdraw.setPassword("1235");
 
-    PrepaidMovement10 originalWithdraw = buildPrepaidMovement10(prepaidUser, new PrepaidWithdraw10(prepaidWithdraw));
+    PrepaidMovement10 originalWithdraw = buildPrepaidMovement11(prepaidUser, new PrepaidWithdraw10(prepaidWithdraw));
     originalWithdraw.setIdTxExterno(prepaidWithdraw.getTransactionId());
     originalWithdraw.setMonto(prepaidWithdraw.getAmount().getValue());
-    originalWithdraw = createPrepaidMovement10(originalWithdraw);
+    originalWithdraw = createPrepaidMovement11(originalWithdraw);
 
     Assert.assertNotNull("Debe tener id", originalWithdraw.getId());
     Assert.assertTrue("Debe tener id", originalWithdraw.getId() > 0);
@@ -513,10 +520,11 @@ public class Test_reverseWithdrawUserBalance_v10 extends TestBaseUnitApi {
     Assert.assertEquals("Deberia tener error code = 130004", REVERSA_TIEMPO_EXPIRADO.getValue(), errorObj.get("code"));
 
     // Se verifica que se tenga un registro de reversa
-    List<PrepaidMovement10> movement = getPrepaidMovementEJBBean10().getPrepaidMovements(null, null,
-      prepaidUser.getId(), prepaidWithdraw.getTransactionId(), PrepaidMovementType.WITHDRAW, PrepaidMovementStatus.PROCESS_OK, null, null, IndicadorNormalCorrector.CORRECTORA, TipoFactura.ANULA_RETIRO_EFECTIVO_COMERCIO_MULTICJA, null, null);
+    List<PrepaidMovement10> movement = getPrepaidMovementEJBBean11().getPrepaidMovements(null, null, null, prepaidWithdraw.getTransactionId(),  PrepaidMovementType.WITHDRAW,
+      PrepaidMovementStatus.PROCESS_OK, null, null, IndicadorNormalCorrector.CORRECTORA, TipoFactura.ANULA_RETIRO_EFECTIVO_COMERCIO_MULTICJA, null, null,
+      null, null, null,  null, null,prepaidCard10.getId());
 
-    Assert.assertNull("No debe tener movimientos de reversa", movement);
+    Assert.assertEquals("No debe tener movimientos de reversa", 0, movement.size());
 
   }
 
@@ -535,10 +543,10 @@ public class Test_reverseWithdrawUserBalance_v10 extends TestBaseUnitApi {
     prepaidWithdraw.getAmount().setValue(BigDecimal.valueOf(500));
     prepaidWithdraw.setPassword("1235");
 
-    PrepaidMovement10 originalWithdraw = buildPrepaidMovement10(prepaidUser, new PrepaidWithdraw10(prepaidWithdraw));
+    PrepaidMovement10 originalWithdraw = buildPrepaidMovement11(prepaidUser, new PrepaidWithdraw10(prepaidWithdraw));
     originalWithdraw.setMonto(prepaidWithdraw.getAmount().getValue());
     originalWithdraw.setIdTxExterno(prepaidWithdraw.getTransactionId());
-    originalWithdraw = createPrepaidMovement10(originalWithdraw);
+    originalWithdraw = createPrepaidMovement11(originalWithdraw);
 
     Assert.assertNotNull("Debe tener id", originalWithdraw.getId());
     Assert.assertTrue("Debe tener id", originalWithdraw.getId() > 0);
@@ -554,10 +562,11 @@ public class Test_reverseWithdrawUserBalance_v10 extends TestBaseUnitApi {
     Assert.assertEquals("Deberia tener error code = 130004", REVERSA_TIEMPO_EXPIRADO.getValue(), errorObj.get("code"));
 
     // Se verifica que se tenga un registro de reversa
-    List<PrepaidMovement10> movement = getPrepaidMovementEJBBean10().getPrepaidMovements(null, null,
-      prepaidUser.getId(), prepaidWithdraw.getTransactionId(), PrepaidMovementType.WITHDRAW, PrepaidMovementStatus.PROCESS_OK, null, null, IndicadorNormalCorrector.CORRECTORA, TipoFactura.ANULA_RETIRO_TRANSFERENCIA, null, null);
+    List<PrepaidMovement10> movement = getPrepaidMovementEJBBean11().getPrepaidMovements(null, null, null, prepaidWithdraw.getTransactionId(),  PrepaidMovementType.WITHDRAW,
+      PrepaidMovementStatus.PROCESS_OK, null, null, IndicadorNormalCorrector.CORRECTORA, TipoFactura.ANULA_RETIRO_TRANSFERENCIA, null, null,
+      null, null, null,  null, null,prepaidCard10.getId());
 
-    Assert.assertNull("No debe tener movimientos de reversa", movement);
+    Assert.assertEquals("No debe tener movimientos de reversa", 0, movement.size());
   }
 
   @Test
@@ -575,10 +584,10 @@ public class Test_reverseWithdrawUserBalance_v10 extends TestBaseUnitApi {
     prepaidWithdraw.getAmount().setValue(BigDecimal.valueOf(500));
     prepaidWithdraw.setPassword("1235");
 
-    PrepaidMovement10 originalWithdraw = buildPrepaidMovement10(prepaidUser, new PrepaidWithdraw10(prepaidWithdraw));
+    PrepaidMovement10 originalWithdraw = buildPrepaidMovement11(prepaidUser, new PrepaidWithdraw10(prepaidWithdraw));
     originalWithdraw.setIdTxExterno(prepaidWithdraw.getTransactionId());
     originalWithdraw.setMonto(prepaidWithdraw.getAmount().getValue());
-    originalWithdraw = createPrepaidMovement10(originalWithdraw);
+    originalWithdraw = createPrepaidMovement11(originalWithdraw);
 
     Assert.assertNotNull("Debe tener id", originalWithdraw.getId());
     Assert.assertTrue("Debe tener id", originalWithdraw.getId() > 0);
@@ -589,8 +598,10 @@ public class Test_reverseWithdrawUserBalance_v10 extends TestBaseUnitApi {
 
     // Se verifica que se tenga un registro de reversa
 
-    List<PrepaidMovement10> movement = getPrepaidMovementEJBBean10().getPrepaidMovements(null, null,
-      prepaidUser.getId(), prepaidWithdraw.getTransactionId(), PrepaidMovementType.WITHDRAW, PrepaidMovementStatus.PENDING, null, null, IndicadorNormalCorrector.CORRECTORA, TipoFactura.ANULA_RETIRO_EFECTIVO_COMERCIO_MULTICJA, null, null);
+    // Se verifica que se tenga un registro de reversa
+    List<PrepaidMovement10> movement = getPrepaidMovementEJBBean11().getPrepaidMovements(null, null, null, prepaidWithdraw.getTransactionId(),  PrepaidMovementType.WITHDRAW,
+      PrepaidMovementStatus.PENDING, null, null, IndicadorNormalCorrector.CORRECTORA, TipoFactura.ANULA_RETIRO_EFECTIVO_COMERCIO_MULTICJA, null, null,
+      null, null, null,  null, null,prepaidCard10.getId());
 
     Assert.assertNotNull("Debe tener movimientos de reversa", movement);
     Assert.assertEquals("Debe tener movimientos de reversa", 1,movement.size());
@@ -611,10 +622,10 @@ public class Test_reverseWithdrawUserBalance_v10 extends TestBaseUnitApi {
     prepaidWithdraw.getAmount().setValue(BigDecimal.valueOf(500));
     prepaidWithdraw.setPassword("1235");
 
-    PrepaidMovement10 originalWithdraw = buildPrepaidMovement10(prepaidUser, new PrepaidWithdraw10(prepaidWithdraw));
+    PrepaidMovement10 originalWithdraw = buildPrepaidMovement11(prepaidUser, new PrepaidWithdraw10(prepaidWithdraw));
     originalWithdraw.setMonto(prepaidWithdraw.getAmount().getValue());
     originalWithdraw.setIdTxExterno(prepaidWithdraw.getTransactionId());
-    originalWithdraw = createPrepaidMovement10(originalWithdraw);
+    originalWithdraw = createPrepaidMovement11(originalWithdraw);
 
 
     Assert.assertNotNull("Debe tener id", originalWithdraw.getId());
@@ -625,8 +636,9 @@ public class Test_reverseWithdrawUserBalance_v10 extends TestBaseUnitApi {
     Assert.assertEquals("status 201", 201, resp.getStatus());
 
     // Se verifica que se tenga un registro de reversa
-    List<PrepaidMovement10> movement = getPrepaidMovementEJBBean10().getPrepaidMovements(null, null,
-      prepaidUser.getId(), prepaidWithdraw.getTransactionId(), PrepaidMovementType.WITHDRAW, PrepaidMovementStatus.PENDING, null, null, IndicadorNormalCorrector.CORRECTORA, TipoFactura.ANULA_RETIRO_TRANSFERENCIA, null, null);
+    List<PrepaidMovement10> movement = getPrepaidMovementEJBBean11().getPrepaidMovements(null, null, null, prepaidWithdraw.getTransactionId(),  PrepaidMovementType.WITHDRAW,
+      PrepaidMovementStatus.PENDING, null, null, IndicadorNormalCorrector.CORRECTORA, TipoFactura.ANULA_RETIRO_TRANSFERENCIA, null, null,
+      null, null, null,  null, null,prepaidCard10.getId());
 
     Assert.assertNotNull("Debe tener movimientos de reversa", movement);
     Assert.assertEquals("Debe tener movimientos de reversa", 1,movement.size());

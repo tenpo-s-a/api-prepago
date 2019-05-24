@@ -33,14 +33,12 @@ import javax.ejb.*;
 import javax.inject.Inject;
 import java.math.BigDecimal;
 import java.sql.*;
+import java.sql.Date;
 import java.text.SimpleDateFormat;
 import java.time.Instant;
 import java.time.LocalDateTime;
 import java.time.ZoneId;
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 
 import static cl.multicaja.core.model.Errors.*;
 import static cl.multicaja.prepaid.helpers.CalculationsHelper.getParametersUtil;
@@ -64,6 +62,7 @@ public class PrepaidMovementEJBBean11 extends PrepaidMovementEJBBean10 {
   private static final String FIND_FEE_BY_ID = String.format("SELECT * FROM %s.prp_movimiento_comision WHERE id = ?", getSchema());
   private static final String FIND_FEE_BY_MOVEMENT_ID = String.format("SELECT * FROM %s.prp_movimiento_comision WHERE id_movimiento = ?", getSchema());
   private static final String INSERT_FEE_SQL = String.format("INSERT INTO %s.prp_movimiento_comision (id_movimiento, tipo_comision, monto, iva, creacion, actualizacion) VALUES(?, ?, ?, ?, timezone('utc', now()), timezone('utc', now()))", getSchema());
+  private static final String GET_NUMAUT = String.format("SELECT %s.getnumaut()",getSchema());
 
   @Inject
   private KafkaEventDelegate10 kafkaEventDelegate10;
@@ -114,7 +113,7 @@ public class PrepaidMovementEJBBean11 extends PrepaidMovementEJBBean10 {
       ps.setBigDecimal(23, movement.getImpdiv());
       ps.setBigDecimal(24, movement.getImpfac());
       ps.setLong(25, movement.getCmbapli());
-      ps.setString(26, movement.getNumaut());
+      ps.setString(26,  (movement.getNumaut() == null || movement.getNumaut().isEmpty()) ? getNumAut() : movement.getNumaut());
       ps.setObject(27, movement.getIndproaje().toString());
       ps.setString(28, movement.getCodcom());
       ps.setLong(29, movement.getCodact());
@@ -199,8 +198,7 @@ public class PrepaidMovementEJBBean11 extends PrepaidMovementEJBBean10 {
     }
   }
 
-  @Override
-  public List<PrepaidMovement10> getPrepaidMovementByIdPrepaidUserAndEstado(Long cardId, PrepaidMovementStatus estado) throws Exception {
+  public List<PrepaidMovement10> getPrepaidMovementByCardIdAndEstado(Long cardId, PrepaidMovementStatus estado) throws Exception {
     if (cardId == null) {
       throw new BadRequestException(PARAMETRO_FALTANTE_$VALUE).setData(new KeyValue("value", "cardId"));
     }
@@ -208,6 +206,17 @@ public class PrepaidMovementEJBBean11 extends PrepaidMovementEJBBean10 {
       throw new BadRequestException(PARAMETRO_FALTANTE_$VALUE).setData(new KeyValue("value", "estado"));
     }
     return this.getPrepaidMovements(null, null, null, null, null, estado, null,
+      null, null, null, null, null, null, null, null, null, null,cardId);
+  }
+
+  public List<PrepaidMovement10> getPrepaidMovementByCardIdAndTipoMovimiento(Long cardId, PrepaidMovementType tipoMovimiento) throws Exception {
+    if (cardId == null) {
+      throw new BadRequestException(PARAMETRO_FALTANTE_$VALUE).setData(new KeyValue("value", "idPrepaidUser"));
+    }
+    if (tipoMovimiento == null) {
+      throw new BadRequestException(PARAMETRO_FALTANTE_$VALUE).setData(new KeyValue("value", "tipoMovimiento"));
+    }
+    return this.getPrepaidMovements(null, null, null, null, tipoMovimiento, null, null,
       null, null, null, null, null, null, null, null, null, null,cardId);
   }
 
@@ -1486,6 +1495,41 @@ public class PrepaidMovementEJBBean11 extends PrepaidMovementEJBBean10 {
         updateAccountingStatusReconciliationDateAndClearingStatus(mov.getId(), AccountingStatusType.RESEARCH, AccountingStatusType.RESEARCH);
       }
     }
+  }
+
+  public List<PrepaidMovement10> getPrepaidMovementByCardId(Long cardId) throws Exception {
+    if (cardId == null) {
+      throw new BadRequestException(PARAMETRO_FALTANTE_$VALUE).setData(new KeyValue("value", "cardId"));
+    }
+    log.info(String.format("[getPrepaidMovementByCardId] cardId: %s",cardId));
+
+    return this.getPrepaidMovements(null, null, null, null, null,
+      null, null, null, null, null, null, null,
+      null, null, null, null, null, cardId);
+  }
+
+  private String getNumAut() {
+    String numAut = getDbUtils().getJdbcTemplate().queryForObject(GET_NUMAUT,String.class);
+    return numAut;
+  }
+
+  public PrepaidMovement10 getLastPrepaidMovementByIdCardIdAndOneStatus(Long cardId, PrepaidMovementStatus... status) throws Exception {
+    List<PrepaidMovement10> movements = this.getPrepaidMovementByCardId(cardId);
+
+    log.info(String.format("[getPrepaidMovementByCardId] cardId: %s %s",cardId, Arrays.toString(status)));
+
+    PrepaidMovement10 movement = movements != null && !movements.isEmpty() ? movements.get(0) : null;
+
+    if (movement == null) {
+      return null;
+    }
+
+    for (PrepaidMovementStatus st : status) {
+      if (st.equals(movement.getEstado())) {
+        return movement;
+      }
+    }
+    return null;
   }
 
 }

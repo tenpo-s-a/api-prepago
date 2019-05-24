@@ -1213,7 +1213,7 @@ public class PrepaidEJBBean10 extends PrepaidBaseEJBBean10 implements PrepaidEJB
     PrepaidCard10 prepaidCard = getPrepaidCardEJB11().getLastPrepaidCardByUserId(headers, prepaidUser.getId());
 
     //Obtener ultimo movimiento
-    PrepaidMovement10 movement = getPrepaidMovementEJB10().getLastPrepaidMovementByIdPrepaidUserAndOneStatus(prepaidUser.getId(),
+    PrepaidMovement10 movement = getPrepaidMovementEJB11().getLastPrepaidMovementByIdCardIdAndOneStatus(prepaidCard.getId(),
       PrepaidMovementStatus.PENDING,
       PrepaidMovementStatus.IN_PROCESS);
 

@@ -1049,6 +1049,13 @@ public class TestBaseUnit extends TestApiBase {
       centalta = accountNumber.substring(4, 8);
       cuenta = accountNumber.substring(12);
     }
+
+    if(prepaidCard == null){
+      System.out.println("llena tarjeta");
+      prepaidCard = getPrepaidCardEJBBean11().getPrepaidCardByAccountId(account.getId());
+    }
+
+
     PrepaidMovement10 prepaidMovement = new PrepaidMovement10();
     prepaidMovement.setIdMovimientoRef(cdtTransaction != null ? cdtTransaction.getTransactionReference() : getUniqueLong());
     prepaidMovement.setIdPrepaidUser(prepaidUser.getId());
@@ -1071,7 +1078,6 @@ public class TestBaseUnit extends TestApiBase {
     prepaidMovement.setImpdiv(BigDecimal.ZERO);
     prepaidMovement.setImpfac(prepaidTopup != null ? prepaidTopup.getAmount().getValue() : null);
     prepaidMovement.setCmbapli(0); // se debe actualizar despues
-    prepaidMovement.setNumaut(""); // se debe actualizar despues con los 6 ultimos digitos de NumFacturaRef
     prepaidMovement.setIndproaje(IndicadorPropiaAjena.AJENA); // A-Ajena
     prepaidMovement.setCodcom(prepaidTopup != null ? prepaidTopup.getMerchantCode() : null);
     prepaidMovement.setCodact(prepaidTopup != null ? prepaidTopup.getMerchantCategory() : null);
@@ -1232,7 +1238,6 @@ public class TestBaseUnit extends TestApiBase {
     prepaidMovement.setImpdiv(BigDecimal.ZERO);
     prepaidMovement.setImpfac(prepaidTopup != null ? prepaidTopup.getAmount().getValue() : null);
     prepaidMovement.setCmbapli(0); // se debe actualizar despues
-    prepaidMovement.setNumaut(""); // se debe actualizar despues con los 6 ultimos digitos de NumFacturaRef
     prepaidMovement.setIndproaje(IndicadorPropiaAjena.AJENA); // A-Ajena
     prepaidMovement.setCodcom(prepaidTopup != null ? prepaidTopup.getMerchantCode() : null);
     prepaidMovement.setCodact(prepaidTopup != null ? prepaidTopup.getMerchantCategory() : null);
