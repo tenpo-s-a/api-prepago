@@ -1,17 +1,22 @@
-{{ $freshdesk_host := key "apps/prepaid/staging/output/freshdesk/host" }}
-{{ $freshdesk_username := key "apps/prepaid/staging/output/freshdesk/user" }}
-{{ $freshdesk_password := key "apps/prepaid/staging/output/freshdesk/password" }}
+{{ $freshdesk_host := key "apps/prepaid/production/output/freshdesk/host" }}
+{{ $freshdesk_username := key "apps/prepaid/production/output/freshdesk/user" }}
+{{ $freshdesk_password := key "apps/prepaid/production/output/freshdesk/password" }}
 
-{{ $activemq_username := key "apps/prepaid/staging/output/activemq/username" }}
-{{ $activemq_password := key "apps/prepaid/staging/output/activemq/password" }}
+{{ $activemq_username := key "apps/prepaid/production/output/activemq/username" }}
+{{ $activemq_password := key "apps/prepaid/production/output/activemq/password" }}
 
-{{ $sftp_host := key "apps/prepaid/staging/output/sftp/host" }}
-{{ $sftp_username := key "apps/prepaid/staging/output/sftp/username" }}
-{{ $sftp_password := key "apps/prepaid/staging/output/sftp/password" }}
+{{ $sftp_host := key "apps/prepaid/production/output/sftp/host" }}
+{{ $sftp_username := key "apps/prepaid/production/output/sftp/username" }}
+{{ $sftp_password := key "apps/prepaid/production/output/sftp/password" }}
 
-{{ $kafka_host := key "apps/prepaid/staging/output/kafka/host" }}
+{{ $kafka_host := key "apps/prepaid/production/output/kafka/host" }}
 
-{{ $tenpo_users_host := key "apps/prepaid/staging/output/api-users/host" }}
+{{ $tenpo_users_host := key "apps/prepaid/production/output/api-users/host" }}
+
+{{ $azure_keyvault_client_id := key "apps/prepaid/production/output/keyvault/clientid" }}
+{{ $azure_keyvault_client_secret := key "apps/prepaid/production/output/keyvault/clientkey" }}
+{{ $azure_keyvault_url := key "apps/prepaid/production/output/keyvault/vaulturi" }}
+{{ $azure_keyvault_key_name := key "apps/prepaid/production/output/keyvault/key-name" }}
 
 #configuracion de la base de datos
 db.jndi=jdbc/prepagoDS
@@ -32,21 +37,22 @@ schema.acc=prepaid_accounting
 prepaid.appname=PREPAGO
 
 #tecnocom-gateway
-tecnocom.apiKey=APPKEY
+tecnocom.apiKey=asdasd
 tecnocom.apiUrl=http://localhost:8080
 tecnocom.codEntity=1234
 tecnocom.channel=CANAL
-tecnocom.service.mock=true
+tecnocom.service.mock=false
 tecnocom.order=DESC
 
-encrypt.password=WLq79EWIX9pjFgMGI1wI5PzqzaSQ6Sej
+# Cuando se habilita Azure se tiene que poner el nombre del Secreto
+encrypt.password={{ $azure_keyvault_key_name }}
 
 #sftp server config - Mastercard T057 file (Sonda)
 sftp.mastercard.host={{ $sftp_host }}
 sftp.mastercard.auth.username=?username={{ $sftp_username }}
 sftp.mastercard.auth.password=&password={{ $sftp_password }}
 #Directorio en el cual se aloja archivo T057 - Es escuchado por apache camel
-sftp.mastercard.recived.folder=/staging/mastercard/usd
+sftp.mastercard.recived.folder=/production/mastercard/usd
 #Directorio en el cual se aloja el archivo procesado de forma exitosa
 sftp.mastercard.move.done.folder=&move=done
 #Directorio en el cual se aloja el archivo procesado con error
@@ -57,7 +63,7 @@ sftp.mastercard.reconnectDelay=&reconnectDelay=30000
 #El valor debe estar en true, ya que sino deja pendiente el proceso de deploy en caso de un fallo
 sftp.mastercard.throwExceptionOnConnectFailed=&throwExceptionOnConnectFailed=true
 
-apis.user.url=http://{{ $tenpo_users_host }}:8080/v1/user-management/users
+apis.user.url=http://{{ $tenpo_users_host }}/v1/user-management
 
 apis.fees.url=http://prepaid-fee-service/prepaid/processor/calculate_fee/transaction_type/%s/currency_code/%s/amount/%s
 
@@ -79,18 +85,24 @@ sftp.multicajared.throwExceptionOnConnectFailed=&throwExceptionOnConnectFailed=t
 #Directorio en el cual se alojan los archivos - Es escuchado por apache camel
 sftp.multicajared.clearing_file_upload.folder=/upload/clearing
 #Directorio para archivo de clearing respuesta
-sftp.mastercard.clearing.received.folder=/staging/clearing/response
+sftp.mastercard.clearing.received.folder=/production/clearing/response
 #Directorio en el cual se aloja el archivo procesado de forma exitosa
 sftp.mastercard.clearing.move.done.folder=&move=done
 #Directorio en el cual se aloja el archivo procesado con error
 sftp.mastercard.clearing.move.error.folder=&moveFailed=error
 
 #Directorio en el cual se depositaran los archivos correspondientes al reporte E06
-sftp.multicajared.e06_file.folder=/staging/Reportes/Inputs
+sftp.multicajared.e06_file.folder=/production/Reportes/Inputs
 
 #Kafka
 kafka.enabled=true
 kafka.host={{ $kafka_host }}
+
+#Crypto Config
+azure.client.enabled=false
+azure.client.id={{ $azure_keyvault_client_id }}
+azure.client.secret={{ $azure_keyvault_client_secret }}
+azure.vault.uri={{ $azure_keyvault_url }}
 
 #FreshDesk
 freshdesk.enabled=true
