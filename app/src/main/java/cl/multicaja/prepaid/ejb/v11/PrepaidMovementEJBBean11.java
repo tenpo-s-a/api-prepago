@@ -474,10 +474,12 @@ public class PrepaidMovementEJBBean11 extends PrepaidMovementEJBBean10 {
       PrepaidUser10 prepaidUser10 = getPrepaidUserEJB10().findById(null, account10.getUserId());
       List<PrepaidMovementFee10> feeList = new ArrayList<>();
 
-      if (movement.getTipofac() == TipoFactura.COMPRA_INTERNACIONAL) {
+      // Compras o Anulacion de compras
+      if (movement.getTipofac().getCode() == TipoFactura.COMPRA_INTERNACIONAL.getCode()) {
         transactionType = TransactionType.PURCHASE;
       }
-      if (movement.getTipofac() == TipoFactura.SUSCRIPCION_INTERNACIONAL) {
+      // Suscripciones o Anulaciones de suscripciones
+      else if (movement.getTipofac().getCode() == TipoFactura.SUSCRIPCION_INTERNACIONAL.getCode()) {
         transactionType = TransactionType.SUSCRIPTION;
       }
 
