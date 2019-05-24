@@ -122,6 +122,9 @@ public class Test_PrepaidMovementEJBBean11_publishTransactionRejectedEvent exten
     PrepaidUser10 user = buildPrepaidUserv2();
     PrepaidTopup10 topup = buildPrepaidTopup10();
 
+    topup.setMerchantCode(getRandomNumericString(10));
+    topup.setMerchantName(getRandomString(10));
+
     PrepaidMovement10 movement = buildPrepaidMovement10(user, topup);
     movement.setFechaCreacion(Timestamp.from(Instant.now()));
     movement.setFechaActualizacion(Timestamp.from(Instant.now()));
@@ -152,6 +155,9 @@ public class Test_PrepaidMovementEJBBean11_publishTransactionRejectedEvent exten
     Assert.assertEquals("Debe tener el mismo tipo", TransactionType.CASH_IN_MULTICAJA.toString(), transactionEvent.getTransaction().getType());
     Assert.assertEquals("Debe tener el status REJECTED", TransactionStatus.REJECTED.toString(), transactionEvent.getTransaction().getStatus());
 
+    Assert.assertEquals("Debe tener el mismo MerchantCode",movement.getCodcom(),transactionEvent.getTransaction().getMerchant().getCode());
+    Assert.assertEquals("Debe tener el mismo Nomcomred",movement.getNomcomred(),transactionEvent.getTransaction().getMerchant().getName());
+
     List<Fee> fees = transactionEvent.getTransaction().getFees();
     Assert.assertEquals("Debe tener 1 fee", 1, fees.size());
     Assert.assertEquals("Debe tener mismo fee", fee.getAmount(), fees.get(0).getAmount().getValue());
@@ -166,6 +172,9 @@ public class Test_PrepaidMovementEJBBean11_publishTransactionRejectedEvent exten
 
     PrepaidUser10 user = buildPrepaidUserv2();
     PrepaidTopup10 topup = buildPrepaidTopup10();
+
+    topup.setMerchantCode(getRandomNumericString(10));
+    topup.setMerchantName(getRandomString(10));
 
     PrepaidMovement10 movement = buildPrepaidMovement10(user, topup);
     movement.setFechaCreacion(Timestamp.from(Instant.now()));
@@ -190,6 +199,9 @@ public class Test_PrepaidMovementEJBBean11_publishTransactionRejectedEvent exten
     Assert.assertEquals("Debe tener el mismo monto", movement.getMonto(), transactionEvent.getTransaction().getPrimaryAmount().getValue());
     Assert.assertEquals("Debe tener el mismo tipo", TransactionType.CASH_IN_MULTICAJA.toString(), transactionEvent.getTransaction().getType());
     Assert.assertEquals("Debe tener el status REJECTED", TransactionStatus.REJECTED.toString(), transactionEvent.getTransaction().getStatus());
+
+    Assert.assertEquals("Debe tener el mismo MerchantCode",movement.getCodcom(),transactionEvent.getTransaction().getMerchant().getCode());
+    Assert.assertEquals("Debe tener el mismo Nomcomred",movement.getNomcomred(),transactionEvent.getTransaction().getMerchant().getName());
 
     Assert.assertEquals("No debe tener fees", 0, transactionEvent.getTransaction().getFees().size());
 
