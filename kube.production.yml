@@ -144,7 +144,8 @@ metadata:
   namespace: prepaid
 spec:
   hosts:
-  - api.${CLUSTER_ENVIRONMENT}.${CLUSTER_DOMAIN}
+  - api.${CLUSTER_NAME}.${CLUSTER_DOMAIN}
+  - api.${CLUSTER_DOMAIN}
   gateways:
   - global-gateway.default.svc.cluster.local
   http:
