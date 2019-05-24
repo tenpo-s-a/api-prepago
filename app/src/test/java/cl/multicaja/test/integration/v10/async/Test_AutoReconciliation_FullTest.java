@@ -134,7 +134,7 @@ public class Test_AutoReconciliation_FullTest extends TestBaseUnitAsync {
     PrepaidTopup10 topup = buildPrepaidTopup10();
 
     // Se inserta un movimiento en estado NOTIFIED
-    PrepaidMovement10 insertedMovement = buildPrepaidMovementV2(prepaidUser, topup, prepaidCard, null, PrepaidMovementType.TOPUP);
+    PrepaidMovement10 insertedMovement = buildPrepaidMovement11(prepaidUser, topup, prepaidCard, null, PrepaidMovementType.TOPUP);
     insertedMovement.setEstado(PrepaidMovementStatus.NOTIFIED);
     insertedMovement.setTipoMovimiento(PrepaidMovementType.SUSCRIPTION);
     insertedMovement.setTipofac(TipoFactura.SUSCRIPCION_INTERNACIONAL);
@@ -173,7 +173,7 @@ public class Test_AutoReconciliation_FullTest extends TestBaseUnitAsync {
     PrepaidTopup10 topup = buildPrepaidTopup10();
 
     // Se inserta un movimiento en estado NOTIFIED
-    PrepaidMovement10 insertedMovement = buildPrepaidMovementV2(prepaidUser, topup, prepaidCard, null, PrepaidMovementType.TOPUP);
+    PrepaidMovement10 insertedMovement = buildPrepaidMovement11(prepaidUser, topup, prepaidCard, null, PrepaidMovementType.TOPUP);
     insertedMovement.setEstado(PrepaidMovementStatus.AUTHORIZED);
     insertedMovement.setTipoMovimiento(PrepaidMovementType.SUSCRIPTION);
     insertedMovement.setTipofac(TipoFactura.SUSCRIPCION_INTERNACIONAL);
@@ -371,7 +371,7 @@ public class Test_AutoReconciliation_FullTest extends TestBaseUnitAsync {
     movimientoTecnocom10 = getTecnocomReconciliationEJBBean10().insertaMovimientoTecnocom(movimientoTecnocom10);
 
     // Se inserta un movimiento en estado NOTIFIED
-    PrepaidMovement10 insertedMovement = buildPrepaidMovementV2(prepaidUser, topup, prepaidCard, null, PrepaidMovementType.TOPUP);
+    PrepaidMovement10 insertedMovement = buildPrepaidMovement11(prepaidUser, topup, prepaidCard, null, PrepaidMovementType.TOPUP);
     insertedMovement.setEstado(PrepaidMovementStatus.NOTIFIED);
     insertedMovement.setTipoMovimiento(PrepaidMovementType.PURCHASE);
     insertedMovement.setTipofac(TipoFactura.COMPRA_INTERNACIONAL);
@@ -419,7 +419,7 @@ public class Test_AutoReconciliation_FullTest extends TestBaseUnitAsync {
     ipmMovement10 = createIpmMovement(ipmMovement10);
 
     // Se inserta un movimiento en estado NOTIFIED
-    PrepaidMovement10 insertedMovement = buildPrepaidMovementV2(prepaidUser, topup, prepaidCard, null, PrepaidMovementType.TOPUP);
+    PrepaidMovement10 insertedMovement = buildPrepaidMovement11(prepaidUser, topup, prepaidCard, null, PrepaidMovementType.TOPUP);
     insertedMovement.setEstado(PrepaidMovementStatus.NOTIFIED);
     insertedMovement.setTipoMovimiento(PrepaidMovementType.SUSCRIPTION);
     insertedMovement.setTipofac(TipoFactura.SUSCRIPCION_INTERNACIONAL);
@@ -476,7 +476,7 @@ public class Test_AutoReconciliation_FullTest extends TestBaseUnitAsync {
     ipmMovement10 = createIpmMovement(ipmMovement10);
 
     // Se inserta un movimiento en estado AUTHORIZED
-    PrepaidMovement10 insertedMovement = buildPrepaidMovementV2(prepaidUser, topup, prepaidCard, null, PrepaidMovementType.TOPUP);
+    PrepaidMovement10 insertedMovement = buildPrepaidMovement11(prepaidUser, topup, prepaidCard, null, PrepaidMovementType.TOPUP);
     insertedMovement.setEstado(PrepaidMovementStatus.AUTHORIZED);
     insertedMovement.setTipoMovimiento(PrepaidMovementType.SUSCRIPTION);
     insertedMovement.setTipofac(TipoFactura.SUSCRIPCION_INTERNACIONAL);
