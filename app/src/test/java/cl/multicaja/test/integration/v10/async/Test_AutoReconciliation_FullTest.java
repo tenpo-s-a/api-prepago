@@ -156,7 +156,7 @@ public class Test_AutoReconciliation_FullTest extends TestBaseUnitAsync {
     PrepaidMovement10 foundNotExpiredMovement = getPrepaidMovementEJBBean11().getPrepaidMovementById(doNotExpireMovement.getId());
     Assert.assertEquals("Debe seguir en estado_con_ecnocom PENDING", ReconciliationStatusType.PENDING, foundNotExpiredMovement.getConTecnocom());
     Assert.assertEquals("Debe seguir en estado NOTIFIED", PrepaidMovementStatus.NOTIFIED, foundNotExpiredMovement.getEstado());
-/*
+
     // Revisar que exista el evento reversado
     Queue qResp = camelFactory.createJMSQueue(KafkaEventsRoute10.TRANSACTION_REVERSED_TOPIC);
     ExchangeData<String> event = (ExchangeData<String>) camelFactory.createJMSMessenger(30000, 60000)
@@ -171,7 +171,7 @@ public class Test_AutoReconciliation_FullTest extends TestBaseUnitAsync {
     Assert.assertEquals("Debe tener el mismo accountId", account.getUuid(), transactionEvent.getAccountId());
     Assert.assertEquals("Debe tener el mismo userId", prepaidUser.getUuid(), transactionEvent.getUserId());
     Assert.assertEquals("Debe tener el mismo transactiontype", "SUSCRIPTION", transactionEvent.getTransaction().getType());
-    Assert.assertEquals("Debe tener el mismo status", "REVERSED", transactionEvent.getTransaction().getStatus());*/
+    Assert.assertEquals("Debe tener el mismo status", "REVERSED", transactionEvent.getTransaction().getStatus());
 
     deleteReconciliationFiles(createdFiles);
     deleteReconciliationFiles(extraFiles);
@@ -212,7 +212,7 @@ public class Test_AutoReconciliation_FullTest extends TestBaseUnitAsync {
     PrepaidMovement10 foundNotExpiredMovement = getPrepaidMovementEJBBean11().getPrepaidMovementById(doNotExpireMovement.getId());
     Assert.assertEquals("Debe seguir en estado_con_ecnocom PENDING", ReconciliationStatusType.PENDING, foundNotExpiredMovement.getConTecnocom());
     Assert.assertEquals("Debe seguir en estado NOTIFIED", PrepaidMovementStatus.NOTIFIED, foundNotExpiredMovement.getEstado());
-/*
+
     // Revisar que exista el evento reversado
     Queue qResp = camelFactory.createJMSQueue(KafkaEventsRoute10.TRANSACTION_REVERSED_TOPIC);
     ExchangeData<String> event = (ExchangeData<String>) camelFactory.createJMSMessenger(30000, 60000)
@@ -227,7 +227,7 @@ public class Test_AutoReconciliation_FullTest extends TestBaseUnitAsync {
     Assert.assertEquals("Debe tener el mismo accountId", account.getUuid(), transactionEvent.getAccountId());
     Assert.assertEquals("Debe tener el mismo userId", prepaidUser.getUuid(), transactionEvent.getUserId());
     Assert.assertEquals("Debe tener el mismo transactiontype", "PURCHASE", transactionEvent.getTransaction().getType());
-    Assert.assertEquals("Debe tener el mismo status", "REVERSED", transactionEvent.getTransaction().getStatus());*/
+    Assert.assertEquals("Debe tener el mismo status", "REVERSED", transactionEvent.getTransaction().getStatus());
 
     deleteReconciliationFiles(createdFiles);
     deleteReconciliationFiles(extraFiles);
@@ -286,7 +286,7 @@ public class Test_AutoReconciliation_FullTest extends TestBaseUnitAsync {
     ClearingData10 liq = getPrepaidClearingEJBBean10().searchClearingDataByAccountingId(null, acc.getId());
     Assert.assertNotNull("Debe existir en clearing", liq);
     Assert.assertEquals("Debe tener estado NOT_SEND", AccountingStatusType.NOT_SEND, liq.getStatus());
-/*
+
     // Verificar que exista en la cola de eventos transaction_reversed
     Queue qResp = camelFactory.createJMSQueue(KafkaEventsRoute10.TRANSACTION_REVERSED_TOPIC);
     ExchangeData<String> event = (ExchangeData<String>) camelFactory.createJMSMessenger(30000, 60000)
@@ -301,7 +301,7 @@ public class Test_AutoReconciliation_FullTest extends TestBaseUnitAsync {
     Assert.assertEquals("Debe tener el mismo accountId", account.getUuid(), transactionEvent.getAccountId());
     Assert.assertEquals("Debe tener el mismo userId", prepaidUser.getUuid(), transactionEvent.getUserId());
     Assert.assertEquals("Debe tener el mismo transactiontype", "SUSCRIPTION", transactionEvent.getTransaction().getType());
-    Assert.assertEquals("Debe tener el mismo status", "REVERSED", transactionEvent.getTransaction().getStatus());*/
+    Assert.assertEquals("Debe tener el mismo status", "REVERSED", transactionEvent.getTransaction().getStatus());
 
     deleteReconciliationFiles(createdFiles);
     deleteReconciliationFiles(extraFiles);
@@ -360,7 +360,7 @@ public class Test_AutoReconciliation_FullTest extends TestBaseUnitAsync {
     ClearingData10 liq = getPrepaidClearingEJBBean10().searchClearingDataByAccountingId(null, acc.getId());
     Assert.assertNotNull("Debe existir en clearing", liq);
     Assert.assertEquals("Debe tener estado NOT_SEND", AccountingStatusType.NOT_SEND, liq.getStatus());
-/*
+
     // Verificar que exista en la cola de eventos transaction_reversed
     Queue qResp = camelFactory.createJMSQueue(KafkaEventsRoute10.TRANSACTION_REVERSED_TOPIC);
     ExchangeData<String> event = (ExchangeData<String>) camelFactory.createJMSMessenger(30000, 60000)
@@ -375,7 +375,7 @@ public class Test_AutoReconciliation_FullTest extends TestBaseUnitAsync {
     Assert.assertEquals("Debe tener el mismo accountId", account.getUuid(), transactionEvent.getAccountId());
     Assert.assertEquals("Debe tener el mismo userId", prepaidUser.getUuid(), transactionEvent.getUserId());
     Assert.assertEquals("Debe tener el mismo transactiontype", "PURCHASE", transactionEvent.getTransaction().getType());
-    Assert.assertEquals("Debe tener el mismo status", "REVERSED", transactionEvent.getTransaction().getStatus());*/
+    Assert.assertEquals("Debe tener el mismo status", "REVERSED", transactionEvent.getTransaction().getStatus());
 
     deleteReconciliationFiles(createdFiles);
     deleteReconciliationFiles(extraFiles);
@@ -449,7 +449,7 @@ public class Test_AutoReconciliation_FullTest extends TestBaseUnitAsync {
     ClearingData10 liq = getPrepaidClearingEJBBean10().searchClearingDataByAccountingId(null, acc.getId());
     Assert.assertNotNull("Debe existir en clearing", liq);
     Assert.assertEquals("Debe tener estado INITIAL", AccountingStatusType.INITIAL, liq.getStatus());
-/*
+
     // Verificar que exista en la cola de eventos transaction_authorized
     Queue qResp = camelFactory.createJMSQueue(KafkaEventsRoute10.TRANSACTION_AUTHORIZED_TOPIC);
     ExchangeData<String> event = (ExchangeData<String>) camelFactory.createJMSMessenger(30000, 60000)
@@ -464,7 +464,7 @@ public class Test_AutoReconciliation_FullTest extends TestBaseUnitAsync {
     Assert.assertEquals("Debe tener el mismo accountId", account.getUuid(), transactionEvent.getAccountId());
     Assert.assertEquals("Debe tener el mismo userId", prepaidUser.getUuid(), transactionEvent.getUserId());
     Assert.assertEquals("Debe tener el mismo transactiontype", "PURCHASE", transactionEvent.getTransaction().getType());
-    Assert.assertEquals("Debe tener el mismo status", "AUTHORIZED", transactionEvent.getTransaction().getStatus());*/
+    Assert.assertEquals("Debe tener el mismo status", "AUTHORIZED", transactionEvent.getTransaction().getStatus());
   }
 
   // Compra en pesos, BD = NO, file = AU
@@ -545,7 +545,7 @@ public class Test_AutoReconciliation_FullTest extends TestBaseUnitAsync {
     ClearingData10 liq = getPrepaidClearingEJBBean10().searchClearingDataByAccountingId(null, acc.getId());
     Assert.assertNotNull("Debe existir en clearing", liq);
     Assert.assertEquals("Debe tener estado INITIAL", AccountingStatusType.INITIAL, liq.getStatus());
-/*
+
     // Verificar que exista en la cola de eventos transaction_authorized
     Queue qResp = camelFactory.createJMSQueue(KafkaEventsRoute10.TRANSACTION_AUTHORIZED_TOPIC);
     ExchangeData<String> event = (ExchangeData<String>) camelFactory.createJMSMessenger(30000, 60000)
@@ -560,7 +560,7 @@ public class Test_AutoReconciliation_FullTest extends TestBaseUnitAsync {
     Assert.assertEquals("Debe tener el mismo accountId", account.getUuid(), transactionEvent.getAccountId());
     Assert.assertEquals("Debe tener el mismo userId", prepaidUser.getUuid(), transactionEvent.getUserId());
     Assert.assertEquals("Debe tener el mismo transactiontype", "PURCHASE", transactionEvent.getTransaction().getType());
-    Assert.assertEquals("Debe tener el mismo status", "AUTHORIZED", transactionEvent.getTransaction().getStatus());*/
+    Assert.assertEquals("Debe tener el mismo status", "AUTHORIZED", transactionEvent.getTransaction().getStatus());
   }
 
   // Compra en dolares, BD = NO, file = OP
@@ -639,7 +639,7 @@ public class Test_AutoReconciliation_FullTest extends TestBaseUnitAsync {
     ClearingData10 liq = getPrepaidClearingEJBBean10().searchClearingDataByAccountingId(null, acc.getId());
     Assert.assertNotNull("Debe existir en clearing", liq);
     Assert.assertEquals("Debe tener estado PENDING", AccountingStatusType.PENDING, liq.getStatus());
-/*
+
     // Verificar que exista en la cola de eventos transaction_authorized
     Queue qResp = camelFactory.createJMSQueue(KafkaEventsRoute10.TRANSACTION_AUTHORIZED_TOPIC);
     ExchangeData<String> event = (ExchangeData<String>) camelFactory.createJMSMessenger(30000, 60000)
@@ -654,7 +654,7 @@ public class Test_AutoReconciliation_FullTest extends TestBaseUnitAsync {
     Assert.assertEquals("Debe tener el mismo accountId", account.getUuid(), transactionEvent.getAccountId());
     Assert.assertEquals("Debe tener el mismo userId", prepaidUser.getUuid(), transactionEvent.getUserId());
     Assert.assertEquals("Debe tener el mismo transactiontype", "PURCHASE", transactionEvent.getTransaction().getType());
-    Assert.assertEquals("Debe tener el mismo status", "AUTHORIZED", transactionEvent.getTransaction().getStatus());*/
+    Assert.assertEquals("Debe tener el mismo status", "AUTHORIZED", transactionEvent.getTransaction().getStatus());
   }
 
   // Compra en pesos, BD = NO, file = OP
@@ -743,7 +743,7 @@ public class Test_AutoReconciliation_FullTest extends TestBaseUnitAsync {
     ClearingData10 liq = getPrepaidClearingEJBBean10().searchClearingDataByAccountingId(null, acc.getId());
     Assert.assertNotNull("Debe existir en clearing", liq);
     Assert.assertEquals("Debe tener estado PENDING", AccountingStatusType.PENDING, liq.getStatus());
-/*
+
     // Verificar que exista en la cola de eventos transaction_authorized
     Queue qResp = camelFactory.createJMSQueue(KafkaEventsRoute10.TRANSACTION_AUTHORIZED_TOPIC);
     ExchangeData<String> event = (ExchangeData<String>) camelFactory.createJMSMessenger(30000, 60000)
@@ -758,7 +758,7 @@ public class Test_AutoReconciliation_FullTest extends TestBaseUnitAsync {
     Assert.assertEquals("Debe tener el mismo accountId", account.getUuid(), transactionEvent.getAccountId());
     Assert.assertEquals("Debe tener el mismo userId", prepaidUser.getUuid(), transactionEvent.getUserId());
     Assert.assertEquals("Debe tener el mismo transactiontype", "PURCHASE", transactionEvent.getTransaction().getType());
-    Assert.assertEquals("Debe tener el mismo status", "AUTHORIZED", transactionEvent.getTransaction().getStatus());*/
+    Assert.assertEquals("Debe tener el mismo status", "AUTHORIZED", transactionEvent.getTransaction().getStatus());
   }
 
   // Compra en dolares, BD = NOTIFIED, file = AU
@@ -830,7 +830,7 @@ public class Test_AutoReconciliation_FullTest extends TestBaseUnitAsync {
     ClearingData10 liq = getPrepaidClearingEJBBean10().searchClearingDataByAccountingId(null, acc.getId());
     Assert.assertNotNull("Debe existir en clearing", liq);
     Assert.assertEquals("Debe tener estado INITIAL", AccountingStatusType.INITIAL, liq.getStatus());
-/*
+
     // Verificar que exista en la cola de eventos transaction_authorized
     Queue qResp = camelFactory.createJMSQueue(KafkaEventsRoute10.TRANSACTION_AUTHORIZED_TOPIC);
     ExchangeData<String> event = (ExchangeData<String>) camelFactory.createJMSMessenger(30000, 60000)
@@ -845,7 +845,7 @@ public class Test_AutoReconciliation_FullTest extends TestBaseUnitAsync {
     Assert.assertEquals("Debe tener el mismo accountId", account.getUuid(), transactionEvent.getAccountId());
     Assert.assertEquals("Debe tener el mismo userId", prepaidUser.getUuid(), transactionEvent.getUserId());
     Assert.assertEquals("Debe tener el mismo transactiontype", "PURCHASE", transactionEvent.getTransaction().getType());
-    Assert.assertEquals("Debe tener el mismo status", "AUTHORIZED", transactionEvent.getTransaction().getStatus());*/
+    Assert.assertEquals("Debe tener el mismo status", "AUTHORIZED", transactionEvent.getTransaction().getStatus());
   }
 
   // Compra en pesos, BD = NOTIFIED, file = AU
@@ -922,7 +922,7 @@ public class Test_AutoReconciliation_FullTest extends TestBaseUnitAsync {
     ClearingData10 liq = getPrepaidClearingEJBBean10().searchClearingDataByAccountingId(null, acc.getId());
     Assert.assertNotNull("Debe existir en clearing", liq);
     Assert.assertEquals("Debe tener estado INITIAL", AccountingStatusType.INITIAL, liq.getStatus());
-/*
+
     // Verificar que exista en la cola de eventos transaction_authorized
     Queue qResp = camelFactory.createJMSQueue(KafkaEventsRoute10.TRANSACTION_AUTHORIZED_TOPIC);
     ExchangeData<String> event = (ExchangeData<String>) camelFactory.createJMSMessenger(30000, 60000)
@@ -937,7 +937,7 @@ public class Test_AutoReconciliation_FullTest extends TestBaseUnitAsync {
     Assert.assertEquals("Debe tener el mismo accountId", account.getUuid(), transactionEvent.getAccountId());
     Assert.assertEquals("Debe tener el mismo userId", prepaidUser.getUuid(), transactionEvent.getUserId());
     Assert.assertEquals("Debe tener el mismo transactiontype", "PURCHASE", transactionEvent.getTransaction().getType());
-    Assert.assertEquals("Debe tener el mismo status", "AUTHORIZED", transactionEvent.getTransaction().getStatus());*/
+    Assert.assertEquals("Debe tener el mismo status", "AUTHORIZED", transactionEvent.getTransaction().getStatus());
   }
 
   // Compra en dolares, BD = NOTIFIED, file = OP
@@ -1017,7 +1017,7 @@ public class Test_AutoReconciliation_FullTest extends TestBaseUnitAsync {
     ClearingData10 liq = getPrepaidClearingEJBBean10().searchClearingDataByAccountingId(null, acc.getId());
     Assert.assertNotNull("Debe existir en clearing", liq);
     Assert.assertEquals("Debe tener estado PENDING", AccountingStatusType.PENDING, liq.getStatus());
-/*
+
     // Verificar que exista en la cola de eventos transaction_authorized
     Queue qResp = camelFactory.createJMSQueue(KafkaEventsRoute10.TRANSACTION_AUTHORIZED_TOPIC);
     ExchangeData<String> event = (ExchangeData<String>) camelFactory.createJMSMessenger(30000, 60000)
@@ -1032,7 +1032,7 @@ public class Test_AutoReconciliation_FullTest extends TestBaseUnitAsync {
     Assert.assertEquals("Debe tener el mismo accountId", account.getUuid(), transactionEvent.getAccountId());
     Assert.assertEquals("Debe tener el mismo userId", prepaidUser.getUuid(), transactionEvent.getUserId());
     Assert.assertEquals("Debe tener el mismo transactiontype", "PURCHASE", transactionEvent.getTransaction().getType());
-    Assert.assertEquals("Debe tener el mismo status", "AUTHORIZED", transactionEvent.getTransaction().getStatus());*/
+    Assert.assertEquals("Debe tener el mismo status", "AUTHORIZED", transactionEvent.getTransaction().getStatus());
   }
 
   // Compra en pesos, BD = NOTIFIED, file = OP
@@ -1117,7 +1117,7 @@ public class Test_AutoReconciliation_FullTest extends TestBaseUnitAsync {
     ClearingData10 liq = getPrepaidClearingEJBBean10().searchClearingDataByAccountingId(null, acc.getId());
     Assert.assertNotNull("Debe existir en clearing", liq);
     Assert.assertEquals("Debe tener estado PENDING", AccountingStatusType.PENDING, liq.getStatus());
-/*
+
     // Verificar que exista en la cola de eventos transaction_authorized
     Queue qResp = camelFactory.createJMSQueue(KafkaEventsRoute10.TRANSACTION_AUTHORIZED_TOPIC);
     ExchangeData<String> event = (ExchangeData<String>) camelFactory.createJMSMessenger(30000, 60000)
@@ -1132,7 +1132,7 @@ public class Test_AutoReconciliation_FullTest extends TestBaseUnitAsync {
     Assert.assertEquals("Debe tener el mismo accountId", account.getUuid(), transactionEvent.getAccountId());
     Assert.assertEquals("Debe tener el mismo userId", prepaidUser.getUuid(), transactionEvent.getUserId());
     Assert.assertEquals("Debe tener el mismo transactiontype", "PURCHASE", transactionEvent.getTransaction().getType());
-    Assert.assertEquals("Debe tener el mismo status", "AUTHORIZED", transactionEvent.getTransaction().getStatus());*/
+    Assert.assertEquals("Debe tener el mismo status", "AUTHORIZED", transactionEvent.getTransaction().getStatus());
   }
 
   // Compra en dolares, BD = AUTHORIZED, file = OP
@@ -1188,7 +1188,7 @@ public class Test_AutoReconciliation_FullTest extends TestBaseUnitAsync {
 
     ClearingData10 liq = getPrepaidClearingEJBBean10().searchClearingDataByAccountingId(null, acc.getId());
     Assert.assertEquals("Debe tener estado PENDING", AccountingStatusType.PENDING, liq.getStatus());
-/*
+
     // Verificar que exista en la cola de eventos transaction_authorized
     Queue qResp = camelFactory.createJMSQueue(KafkaEventsRoute10.TRANSACTION_AUTHORIZED_TOPIC);
     ExchangeData<String> event = (ExchangeData<String>) camelFactory.createJMSMessenger(30000, 60000)
@@ -1203,7 +1203,7 @@ public class Test_AutoReconciliation_FullTest extends TestBaseUnitAsync {
     Assert.assertEquals("Debe tener el mismo accountId", account.getUuid(), transactionEvent.getAccountId());
     Assert.assertEquals("Debe tener el mismo userId", prepaidUser.getUuid(), transactionEvent.getUserId());
     Assert.assertEquals("Debe tener el mismo transactiontype", "PURCHASE", transactionEvent.getTransaction().getType());
-    Assert.assertEquals("Debe tener el mismo status", "AUTHORIZED", transactionEvent.getTransaction().getStatus());*/
+    Assert.assertEquals("Debe tener el mismo status", "AUTHORIZED", transactionEvent.getTransaction().getStatus());
   }
 
   // Compra en pesos, BD = AUTHORIZED, file = OP
@@ -1259,7 +1259,7 @@ public class Test_AutoReconciliation_FullTest extends TestBaseUnitAsync {
 
     ClearingData10 liq = getPrepaidClearingEJBBean10().searchClearingDataByAccountingId(null, acc.getId());
     Assert.assertEquals("Debe tener estado PENDING", AccountingStatusType.PENDING, liq.getStatus());
-/*
+
     // Verificar que exista en la cola de eventos transaction_authorized
     Queue qResp = camelFactory.createJMSQueue(KafkaEventsRoute10.TRANSACTION_AUTHORIZED_TOPIC);
     ExchangeData<String> event = (ExchangeData<String>) camelFactory.createJMSMessenger(30000, 60000)
@@ -1274,7 +1274,7 @@ public class Test_AutoReconciliation_FullTest extends TestBaseUnitAsync {
     Assert.assertEquals("Debe tener el mismo accountId", account.getUuid(), transactionEvent.getAccountId());
     Assert.assertEquals("Debe tener el mismo userId", prepaidUser.getUuid(), transactionEvent.getUserId());
     Assert.assertEquals("Debe tener el mismo transactiontype", "PURCHASE", transactionEvent.getTransaction().getType());
-    Assert.assertEquals("Debe tener el mismo status", "AUTHORIZED", transactionEvent.getTransaction().getStatus());*/
+    Assert.assertEquals("Debe tener el mismo status", "AUTHORIZED", transactionEvent.getTransaction().getStatus());
   }
 
   private void prepareCalculateFeesMock(BigDecimal amount, boolean chargesIva) throws TimeoutException, BaseException {
@@ -1427,9 +1427,9 @@ public class Test_AutoReconciliation_FullTest extends TestBaseUnitAsync {
     prepaidMovement10.setClamone(movimientoTecnocom10.getClamone().getValue());
     prepaidMovement10.setTipolin(movimientoTecnocom10.getTipoLin());
     prepaidMovement10.setLinref(movimientoTecnocom10.getLinRef());
-    prepaidMovement10.setNumbencta(0); // Esto no es el valor correcto
-    prepaidMovement10.setNumplastico(0L); // Esto no es el valor correcto
-    prepaidMovement10.setNomcomred(""); // Esto no es el valor correcto
+    prepaidMovement10.setNumbencta(0); 
+    prepaidMovement10.setNumplastico(0L);
+    prepaidMovement10.setNomcomred("");
     prepaidMovement10.setCardId(prepaidCard.getId());
 
     return prepaidMovement10;

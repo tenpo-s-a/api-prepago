@@ -472,7 +472,7 @@ public class PrepaidMovementEJBBean11 extends PrepaidMovementEJBBean10 {
       PrepaidCard10 prepaidCard10 = getPrepaidCardEJB11().getPrepaidCardById(null, movement.getCardId());
       Account account10 = getAccountEJBBean10().findById(prepaidCard10.getAccountId());
       PrepaidUser10 prepaidUser10 = getPrepaidUserEJB10().findById(null, account10.getUserId());
-      List<PrepaidMovementFee10> feeList = new ArrayList<PrepaidMovementFee10>();
+      List<PrepaidMovementFee10> feeList = new ArrayList<>();
 
       if (movement.getTipofac() == TipoFactura.COMPRA_INTERNACIONAL) {
         transactionType = TransactionType.PURCHASE;
@@ -503,9 +503,8 @@ public class PrepaidMovementEJBBean11 extends PrepaidMovementEJBBean10 {
     queryExpire.append("WHERE f.created_at >= mov.fecha_creacion AND f.tipo = 'TECNOCOM_FILE' AND f.status = 'OK' ) >= %d");
     String expiredQuerySelected = queryExpire.toString();
 
-    //PrepaidMovementStatus.NOTIFIED.toString()
     String expiredQuerySelect = String.format(expiredQuerySelected,getSchema(),movement,getSchema(),numFiles);
-    log.info("Buscando autorizaciones " + movement +": " + expiredQuerySelect);
+    log.info("Buscando autorizaciones: " + expiredQuerySelect);
 
     return getDbUtils().getJdbcTemplate().query(expiredQuerySelect, this.getMovementMapper());
   }
