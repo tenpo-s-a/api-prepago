@@ -37,18 +37,15 @@ metadata:
   namespace: prepaid
   labels:
     app: api-prepaid
-    version: v1
 spec:
   replicas: 1
   selector:
     matchLabels:
       app: api-prepaid
-      version: v1
   template:
     metadata:
       labels:
         app: api-prepaid
-        version: v1
     spec:
       containers:
       - name: api-prepaid
@@ -67,6 +64,8 @@ spec:
             value: ${DB_HOST_FQDN}
           - name: API_ENVIRONMENT
             value: ${API_ENVIRONMENT}
+          - name: TENPO_USER_API_URL
+            value: "http://${TENPO_USER_API_HOST_IP}:8080/v1/user-management/users"
           - name: TECNOCOM_MOCK_IMPL
             value: "false"
           - name: TECNOCOM_APIKEY
@@ -108,11 +107,65 @@ spec:
   hosts:
   - "users.uat.multicajadigital"
   addresses:
-  - "40.70.68.63"
+  - "${TENPO_USER_API_HOST_IP}"
   location: MESH_EXTERNAL
   ports:
   - number: 8080
     name: tcp-api-prepaid-user-management
     protocol: TCP
   resolution: NONE
+---
+apiVersion: networking.istio.io/v1alpha3
+kind: VirtualService
+metadata:
+  name: api-prepaid-vts
+  namespace: prepaid
+spec:
+  hosts:
+  - ${INTERNAL_LB}
+  gateways:
+  - global-gateway.default.svc.cluster.local
+  http:
+  - match:
+    - uri:
+        prefix: /prepaid/1.0
+    rewrite:
+      uri: /api-prepaid-1.0/1.0
+    route:
+    - destination:
+        host: api-prepaid
+        port:
+          number: 80
+---
+apiVersion: networking.istio.io/v1alpha3
+kind: VirtualService
+metadata:
+  name: api-prepaid-external-vts
+  namespace: prepaid
+spec:
+  hosts:
+  - api.${CLUSTER_ENVIRONMENT}.${CLUSTER_DOMAIN}
+  gateways:
+  - global-gateway.default.svc.cluster.local
+  http:
+  - match:
+    - uri:
+        exact: /prepaid/1.0/prepaid/Queue
+    rewrite:
+      uri: /api-prepaid-1.0/1.0/prepaid/Queue
+    route:
+    - destination:
+        host: api-prepaid
+        port:
+          number: 80
+  - match:
+    - uri:
+        exact: /prepaid/1.0/prepaid/ping
+    rewrite:
+      uri: /api-prepaid-1.0/1.0/prepaid/ping
+    route:
+    - destination:
+        host: api-prepaid
+        port:
+          number: 80
 ---
