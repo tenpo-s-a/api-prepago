@@ -124,9 +124,9 @@ pipeline:
       branch: master
 
   publish_image_prod:
-    registry: mccontainerregistry.azurecr.io
+    registry: mcdcontainerregistry.azurecr.io
     image: plugins/docker
-    repo: mccontainerregistry.azurecr.io/api-prepago
+    repo: mcdcontainerregistry.azurecr.io/api-prepago
     tags:
       - ${DRONE_COMMIT_SHA}
       - ${DRONE_TAG}
@@ -268,14 +268,19 @@ pipeline:
       ref: refs/tags/snapshot*
 
   deploy_to_prod:
-    image: mccontainerregistry.azurecr.io/tools/drone-phoenix:1.0.0
+    image: mcdcontainerregistry.azurecr.io/tools/drone-phoenix:1.0.0
     cluster: atlas
     template: kube.production.yml
     consul_kv: env/production.env
     vars:
-      - IMAGE=mccontainerregistry.azurecr.io/api-prepago:${DRONE_COMMIT_SHA}
+      - IMAGE=mcdcontainerregistry.azurecr.io/api-prepago:${DRONE_COMMIT_SHA}
       - DB_NAME=prepago_api
       - API_ENVIRONMENT=production
+    secrets:
+      - source: consul_http_addr
+        target: CONSUL_HTTP_ADDR
+      - source: consul_http_token
+        target: CONSUL_HTTP_TOKEN
     when:
       event: [ tag ]
       ref: refs/tags/prod-*
