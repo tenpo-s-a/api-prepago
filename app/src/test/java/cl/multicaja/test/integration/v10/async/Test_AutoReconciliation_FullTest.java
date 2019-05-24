@@ -830,22 +830,6 @@ public class Test_AutoReconciliation_FullTest extends TestBaseUnitAsync {
     ClearingData10 liq = getPrepaidClearingEJBBean10().searchClearingDataByAccountingId(null, acc.getId());
     Assert.assertNotNull("Debe existir en clearing", liq);
     Assert.assertEquals("Debe tener estado INITIAL", AccountingStatusType.INITIAL, liq.getStatus());
-
-    // Verificar que exista en la cola de eventos transaction_authorized
-    Queue qResp = camelFactory.createJMSQueue(KafkaEventsRoute10.TRANSACTION_AUTHORIZED_TOPIC);
-    ExchangeData<String> event = (ExchangeData<String>) camelFactory.createJMSMessenger(30000, 60000)
-      .getMessage(qResp, prepaidMovement10.getIdTxExterno());
-
-    Assert.assertNotNull("Deberia existir un evento de transaccion autorizada", event);
-    Assert.assertNotNull("Deberia existir un evento de transaccion autorizada", event.getData());
-
-    TransactionEvent transactionEvent = getJsonParser().fromJson(event.getData(), TransactionEvent.class);
-
-    Assert.assertEquals("Debe tener el mismo id", prepaidMovement10.getIdTxExterno(), transactionEvent.getTransaction().getRemoteTransactionId());
-    Assert.assertEquals("Debe tener el mismo accountId", account.getUuid(), transactionEvent.getAccountId());
-    Assert.assertEquals("Debe tener el mismo userId", prepaidUser.getUuid(), transactionEvent.getUserId());
-    Assert.assertEquals("Debe tener el mismo transactiontype", "PURCHASE", transactionEvent.getTransaction().getType());
-    Assert.assertEquals("Debe tener el mismo status", "AUTHORIZED", transactionEvent.getTransaction().getStatus());
   }
 
   // Compra en pesos, BD = NOTIFIED, file = AU
@@ -922,22 +906,6 @@ public class Test_AutoReconciliation_FullTest extends TestBaseUnitAsync {
     ClearingData10 liq = getPrepaidClearingEJBBean10().searchClearingDataByAccountingId(null, acc.getId());
     Assert.assertNotNull("Debe existir en clearing", liq);
     Assert.assertEquals("Debe tener estado INITIAL", AccountingStatusType.INITIAL, liq.getStatus());
-
-    // Verificar que exista en la cola de eventos transaction_authorized
-    Queue qResp = camelFactory.createJMSQueue(KafkaEventsRoute10.TRANSACTION_AUTHORIZED_TOPIC);
-    ExchangeData<String> event = (ExchangeData<String>) camelFactory.createJMSMessenger(30000, 60000)
-      .getMessage(qResp, prepaidMovement10.getIdTxExterno());
-
-    Assert.assertNotNull("Deberia existir un evento de transaccion autorizada", event);
-    Assert.assertNotNull("Deberia existir un evento de transaccion autorizada", event.getData());
-
-    TransactionEvent transactionEvent = getJsonParser().fromJson(event.getData(), TransactionEvent.class);
-
-    Assert.assertEquals("Debe tener el mismo id", prepaidMovement10.getIdTxExterno(), transactionEvent.getTransaction().getRemoteTransactionId());
-    Assert.assertEquals("Debe tener el mismo accountId", account.getUuid(), transactionEvent.getAccountId());
-    Assert.assertEquals("Debe tener el mismo userId", prepaidUser.getUuid(), transactionEvent.getUserId());
-    Assert.assertEquals("Debe tener el mismo transactiontype", "PURCHASE", transactionEvent.getTransaction().getType());
-    Assert.assertEquals("Debe tener el mismo status", "AUTHORIZED", transactionEvent.getTransaction().getStatus());
   }
 
   // Compra en dolares, BD = NOTIFIED, file = OP
@@ -1017,22 +985,6 @@ public class Test_AutoReconciliation_FullTest extends TestBaseUnitAsync {
     ClearingData10 liq = getPrepaidClearingEJBBean10().searchClearingDataByAccountingId(null, acc.getId());
     Assert.assertNotNull("Debe existir en clearing", liq);
     Assert.assertEquals("Debe tener estado PENDING", AccountingStatusType.PENDING, liq.getStatus());
-
-    // Verificar que exista en la cola de eventos transaction_authorized
-    Queue qResp = camelFactory.createJMSQueue(KafkaEventsRoute10.TRANSACTION_AUTHORIZED_TOPIC);
-    ExchangeData<String> event = (ExchangeData<String>) camelFactory.createJMSMessenger(30000, 60000)
-      .getMessage(qResp, prepaidMovement10.getIdTxExterno());
-
-    Assert.assertNotNull("Deberia existir un evento de transaccion autorizada", event);
-    Assert.assertNotNull("Deberia existir un evento de transaccion autorizada", event.getData());
-
-    TransactionEvent transactionEvent = getJsonParser().fromJson(event.getData(), TransactionEvent.class);
-
-    Assert.assertEquals("Debe tener el mismo id", prepaidMovement10.getIdTxExterno(), transactionEvent.getTransaction().getRemoteTransactionId());
-    Assert.assertEquals("Debe tener el mismo accountId", account.getUuid(), transactionEvent.getAccountId());
-    Assert.assertEquals("Debe tener el mismo userId", prepaidUser.getUuid(), transactionEvent.getUserId());
-    Assert.assertEquals("Debe tener el mismo transactiontype", "PURCHASE", transactionEvent.getTransaction().getType());
-    Assert.assertEquals("Debe tener el mismo status", "AUTHORIZED", transactionEvent.getTransaction().getStatus());
   }
 
   // Compra en pesos, BD = NOTIFIED, file = OP
@@ -1117,22 +1069,6 @@ public class Test_AutoReconciliation_FullTest extends TestBaseUnitAsync {
     ClearingData10 liq = getPrepaidClearingEJBBean10().searchClearingDataByAccountingId(null, acc.getId());
     Assert.assertNotNull("Debe existir en clearing", liq);
     Assert.assertEquals("Debe tener estado PENDING", AccountingStatusType.PENDING, liq.getStatus());
-
-    // Verificar que exista en la cola de eventos transaction_authorized
-    Queue qResp = camelFactory.createJMSQueue(KafkaEventsRoute10.TRANSACTION_AUTHORIZED_TOPIC);
-    ExchangeData<String> event = (ExchangeData<String>) camelFactory.createJMSMessenger(30000, 60000)
-      .getMessage(qResp, prepaidMovement10.getIdTxExterno());
-
-    Assert.assertNotNull("Deberia existir un evento de transaccion autorizada", event);
-    Assert.assertNotNull("Deberia existir un evento de transaccion autorizada", event.getData());
-
-    TransactionEvent transactionEvent = getJsonParser().fromJson(event.getData(), TransactionEvent.class);
-
-    Assert.assertEquals("Debe tener el mismo id", prepaidMovement10.getIdTxExterno(), transactionEvent.getTransaction().getRemoteTransactionId());
-    Assert.assertEquals("Debe tener el mismo accountId", account.getUuid(), transactionEvent.getAccountId());
-    Assert.assertEquals("Debe tener el mismo userId", prepaidUser.getUuid(), transactionEvent.getUserId());
-    Assert.assertEquals("Debe tener el mismo transactiontype", "PURCHASE", transactionEvent.getTransaction().getType());
-    Assert.assertEquals("Debe tener el mismo status", "AUTHORIZED", transactionEvent.getTransaction().getStatus());
   }
 
   // Compra en dolares, BD = AUTHORIZED, file = OP
@@ -1188,22 +1124,6 @@ public class Test_AutoReconciliation_FullTest extends TestBaseUnitAsync {
 
     ClearingData10 liq = getPrepaidClearingEJBBean10().searchClearingDataByAccountingId(null, acc.getId());
     Assert.assertEquals("Debe tener estado PENDING", AccountingStatusType.PENDING, liq.getStatus());
-
-    // Verificar que exista en la cola de eventos transaction_authorized
-    Queue qResp = camelFactory.createJMSQueue(KafkaEventsRoute10.TRANSACTION_AUTHORIZED_TOPIC);
-    ExchangeData<String> event = (ExchangeData<String>) camelFactory.createJMSMessenger(30000, 60000)
-      .getMessage(qResp, prepaidMovement10.getIdTxExterno());
-
-    Assert.assertNotNull("Deberia existir un evento de transaccion autorizada", event);
-    Assert.assertNotNull("Deberia existir un evento de transaccion autorizada", event.getData());
-
-    TransactionEvent transactionEvent = getJsonParser().fromJson(event.getData(), TransactionEvent.class);
-
-    Assert.assertEquals("Debe tener el mismo id", prepaidMovement10.getIdTxExterno(), transactionEvent.getTransaction().getRemoteTransactionId());
-    Assert.assertEquals("Debe tener el mismo accountId", account.getUuid(), transactionEvent.getAccountId());
-    Assert.assertEquals("Debe tener el mismo userId", prepaidUser.getUuid(), transactionEvent.getUserId());
-    Assert.assertEquals("Debe tener el mismo transactiontype", "PURCHASE", transactionEvent.getTransaction().getType());
-    Assert.assertEquals("Debe tener el mismo status", "AUTHORIZED", transactionEvent.getTransaction().getStatus());
   }
 
   // Compra en pesos, BD = AUTHORIZED, file = OP
@@ -1259,6 +1179,76 @@ public class Test_AutoReconciliation_FullTest extends TestBaseUnitAsync {
 
     ClearingData10 liq = getPrepaidClearingEJBBean10().searchClearingDataByAccountingId(null, acc.getId());
     Assert.assertEquals("Debe tener estado PENDING", AccountingStatusType.PENDING, liq.getStatus());
+  }
+
+  // Suscripcion en dolares, BD = NO, file = AU
+  @Test
+  public void processTecnocomTableData_whenMovSuscriptionInForeignCoin_NotInDBAndFileStateIsAU_movIsInsertedAndLiqAccMustExistInInitialState() throws Exception {
+    MovimientoTecnocom10 movimientoTecnocom10 = createMovimientoTecnocom(tecnocomReconciliationFile10.getId());
+    movimientoTecnocom10.setTipoReg(TecnocomReconciliationRegisterType.AU);
+    movimientoTecnocom10.setTipoFac(TipoFactura.SUSCRIPCION_INTERNACIONAL);
+    movimientoTecnocom10.setIndNorCor(IndicadorNormalCorrector.NORMAL.getValue());
+    movimientoTecnocom10.getImpDiv().setCurrencyCode(CodigoMoneda.USA_USD);
+    movimientoTecnocom10 = getTecnocomReconciliationEJBBean10().insertaMovimientoTecnocom(movimientoTecnocom10);
+
+    // Prepara un mock del servicio de fees, para que retorne las fees esperadas
+    prepareCalculateFeesMock(movimientoTecnocom10.getImpFac().getValue(), false);
+
+    getTecnocomReconciliationEJBBean10().processTecnocomTableData(tecnocomReconciliationFile10.getId());
+
+    // Verificar que exista el movimiento nuevo en la BD en estado AU
+    PrepaidMovement10 prepaidMovement10 = getPrepaidMovement(movimientoTecnocom10.getMovementType(), movimientoTecnocom10.getTipoFac(), movimientoTecnocom10.getNumAut(), prepaidCard.getPan(), movimientoTecnocom10.getCodCom());
+    Assert.assertNotNull("Debe existir el nuevo movimiento en la BD", prepaidMovement10);
+    Assert.assertEquals("Debe tener estado AUTHORIZED", PrepaidMovementStatus.AUTHORIZED, prepaidMovement10.getEstado());
+
+    // Verificar que se hayan creado las comisiones del nuevo movimiento
+    List<PrepaidMovementFee10> prepaidMovementFee10List = getPrepaidMovementEJBBean11().getPrepaidMovementFeesByMovementId(prepaidMovement10.getId());
+    Assert.assertEquals("Debe tener 1 fee asignada", 1, prepaidMovementFee10List.size());
+
+    PrepaidMovementFee10 prepaidFee = prepaidMovementFee10List.stream().filter(f -> PrepaidMovementFeeType.SUSCRIPTION_INT_FEE.equals(f.getFeeType())).findAny().orElse(null);
+    Assert.assertNotNull("Debe existir una fee de compra internacional", prepaidFee);
+    BigDecimal expectedPrepaidFee = prepaidMovement10.getImpfac().multiply(new BigDecimal(0.02));
+    Assert.assertEquals("Debe tener un valor de ", expectedPrepaidFee.setScale(0, RoundingMode.HALF_UP), prepaidFee.getAmount().setScale(0, RoundingMode.HALF_UP));
+
+    // Verificar que exista en la tablas de contabilidad (acc y liq) en sus estados (INITIAL y PENDING)
+    AccountingData10 acc = getPrepaidAccountingEJBBean10().searchAccountingByIdTrx(null,prepaidMovement10.getId());
+    Assert.assertNotNull("Debe existir en accounting", acc);
+    Assert.assertEquals("Debe tener estado PENDING", AccountingStatusType.PENDING, acc.getStatus());
+    Assert.assertEquals("Debe tener estado PENDING", AccountingStatusType.PENDING, acc.getAccountingStatus());
+    Assert.assertEquals("Debe ser del tipo SUSCRIPCION", AccountingTxType.COMPRA_SUSCRIPCION, acc.getType());
+    Assert.assertEquals("Debe ser del tipo mov SUSCRIPCION", AccountingMovementType.SUSCRIPCION, acc.getAccountingMovementType());
+
+    // Compras Internacionales en moneda extranjera: Regla de contabilidad 1: El monto_trx_pesos se llenara con el monto del archivo de operacion impfac
+    Assert.assertEquals("impfac de tecnocom debe ser igual al de contabilidad", prepaidMovement10.getImpfac().setScale(2, RoundingMode.HALF_UP), acc.getAmount().getValue());
+
+    // Compras Internacionales en moneda extranjera: Regla de contabilidad 2: Dif tipo cambio debe rellenarse con la suma de las comisiones
+    BigDecimal totalFees = BigDecimal.ZERO;
+    for (PrepaidMovementFee10 fee : prepaidMovementFee10List) {
+      totalFees = totalFees.add(fee.getAmount());
+    }
+    Assert.assertEquals("todas las fees se suman y se guardan en dif tipo cambio", totalFees, acc.getExchangeRateDif());
+
+    // Compras Internacionales en moneda extranjera: Regla de contabilidad 3: no debe tener fecha de conciliacion reciente
+    Assert.assertTrue("Debe tener fecha de conciliacion futura (+1000 años)", acc.getConciliationDate().after(Timestamp.valueOf(LocalDateTime.now(ZoneId.of("UTC")).plusYears(999))));
+
+    // Compras Internacionales en moneda extranjera: Regla de contabilidad 4: no esta en OP, no debe tener monto mastercard
+    Assert.assertEquals("Debe tener monto mastercard = zero", BigDecimal.ZERO, acc.getAmountMastercard().getValue().stripTrailingZeros());
+
+    // Compras Internacionales en moneda extranjera: Regla de contabilidad 5: El Monto Dolar debe ser zero
+    Assert.assertEquals("Debe tener monto dolar = zero", BigDecimal.ZERO, acc.getAmountUsd().getValue().stripTrailingZeros());
+
+    // Compras Internacionales en moneda extranjera: Regla de contabilidad 6: Todos los valores de fees deben ser zero
+    Assert.assertEquals("Debe tener fee = zero", BigDecimal.ZERO, acc.getFee().stripTrailingZeros());
+    Assert.assertEquals("Debe tener feeIva = zero", BigDecimal.ZERO, acc.getFeeIva().stripTrailingZeros());
+    Assert.assertEquals("Debe tener collectorFee = zero", BigDecimal.ZERO, acc.getCollectorFee().stripTrailingZeros());
+    Assert.assertEquals("Debe tener collectorFeeIva = zero", BigDecimal.ZERO, acc.getCollectorFeeIva().stripTrailingZeros());
+
+    // Compras Internacionales en moneda extranjera: Regla de contabilidad 7: El monto afecto a saldo debe ser igual al monto_trx_peso + dif tipo cambio
+    Assert.assertEquals("Debe tener monto afecto a saldo = monto trx pesos + dif cambio", acc.getAmount().getValue().add(acc.getExchangeRateDif()), acc.getAmountBalance().getValue());
+
+    ClearingData10 liq = getPrepaidClearingEJBBean10().searchClearingDataByAccountingId(null, acc.getId());
+    Assert.assertNotNull("Debe existir en clearing", liq);
+    Assert.assertEquals("Debe tener estado INITIAL", AccountingStatusType.INITIAL, liq.getStatus());
 
     // Verificar que exista en la cola de eventos transaction_authorized
     Queue qResp = camelFactory.createJMSQueue(KafkaEventsRoute10.TRANSACTION_AUTHORIZED_TOPIC);
@@ -1273,8 +1263,722 @@ public class Test_AutoReconciliation_FullTest extends TestBaseUnitAsync {
     Assert.assertEquals("Debe tener el mismo id", prepaidMovement10.getIdTxExterno(), transactionEvent.getTransaction().getRemoteTransactionId());
     Assert.assertEquals("Debe tener el mismo accountId", account.getUuid(), transactionEvent.getAccountId());
     Assert.assertEquals("Debe tener el mismo userId", prepaidUser.getUuid(), transactionEvent.getUserId());
-    Assert.assertEquals("Debe tener el mismo transactiontype", "PURCHASE", transactionEvent.getTransaction().getType());
+    Assert.assertEquals("Debe tener el mismo transactiontype", "SUSCRIPTION", transactionEvent.getTransaction().getType());
     Assert.assertEquals("Debe tener el mismo status", "AUTHORIZED", transactionEvent.getTransaction().getStatus());
+  }
+
+  // Suscripcion en pesos, BD = NO, file = AU
+  @Test
+  public void processTecnocomTableData_whenMovSuscriptionInPesos_NotInDBAndFileStateIsAU_movIsInsertedAndLiqAccMustExistInInitialState() throws Exception {
+    MovimientoTecnocom10 movimientoTecnocom10 = createMovimientoTecnocom(tecnocomReconciliationFile10.getId());
+    movimientoTecnocom10.setTipoReg(TecnocomReconciliationRegisterType.AU);
+    movimientoTecnocom10.setTipoFac(TipoFactura.SUSCRIPCION_INTERNACIONAL);
+    movimientoTecnocom10.setIndNorCor(IndicadorNormalCorrector.NORMAL.getValue());
+    movimientoTecnocom10.getImpDiv().setCurrencyCode(CodigoMoneda.CHILE_CLP);
+    movimientoTecnocom10 = getTecnocomReconciliationEJBBean10().insertaMovimientoTecnocom(movimientoTecnocom10);
+
+    // Prepara un mock del servicio de fees, para que retorne las fees esperadas
+    prepareCalculateFeesMock(movimientoTecnocom10.getImpFac().getValue(), true);
+
+    getTecnocomReconciliationEJBBean10().processTecnocomTableData(tecnocomReconciliationFile10.getId());
+
+    // Verificar que exista el movimiento nuevo en la BD en estado AU
+    PrepaidMovement10 prepaidMovement10 = getPrepaidMovement(movimientoTecnocom10.getMovementType(), movimientoTecnocom10.getTipoFac(), movimientoTecnocom10.getNumAut(), prepaidCard.getPan(), movimientoTecnocom10.getCodCom());
+    Assert.assertNotNull("Debe existir el nuevo movimiento en la BD", prepaidMovement10);
+    Assert.assertEquals("Debe tener estado AUTHORIZED", PrepaidMovementStatus.AUTHORIZED, prepaidMovement10.getEstado());
+
+    // Verificar que se hayan creado las comisiones del nuevo movimiento
+    List<PrepaidMovementFee10> prepaidMovementFee10List = getPrepaidMovementEJBBean11().getPrepaidMovementFeesByMovementId(prepaidMovement10.getId());
+    Assert.assertEquals("Debe tener 2 fee asignada", 2, prepaidMovementFee10List.size());
+
+    PrepaidMovementFee10 prepaidFee = prepaidMovementFee10List.stream().filter(f -> PrepaidMovementFeeType.SUSCRIPTION_INT_FEE.equals(f.getFeeType())).findAny().orElse(null);
+    Assert.assertNotNull("Debe existir una fee de compra internacional", prepaidFee);
+    BigDecimal expectedPrepaidFee = prepaidMovement10.getImpfac().multiply(new BigDecimal(0.02)).multiply(new BigDecimal(0.84));
+    Assert.assertEquals("Debe tener un valor de ", expectedPrepaidFee.setScale(0, RoundingMode.HALF_UP), prepaidFee.getAmount().setScale(0, RoundingMode.HALF_UP));
+
+    PrepaidMovementFee10 ivaFee = prepaidMovementFee10List.stream().filter(f -> PrepaidMovementFeeType.IVA.equals(f.getFeeType())).findAny().orElse(null);
+    Assert.assertNotNull("Debe existir una fee de iva", ivaFee);
+    BigDecimal expectedIvaFee = prepaidMovement10.getImpfac().multiply(new BigDecimal(0.02)).multiply(new BigDecimal(0.16));
+    Assert.assertEquals("Debe tener un valor de ", expectedIvaFee.setScale(0, RoundingMode.HALF_UP), ivaFee.getAmount().setScale(0, RoundingMode.HALF_UP));
+
+    // Verificar que exista en la tablas de contabilidad (acc y liq) en sus estados (INITIAL y PENDING)
+    AccountingData10 acc = getPrepaidAccountingEJBBean10().searchAccountingByIdTrx(null,prepaidMovement10.getId());
+    Assert.assertNotNull("Debe existir en accounting", acc);
+    Assert.assertEquals("Debe tener estado PENDING", AccountingStatusType.PENDING, acc.getStatus());
+    Assert.assertEquals("Debe tener estado PENDING", AccountingStatusType.PENDING, acc.getAccountingStatus());
+    Assert.assertEquals("Debe ser del tipo SUSCRIPCION", AccountingTxType.COMPRA_SUSCRIPCION, acc.getType());
+    Assert.assertEquals("Debe ser del tipo mov SUSCRIPCION", AccountingMovementType.SUSCRIPCION, acc.getAccountingMovementType());
+
+    // Compras Internacionales en pesos: Regla de contabilidad 1: El monto_trx_pesos se llenara con el monto del archivo de operacion impfac
+    Assert.assertEquals("impfac de tecnocom debe ser igual al de contabilidad", prepaidMovement10.getImpfac().setScale(2, RoundingMode.HALF_UP), acc.getAmount().getValue());
+
+    // Compras Internacionales en pesos: Regla de contabilidad 2: Las fees sumadas se deben guardar en Fee, los ivas en FeeIva
+    BigDecimal totalFees = BigDecimal.ZERO;
+    BigDecimal totalFeesIva = BigDecimal.ZERO;
+    for (PrepaidMovementFee10 fee : prepaidMovementFee10List) {
+      if (PrepaidMovementFeeType.IVA.equals(fee.getFeeType())) {
+        totalFeesIva = totalFeesIva.add(fee.getAmount());
+      } else {
+        totalFees = totalFees.add(fee.getAmount());
+      }
+    }
+    Assert.assertEquals("todas las fees se suman y se guardan en fee", totalFees, acc.getFee());
+    Assert.assertEquals("todas los ivas se suman y se guardan en feeIva", totalFeesIva, acc.getFeeIva());
+
+    // Compras Internacionales en pesos: Regla de contabilidad 3: no debe tener fecha de conciliacion reciente
+    Assert.assertTrue("Debe tener fecha de conciliacion futura (+1000 años)", acc.getConciliationDate().after(Timestamp.valueOf(LocalDateTime.now(ZoneId.of("UTC")).plusYears(999))));
+
+    // Compras Internacionales en pesos: Regla de contabilidad 4: no esta en OP, no debe tener monto mastercard
+    Assert.assertEquals("Debe tener monto mastercard = zero", BigDecimal.ZERO, acc.getAmountMastercard().getValue().stripTrailingZeros());
+
+    // Compras Internacionales en pesos: Regla de contabilidad 5: El Valor Dolar debe ser zero, el valor de dif tipo de cambio debe ser cero
+    Assert.assertEquals("Debe tener monto dolar = zero", BigDecimal.ZERO, acc.getAmountUsd().getValue().stripTrailingZeros());
+    Assert.assertEquals("dif tipo cambio debe ser = zero", BigDecimal.ZERO, acc.getExchangeRateDif().stripTrailingZeros());
+
+    // Compras Internacionales en pesos: Regla de contabilidad 6: Todos los valores de fee collector deben ser zero
+    Assert.assertEquals("Debe tener collectorFee = zero", BigDecimal.ZERO, acc.getCollectorFee().stripTrailingZeros());
+    Assert.assertEquals("Debe tener collectorFeeIva = zero", BigDecimal.ZERO, acc.getCollectorFeeIva().stripTrailingZeros());
+
+    // Compras Internacionales en pesos: Regla de contabilidad 7: El monto afecto a saldo debe ser igual al monto_trx_peso + fee + ivas
+    Assert.assertEquals("Debe tener monto afecto a saldo = monto trx pesos + fee + feeIva", acc.getAmount().getValue().add(acc.getFee()).add(acc.getFeeIva()), acc.getAmountBalance().getValue());
+
+    ClearingData10 liq = getPrepaidClearingEJBBean10().searchClearingDataByAccountingId(null, acc.getId());
+    Assert.assertNotNull("Debe existir en clearing", liq);
+    Assert.assertEquals("Debe tener estado INITIAL", AccountingStatusType.INITIAL, liq.getStatus());
+
+    // Verificar que exista en la cola de eventos transaction_authorized
+    Queue qResp = camelFactory.createJMSQueue(KafkaEventsRoute10.TRANSACTION_AUTHORIZED_TOPIC);
+    ExchangeData<String> event = (ExchangeData<String>) camelFactory.createJMSMessenger(30000, 60000)
+      .getMessage(qResp, prepaidMovement10.getIdTxExterno());
+
+    Assert.assertNotNull("Deberia existir un evento de transaccion autorizada", event);
+    Assert.assertNotNull("Deberia existir un evento de transaccion autorizada", event.getData());
+
+    TransactionEvent transactionEvent = getJsonParser().fromJson(event.getData(), TransactionEvent.class);
+
+    Assert.assertEquals("Debe tener el mismo id", prepaidMovement10.getIdTxExterno(), transactionEvent.getTransaction().getRemoteTransactionId());
+    Assert.assertEquals("Debe tener el mismo accountId", account.getUuid(), transactionEvent.getAccountId());
+    Assert.assertEquals("Debe tener el mismo userId", prepaidUser.getUuid(), transactionEvent.getUserId());
+    Assert.assertEquals("Debe tener el mismo transactiontype", "SUSCRIPTION", transactionEvent.getTransaction().getType());
+    Assert.assertEquals("Debe tener el mismo status", "AUTHORIZED", transactionEvent.getTransaction().getStatus());
+  }
+
+  // Suscription en dolares, BD = NO, file = OP
+  @Test
+  public void processTecnocomTableData_whenMovSuscriptionInForeignCoin_NotInDBAndFileStateIsOp_movIsInsertedAndLiqAccMustExistInInitialState() throws Exception {
+    MovimientoTecnocom10 movimientoTecnocom10 = createMovimientoTecnocom(tecnocomReconciliationFile10.getId());
+    movimientoTecnocom10.setTipoReg(TecnocomReconciliationRegisterType.OP);
+    movimientoTecnocom10.setTipoFac(TipoFactura.SUSCRIPCION_INTERNACIONAL);
+    movimientoTecnocom10.setIndNorCor(IndicadorNormalCorrector.NORMAL.getValue());
+    movimientoTecnocom10.getImpDiv().setCurrencyCode(CodigoMoneda.USA_USD);
+    movimientoTecnocom10 = getTecnocomReconciliationEJBBean10().insertaMovimientoTecnocom(movimientoTecnocom10);
+
+    // Inserta el movimiento que vino en el archivo IPM (para hacer un match, y reescribir su valor)
+    IpmMovement10 ipmMovement10 = buildIpmMovement10();
+    ipmMovement10.setCardholderBillingAmount(movimientoTecnocom10.getImpFac().getValue().multiply(new BigDecimal(0.995)).setScale(2, RoundingMode.HALF_UP)); // Alterar levemente el valor para que se reescriba
+    ipmMovement10.setPan(prepaidCard.getPan());
+    ipmMovement10.setMerchantCode(movimientoTecnocom10.getCodCom());
+    ipmMovement10.setApprovalCode(movimientoTecnocom10.getNumAut());
+    ipmMovement10 = createIpmMovement(ipmMovement10);
+
+    // Prepara un mock del servicio de fees, para que retorne las fees esperadas
+    prepareCalculateFeesMock(movimientoTecnocom10.getImpFac().getValue(), false);
+
+    getTecnocomReconciliationEJBBean10().processTecnocomTableData(tecnocomReconciliationFile10.getId());
+
+    // Verificar que exista el movimiento nuevo en la BD en estado Process_OK
+    PrepaidMovement10 prepaidMovement10 = getPrepaidMovement(movimientoTecnocom10.getMovementType(), movimientoTecnocom10.getTipoFac(), movimientoTecnocom10.getNumAut(), prepaidCard.getPan(), movimientoTecnocom10.getCodCom());
+    Assert.assertNotNull("Debe existir el nuevo movimiento en la BD", prepaidMovement10);
+    Assert.assertEquals("Debe tener estado AUTHORIZED", PrepaidMovementStatus.PROCESS_OK, prepaidMovement10.getEstado());
+
+    // Verificar que se hayan creado las comisiones del nuevo movimiento
+    List<PrepaidMovementFee10> prepaidMovementFee10List = getPrepaidMovementEJBBean11().getPrepaidMovementFeesByMovementId(prepaidMovement10.getId());
+    Assert.assertEquals("Debe tener 1 fee asignada", 1, prepaidMovementFee10List.size());
+
+    PrepaidMovementFee10 prepaidFee = prepaidMovementFee10List.stream().filter(f -> PrepaidMovementFeeType.SUSCRIPTION_INT_FEE.equals(f.getFeeType())).findAny().orElse(null);
+    Assert.assertNotNull("Debe existir una fee de compra internacional", prepaidFee);
+    BigDecimal expectedPrepaidFee = prepaidMovement10.getImpfac().multiply(new BigDecimal(0.02));
+    Assert.assertEquals("Debe tener un valor de ", expectedPrepaidFee.setScale(0, RoundingMode.HALF_UP), prepaidFee.getAmount().setScale(0, RoundingMode.HALF_UP));
+
+    // Verificar que exista en la tablas de contabilidad (acc y liq) en sus estados (INITIAL y PENDING)
+    AccountingData10 acc = getPrepaidAccountingEJBBean10().searchAccountingByIdTrx(null,prepaidMovement10.getId());
+    Assert.assertNotNull("Debe existir en accounting", acc);
+    Assert.assertEquals("Debe tener estado PENDING", AccountingStatusType.PENDING, acc.getStatus());
+    Assert.assertEquals("Debe tener estado OK", AccountingStatusType.OK, acc.getAccountingStatus());
+    Assert.assertEquals("Debe ser del tipo SUSCRIPCION", AccountingTxType.COMPRA_SUSCRIPCION, acc.getType());
+    Assert.assertEquals("Debe ser del tipo mov SUSCRIPCION", AccountingMovementType.SUSCRIPCION, acc.getAccountingMovementType());
+
+    // Compras Internacionales en moneda extranjera: Regla de contabilidad 1: El monto_trx_pesos se llenara con el monto del archivo de operacion impfac
+    Assert.assertEquals("impfac de tecnocom debe ser igual al de contabilidad", prepaidMovement10.getImpfac().setScale(2, RoundingMode.HALF_UP), acc.getAmount().getValue());
+
+    // Compras Internacionales en moneda extranjera: Regla de contabilidad 2: Dif tipo cambio debe rellenarse con la suma de las comisiones
+    BigDecimal totalFees = BigDecimal.ZERO;
+    for (PrepaidMovementFee10 fee : prepaidMovementFee10List) {
+      totalFees = totalFees.add(fee.getAmount());
+    }
+    Assert.assertEquals("todas las fees se suman y se guardan en dif tipo cambio", totalFees, acc.getExchangeRateDif());
+
+    // Compras Internacionales en moneda extranjera: Regla de contabilidad 3: debe tener fecha de conciliacion reciente
+    Assert.assertTrue("Debe tener fecha de conciliacion reciente", isRecentLocalDateTime(acc.getConciliationDate().toLocalDateTime(), 5));
+
+    // Compras Internacionales en moneda extranjera: Regla de contabilidad 4: esta en OP, debe tener monto mastercard corregido por ipm
+    Assert.assertEquals("Debe tener monto mastercard = ipm", ipmMovement10.getCardholderBillingAmount(), acc.getAmountMastercard().getValue());
+
+    // Compras Internacionales en moneda extranjera: Regla de contabilidad 5: El Monto Dolar debe ser zero
+    Assert.assertEquals("Debe tener monto dolar = zero", BigDecimal.ZERO, acc.getAmountUsd().getValue().stripTrailingZeros());
+
+    // Compras Internacionales en moneda extranjera: Regla de contabilidad 6: Todos los valores de fees deben ser zero
+    Assert.assertEquals("Debe tener fee = zero", BigDecimal.ZERO, acc.getFee().stripTrailingZeros());
+    Assert.assertEquals("Debe tener feeIva = zero", BigDecimal.ZERO, acc.getFeeIva().stripTrailingZeros());
+    Assert.assertEquals("Debe tener collectorFee = zero", BigDecimal.ZERO, acc.getCollectorFee().stripTrailingZeros());
+    Assert.assertEquals("Debe tener collectorFeeIva = zero", BigDecimal.ZERO, acc.getCollectorFeeIva().stripTrailingZeros());
+
+    // Compras Internacionales en moneda extranjera: Regla de contabilidad 7: El monto afecto a saldo debe ser igual al monto_trx_peso + dif tipo cambio
+    Assert.assertEquals("Debe tener monto afecto a saldo = monto trx pesos + dif cambio", acc.getAmount().getValue().add(acc.getExchangeRateDif()), acc.getAmountBalance().getValue());
+
+    ClearingData10 liq = getPrepaidClearingEJBBean10().searchClearingDataByAccountingId(null, acc.getId());
+    Assert.assertNotNull("Debe existir en clearing", liq);
+    Assert.assertEquals("Debe tener estado PENDING", AccountingStatusType.PENDING, liq.getStatus());
+
+    // Verificar que exista en la cola de eventos transaction_authorized
+    Queue qResp = camelFactory.createJMSQueue(KafkaEventsRoute10.TRANSACTION_AUTHORIZED_TOPIC);
+    ExchangeData<String> event = (ExchangeData<String>) camelFactory.createJMSMessenger(30000, 60000)
+      .getMessage(qResp, prepaidMovement10.getIdTxExterno());
+
+    Assert.assertNotNull("Deberia existir un evento de transaccion autorizada", event);
+    Assert.assertNotNull("Deberia existir un evento de transaccion autorizada", event.getData());
+
+    TransactionEvent transactionEvent = getJsonParser().fromJson(event.getData(), TransactionEvent.class);
+
+    Assert.assertEquals("Debe tener el mismo id", prepaidMovement10.getIdTxExterno(), transactionEvent.getTransaction().getRemoteTransactionId());
+    Assert.assertEquals("Debe tener el mismo accountId", account.getUuid(), transactionEvent.getAccountId());
+    Assert.assertEquals("Debe tener el mismo userId", prepaidUser.getUuid(), transactionEvent.getUserId());
+    Assert.assertEquals("Debe tener el mismo transactiontype", "SUSCRIPTION", transactionEvent.getTransaction().getType());
+    Assert.assertEquals("Debe tener el mismo status", "AUTHORIZED", transactionEvent.getTransaction().getStatus());
+  }
+
+  // Suscription en pesos, BD = NO, file = OP
+  @Test
+  public void processTecnocomTableData_whenMovSuscriptionInPesos_NotInDBAndFileStateIsOP_movIsInsertedAndLiqAccMustExistInInitialState() throws Exception {
+    MovimientoTecnocom10 movimientoTecnocom10 = createMovimientoTecnocom(tecnocomReconciliationFile10.getId());
+    movimientoTecnocom10.setTipoReg(TecnocomReconciliationRegisterType.OP);
+    movimientoTecnocom10.setTipoFac(TipoFactura.SUSCRIPCION_INTERNACIONAL);
+    movimientoTecnocom10.setIndNorCor(IndicadorNormalCorrector.NORMAL.getValue());
+    movimientoTecnocom10.getImpDiv().setCurrencyCode(CodigoMoneda.CHILE_CLP);
+    movimientoTecnocom10 = getTecnocomReconciliationEJBBean10().insertaMovimientoTecnocom(movimientoTecnocom10);
+
+    // Inserta el movimiento que vino en el archivo IPM (para hacer un match, y reescribir su valor)
+    IpmMovement10 ipmMovement10 = buildIpmMovement10();
+    ipmMovement10.setCardholderBillingAmount(movimientoTecnocom10.getImpFac().getValue().multiply(new BigDecimal(0.995)).setScale(2, RoundingMode.HALF_UP)); // Alterar levemente el valor para que se reescriba
+    ipmMovement10.setPan(prepaidCard.getPan());
+    ipmMovement10.setMerchantCode(movimientoTecnocom10.getCodCom());
+    ipmMovement10.setApprovalCode(movimientoTecnocom10.getNumAut());
+    ipmMovement10 = createIpmMovement(ipmMovement10);
+
+    // Prepara un mock del servicio de fees, para que retorne las fees esperadas
+    prepareCalculateFeesMock(movimientoTecnocom10.getImpFac().getValue(), true);
+
+    getTecnocomReconciliationEJBBean10().processTecnocomTableData(tecnocomReconciliationFile10.getId());
+
+    // Verificar que exista el movimiento nuevo en la BD en estado Process_Ok
+    PrepaidMovement10 prepaidMovement10 = getPrepaidMovement(movimientoTecnocom10.getMovementType(), movimientoTecnocom10.getTipoFac(), movimientoTecnocom10.getNumAut(), prepaidCard.getPan(), movimientoTecnocom10.getCodCom());
+    Assert.assertNotNull("Debe existir el nuevo movimiento en la BD", prepaidMovement10);
+    Assert.assertEquals("Debe tener estado PROCESS_OK", PrepaidMovementStatus.PROCESS_OK, prepaidMovement10.getEstado());
+
+    // Verificar que se hayan creado las comisiones del nuevo movimiento
+    List<PrepaidMovementFee10> prepaidMovementFee10List = getPrepaidMovementEJBBean11().getPrepaidMovementFeesByMovementId(prepaidMovement10.getId());
+    Assert.assertEquals("Debe tener 2 fee asignada", 2, prepaidMovementFee10List.size());
+
+    PrepaidMovementFee10 prepaidFee = prepaidMovementFee10List.stream().filter(f -> PrepaidMovementFeeType.SUSCRIPTION_INT_FEE.equals(f.getFeeType())).findAny().orElse(null);
+    Assert.assertNotNull("Debe existir una fee de compra internacional", prepaidFee);
+    BigDecimal expectedPrepaidFee = prepaidMovement10.getImpfac().multiply(new BigDecimal(0.02)).multiply(new BigDecimal(0.84));
+    Assert.assertEquals("Debe tener un valor de ", expectedPrepaidFee.setScale(0, RoundingMode.HALF_UP), prepaidFee.getAmount().setScale(0, RoundingMode.HALF_UP));
+
+    PrepaidMovementFee10 ivaFee = prepaidMovementFee10List.stream().filter(f -> PrepaidMovementFeeType.IVA.equals(f.getFeeType())).findAny().orElse(null);
+    Assert.assertNotNull("Debe existir una fee de iva", ivaFee);
+    BigDecimal expectedIvaFee = prepaidMovement10.getImpfac().multiply(new BigDecimal(0.02)).multiply(new BigDecimal(0.16));
+    Assert.assertEquals("Debe tener un valor de ", expectedIvaFee.setScale(0, RoundingMode.HALF_UP), ivaFee.getAmount().setScale(0, RoundingMode.HALF_UP));
+
+    // Verificar que exista en la tablas de contabilidad (acc y liq) en sus estados (OK y PENDING)
+    AccountingData10 acc = getPrepaidAccountingEJBBean10().searchAccountingByIdTrx(null,prepaidMovement10.getId());
+    Assert.assertNotNull("Debe existir en accounting", acc);
+    Assert.assertEquals("Debe tener estado PENDING", AccountingStatusType.PENDING, acc.getStatus());
+    Assert.assertEquals("Debe tener estado OK", AccountingStatusType.OK, acc.getAccountingStatus());
+    Assert.assertEquals("Debe ser del tipo SUSCRIPCION", AccountingTxType.COMPRA_SUSCRIPCION, acc.getType());
+    Assert.assertEquals("Debe ser del tipo mov SUSCRIPCION", AccountingMovementType.SUSCRIPCION, acc.getAccountingMovementType());
+
+    // Compras Internacionales en pesos: Regla de contabilidad 1: El monto_trx_pesos se llenara con el monto del archivo de operacion impfac
+    Assert.assertEquals("impfac de tecnocom debe ser igual al de contabilidad", prepaidMovement10.getImpfac().setScale(2, RoundingMode.HALF_UP), acc.getAmount().getValue());
+
+    // Compras Internacionales en pesos: Regla de contabilidad 2: Las fees sumadas se deben guardar en Fee, los ivas en FeeIva
+    BigDecimal totalFees = BigDecimal.ZERO;
+    BigDecimal totalFeesIva = BigDecimal.ZERO;
+    for (PrepaidMovementFee10 fee : prepaidMovementFee10List) {
+      if (PrepaidMovementFeeType.IVA.equals(fee.getFeeType())) {
+        totalFeesIva = totalFeesIva.add(fee.getAmount());
+      } else {
+        totalFees = totalFees.add(fee.getAmount());
+      }
+    }
+    Assert.assertEquals("todas las fees se suman y se guardan en fee", totalFees, acc.getFee());
+    Assert.assertEquals("todas los ivas se suman y se guardan en feeIva", totalFeesIva, acc.getFeeIva());
+
+    // Compras Internacionales en pesos: Regla de contabilidad 3: debe tener fecha de conciliacion reciente
+    Assert.assertTrue("Debe tener fecha de conciliacion reciente", isRecentLocalDateTime(acc.getConciliationDate().toLocalDateTime(), 5));
+
+    // Compras Internacionales en pesos: Regla de contabilidad 4: esta en OP, debe tener monto mastercard corregido por ipm
+    Assert.assertEquals("Debe tener monto mastercard = ipm", ipmMovement10.getCardholderBillingAmount(), acc.getAmountMastercard().getValue());
+
+    // Compras Internacionales en pesos: Regla de contabilidad 5: El Valor Dolar debe ser zero, el valor de dif tipo de cambio debe ser cero
+    Assert.assertEquals("Debe tener monto dolar = zero", BigDecimal.ZERO, acc.getAmountUsd().getValue().stripTrailingZeros());
+    Assert.assertEquals("dif tipo cambio debe ser = zero", BigDecimal.ZERO, acc.getExchangeRateDif().stripTrailingZeros());
+
+    // Compras Internacionales en pesos: Regla de contabilidad 6: Todos los valores de fee collector deben ser zero
+    Assert.assertEquals("Debe tener collectorFee = zero", BigDecimal.ZERO, acc.getCollectorFee().stripTrailingZeros());
+    Assert.assertEquals("Debe tener collectorFeeIva = zero", BigDecimal.ZERO, acc.getCollectorFeeIva().stripTrailingZeros());
+
+    // Compras Internacionales en pesos: Regla de contabilidad 7: El monto afecto a saldo debe ser igual al monto_trx_peso + fee + ivas
+    Assert.assertEquals("Debe tener monto afecto a saldo = monto trx pesos + fee + feeIva", acc.getAmount().getValue().add(acc.getFee()).add(acc.getFeeIva()), acc.getAmountBalance().getValue());
+
+    ClearingData10 liq = getPrepaidClearingEJBBean10().searchClearingDataByAccountingId(null, acc.getId());
+    Assert.assertNotNull("Debe existir en clearing", liq);
+    Assert.assertEquals("Debe tener estado PENDING", AccountingStatusType.PENDING, liq.getStatus());
+
+    // Verificar que exista en la cola de eventos transaction_authorized
+    Queue qResp = camelFactory.createJMSQueue(KafkaEventsRoute10.TRANSACTION_AUTHORIZED_TOPIC);
+    ExchangeData<String> event = (ExchangeData<String>) camelFactory.createJMSMessenger(30000, 60000)
+      .getMessage(qResp, prepaidMovement10.getIdTxExterno());
+
+    Assert.assertNotNull("Deberia existir un evento de transaccion autorizada", event);
+    Assert.assertNotNull("Deberia existir un evento de transaccion autorizada", event.getData());
+
+    TransactionEvent transactionEvent = getJsonParser().fromJson(event.getData(), TransactionEvent.class);
+
+    Assert.assertEquals("Debe tener el mismo id", prepaidMovement10.getIdTxExterno(), transactionEvent.getTransaction().getRemoteTransactionId());
+    Assert.assertEquals("Debe tener el mismo accountId", account.getUuid(), transactionEvent.getAccountId());
+    Assert.assertEquals("Debe tener el mismo userId", prepaidUser.getUuid(), transactionEvent.getUserId());
+    Assert.assertEquals("Debe tener el mismo transactiontype", "SUSCRIPTION", transactionEvent.getTransaction().getType());
+    Assert.assertEquals("Debe tener el mismo status", "AUTHORIZED", transactionEvent.getTransaction().getStatus());
+  }
+
+  // Suscription en dolares, BD = NOTIFIED, file = AU
+  @Test
+  public void processTecnocomTableData_whenMovSuscriptionInForeignCoin_InDBNotifiedAndFileStateIsAU_movIsInsertedAndLiqAccMustExistInInitialState() throws Exception {
+    MovimientoTecnocom10 movimientoTecnocom10 = createMovimientoTecnocom(tecnocomReconciliationFile10.getId());
+    movimientoTecnocom10.setTipoReg(TecnocomReconciliationRegisterType.AU);
+    movimientoTecnocom10.setTipoFac(TipoFactura.SUSCRIPCION_INTERNACIONAL);
+    movimientoTecnocom10.setIndNorCor(IndicadorNormalCorrector.NORMAL.getValue());
+    movimientoTecnocom10.getImpDiv().setCurrencyCode(CodigoMoneda.USA_USD);
+    movimientoTecnocom10 = getTecnocomReconciliationEJBBean10().insertaMovimientoTecnocom(movimientoTecnocom10);
+
+    // Insertar el movimiento en la BD
+    PrepaidMovement10 insertedMovement = buildPrepaidMovementFromTecnocomMovement(movimientoTecnocom10);
+    insertedMovement.setEstado(PrepaidMovementStatus.NOTIFIED);
+    insertedMovement = createPrepaidMovement11(insertedMovement);
+
+    // Insertar los fees del movimiento
+    List<PrepaidMovementFee10> prepaidMovementFee10List = new ArrayList<>();
+    PrepaidMovementFee10 prepaidFee = new PrepaidMovementFee10();
+    prepaidFee.setMovementId(insertedMovement.getId());
+    prepaidFee.setFeeType(PrepaidMovementFeeType.SUSCRIPTION_INT_FEE);
+    prepaidFee.setAmount(movimientoTecnocom10.getImpFac().getValue().multiply(new BigDecimal(0.02)).setScale(2, RoundingMode.HALF_UP));
+    prepaidMovementFee10List.add(prepaidFee);
+    getPrepaidMovementEJBBean11().addPrepaidMovementFeeList(prepaidMovementFee10List);
+
+    getTecnocomReconciliationEJBBean10().processTecnocomTableData(tecnocomReconciliationFile10.getId());
+
+    // Verificar que exista el movimiento nuevo en la BD en estado AU
+    PrepaidMovement10 prepaidMovement10 = getPrepaidMovementEJBBean11().getPrepaidMovementById(insertedMovement.getId());
+    Assert.assertEquals("Debe tener estado AUTHORIZED", PrepaidMovementStatus.AUTHORIZED, prepaidMovement10.getEstado());
+
+    // Verificar que exista en la tablas de contabilidad (acc y liq) en sus estados (INITIAL y PENDING)
+    AccountingData10 acc = getPrepaidAccountingEJBBean10().searchAccountingByIdTrx(null,prepaidMovement10.getId());
+    Assert.assertNotNull("Debe existir en accounting", acc);
+    Assert.assertEquals("Debe tener estado PENDING", AccountingStatusType.PENDING, acc.getStatus());
+    Assert.assertEquals("Debe tener estado PENDING", AccountingStatusType.PENDING, acc.getAccountingStatus());
+    Assert.assertEquals("Debe ser del tipo SUSCRIPCION", AccountingTxType.COMPRA_SUSCRIPCION, acc.getType());
+    Assert.assertEquals("Debe ser del tipo mov SUSCRIPCION", AccountingMovementType.SUSCRIPCION, acc.getAccountingMovementType());
+
+    // Compras Internacionales en moneda extranjera: Regla de contabilidad 1: El monto_trx_pesos se llenara con el monto del archivo de operacion impfac
+    Assert.assertEquals("impfac de tecnocom debe ser igual al de contabilidad", prepaidMovement10.getImpfac().setScale(2, RoundingMode.HALF_UP), acc.getAmount().getValue());
+
+    // Compras Internacionales en moneda extranjera: Regla de contabilidad 2: Dif tipo cambio debe rellenarse con la suma de las comisiones
+    BigDecimal totalFees = BigDecimal.ZERO;
+    for (PrepaidMovementFee10 fee : prepaidMovementFee10List) {
+      totalFees = totalFees.add(fee.getAmount());
+    }
+    Assert.assertEquals("todas las fees se suman y se guardan en dif tipo cambio", totalFees, acc.getExchangeRateDif());
+
+    // Compras Internacionales en moneda extranjera: Regla de contabilidad 3: no debe tener fecha de conciliacion reciente
+    Assert.assertTrue("Debe tener fecha de conciliacion futura (+1000 años)", acc.getConciliationDate().after(Timestamp.valueOf(LocalDateTime.now(ZoneId.of("UTC")).plusYears(999))));
+
+    // Compras Internacionales en moneda extranjera: Regla de contabilidad 4: no esta en OP, no debe tener monto mastercard
+    Assert.assertEquals("Debe tener monto mastercard = zero", BigDecimal.ZERO, acc.getAmountMastercard().getValue().stripTrailingZeros());
+
+    // Compras Internacionales en moneda extranjera: Regla de contabilidad 5: El Monto Dolar debe ser zero
+    Assert.assertEquals("Debe tener monto dolar = zero", BigDecimal.ZERO, acc.getAmountUsd().getValue().stripTrailingZeros());
+
+    // Compras Internacionales en moneda extranjera: Regla de contabilidad 6: Todos los valores de fees deben ser zero
+    Assert.assertEquals("Debe tener fee = zero", BigDecimal.ZERO, acc.getFee().stripTrailingZeros());
+    Assert.assertEquals("Debe tener feeIva = zero", BigDecimal.ZERO, acc.getFeeIva().stripTrailingZeros());
+    Assert.assertEquals("Debe tener collectorFee = zero", BigDecimal.ZERO, acc.getCollectorFee().stripTrailingZeros());
+    Assert.assertEquals("Debe tener collectorFeeIva = zero", BigDecimal.ZERO, acc.getCollectorFeeIva().stripTrailingZeros());
+
+    // Compras Internacionales en moneda extranjera: Regla de contabilidad 7: El monto afecto a saldo debe ser igual al monto_trx_peso + dif tipo cambio
+    Assert.assertEquals("Debe tener monto afecto a saldo = monto trx pesos + dif cambio", acc.getAmount().getValue().add(acc.getExchangeRateDif()), acc.getAmountBalance().getValue());
+
+    ClearingData10 liq = getPrepaidClearingEJBBean10().searchClearingDataByAccountingId(null, acc.getId());
+    Assert.assertNotNull("Debe existir en clearing", liq);
+    Assert.assertEquals("Debe tener estado INITIAL", AccountingStatusType.INITIAL, liq.getStatus());
+  }
+
+  // Suscription en pesos, BD = NOTIFIED, file = AU
+  @Test
+  public void processTecnocomTableData_whenMovSuscriptionInPesos_InDBNotifiedAndFileStateIsAU_movIsInsertedAndLiqAccMustExistInInitialState() throws Exception {
+    MovimientoTecnocom10 movimientoTecnocom10 = createMovimientoTecnocom(tecnocomReconciliationFile10.getId());
+    movimientoTecnocom10.setTipoReg(TecnocomReconciliationRegisterType.AU);
+    movimientoTecnocom10.setTipoFac(TipoFactura.SUSCRIPCION_INTERNACIONAL);
+    movimientoTecnocom10.setIndNorCor(IndicadorNormalCorrector.NORMAL.getValue());
+    movimientoTecnocom10.getImpDiv().setCurrencyCode(CodigoMoneda.CHILE_CLP);
+    movimientoTecnocom10 = getTecnocomReconciliationEJBBean10().insertaMovimientoTecnocom(movimientoTecnocom10);
+
+    // Insertar el movimiento en la BD
+    PrepaidMovement10 insertedMovement = buildPrepaidMovementFromTecnocomMovement(movimientoTecnocom10);
+    insertedMovement.setEstado(PrepaidMovementStatus.NOTIFIED);
+    insertedMovement = createPrepaidMovement11(insertedMovement);
+
+    // Insertar los fees del movimiento
+    List<PrepaidMovementFee10> prepaidMovementFee10List = new ArrayList<>();
+    PrepaidMovementFee10 prepaidFee = new PrepaidMovementFee10();
+    prepaidFee.setMovementId(insertedMovement.getId());
+    prepaidFee.setFeeType(PrepaidMovementFeeType.SUSCRIPTION_INT_FEE);
+    prepaidFee.setAmount(movimientoTecnocom10.getImpFac().getValue().multiply(new BigDecimal(0.02)).setScale(2, RoundingMode.HALF_UP));
+    prepaidMovementFee10List.add(prepaidFee);
+    getPrepaidMovementEJBBean11().addPrepaidMovementFeeList(prepaidMovementFee10List);
+
+    getTecnocomReconciliationEJBBean10().processTecnocomTableData(tecnocomReconciliationFile10.getId());
+
+    // Verificar que exista el movimiento nuevo en la BD en estado AU
+    PrepaidMovement10 prepaidMovement10 = getPrepaidMovementEJBBean11().getPrepaidMovementById(insertedMovement.getId());
+    Assert.assertEquals("Debe tener estado AUTHORIZED", PrepaidMovementStatus.AUTHORIZED, prepaidMovement10.getEstado());
+
+    // Verificar que exista en la tablas de contabilidad (acc y liq) en sus estados (INITIAL y PENDING)
+    AccountingData10 acc = getPrepaidAccountingEJBBean10().searchAccountingByIdTrx(null,prepaidMovement10.getId());
+    Assert.assertNotNull("Debe existir en accounting", acc);
+    Assert.assertEquals("Debe tener estado PENDING", AccountingStatusType.PENDING, acc.getStatus());
+    Assert.assertEquals("Debe tener estado PENDING", AccountingStatusType.PENDING, acc.getAccountingStatus());
+    Assert.assertEquals("Debe ser del tipo SUSCRIPCION", AccountingTxType.COMPRA_SUSCRIPCION, acc.getType());
+    Assert.assertEquals("Debe ser del tipo mov SUSCRIPCION", AccountingMovementType.SUSCRIPCION, acc.getAccountingMovementType());
+
+    // Compras Internacionales en pesos: Regla de contabilidad 1: El monto_trx_pesos se llenara con el monto del archivo de operacion impfac
+    Assert.assertEquals("impfac de tecnocom debe ser igual al de contabilidad", prepaidMovement10.getImpfac().setScale(2, RoundingMode.HALF_UP), acc.getAmount().getValue());
+
+    // Compras Internacionales en pesos: Regla de contabilidad 2: Las fees sumadas se deben guardar en Fee, los ivas en FeeIva
+    BigDecimal totalFees = BigDecimal.ZERO;
+    BigDecimal totalFeesIva = BigDecimal.ZERO;
+    for (PrepaidMovementFee10 fee : prepaidMovementFee10List) {
+      if (PrepaidMovementFeeType.IVA.equals(fee.getFeeType())) {
+        totalFeesIva = totalFeesIva.add(fee.getAmount());
+      } else {
+        totalFees = totalFees.add(fee.getAmount());
+      }
+    }
+    Assert.assertEquals("todas las fees se suman y se guardan en fee", totalFees.stripTrailingZeros(), acc.getFee().stripTrailingZeros());
+    Assert.assertEquals("todas los ivas se suman y se guardan en feeIva", totalFeesIva.stripTrailingZeros(), acc.getFeeIva().stripTrailingZeros());
+
+    // Compras Internacionales en pesos: Regla de contabilidad 3: no debe tener fecha de conciliacion reciente
+    Assert.assertTrue("Debe tener fecha de conciliacion futura (+1000 años)", acc.getConciliationDate().after(Timestamp.valueOf(LocalDateTime.now(ZoneId.of("UTC")).plusYears(999))));
+
+    // Compras Internacionales en pesos: Regla de contabilidad 4: no esta en OP, no debe tener monto mastercard
+    Assert.assertEquals("Debe tener monto mastercard = zero", BigDecimal.ZERO, acc.getAmountMastercard().getValue().stripTrailingZeros());
+
+    // Compras Internacionales en pesos: Regla de contabilidad 5: El Valor Dolar debe ser zero, el valor de dif tipo de cambio debe ser cero
+    Assert.assertEquals("Debe tener monto dolar = zero", BigDecimal.ZERO, acc.getAmountUsd().getValue().stripTrailingZeros());
+    Assert.assertEquals("dif tipo cambio debe ser = zero", BigDecimal.ZERO, acc.getExchangeRateDif().stripTrailingZeros());
+
+    // Compras Internacionales en pesos: Regla de contabilidad 6: Todos los valores de fee collector deben ser zero
+    Assert.assertEquals("Debe tener collectorFee = zero", BigDecimal.ZERO, acc.getCollectorFee().stripTrailingZeros());
+    Assert.assertEquals("Debe tener collectorFeeIva = zero", BigDecimal.ZERO, acc.getCollectorFeeIva().stripTrailingZeros());
+
+    // Compras Internacionales en pesos: Regla de contabilidad 7: El monto afecto a saldo debe ser igual al monto_trx_peso + fee + ivas
+    Assert.assertEquals("Debe tener monto afecto a saldo = monto trx pesos + fee + feeIva", acc.getAmount().getValue().add(acc.getFee()).add(acc.getFeeIva()), acc.getAmountBalance().getValue());
+
+    ClearingData10 liq = getPrepaidClearingEJBBean10().searchClearingDataByAccountingId(null, acc.getId());
+    Assert.assertNotNull("Debe existir en clearing", liq);
+    Assert.assertEquals("Debe tener estado INITIAL", AccountingStatusType.INITIAL, liq.getStatus());
+  }
+
+  // Suscription en dolares, BD = NOTIFIED, file = OP
+  @Test
+  public void processTecnocomTableData_whenMovSuscriptionInForeignCoin_InDBNotifiedAndFileStateIsOp_movIsInsertedAndLiqAccMustExistInInitialState() throws Exception {
+    MovimientoTecnocom10 movimientoTecnocom10 = createMovimientoTecnocom(tecnocomReconciliationFile10.getId());
+    movimientoTecnocom10.setTipoReg(TecnocomReconciliationRegisterType.OP);
+    movimientoTecnocom10.setTipoFac(TipoFactura.SUSCRIPCION_INTERNACIONAL);
+    movimientoTecnocom10.setIndNorCor(IndicadorNormalCorrector.NORMAL.getValue());
+    movimientoTecnocom10.getImpDiv().setCurrencyCode(CodigoMoneda.USA_USD);
+    movimientoTecnocom10 = getTecnocomReconciliationEJBBean10().insertaMovimientoTecnocom(movimientoTecnocom10);
+
+    // Insertar el movimiento en la BD
+    PrepaidMovement10 insertedMovement = buildPrepaidMovementFromTecnocomMovement(movimientoTecnocom10);
+    insertedMovement.setEstado(PrepaidMovementStatus.NOTIFIED);
+    insertedMovement = createPrepaidMovement11(insertedMovement);
+
+    // Inserta el movimiento que vino en el archivo IPM (para hacer un match, y reescribir su valor)
+    IpmMovement10 ipmMovement10 = buildIpmMovement10();
+    ipmMovement10.setCardholderBillingAmount(movimientoTecnocom10.getImpFac().getValue().multiply(new BigDecimal(0.995)).setScale(2, RoundingMode.HALF_UP)); // Alterar levemente el valor para que se reescriba
+    ipmMovement10.setPan(prepaidCard.getPan());
+    ipmMovement10.setMerchantCode(movimientoTecnocom10.getCodCom());
+    ipmMovement10.setApprovalCode(movimientoTecnocom10.getNumAut());
+    ipmMovement10 = createIpmMovement(ipmMovement10);
+
+    // Insertar los fees del movimiento
+    List<PrepaidMovementFee10> prepaidMovementFee10List = new ArrayList<>();
+    PrepaidMovementFee10 prepaidFee = new PrepaidMovementFee10();
+    prepaidFee.setMovementId(insertedMovement.getId());
+    prepaidFee.setFeeType(PrepaidMovementFeeType.SUSCRIPTION_INT_FEE);
+    prepaidFee.setAmount(movimientoTecnocom10.getImpFac().getValue().multiply(new BigDecimal(0.02)).setScale(2, RoundingMode.HALF_UP));
+    prepaidMovementFee10List.add(prepaidFee);
+    getPrepaidMovementEJBBean11().addPrepaidMovementFeeList(prepaidMovementFee10List);
+
+    getTecnocomReconciliationEJBBean10().processTecnocomTableData(tecnocomReconciliationFile10.getId());
+
+    // Verificar que exista el movimiento nuevo en la BD en estado Process_Ok
+    PrepaidMovement10 prepaidMovement10 = getPrepaidMovementEJBBean11().getPrepaidMovementById(insertedMovement.getId());
+    Assert.assertEquals("Debe tener estado Process_OK", PrepaidMovementStatus.PROCESS_OK, prepaidMovement10.getEstado());
+
+    // Verificar que exista en la tablas de contabilidad (acc y liq) en sus estados (PENDING y OK)
+    AccountingData10 acc = getPrepaidAccountingEJBBean10().searchAccountingByIdTrx(null,prepaidMovement10.getId());
+    Assert.assertNotNull("Debe existir en accounting", acc);
+    Assert.assertEquals("Debe tener estado PENDING", AccountingStatusType.PENDING, acc.getStatus());
+    Assert.assertEquals("Debe tener estado OK", AccountingStatusType.OK, acc.getAccountingStatus());
+    Assert.assertEquals("Debe ser del tipo SUSCRIPCION", AccountingTxType.COMPRA_SUSCRIPCION, acc.getType());
+    Assert.assertEquals("Debe ser del tipo mov SUSCRIPCION", AccountingMovementType.SUSCRIPCION, acc.getAccountingMovementType());
+
+    // Compras Internacionales en moneda extranjera: Regla de contabilidad 1: El monto_trx_pesos se llenara con el monto del archivo de operacion impfac
+    Assert.assertEquals("impfac de tecnocom debe ser igual al de contabilidad", prepaidMovement10.getImpfac().setScale(2, RoundingMode.HALF_UP), acc.getAmount().getValue());
+
+    // Compras Internacionales en moneda extranjera: Regla de contabilidad 2: Dif tipo cambio debe rellenarse con la suma de las comisiones
+    BigDecimal totalFees = BigDecimal.ZERO;
+    for (PrepaidMovementFee10 fee : prepaidMovementFee10List) {
+      totalFees = totalFees.add(fee.getAmount());
+    }
+    Assert.assertEquals("todas las fees se suman y se guardan en dif tipo cambio", totalFees, acc.getExchangeRateDif());
+
+    // Compras Internacionales en moneda extranjera: Regla de contabilidad 3: debe tener fecha de conciliacion reciente
+    Assert.assertTrue("Debe tener fecha de conciliacion reciente", isRecentLocalDateTime(acc.getConciliationDate().toLocalDateTime(), 5));
+
+    // Compras Internacionales en moneda extranjera: Regla de contabilidad 4: esta en OP, debe tener monto mastercard corregido por ipm
+    Assert.assertEquals("Debe tener monto mastercard = ipm", ipmMovement10.getCardholderBillingAmount(), acc.getAmountMastercard().getValue());
+
+    // Compras Internacionales en moneda extranjera: Regla de contabilidad 5: El Monto Dolar debe ser zero
+    Assert.assertEquals("Debe tener monto dolar = zero", BigDecimal.ZERO, acc.getAmountUsd().getValue().stripTrailingZeros());
+
+    // Compras Internacionales en moneda extranjera: Regla de contabilidad 6: Todos los valores de fees deben ser zero
+    Assert.assertEquals("Debe tener fee = zero", BigDecimal.ZERO, acc.getFee().stripTrailingZeros());
+    Assert.assertEquals("Debe tener feeIva = zero", BigDecimal.ZERO, acc.getFeeIva().stripTrailingZeros());
+    Assert.assertEquals("Debe tener collectorFee = zero", BigDecimal.ZERO, acc.getCollectorFee().stripTrailingZeros());
+    Assert.assertEquals("Debe tener collectorFeeIva = zero", BigDecimal.ZERO, acc.getCollectorFeeIva().stripTrailingZeros());
+
+    // Compras Internacionales en moneda extranjera: Regla de contabilidad 7: El monto afecto a saldo debe ser igual al monto_trx_peso + dif tipo cambio
+    Assert.assertEquals("Debe tener monto afecto a saldo = monto trx pesos + dif cambio", acc.getAmount().getValue().add(acc.getExchangeRateDif()), acc.getAmountBalance().getValue());
+
+    ClearingData10 liq = getPrepaidClearingEJBBean10().searchClearingDataByAccountingId(null, acc.getId());
+    Assert.assertNotNull("Debe existir en clearing", liq);
+    Assert.assertEquals("Debe tener estado PENDING", AccountingStatusType.PENDING, liq.getStatus());
+  }
+
+  // Suscription en pesos, BD = NOTIFIED, file = OP
+  @Test
+  public void processTecnocomTableData_whenMovSuscriptionInPesos_InDBNotifiedAndFileStateIsOP_movIsInsertedAndLiqAccMustExistInInitialState() throws Exception {
+    MovimientoTecnocom10 movimientoTecnocom10 = createMovimientoTecnocom(tecnocomReconciliationFile10.getId());
+    movimientoTecnocom10.setTipoReg(TecnocomReconciliationRegisterType.OP);
+    movimientoTecnocom10.setTipoFac(TipoFactura.SUSCRIPCION_INTERNACIONAL);
+    movimientoTecnocom10.setIndNorCor(IndicadorNormalCorrector.NORMAL.getValue());
+    movimientoTecnocom10.getImpDiv().setCurrencyCode(CodigoMoneda.CHILE_CLP);
+    movimientoTecnocom10 = getTecnocomReconciliationEJBBean10().insertaMovimientoTecnocom(movimientoTecnocom10);
+
+    // Insertar el movimiento en la BD
+    PrepaidMovement10 insertedMovement = buildPrepaidMovementFromTecnocomMovement(movimientoTecnocom10);
+    insertedMovement.setEstado(PrepaidMovementStatus.NOTIFIED);
+    insertedMovement = createPrepaidMovement11(insertedMovement);
+
+    // Inserta el movimiento que vino en el archivo IPM (para hacer un match, y reescribir su valor)
+    IpmMovement10 ipmMovement10 = buildIpmMovement10();
+    ipmMovement10.setCardholderBillingAmount(movimientoTecnocom10.getImpFac().getValue().multiply(new BigDecimal(0.995)).setScale(2, RoundingMode.HALF_UP)); // Alterar levemente el valor para que se reescriba
+    ipmMovement10.setPan(prepaidCard.getPan());
+    ipmMovement10.setMerchantCode(movimientoTecnocom10.getCodCom());
+    ipmMovement10.setApprovalCode(movimientoTecnocom10.getNumAut());
+    ipmMovement10 = createIpmMovement(ipmMovement10);
+
+    // Insertar los fees del movimiento
+    List<PrepaidMovementFee10> prepaidMovementFee10List = new ArrayList<>();
+    PrepaidMovementFee10 prepaidFee = new PrepaidMovementFee10();
+    prepaidFee.setMovementId(insertedMovement.getId());
+    prepaidFee.setFeeType(PrepaidMovementFeeType.SUSCRIPTION_INT_FEE);
+    prepaidFee.setAmount(movimientoTecnocom10.getImpFac().getValue().multiply(new BigDecimal(0.02)).setScale(2, RoundingMode.HALF_UP));
+    prepaidMovementFee10List.add(prepaidFee);
+    getPrepaidMovementEJBBean11().addPrepaidMovementFeeList(prepaidMovementFee10List);
+
+    getTecnocomReconciliationEJBBean10().processTecnocomTableData(tecnocomReconciliationFile10.getId());
+
+    // Verificar que exista el movimiento nuevo en la BD en estado Process_Ok
+    PrepaidMovement10 prepaidMovement10 = getPrepaidMovementEJBBean11().getPrepaidMovementById(insertedMovement.getId());
+    Assert.assertEquals("Debe tener estado Process_Ok", PrepaidMovementStatus.PROCESS_OK, prepaidMovement10.getEstado());
+
+    // Verificar que exista en la tablas de contabilidad (acc y liq) en sus estados (OK y PENDING)
+    AccountingData10 acc = getPrepaidAccountingEJBBean10().searchAccountingByIdTrx(null,prepaidMovement10.getId());
+    Assert.assertNotNull("Debe existir en accounting", acc);
+    Assert.assertEquals("Debe tener estado PENDING", AccountingStatusType.PENDING, acc.getStatus());
+    Assert.assertEquals("Debe tener estado OK", AccountingStatusType.OK, acc.getAccountingStatus());
+    Assert.assertEquals("Debe ser del tipo SUSCRIPCION", AccountingTxType.COMPRA_SUSCRIPCION, acc.getType());
+    Assert.assertEquals("Debe ser del tipo mov SUSCRIPCION", AccountingMovementType.SUSCRIPCION, acc.getAccountingMovementType());
+
+    // Compras Internacionales en pesos: Regla de contabilidad 1: El monto_trx_pesos se llenara con el monto del archivo de operacion impfac
+    Assert.assertEquals("impfac de tecnocom debe ser igual al de contabilidad", prepaidMovement10.getImpfac().setScale(2, RoundingMode.HALF_UP), acc.getAmount().getValue());
+
+    // Compras Internacionales en pesos: Regla de contabilidad 2: Las fees sumadas se deben guardar en Fee, los ivas en FeeIva
+    BigDecimal totalFees = BigDecimal.ZERO;
+    BigDecimal totalFeesIva = BigDecimal.ZERO;
+    for (PrepaidMovementFee10 fee : prepaidMovementFee10List) {
+      if (PrepaidMovementFeeType.IVA.equals(fee.getFeeType())) {
+        totalFeesIva = totalFeesIva.add(fee.getAmount());
+      } else {
+        totalFees = totalFees.add(fee.getAmount());
+      }
+    }
+    Assert.assertEquals("todas las fees se suman y se guardan en fee", totalFees.stripTrailingZeros(), acc.getFee().stripTrailingZeros());
+    Assert.assertEquals("todas los ivas se suman y se guardan en feeIva", totalFeesIva.stripTrailingZeros(), acc.getFeeIva().stripTrailingZeros());
+
+    // Compras Internacionales en pesos: Regla de contabilidad 3: debe tener fecha de conciliacion reciente
+    Assert.assertTrue("Debe tener fecha de conciliacion reciente", isRecentLocalDateTime(acc.getConciliationDate().toLocalDateTime(), 5));
+
+    // Compras Internacionales en pesos: Regla de contabilidad 4: esta en OP, debe tener monto mastercard corregido por ipm
+    Assert.assertEquals("Debe tener monto mastercard = ipm", ipmMovement10.getCardholderBillingAmount(), acc.getAmountMastercard().getValue());
+
+    // Compras Internacionales en pesos: Regla de contabilidad 5: El Valor Dolar debe ser zero, el valor de dif tipo de cambio debe ser cero
+    Assert.assertEquals("Debe tener monto dolar = zero", BigDecimal.ZERO, acc.getAmountUsd().getValue().stripTrailingZeros());
+    Assert.assertEquals("dif tipo cambio debe ser = zero", BigDecimal.ZERO, acc.getExchangeRateDif().stripTrailingZeros());
+
+    // Compras Internacionales en pesos: Regla de contabilidad 6: Todos los valores de fee collector deben ser zero
+    Assert.assertEquals("Debe tener collectorFee = zero", BigDecimal.ZERO, acc.getCollectorFee().stripTrailingZeros());
+    Assert.assertEquals("Debe tener collectorFeeIva = zero", BigDecimal.ZERO, acc.getCollectorFeeIva().stripTrailingZeros());
+
+    // Compras Internacionales en pesos: Regla de contabilidad 7: El monto afecto a saldo debe ser igual al monto_trx_peso + fee + ivas
+    Assert.assertEquals("Debe tener monto afecto a saldo = monto trx pesos + fee + feeIva", acc.getAmount().getValue().add(acc.getFee()).add(acc.getFeeIva()), acc.getAmountBalance().getValue());
+
+    ClearingData10 liq = getPrepaidClearingEJBBean10().searchClearingDataByAccountingId(null, acc.getId());
+    Assert.assertNotNull("Debe existir en clearing", liq);
+    Assert.assertEquals("Debe tener estado PENDING", AccountingStatusType.PENDING, liq.getStatus());
+  }
+
+  // Suscription en dolares, BD = AUTHORIZED, file = OP
+  @Test
+  public void processTecnocomTableData_whenMovSuscriptionInForeignCoin_InDBAuthorizedAndFileStateIsOp_movIsInsertedAndLiqAccMustExistInInitialState() throws Exception {
+    MovimientoTecnocom10 movimientoTecnocom10 = createMovimientoTecnocom(tecnocomReconciliationFile10.getId());
+    movimientoTecnocom10.setTipoReg(TecnocomReconciliationRegisterType.OP);
+    movimientoTecnocom10.setTipoFac(TipoFactura.SUSCRIPCION_INTERNACIONAL);
+    movimientoTecnocom10.setIndNorCor(IndicadorNormalCorrector.NORMAL.getValue());
+    movimientoTecnocom10.getImpDiv().setCurrencyCode(CodigoMoneda.USA_USD);
+    movimientoTecnocom10 = getTecnocomReconciliationEJBBean10().insertaMovimientoTecnocom(movimientoTecnocom10);
+
+    // Insertar el movimiento en la BD
+    PrepaidMovement10 insertedMovement = buildPrepaidMovementFromTecnocomMovement(movimientoTecnocom10);
+    insertedMovement.setEstado(PrepaidMovementStatus.AUTHORIZED);
+    insertedMovement = createPrepaidMovement11(insertedMovement);
+
+    // Inserta el movimiento que vino en el archivo IPM (para hacer un match, y reescribir su valor)
+    IpmMovement10 ipmMovement10 = buildIpmMovement10();
+    ipmMovement10.setCardholderBillingAmount(movimientoTecnocom10.getImpFac().getValue().multiply(new BigDecimal(0.995)).setScale(2, RoundingMode.HALF_UP)); // Alterar levemente el valor para que se reescriba
+    ipmMovement10.setPan(prepaidCard.getPan());
+    ipmMovement10.setMerchantCode(movimientoTecnocom10.getCodCom());
+    ipmMovement10.setApprovalCode(movimientoTecnocom10.getNumAut());
+    ipmMovement10 = createIpmMovement(ipmMovement10);
+
+    // Inserta los registros en la tabla de contabilidad en estado PENDING Y PENDING
+    AccountingData10 accountingData10 = buildRandomAccouting();
+    accountingData10.setIdTransaction(insertedMovement.getId());
+    accountingData10.setStatus(AccountingStatusType.PENDING);
+    accountingData10.setAccountingStatus(AccountingStatusType.PENDING);
+    getPrepaidAccountingEJBBean10().saveAccountingData(null, accountingData10);
+
+    // Insertar los registros en la tabla de liquidacion en estado INITIAL
+    ClearingData10 clearingData10 = createClearingData(accountingData10, AccountingStatusType.INITIAL);
+    getPrepaidClearingEJBBean10().insertClearingData(null, clearingData10);
+
+    getTecnocomReconciliationEJBBean10().processTecnocomTableData(tecnocomReconciliationFile10.getId());
+
+    // Verificar que exista el movimiento nuevo en la BD en estado Process_Ok
+    PrepaidMovement10 prepaidMovement10 = getPrepaidMovementEJBBean11().getPrepaidMovementById(insertedMovement.getId());
+    Assert.assertEquals("Debe tener estado Process_OK", PrepaidMovementStatus.PROCESS_OK, prepaidMovement10.getEstado());
+
+    // Verificar que exista en la tablas de contabilidad (acc y liq) en sus estados (PENDING y OK)
+    AccountingData10 acc = getPrepaidAccountingEJBBean10().searchAccountingByIdTrx(null,prepaidMovement10.getId());
+    Assert.assertEquals("Debe tener estado PENDING", AccountingStatusType.PENDING, acc.getStatus());
+    Assert.assertEquals("Debe tener estado OK", AccountingStatusType.OK, acc.getAccountingStatus());
+
+    // Compras Internacionales en moneda extranjera: Regla de contabilidad 3: debe tener fecha de conciliacion reciente
+    Assert.assertTrue("Debe tener fecha de conciliacion reciente", isRecentLocalDateTime(acc.getConciliationDate().toLocalDateTime(), 5));
+
+    // Compras Internacionales en moneda extranjera: Regla de contabilidad 4: esta en OP, debe tener monto mastercard corregido por ipm
+    Assert.assertEquals("Debe tener monto mastercard = ipm", ipmMovement10.getCardholderBillingAmount(), acc.getAmountMastercard().getValue());
+
+    ClearingData10 liq = getPrepaidClearingEJBBean10().searchClearingDataByAccountingId(null, acc.getId());
+    Assert.assertEquals("Debe tener estado PENDING", AccountingStatusType.PENDING, liq.getStatus());
+  }
+
+  // Suscription en pesos, BD = AUTHORIZED, file = OP
+  @Test
+  public void processTecnocomTableData_whenMovSuscriptionInPesos_InDBAuthorizedAndFileStateIsOP_movIsInsertedAndLiqAccMustExistInInitialState() throws Exception {
+    MovimientoTecnocom10 movimientoTecnocom10 = createMovimientoTecnocom(tecnocomReconciliationFile10.getId());
+    movimientoTecnocom10.setTipoReg(TecnocomReconciliationRegisterType.OP);
+    movimientoTecnocom10.setTipoFac(TipoFactura.SUSCRIPCION_INTERNACIONAL);
+    movimientoTecnocom10.setIndNorCor(IndicadorNormalCorrector.NORMAL.getValue());
+    movimientoTecnocom10.getImpDiv().setCurrencyCode(CodigoMoneda.CHILE_CLP);
+    movimientoTecnocom10 = getTecnocomReconciliationEJBBean10().insertaMovimientoTecnocom(movimientoTecnocom10);
+
+    // Insertar el movimiento en la BD
+    PrepaidMovement10 insertedMovement = buildPrepaidMovementFromTecnocomMovement(movimientoTecnocom10);
+    insertedMovement.setEstado(PrepaidMovementStatus.AUTHORIZED);
+    insertedMovement = createPrepaidMovement11(insertedMovement);
+
+    // Inserta el movimiento que vino en el archivo IPM (para hacer un match, y reescribir su valor)
+    IpmMovement10 ipmMovement10 = buildIpmMovement10();
+    ipmMovement10.setCardholderBillingAmount(movimientoTecnocom10.getImpFac().getValue().multiply(new BigDecimal(0.995)).setScale(2, RoundingMode.HALF_UP)); // Alterar levemente el valor para que se reescriba
+    ipmMovement10.setPan(prepaidCard.getPan());
+    ipmMovement10.setMerchantCode(movimientoTecnocom10.getCodCom());
+    ipmMovement10.setApprovalCode(movimientoTecnocom10.getNumAut());
+    ipmMovement10 = createIpmMovement(ipmMovement10);
+
+    // Inserta los registros en la tabla de contabilidad en estado PENDING Y PENDING
+    AccountingData10 accountingData10 = buildRandomAccouting();
+    accountingData10.setIdTransaction(insertedMovement.getId());
+    accountingData10.setStatus(AccountingStatusType.PENDING);
+    accountingData10.setAccountingStatus(AccountingStatusType.PENDING);
+    getPrepaidAccountingEJBBean10().saveAccountingData(null, accountingData10);
+
+    // Insertar los registros en la tabla de liquidacion en estado INITIAL
+    ClearingData10 clearingData10 = createClearingData(accountingData10, AccountingStatusType.INITIAL);
+    getPrepaidClearingEJBBean10().insertClearingData(null, clearingData10);
+
+    getTecnocomReconciliationEJBBean10().processTecnocomTableData(tecnocomReconciliationFile10.getId());
+
+    // Verificar que exista el movimiento nuevo en la BD en estado Process_Ok
+    PrepaidMovement10 prepaidMovement10 = getPrepaidMovementEJBBean11().getPrepaidMovementById(insertedMovement.getId());
+    Assert.assertEquals("Debe tener estado Process_Ok", PrepaidMovementStatus.PROCESS_OK, prepaidMovement10.getEstado());
+
+    // Verificar que exista en la tablas de contabilidad (acc y liq) en sus estados (OK y PENDING)
+    AccountingData10 acc = getPrepaidAccountingEJBBean10().searchAccountingByIdTrx(null,prepaidMovement10.getId());
+    Assert.assertEquals("Debe tener estado PENDING", AccountingStatusType.PENDING, acc.getStatus());
+    Assert.assertEquals("Debe tener estado OK", AccountingStatusType.OK, acc.getAccountingStatus());
+
+    // Compras Internacionales en pesos: Regla de contabilidad 3: debe tener fecha de conciliacion reciente
+    Assert.assertTrue("Debe tener fecha de conciliacion reciente", isRecentLocalDateTime(acc.getConciliationDate().toLocalDateTime(), 5));
+
+    // Compras Internacionales en pesos: Regla de contabilidad 4: esta en OP, debe tener monto mastercard corregido por ipm
+    Assert.assertEquals("Debe tener monto mastercard = ipm", ipmMovement10.getCardholderBillingAmount(), acc.getAmountMastercard().getValue());
+
+    ClearingData10 liq = getPrepaidClearingEJBBean10().searchClearingDataByAccountingId(null, acc.getId());
+    Assert.assertEquals("Debe tener estado PENDING", AccountingStatusType.PENDING, liq.getStatus());
   }
 
   private void prepareCalculateFeesMock(BigDecimal amount, boolean chargesIva) throws TimeoutException, BaseException {
