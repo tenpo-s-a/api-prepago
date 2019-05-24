@@ -295,6 +295,8 @@ pipeline:
     channel: drone_deployments
     icon_emoji: ":package:"
     when:
+      ref:
+        exclude: refs/tags/prod-*
       status: [ success, failure ]
 
 services:
