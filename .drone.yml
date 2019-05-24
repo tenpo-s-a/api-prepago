@@ -82,6 +82,17 @@ pipeline:
       event: [ push ]
       branch: master
 
+  consul_prod:
+    image: hashicorp/consul-template:alpine
+    commands:
+      - /bin/consul-template -template "./app/src/main/resources/api-prepaid/production.properties.tmpl:./app/src/main/resources/api-prepaid/production.properties" -once
+    secrets:
+      - consul_http_addr
+      - consul_http_token
+    when:
+      event: [ tag ]
+      ref: refs/tags/prod-*
+
   build:
     image: maven:3.6.0-jdk-8-alpine
     commands:
@@ -90,6 +101,15 @@ pipeline:
     when:
       event: [ push ]
       branch: master
+
+  build_prod:
+    image: maven:3.6.0-jdk-8-alpine
+    commands:
+      - ./drone-mvn-cache.sh
+      - cd app && ./package.sh
+    when:
+      event: [ tag ]
+      ref: refs/tags/prod-*
 
   publish_image:
     registry: mccontainerregistry.azurecr.io
@@ -102,6 +122,19 @@ pipeline:
     when:
       event: [ push ]
       branch: master
+
+  publish_image_prod:
+    registry: mccontainerregistry.azurecr.io
+    image: plugins/docker
+    repo: mccontainerregistry.azurecr.io/api-prepago
+    tags:
+      - ${DRONE_COMMIT_SHA}
+      - ${DRONE_TAG}
+      - latest
+    secrets: [ docker_username, docker_password ]
+    when:
+      event: [ tag ]
+      ref: refs/tags/prod-*
 
   db_migration_staging:
     image: maven:3.6.0-jdk-8-alpine
@@ -129,6 +162,19 @@ pipeline:
       event: [ tag ]
       ref: refs/tags/snapshot*
 
+  db_consul_prod:
+    image: hashicorp/consul-template:alpine
+    commands:
+      - /bin/consul-template -template "./pg/environments/production.properties.tmpl:./pg/environments/production.properties" -once
+    environment:
+      - DB_NAME=prepago_api
+    secrets:
+      - consul_http_addr
+      - consul_http_token
+    when:
+      event: [ tag ]
+      ref: refs/tags/prod-*
+
   db_migration_uat:
     image: maven:3.6.0-jdk-8-alpine
     commands:
@@ -150,6 +196,17 @@ pipeline:
     when:
       event: [ tag ]
       ref: refs/tags/snapshot*
+
+  db_migration_prod:
+    image: maven:3.6.0-jdk-8-alpine
+    commands:
+      - ./drone-mvn-cache.sh
+      - cd pg
+      - ./db-create.sh -Denv=production
+      - ./migrate-up.sh -Denv=production
+    when:
+      event: [ tag ]
+      ref: refs/tags/prod-*
 
   deploy_to_staging:
     image: mccontainerregistry.azurecr.io/tools/drone-phoenix:1.0.0
@@ -209,6 +266,19 @@ pipeline:
     when:
       event: [ tag ]
       ref: refs/tags/snapshot*
+
+  deploy_to_prod:
+    image: mccontainerregistry.azurecr.io/tools/drone-phoenix:1.0.0
+    cluster: atlas
+    template: kube.production.yml
+    consul_kv: env/production.env
+    vars:
+      - IMAGE=mccontainerregistry.azurecr.io/api-prepago:${DRONE_COMMIT_SHA}
+      - DB_NAME=prepago_api
+      - API_ENVIRONMENT=production
+    when:
+      event: [ tag ]
+      ref: refs/tags/prod-*
 
   rebuild-cache:
     image: drillster/drone-volume-cache

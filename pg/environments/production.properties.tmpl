@@ -1,3 +1,10 @@
+{{ $pg_db_name := (env "DB_NAME" | toLower)  }}
+
+{{ $pg_login := key "infrastructure/k8s-azure/production/output/db/postgres/pg-login" }}
+{{ $pg_password := key "infrastructure/k8s-azure/production/output/db/postgres/pg-password" }}
+{{ $pg_name := key "infrastructure/k8s-azure/production/output/db/postgres/name" }}
+{{ $pg_fqdn := key "infrastructure/k8s-azure/production/output/db/postgres/fqdn" }}
+
 #
 #    Copyright 2010-2017 the original author or authors.
 #
@@ -22,9 +29,9 @@ script_char_set=UTF-8
 
 ## JDBC connection properties.
 driver=org.postgresql.Driver
-url=jdbc:postgresql://postgres-db-sandbox-dhtgrw.postgres.database.azure.com:5432/prepago_api
-username=sandbox@postgres-db-sandbox-dhtgrw
-password=5YPG3UJ6mWjiOGqU0CfsmabuF1XJKGhS
+url=jdbc:postgresql://{{ $pg_fqdn }}:5432/{{ $pg_db_name }}
+username={{ $pg_login }}@{{ $pg_name }}
+password={{ $pg_password }}
 
 #
 # A NOTE ON STORED PROCEDURES AND DELIMITERS

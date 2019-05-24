@@ -1,0 +1,161 @@
+---
+apiVersion: v1
+kind: Namespace
+metadata:
+  name: prepaid
+  labels:
+    istio-injection: enabled
+---
+###########
+# Service #
+###########
+apiVersion: v1
+kind: Service
+metadata:
+  name: api-prepaid
+  labels:
+    app: api-prepaid
+    service: api-prepaid
+  namespace: prepaid
+spec:
+  type: ClusterIP
+  ports:
+  - port: 80
+    targetPort: 8080
+    protocol: TCP
+    name: http
+  selector:
+    app: api-prepaid
+---
+##############
+# Deployment #
+##############
+apiVersion: extensions/v1beta1
+kind: Deployment
+metadata:
+  name: api-prepaid
+  namespace: prepaid
+  labels:
+    app: api-prepaid
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: api-prepaid
+  template:
+    metadata:
+      labels:
+        app: api-prepaid
+    spec:
+      containers:
+      - name: api-prepaid
+        image: ${IMAGE}
+        ports:
+        - containerPort: 8080
+        imagePullPolicy: Always
+        env:
+          - name: DB_USERNAME
+            value: ${DB_USERNAME}@${DB_HOST_NAME}
+          - name: DB_PASSWORD
+            value: ${DB_PASSWORD}
+          - name: DB_NAME
+            value: ${DB_NAME}
+          - name: DB_HOST_FQDN
+            value: ${DB_HOST_FQDN}
+          - name: API_ENVIRONMENT
+            value: ${API_ENVIRONMENT}
+          - name: TENPO_USER_API_URL
+            value: "http://${TENPO_USER_API_HOST_IP}/v1/user-management"
+          - name: TECNOCOM_MOCK_IMPL
+            value: "false"
+          - name: TECNOCOM_APIKEY
+            value: ${TECNOCOM_API_KEY}
+          - name: TECNOCOM_APIURL
+            value: ${TECNOCOM_API_URL}
+          - name: TECNOCOM_CHANNEL
+            value: ${TECNOCOM_CHANNEL}
+          - name: TECNOCOM_CODENTITY
+            value: "${TECNOCOM_CODENT}"
+          - name: TECNOCOM_ORDER
+            value: ${TECNOCOM_ORDER}
+      imagePullSecrets:
+        - name: container-reg-credentials
+---
+apiVersion: networking.istio.io/v1alpha3
+kind: ServiceEntry
+metadata:
+  name: api-prepaid-se-tecnocom
+  namespace: prepaid
+spec:
+  hosts:
+  - "tc.uat.multicajadigital"
+  addresses:
+  - "200.111.44.187"
+  location: MESH_EXTERNAL
+  ports:
+  - number: 9080
+    name: http-api-prepaid-tecnocom
+    protocol: HTTP
+  resolution: NONE
+---
+apiVersion: networking.istio.io/v1alpha3
+kind: ServiceEntry
+metadata:
+  name: api-prepaid-user-management
+  namespace: prepaid
+spec:
+  hosts:
+  - "users.uat.multicajadigital"
+  addresses:
+  - "${TENPO_USER_API_HOST_IP}"
+  location: MESH_EXTERNAL
+  ports:
+  - number: 8080
+    name: tcp-api-prepaid-user-management
+    protocol: TCP
+  resolution: NONE
+---
+apiVersion: networking.istio.io/v1alpha3
+kind: VirtualService
+metadata:
+  name: api-prepaid-vts
+  namespace: prepaid
+spec:
+  hosts:
+  - ${INTERNAL_LB}
+  gateways:
+  - global-gateway.default.svc.cluster.local
+  http:
+  - match:
+    - uri:
+        prefix: /prepaid/1.0
+    rewrite:
+      uri: /api-prepaid-1.0/1.0
+    route:
+    - destination:
+        host: api-prepaid
+        port:
+          number: 80
+---
+apiVersion: networking.istio.io/v1alpha3
+kind: VirtualService
+metadata:
+  name: api-prepaid-external-vts
+  namespace: prepaid
+spec:
+  hosts:
+  - api.${CLUSTER_ENVIRONMENT}.${CLUSTER_DOMAIN}
+  gateways:
+  - global-gateway.default.svc.cluster.local
+  http:
+  - match:
+    - uri:
+        exact: /prepaid/1.0/prepaid/Queue
+    rewrite:
+      uri: /api-prepaid-1.0/1.0/prepaid/Queue
+    route:
+    - destination:
+        host: api-prepaid
+        port:
+          number: 80
+---
