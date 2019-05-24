@@ -69,8 +69,6 @@ spec:
             value: ${API_ENVIRONMENT}
           - name: TECNOCOM_MOCK_DATA_PATH
             value: /mock/data
-          - name: TENPO_USER_API_URL
-            value: http://${TENPO_USER_API_HOST}/v1/user-management
       imagePullSecrets:
         - name: container-reg-credentials
       volumes:
