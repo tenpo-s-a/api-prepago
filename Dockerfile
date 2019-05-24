@@ -1,4 +1,4 @@
-FROM mccontainerregistry.azurecr.io/payara-py:1.0.0
+FROM payara/server-full:5.181
 
 # Setup Configuration
 USER payara
