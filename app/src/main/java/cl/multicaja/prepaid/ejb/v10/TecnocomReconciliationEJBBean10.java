@@ -43,8 +43,8 @@ import javax.inject.Inject;
 import java.io.InputStream;
 import java.math.BigDecimal;
 import java.math.RoundingMode;
-import java.sql.*;
 import java.sql.Date;
+import java.sql.*;
 import java.text.SimpleDateFormat;
 import java.time.*;
 import java.time.format.DateTimeFormatter;
@@ -546,9 +546,7 @@ public class TecnocomReconciliationEJBBean10 extends PrepaidBaseEJBBean10 implem
           prepaidMovement10 = getPrepaidMovementEJBBean10().addPrepaidMovement(null, prepaidMovement10);
 
           // Se consulta al servicio de comisiones y se insertan las comisiones recibidas
-          insertMovementFees(prepaidMovement10);
-          //FIXME: falta construir la lista de comisiones para TODOS los tipos de trx (Compras, Suscripciones, Refund = sin lista)
-          List<PrepaidMovementFee10> feeList = Collections.emptyList();
+          List<PrepaidMovementFee10> feeList = insertMovementFees(prepaidMovement10);
 
           // Dado que no esta en la BD, se crean tambien sus campos en las tablas de contabilidad
           insertIntoAccoutingAndClearing(trx.getTipoReg(), prepaidMovement10);
@@ -600,8 +598,7 @@ public class TecnocomReconciliationEJBBean10 extends PrepaidBaseEJBBean10 implem
             LocalDateTime localDateTime = LocalDateTime.now(ZoneId.of("UTC"));
             DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss");
             String formattedDate = localDateTime.format(formatter);
-
-            // TODO: En vez de sacarlo y actualizarlo, podria hacerse una funcion que actualiza by IdTrx
+            
             AccountingData10 accountingData10 = getPrepaidAccountingEJBBean10().searchAccountingByIdTrx(null, prepaidMovement10.getId());
             getPrepaidAccountingEJBBean10().updateAccountingStatusAndConciliationDate(null, accountingData10.getId(), AccountingStatusType.OK, formattedDate);
 
@@ -643,10 +640,10 @@ public class TecnocomReconciliationEJBBean10 extends PrepaidBaseEJBBean10 implem
     log.info("INSERT AUT OUT");
   }
 
-  private void insertMovementFees(PrepaidMovement10 prepaidMovement10) throws Exception {
+  private List<PrepaidMovementFee10> insertMovementFees(PrepaidMovement10 prepaidMovement10) throws Exception {
     // Por negocio las devoluciones no generan comisiones de ningun tipo
     if (PrepaidMovementType.REFUND.equals(prepaidMovement10.getTipoMovimiento())) {
-      return;
+      return Collections.emptyList();
     }
 
     // Pide la lista de comisiones al servicio
@@ -657,10 +654,12 @@ public class TecnocomReconciliationEJBBean10 extends PrepaidBaseEJBBean10 implem
     } catch (Exception e) {
       e.printStackTrace();
       log.error(String.format("Error consuming fee service for movement [TipoMovimiento:%s][Clamon:%s][ImpFac:%s]", prepaidMovement10.getTipoMovimiento(), prepaidMovement10.getClamon(), prepaidMovement10.getImpfac().longValue()));
-      return;
+      return Collections.emptyList();
     }
 
-    if (feeCharges != null) {
+    if (feeCharges != null && !feeCharges.isEmpty()) {
+      List<PrepaidMovementFee10> feeList = new ArrayList<>();
+
       // Por cada comision, almacenarla en la BD
       for (Charge feeCharge : feeCharges) {
         PrepaidMovementFee10 prepaidFee = new PrepaidMovementFee10();
@@ -689,7 +688,12 @@ public class TecnocomReconciliationEJBBean10 extends PrepaidBaseEJBBean10 implem
 
         // Insertar Fee en BD
         getPrepaidMovementEJBBean11().addPrepaidMovementFee(prepaidFee);
+        feeList.add(prepaidFee);
       }
+
+      return feeList;
+    } else {
+      return Collections.emptyList();
     }
   }
 
