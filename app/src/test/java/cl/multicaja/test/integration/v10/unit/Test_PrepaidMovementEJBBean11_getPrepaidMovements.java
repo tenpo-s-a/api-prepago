@@ -32,7 +32,7 @@ public class Test_PrepaidMovementEJBBean11_getPrepaidMovements extends TestBaseU
 
     PrepaidTopup10 topup = buildPrepaidTopup10();
 
-    PrepaidMovement10 movement = buildPrepaidMovementV2(prepaidUser10, topup, card, null, PrepaidMovementType.TOPUP);
+    PrepaidMovement10 movement = buildPrepaidMovement11(prepaidUser10, topup, card, null, PrepaidMovementType.TOPUP,false);
     movement.setCodcom(getRandomString(10));
     movement.setIdMovimientoRef(1L);
     movement.setIdTxExterno("uno");
@@ -48,7 +48,7 @@ public class Test_PrepaidMovementEJBBean11_getPrepaidMovements extends TestBaseU
     movement.setPan("123");
     movement = createPrepaidMovement11(movement);
 
-    PrepaidMovement10 movement2 = buildPrepaidMovementV2(prepaidUser10, topup, card, null, PrepaidMovementType.TOPUP);
+    PrepaidMovement10 movement2 = buildPrepaidMovement11(prepaidUser10, topup, card, null, PrepaidMovementType.TOPUP,false);
     movement2.setCodcom(getRandomString(10));
     movement2.setIdMovimientoRef(2L);
     movement2.setIdTxExterno("dos");
@@ -64,7 +64,7 @@ public class Test_PrepaidMovementEJBBean11_getPrepaidMovements extends TestBaseU
     movement2.setPan("1234");
     movement2 = createPrepaidMovement11(movement2);
 
-    PrepaidMovement10 movement3 = buildPrepaidMovementV2(prepaidUser10, topup, card, null, PrepaidMovementType.WITHDRAW);
+    PrepaidMovement10 movement3 = buildPrepaidMovement11(prepaidUser10, topup, card, null, PrepaidMovementType.WITHDRAW,false);
     movement3.setCodcom(getRandomString(10));
     movement3.setIdMovimientoRef(3L);
     movement3.setIdTxExterno("tres");

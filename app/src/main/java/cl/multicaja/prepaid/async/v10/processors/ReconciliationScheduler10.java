@@ -26,7 +26,7 @@ public class ReconciliationScheduler10 extends BaseProcessor10 {
       @Override
       public void process(Exchange exchange) throws Exception {
         log.info(String.format("Running scheduled task - %s", LocalDateTime.now()));
-        getRoute().getPrepaidMovementEJBBean10().processReconciliationRules();
+        getRoute().getPrepaidMovementEJBBean11().processReconciliationRules();
       }
     };
   }

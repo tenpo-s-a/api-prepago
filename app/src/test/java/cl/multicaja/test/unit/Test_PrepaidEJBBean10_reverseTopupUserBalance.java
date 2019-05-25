@@ -6,7 +6,6 @@ import cl.multicaja.core.utils.Constants;
 import cl.multicaja.prepaid.async.v10.PrepaidTopupDelegate10;
 import cl.multicaja.prepaid.ejb.v10.AccountEJBBean10;
 import cl.multicaja.prepaid.ejb.v10.PrepaidEJBBean10;
-import cl.multicaja.prepaid.ejb.v10.PrepaidMovementEJBBean10;
 import cl.multicaja.prepaid.ejb.v10.PrepaidUserEJBBean10;
 import cl.multicaja.prepaid.ejb.v11.PrepaidCardEJBBean11;
 import cl.multicaja.prepaid.ejb.v11.PrepaidMovementEJBBean11;
@@ -16,7 +15,6 @@ import cl.multicaja.prepaid.utils.ParametersUtil;
 import cl.multicaja.tecnocom.constants.TipoFactura;
 import org.junit.Assert;
 import org.junit.BeforeClass;
-import org.junit.Ignore;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.InjectMocks;
@@ -43,8 +41,6 @@ public class Test_PrepaidEJBBean10_reverseTopupUserBalance {
   @Spy
   private PrepaidUserEJBBean10 prepaidUserEJBBean10;
 
-  @Spy
-  private PrepaidMovementEJBBean10 prepaidMovementEJBBean10;
 
   @Spy
   private PrepaidCardEJBBean11 prepaidCardEJBBean11;
@@ -290,7 +286,7 @@ public class Test_PrepaidEJBBean10_reverseTopupUserBalance {
     Mockito.doReturn(prepaidCard10).when(prepaidCardEJBBean11).getByUserIdAndStatus(null, prepaidUser.getId(),PrepaidCardStatus.ACTIVE,PrepaidCardStatus.LOCKED);
 
     // Reverse
-    Mockito.doReturn(reverse).when(prepaidMovementEJBBean10).getPrepaidMovementForReverse(Mockito.anyLong(), Mockito.anyString(),
+    Mockito.doReturn(reverse).when(prepaidMovementEJBBean11).getPrepaidMovementForReverse(Mockito.anyLong(), Mockito.anyString(),
     Mockito.any(PrepaidMovementType.class), Mockito.any(TipoFactura.class));
 
     NewPrepaidTopup10 reverseRequest = new NewPrepaidTopup10();
@@ -308,9 +304,9 @@ public class Test_PrepaidEJBBean10_reverseTopupUserBalance {
       Assert.assertEquals("Debe retornar error de reversa ya recibida", REVERSA_RECIBIDA_PREVIAMENTE.getValue(), ex.getCode());
     }
 
-    Mockito.verify(prepaidMovementEJBBean10, Mockito.times(1)).getPrepaidMovementForReverse(Mockito.anyLong(), Mockito.anyString(),
+    Mockito.verify(prepaidMovementEJBBean11, Mockito.times(1)).getPrepaidMovementForReverse(Mockito.anyLong(), Mockito.anyString(),
       Mockito.any(PrepaidMovementType.class), Mockito.any(TipoFactura.class));
-    Mockito.verify(prepaidMovementEJBBean10, Mockito.never()).addPrepaidMovement(Mockito.any(), Mockito.any(PrepaidMovement10.class));
+    Mockito.verify(prepaidMovementEJBBean11, Mockito.never()).addPrepaidMovement(Mockito.any(), Mockito.any(PrepaidMovement10.class));
   }
 
   @Test
@@ -353,11 +349,11 @@ public class Test_PrepaidEJBBean10_reverseTopupUserBalance {
      */
     Mockito.doReturn(null)
     .doReturn(null)
-      .when(prepaidMovementEJBBean10).getPrepaidMovementForReverse(Mockito.anyLong(), Mockito.anyString(),
+      .when(prepaidMovementEJBBean11).getPrepaidMovementForReverse(Mockito.anyLong(), Mockito.anyString(),
       Mockito.any(PrepaidMovementType.class), Mockito.any(TipoFactura.class));
 
-    Mockito.doReturn(reverse).when(prepaidMovementEJBBean10).addPrepaidMovement(Mockito.any(), Mockito.any(PrepaidMovement10.class));
-    Mockito.doNothing().when(prepaidMovementEJBBean10).updatePrepaidMovementStatus(Mockito.any(), Mockito.anyLong(), Mockito.any(PrepaidMovementStatus.class));
+    Mockito.doReturn(reverse).when(prepaidMovementEJBBean11).addPrepaidMovement(Mockito.any(), Mockito.any(PrepaidMovement10.class));
+    Mockito.doNothing().when(prepaidMovementEJBBean11).updatePrepaidMovementStatus(Mockito.any(), Mockito.anyLong(), Mockito.any(PrepaidMovementStatus.class));
 
     NewPrepaidTopup10 reverseRequest = new NewPrepaidTopup10();
     NewAmountAndCurrency10 amount = new NewAmountAndCurrency10(BigDecimal.ZERO);
@@ -374,10 +370,10 @@ public class Test_PrepaidEJBBean10_reverseTopupUserBalance {
       Assert.assertEquals("Debe retornar error de movimiento original no recibido", REVERSA_MOVIMIENTO_ORIGINAL_NO_RECIBIDO.getValue(), ex.getCode());
     }
 
-    Mockito.verify(prepaidMovementEJBBean10, Mockito.times(2)).getPrepaidMovementForReverse(Mockito.anyLong(), Mockito.anyString(),
+    Mockito.verify(prepaidMovementEJBBean11, Mockito.times(2)).getPrepaidMovementForReverse(Mockito.anyLong(), Mockito.anyString(),
       Mockito.any(PrepaidMovementType.class), Mockito.any(TipoFactura.class));
-    Mockito.verify(prepaidMovementEJBBean10, Mockito.times(1)).addPrepaidMovement(Mockito.any(), Mockito.any(PrepaidMovement10.class));
-    Mockito.verify(prepaidMovementEJBBean10, Mockito.times(1)).updatePrepaidMovementStatus(Mockito.any(), Mockito.anyLong(), Mockito.any(PrepaidMovementStatus.class));
+    Mockito.verify(prepaidMovementEJBBean11, Mockito.times(1)).addPrepaidMovement(Mockito.any(), Mockito.any(PrepaidMovement10.class));
+    Mockito.verify(prepaidMovementEJBBean11, Mockito.times(1)).updatePrepaidMovementStatus(Mockito.any(), Mockito.anyLong(), Mockito.any(PrepaidMovementStatus.class));
   }
 
   @Test
@@ -418,11 +414,11 @@ public class Test_PrepaidEJBBean10_reverseTopupUserBalance {
 
     Mockito.doReturn(null)
       .doReturn(originalTopup)
-      .when(prepaidMovementEJBBean10).getPrepaidMovementForReverse(Mockito.anyLong(), Mockito.anyString(),
+      .when(prepaidMovementEJBBean11).getPrepaidMovementForReverse(Mockito.anyLong(), Mockito.anyString(),
       Mockito.any(PrepaidMovementType.class), Mockito.any(TipoFactura.class));
 
-    Mockito.doReturn(reverse).when(prepaidMovementEJBBean10).addPrepaidMovement(Mockito.any(), Mockito.any(PrepaidMovement10.class));
-    Mockito.doNothing().when(prepaidMovementEJBBean10).updatePrepaidMovementStatus(Mockito.any(), Mockito.anyLong(), Mockito.any(PrepaidMovementStatus.class));
+    Mockito.doReturn(reverse).when(prepaidMovementEJBBean11).addPrepaidMovement(Mockito.any(), Mockito.any(PrepaidMovement10.class));
+    Mockito.doNothing().when(prepaidMovementEJBBean11).updatePrepaidMovementStatus(Mockito.any(), Mockito.anyLong(), Mockito.any(PrepaidMovementStatus.class));
 
 
     NewPrepaidTopup10 reverseRequest = new NewPrepaidTopup10();
@@ -440,10 +436,10 @@ public class Test_PrepaidEJBBean10_reverseTopupUserBalance {
       Assert.assertEquals("Debe retornar error de monto no concuerda", REVERSA_INFORMACION_NO_CONCUERDA.getValue(), ex.getCode());
     }
 
-    Mockito.verify(prepaidMovementEJBBean10, Mockito.times(2)).getPrepaidMovementForReverse(Mockito.anyLong(), Mockito.anyString(),
+    Mockito.verify(prepaidMovementEJBBean11, Mockito.times(2)).getPrepaidMovementForReverse(Mockito.anyLong(), Mockito.anyString(),
       Mockito.any(PrepaidMovementType.class), Mockito.any(TipoFactura.class));
-    Mockito.verify(prepaidMovementEJBBean10, Mockito.never()).addPrepaidMovement(Mockito.any(), Mockito.any(PrepaidMovement10.class));
-    Mockito.verify(prepaidMovementEJBBean10, Mockito.never()).updatePrepaidMovementStatus(Mockito.any(), Mockito.anyLong(), Mockito.any(PrepaidMovementStatus.class));
+    Mockito.verify(prepaidMovementEJBBean11, Mockito.never()).addPrepaidMovement(Mockito.any(), Mockito.any(PrepaidMovement10.class));
+    Mockito.verify(prepaidMovementEJBBean11, Mockito.never()).updatePrepaidMovementStatus(Mockito.any(), Mockito.anyLong(), Mockito.any(PrepaidMovementStatus.class));
 
   }
 
@@ -484,7 +480,7 @@ public class Test_PrepaidEJBBean10_reverseTopupUserBalance {
 
     Mockito.doReturn(null)
       .doReturn(originalTopup)
-      .when(prepaidMovementEJBBean10).getPrepaidMovementForReverse(Mockito.anyLong(), Mockito.anyString(),
+      .when(prepaidMovementEJBBean11).getPrepaidMovementForReverse(Mockito.anyLong(), Mockito.anyString(),
       Mockito.any(PrepaidMovementType.class), Mockito.any(TipoFactura.class));
 
     NewPrepaidTopup10 reverseRequest = new NewPrepaidTopup10();
@@ -501,9 +497,9 @@ public class Test_PrepaidEJBBean10_reverseTopupUserBalance {
       Assert.fail("Sould not be here");
     } catch (ReverseTimeExpiredException ex) {
       Assert.assertEquals("Deberia tener error de transaccion", REVERSA_TIEMPO_EXPIRADO.getValue(), ex.getCode());
-      Mockito.verify(prepaidMovementEJBBean10, Mockito.times(2)).getPrepaidMovementForReverse(Mockito.anyLong(), Mockito.anyString(),
+      Mockito.verify(prepaidMovementEJBBean11, Mockito.times(2)).getPrepaidMovementForReverse(Mockito.anyLong(), Mockito.anyString(),
         Mockito.any(PrepaidMovementType.class), Mockito.any(TipoFactura.class));
-      Mockito.verify(prepaidMovementEJBBean10, Mockito.never()).addPrepaidMovement(Mockito.any(), Mockito.any(PrepaidMovement10.class));
+      Mockito.verify(prepaidMovementEJBBean11, Mockito.never()).addPrepaidMovement(Mockito.any(), Mockito.any(PrepaidMovement10.class));
     }
   }
 
@@ -557,12 +553,12 @@ public class Test_PrepaidEJBBean10_reverseTopupUserBalance {
       2. Busca movimineto de carga original
      */
     Mockito.doReturn(null)
-      .doReturn(originalTopup).when(prepaidMovementEJBBean10).getPrepaidMovementForReverse(Mockito.anyLong(), Mockito.anyString(),
+      .doReturn(originalTopup).when(prepaidMovementEJBBean11).getPrepaidMovementForReverse(Mockito.anyLong(), Mockito.anyString(),
       Mockito.any(PrepaidMovementType.class), Mockito.any(TipoFactura.class));
 
-    Mockito.doReturn(reverseMovement).when(prepaidMovementEJBBean10).addPrepaidMovement(Mockito.any(), Mockito.any(PrepaidMovement10.class));
+    Mockito.doReturn(reverseMovement).when(prepaidMovementEJBBean11).addPrepaidMovement(Mockito.any(), Mockito.any(PrepaidMovement10.class));
 
-    Mockito.doReturn(reverseMovement).when(prepaidMovementEJBBean10).getPrepaidMovementById(reverseMovement.getId());
+    Mockito.doReturn(reverseMovement).when(prepaidMovementEJBBean11).getPrepaidMovementById(reverseMovement.getId());
 
     Mockito.doReturn("0987").when(parametersUtil).getString("api-prepaid", "cod_entidad", "v10");
 
@@ -580,10 +576,10 @@ public class Test_PrepaidEJBBean10_reverseTopupUserBalance {
     prepaidEJBBean10.reverseTopupUserBalance(headers,uuid, reverseRequest,true);
 
     // Se verifica que se llamaron los metodos
-    Mockito.verify(prepaidMovementEJBBean10, Mockito.times(2)).getPrepaidMovementForReverse(Mockito.anyLong(), Mockito.anyString(),
+    Mockito.verify(prepaidMovementEJBBean11, Mockito.times(2)).getPrepaidMovementForReverse(Mockito.anyLong(), Mockito.anyString(),
       Mockito.any(PrepaidMovementType.class), Mockito.any(TipoFactura.class));
 
-    Mockito.verify(prepaidMovementEJBBean10, Mockito.times(1)).addPrepaidMovement(Mockito.any(), Mockito.any(PrepaidMovement10.class));
+    Mockito.verify(prepaidMovementEJBBean11, Mockito.times(1)).addPrepaidMovement(Mockito.any(), Mockito.any(PrepaidMovement10.class));
     Mockito.verify(delegate, Mockito.times(1)).sendPendingTopupReverse(Mockito.any(), Mockito.any(), Mockito.any(PrepaidUser10.class), Mockito.any());
   }
 

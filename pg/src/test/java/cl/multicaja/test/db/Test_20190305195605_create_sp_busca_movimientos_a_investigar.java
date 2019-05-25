@@ -29,11 +29,7 @@ import java.util.Map;
 
 public class Test_20190305195605_create_sp_busca_movimientos_a_investigar extends TestDbBasePg {
 
-  // Historial de modificación
-  // 20181010114034_create_sp_busca_movimientos_a_investigar.sql
-  // 20190222153542_create_sp_busca_movimientos_a_investigar_v11.sql
-  // 20181010114035_create_sp_busca_movimientos_a_investigar_v12.sql
-  // 20190305195605_create_sp_busca_movimientos_a_investigar_v13.sql
+
 
   private static final String SP_SEARCH_RESEARCH_MOVEMENT_NAME = SCHEMA + ".mc_prp_busca_movimientos_a_investigar_v13";
 
@@ -561,13 +557,12 @@ public class Test_20190305195605_create_sp_busca_movimientos_a_investigar extend
     beginDateTime = beginDateTime.minusHours(1);
     LocalDateTime endDateTime = LocalDateTime.now(ZoneId.of("UTC"));
 
-    Map<String, Object> data = searchResearchMovement( id,
-      Timestamp.valueOf(beginDateTime),Timestamp.valueOf(endDateTime), null,numberUtils.toBigDecimal(movRef));
+    Map<String, Object> data = searchResearchMovement(id, Timestamp.valueOf(beginDateTime),Timestamp.valueOf(endDateTime), null,numberUtils.toBigDecimal(movRef));
 
     Assert.assertNotNull("Data no debe ser null", data);
     List<Map<String, Object>> results = (List)data.get("result");
     Long resultRecords = Long.valueOf(results.size());
-    Assert.assertEquals("Se debe encontrar 1 registro",Long.valueOf(1),resultRecords);
+    Assert.assertEquals("Se debe encontrar 1 registro", 1,resultRecords.longValue());
 
   }
 

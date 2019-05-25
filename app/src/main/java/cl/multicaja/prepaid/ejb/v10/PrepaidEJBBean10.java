@@ -660,15 +660,13 @@ public class PrepaidEJBBean10 extends PrepaidBaseEJBBean10 implements PrepaidEJB
     TipoFactura tipoFacReverse = TransactionOriginType.WEB.equals(topupRequest.getTransactionOriginType()) ? TipoFactura.ANULA_CARGA_TRANSFERENCIA : TipoFactura.ANULA_CARGA_EFECTIVO_COMERCIO_MULTICAJA;
 
     // Se verifica si ya se tiene una reversa con los mismos datos
-    PrepaidMovement10 previousReverse = this.getPrepaidMovementEJB10().getPrepaidMovementForReverse(prepaidUser.getId(),
-      topupRequest.getTransactionId(), PrepaidMovementType.TOPUP,
-      tipoFacReverse);
+    PrepaidMovement10 previousReverse = this.getPrepaidMovementEJB11().getPrepaidMovementForReverse(prepaidCard.getId(), topupRequest.getTransactionId(),
+      PrepaidMovementType.TOPUP, tipoFacReverse);
 
     if(previousReverse == null) {
 
       // Busca el movimiento de carga original
-      PrepaidMovement10 originalTopup = this.getPrepaidMovementEJB10().getPrepaidMovementForReverse(prepaidUser.getId(),
-        topupRequest.getTransactionId(), PrepaidMovementType.TOPUP, tipoFacTopup);
+      PrepaidMovement10 originalTopup = this.getPrepaidMovementEJB11().getPrepaidMovementForReverse(prepaidCard.getId(), topupRequest.getTransactionId(), PrepaidMovementType.TOPUP, tipoFacTopup);
 
       // Verifica si existe la carga original topup
       if(originalTopup != null) {
@@ -698,7 +696,7 @@ public class PrepaidEJBBean10 extends PrepaidBaseEJBBean10 implements PrepaidEJB
             prepaidMovement.setPan(originalTopup.getPan());
             prepaidMovement.setTipofac(tipoFacReverse);
             prepaidMovement.setIndnorcor(IndicadorNormalCorrector.fromValue(tipoFacReverse.getCorrector()));
-            prepaidMovement = getPrepaidMovementEJB10().addPrepaidMovement(headers, prepaidMovement);
+            prepaidMovement = getPrepaidMovementEJB11().addPrepaidMovement(headers, prepaidMovement);
             prepaidMovement.setNumaut(TecnocomServiceHelper.getNumautFromIdMov(prepaidMovement.getId().toString()));
             this.getDelegate().sendPendingTopupReverse(reverse,prepaidCard,prepaidUser,prepaidMovement);
 
@@ -728,10 +726,11 @@ public class PrepaidEJBBean10 extends PrepaidBaseEJBBean10 implements PrepaidEJB
         }
         prepaidMovement.setTipofac(tipoFacReverse);
         prepaidMovement.setIndnorcor(IndicadorNormalCorrector.fromValue(tipoFacReverse.getCorrector()));
+        prepaidMovement.setCardId(prepaidCard.getId());
         // Se coloca conciliada contra tecnocom, ya que nunca se hace la reversa y por lo tanto no vendra en el archivo de operaciones diarias
         prepaidMovement.setConTecnocom(ReconciliationStatusType.RECONCILED);
-        prepaidMovement = this.getPrepaidMovementEJB10().addPrepaidMovement(headers, prepaidMovement);
-        this.getPrepaidMovementEJB10().updatePrepaidMovementStatus(headers, prepaidMovement.getId(), PrepaidMovementStatus.PROCESS_OK);
+        prepaidMovement = this.getPrepaidMovementEJB11().addPrepaidMovement(headers, prepaidMovement);
+        this.getPrepaidMovementEJB11().updatePrepaidMovementStatus(headers, prepaidMovement.getId(), PrepaidMovementStatus.PROCESS_OK);
 
         throw new ReverseOriginalMovementNotFoundException();
       }
@@ -1027,7 +1026,6 @@ public class PrepaidEJBBean10 extends PrepaidBaseEJBBean10 implements PrepaidEJB
 
   @Override
   public void reverseWithdrawUserBalance(Map<String, Object> headers,String extUserId, NewPrepaidWithdraw10 withdrawRequest, Boolean fromEndPoint) throws Exception {
-
     if(fromEndPoint == null){
       fromEndPoint = Boolean.FALSE;
     }
@@ -1062,12 +1060,12 @@ public class PrepaidEJBBean10 extends PrepaidBaseEJBBean10 implements PrepaidEJB
     TipoFactura tipoFacReverse = TransactionOriginType.WEB.equals(withdrawRequest.getTransactionOriginType()) ? TipoFactura.ANULA_RETIRO_TRANSFERENCIA : TipoFactura.ANULA_RETIRO_EFECTIVO_COMERCIO_MULTICJA;
 
     // Se verifica si ya se tiene una reversa con los mismos datos
-    PrepaidMovement10 previousReverse = this.getPrepaidMovementEJB10().getPrepaidMovementForReverse(prepaidUser.getId(), withdrawRequest.getTransactionId(),
+    PrepaidMovement10 previousReverse = this.getPrepaidMovementEJB11().getPrepaidMovementForReverse(prepaidCard.getId(), withdrawRequest.getTransactionId(),
       PrepaidMovementType.WITHDRAW, tipoFacReverse);
 
     if(previousReverse == null) {
       // Busca el movimiento de retiro original
-      PrepaidMovement10 originalwithdraw = this.getPrepaidMovementEJB10().getPrepaidMovementForReverse(prepaidUser.getId(), withdrawRequest.getTransactionId(),
+      PrepaidMovement10 originalwithdraw = this.getPrepaidMovementEJB11().getPrepaidMovementForReverse(prepaidCard.getId(), withdrawRequest.getTransactionId(),
         PrepaidMovementType.WITHDRAW, tipoFacTopup);
 
       if(originalwithdraw != null) {
@@ -1097,8 +1095,8 @@ public class PrepaidEJBBean10 extends PrepaidBaseEJBBean10 implements PrepaidEJB
             prepaidMovement.setCuenta(originalwithdraw.getCuenta());
             prepaidMovement.setTipofac(tipoFacReverse);
             prepaidMovement.setIndnorcor(IndicadorNormalCorrector.fromValue(tipoFacReverse.getCorrector()));
-            prepaidMovement = getPrepaidMovementEJB10().addPrepaidMovement(headers, prepaidMovement);
-            prepaidMovement = getPrepaidMovementEJB10().getPrepaidMovementById(prepaidMovement.getId());
+            prepaidMovement = getPrepaidMovementEJB11().addPrepaidMovement(headers, prepaidMovement);
+            prepaidMovement = getPrepaidMovementEJB11().getPrepaidMovementById(prepaidMovement.getId());
             // Publica evento de Trx reversada.
             if(PrepaidWithdraw10.WEB_MERCHANT_CODE.equals(withdrawRequest.getMerchantCode())){
               // Se publica evento de transaccion reversada
@@ -1135,8 +1133,8 @@ public class PrepaidEJBBean10 extends PrepaidBaseEJBBean10 implements PrepaidEJB
         prepaidMovement.setIndnorcor(IndicadorNormalCorrector.fromValue(tipoFacReverse.getCorrector()));
         // Se coloca conciliada contra tecnocom, ya que nunca se hace la reversa y por lo tanto no vendra en el archivo de operaciones diarias
         prepaidMovement.setConTecnocom(ReconciliationStatusType.RECONCILED);
-        prepaidMovement = this.getPrepaidMovementEJB10().addPrepaidMovement(headers, prepaidMovement);
-        this.getPrepaidMovementEJB10().updatePrepaidMovementStatus(headers, prepaidMovement.getId(), PrepaidMovementStatus.PROCESS_OK);
+        prepaidMovement = this.getPrepaidMovementEJB11().addPrepaidMovement(headers, prepaidMovement);
+        this.getPrepaidMovementEJB11().updatePrepaidMovementStatus(headers, prepaidMovement.getId(), PrepaidMovementStatus.PROCESS_OK);
 
         throw new ReverseOriginalMovementNotFoundException();
       }
@@ -1215,7 +1213,7 @@ public class PrepaidEJBBean10 extends PrepaidBaseEJBBean10 implements PrepaidEJB
     PrepaidCard10 prepaidCard = getPrepaidCardEJB11().getLastPrepaidCardByUserId(headers, prepaidUser.getId());
 
     //Obtener ultimo movimiento
-    PrepaidMovement10 movement = getPrepaidMovementEJB10().getLastPrepaidMovementByIdPrepaidUserAndOneStatus(prepaidUser.getId(),
+    PrepaidMovement10 movement = getPrepaidMovementEJB11().getLastPrepaidMovementByIdCardIdAndOneStatus(prepaidCard.getId(),
       PrepaidMovementStatus.PENDING,
       PrepaidMovementStatus.IN_PROCESS);
 
@@ -1545,7 +1543,7 @@ public class PrepaidEJBBean10 extends PrepaidBaseEJBBean10 implements PrepaidEJB
     prepaidMovement.setNumplastico(0L); // se debe actualizar despues
     prepaidMovement.setOriginType(MovementOriginType.API);
     prepaidMovement.setNomcomred(transaction.getMerchantName());
-
+    prepaidMovement.setCardId(prepaidCard != null ? prepaidCard.getId(): 0);
     return prepaidMovement;
   }
 

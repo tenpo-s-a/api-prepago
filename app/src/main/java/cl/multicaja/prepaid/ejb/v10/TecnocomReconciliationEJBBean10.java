@@ -353,7 +353,7 @@ public class TecnocomReconciliationEJBBean10 extends PrepaidBaseEJBBean10 implem
         }
 
         //Se busca el movimiento
-        PrepaidMovement10 originalMovement = getPrepaidMovementEJBBean10().getPrepaidMovementForTecnocomReconciliation(account.getUserId(), trx.getNumAut(),
+        PrepaidMovement10 originalMovement = getPrepaidMovementEJBBean11().getPrepaidMovementForTecnocomReconciliation(account.getUserId(), trx.getNumAut(),
           java.sql.Date.valueOf(trx.getFecFac()), trx.getTipoFac());
 
         if(originalMovement == null) {
@@ -443,8 +443,7 @@ public class TecnocomReconciliationEJBBean10 extends PrepaidBaseEJBBean10 implem
 
           Account account = getAccountEJBBean10().findById(prepaidCard10.getAccountId());
           //Se busca el movimiento
-          PrepaidMovement10 originalMovement = getPrepaidMovementEJBBean10().getPrepaidMovementForTecnocomReconciliation(account.getUserId(),
-            trx.getNumAut(), java.sql.Date.valueOf(trx.getFecFac()), trx.getTipoFac());
+          PrepaidMovement10 originalMovement = getPrepaidMovementEJBBean11().getPrepaidMovementForTecnocomReconciliationV2(prepaidCard10.getId(), trx.getNumAut(), java.sql.Date.valueOf(trx.getFecFac()), trx.getTipoFac());
 
           if(originalMovement == null) {
             String msg = String.format("Error processing transaction - Transaction not found in database with userId = [%s], tipofac= [%s], indnorcor = [%s], numaut = [%s], fecfac = [%s], amount = [%s]",

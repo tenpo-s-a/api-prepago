@@ -83,12 +83,6 @@ public class TestContextHelper extends TestBaseUnit {
       kafkaEventsRoute10.setPrepaidUserEJBBean10(getPrepaidUserEJBBean10());
       kafkaEventsRoute10.setAccountEJBBean10(getAccountEJBBean10());
 
-     /*
-      camelFactory.startCamelContextWithRoutes(true,
-        prepaidTopupRoute10 ,transactionReversalRoute10,
-        currencyConvertionRoute10,
-        tecnocomReconciliationRoute10);
-        */
       camelFactory.startCamelContextWithRoutes(true,
         prepaidTopupRoute10, transactionReversalRoute10, productChangeRoute10, mailRoute10,invoiceRoute10, kafkaEventsRoute10);
     }

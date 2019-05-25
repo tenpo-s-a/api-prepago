@@ -217,17 +217,17 @@ public class Test_PrepaidMovementEJB10_procesReconciliation10 extends TestBaseUn
     CdtTransaction10 cdtTransaction = buildCdtTransaction10(prepaidUser, prepaidTopup);
     cdtTransaction = createCdtTransaction10(cdtTransaction);
 
-    PrepaidMovement10 prepaidMovement10 = buildPrepaidMovement10(prepaidUser, prepaidTopup, prepaidCard, cdtTransaction);
+    PrepaidMovement10 prepaidMovement10 = buildPrepaidMovement11(prepaidUser, prepaidTopup, prepaidCard, cdtTransaction, prepaidCard10);
     prepaidMovement10.setConSwitch(ReconciliationStatusType.RECONCILED);
     prepaidMovement10.setConTecnocom(ReconciliationStatusType.NOT_RECONCILED);
     prepaidMovement10.setEstado(PrepaidMovementStatus.REJECTED);
     prepaidMovement10.setTipoMovimiento(PrepaidMovementType.TOPUP);
-    prepaidMovement10 = createPrepaidMovement10(prepaidMovement10);
+    prepaidMovement10 = createPrepaidMovement11(prepaidMovement10);
 
     // crea los movimientos de accounting y clearing correspondientes
     addAccountingAndClearing(prepaidMovement10);
 
-    getPrepaidMovementEJBBean10().processReconciliation(prepaidMovement10);
+    getPrepaidMovementEJBBean11().processReconciliation(prepaidMovement10);
 
     List cdtTransaction10s = getCdtEJBBean10().buscaListaMovimientoByIdExterno(null, prepaidMovement10.getIdTxExterno());
     System.out.println(cdtTransaction10s);

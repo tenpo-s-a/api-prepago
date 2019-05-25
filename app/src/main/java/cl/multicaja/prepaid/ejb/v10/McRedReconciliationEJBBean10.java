@@ -389,7 +389,6 @@ public class McRedReconciliationEJBBean10 extends PrepaidBaseEJBBean10 implement
       reconciliationMcRed10.setAmount(getNumberUtils().toBigDecimal(row.get("_monto")));
       reconciliationMcRed10.setDateTrx((Timestamp) row.get("_fecha_trx"));
 
-
       return reconciliationMcRed10;
     };
 
