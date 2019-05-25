@@ -38,15 +38,16 @@ public class Test_PrepaidMovementEJBBean10_getPrepaidMovement extends TestBaseUn
     PrepaidCard10 prepaidCard10 = buildPrepaidCardWithTecnocomData(prepaidUser,account);
     prepaidCard10 = createPrepaidCardV2(prepaidCard10);
 
-    PrepaidTopup10 prepaidTopup = buildPrepaidTopup10();
+    PrepaidTopup10 prepaidTopup;
 
+    prepaidTopup = buildPrepaidTopup10();
     PrepaidMovement10 prepaidMovement1 = buildPrepaidMovement11(prepaidUser, prepaidTopup,prepaidCard10);
     prepaidMovement1 = createPrepaidMovement11(prepaidMovement1);
 
+    prepaidTopup = buildPrepaidTopup10();
     PrepaidMovement10 prepaidMovement2 = buildPrepaidMovement11(prepaidUser, prepaidTopup,prepaidCard10);
     prepaidMovement2 = createPrepaidMovement11(prepaidMovement2);
-
-
+    
     List<PrepaidMovement10> lst = getPrepaidMovementEJBBean11().getPrepaidMovementByCardId(prepaidCard10.getId());
 
     Assert.assertNotNull("debe retornar una lista", lst);

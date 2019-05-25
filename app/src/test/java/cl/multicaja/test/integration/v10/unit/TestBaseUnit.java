@@ -1024,7 +1024,7 @@ public class TestBaseUnit extends TestApiBase {
       codent = getConfigUtils().getProperty("tecnocom.codEntity");
     }
     TipoFactura tipoFactura;
-    if(isReverse == null || !isReverse){
+    if(isReverse == null || !isReverse) {
       if(PrepaidMovementType.TOPUP.equals(type)) {
         tipoFactura = TipoFactura.CARGA_TRANSFERENCIA;
       } else {
@@ -1058,9 +1058,6 @@ public class TestBaseUnit extends TestApiBase {
       }
     }
 
-
-
-
     Account account = getAccountEJBBean10().findByUserId(prepaidUser.getId());
     String centalta = "";
     String cuenta = "";
@@ -1070,11 +1067,10 @@ public class TestBaseUnit extends TestApiBase {
       cuenta = accountNumber.substring(12);
     }
 
-    if(prepaidCard == null){
+    if(prepaidCard == null) {
       System.out.println("llena tarjeta");
       prepaidCard = getPrepaidCardEJBBean11().getPrepaidCardByAccountId(account.getId());
     }
-
 
     PrepaidMovement10 prepaidMovement = new PrepaidMovement10();
     prepaidMovement.setIdMovimientoRef(cdtTransaction != null ? cdtTransaction.getTransactionReference() : getUniqueLong());
