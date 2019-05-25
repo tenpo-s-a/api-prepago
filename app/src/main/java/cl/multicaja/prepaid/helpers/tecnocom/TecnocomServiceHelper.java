@@ -2,7 +2,7 @@ package cl.multicaja.prepaid.helpers.tecnocom;
 
 import cl.multicaja.core.utils.ConfigUtils;
 import cl.multicaja.prepaid.model.v10.PrepaidMovement10;
-import cl.multicaja.prepaid.utils.ParametersUtil;
+import cl.multicaja.prepaid.utils.EnvironmentUtil;
 import cl.multicaja.tecnocom.TecnocomService;
 import cl.multicaja.tecnocom.TecnocomServiceImpl;
 import cl.multicaja.tecnocom.TecnocomServiceMockImpl;
@@ -33,6 +33,14 @@ public final class TecnocomServiceHelper {
 
   private static TecnocomServiceHelper instance;
 
+  private static final String TECNOCOM_API_KEY = "TECNOCOM_API_KEY";
+  private static final String TECNOCOM_API_URL = "TECNOCOM_API_URL";
+  private static final String TECNOCOM_CHANNEL = "TECNOCOM_CHANNEL";
+  private static final String TECNOCOM_CODENT = "TECNOCOM_CODENT";
+  private static final String TECNOCOM_ORDER = "TECNOCOM_ORDER";
+  private static final String TECNOCOM_MOCK_IMPL = "TECNOCOM_MOCK_IMPL";
+  private static final String TECNOCOM_MOCK_DATA_PATH = "TECNOCOM_MOCK_DATA_PATH";
+
   public static TecnocomServiceHelper getInstance() {
     if (instance == null) {
       instance = new TecnocomServiceHelper();
@@ -41,7 +49,6 @@ public final class TecnocomServiceHelper {
   }
 
   private ConfigUtils configUtils;
-  private ParametersUtil parametersUtil;
   private TecnocomService tecnocomService;
 
   /**
@@ -55,13 +62,6 @@ public final class TecnocomServiceHelper {
     return this.configUtils;
   }
 
-  private ParametersUtil getParametersUtil() {
-    if (parametersUtil == null) {
-      parametersUtil = ParametersUtil.getInstance();
-    }
-    return parametersUtil;
-  }
-
   /**
    *
    * @return
@@ -69,23 +69,26 @@ public final class TecnocomServiceHelper {
   public synchronized TecnocomService getTecnocomService() {
     if (this.tecnocomService == null) {
       ConfigUtils config = getConfigUtils();
-      String apiKey = config.getProperty("tecnocom.apiKey");
-      String apiUrl = config.getProperty("tecnocom.apiUrl");
-      String channel = config.getProperty("tecnocom.channel");
-      String codent = null;
-      String order = config.getProperty("tecnocom.order");
+      String apiKey = EnvironmentUtil.getVariable(TECNOCOM_API_KEY, () ->
+        config.getProperty("tecnocom.apiKey"));
+      String apiUrl = EnvironmentUtil.getVariable(TECNOCOM_API_URL, () ->
+        config.getProperty("tecnocom.apiUrl"));
+      String channel = EnvironmentUtil.getVariable(TECNOCOM_CHANNEL, () ->
+        config.getProperty("tecnocom.channel"));
+      String codent = EnvironmentUtil.getVariable(TECNOCOM_CODENT, () ->
+        config.getProperty("tecnocom.codEntity"));
+      String order = EnvironmentUtil.getVariable(TECNOCOM_ORDER, () ->
+        config.getProperty("tecnocom.order"));
+      String useMock = EnvironmentUtil.getVariable(TECNOCOM_MOCK_IMPL, () ->
+        config.getProperty("tecnocom.service.mock"));
 
       HashOrder hashOrder = order.equals("ASC") ? HashOrder.ASC : HashOrder.DESC;
-      log.info(hashOrder);
-      try {
-        codent = getParametersUtil().getString("api-prepaid", "cod_entidad", "v10");
-      } catch (Exception e) {
-        log.error("Error al cargar parametro cod_entidad");
-        codent = config.getProperty("tecnocom.codEntity");
-      }
-      boolean useMock = config.getPropertyBoolean("tecnocom.service.mock", false);
-      if (useMock) {
-        this.tecnocomService = new TecnocomServiceMockImpl(apiKey, apiUrl, channel, codent, hashOrder);
+
+      if (Boolean.valueOf(useMock)) {
+        String mockPath =  EnvironmentUtil.getVariable(TECNOCOM_MOCK_DATA_PATH, () ->
+          ".");
+
+        this.tecnocomService = new TecnocomServiceMockImpl(apiKey, apiUrl, channel, codent, hashOrder, mockPath);
       } else {
         this.tecnocomService = new TecnocomServiceImpl(apiKey, apiUrl, channel, codent, hashOrder);
       }
@@ -136,6 +139,10 @@ public final class TecnocomServiceHelper {
     ZonedDateTime chileDt = ZonedDateTime.ofInstant(ZonedDateTime.now().toInstant(), ZoneId.of("America/Santiago"));
 
     Date fecfac = format.parse(chileDt.format(dtf));
+
+    if(nomcomred.length() > 27){
+      nomcomred = nomcomred.substring(0, 27);
+    }
 
     log.info(String.format("LLamando a inclusion de movimientos para carga de saldo a contrato %s", contrato));
 

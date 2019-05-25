@@ -1,11 +1,9 @@
 package cl.multicaja.prepaid.web;
 
-import cl.multicaja.accounting.async.v10.routes.MastercardAccountingRoute10;
 import cl.multicaja.camel.CamelFactory;
 import cl.multicaja.core.utils.ConfigUtils;
 import cl.multicaja.core.utils.Constants;
 import cl.multicaja.prepaid.async.v10.routes.*;
-import cl.multicaja.core.utils.EncryptUtil;
 import org.apache.activemq.broker.BrokerService;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
@@ -39,9 +37,6 @@ public class WebApp implements ServletContextListener  {
   private TecnocomReconciliationRoute10 tecnocomReconciliationRoute10;
 
   @Inject
-  private MastercardAccountingRoute10 mastercardAccountingRoute10;
-
-  @Inject
   private ConciliationMcRedRoute10 conciliationMcRedRoute10;
 
   @Inject
@@ -59,6 +54,12 @@ public class WebApp implements ServletContextListener  {
   @Inject
   private BackofficeReportRoute10 backofficeReportRoute10;
 
+  @Inject
+  private InvoiceRoute10 invoiceRoute10;
+
+  @Inject
+  private KafkaEventsRoute10 kafkaEventsRoute10;
+
   private BrokerService brokerService;
 
   public WebApp() {
@@ -69,7 +70,6 @@ public class WebApp implements ServletContextListener  {
   public void contextInitialized(ServletContextEvent sce) {
     Locale.setDefault(Constants.DEFAULT_LOCALE);
     ConfigUtils cu = new ConfigUtils("api-prepaid");
-    EncryptUtil.getInstance().setPassword(cu.getProperty("encrypt.password"));
     log.info("Init app: " + cu.getModuleProperties());
     //solamente crea un mq embebido si la conexión es del tipo vm, caso contrario se conecta a un activemq externo
     if (cu.getProperty("activemq.url","").startsWith("vm:")) {
@@ -89,7 +89,10 @@ public class WebApp implements ServletContextListener  {
           prepaidTopupRoute10,
           transactionReversalRoute10,
           productChangeRoute10,
-          mailRoute10
+          mailRoute10,
+          invoiceRoute10,
+          kafkaEventsRoute10,
+          tecnocomReconciliationRoute10
           );
         log.info("==== Apache camel iniciado ====");
       }

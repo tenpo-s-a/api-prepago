@@ -8,12 +8,6 @@ import cl.multicaja.prepaid.ejb.v10.PrepaidCardEJBBean10;
 import cl.multicaja.prepaid.ejb.v10.PrepaidEJBBean10;
 import cl.multicaja.prepaid.ejb.v10.PrepaidMovementEJBBean10;
 import cl.multicaja.prepaid.ejb.v10.PrepaidUserEJBBean10;
-import cl.multicaja.prepaid.helpers.tecnocom.TecnocomServiceHelper;
-import cl.multicaja.prepaid.helpers.users.UserClient;
-import cl.multicaja.prepaid.helpers.users.model.Rut;
-import cl.multicaja.prepaid.helpers.users.model.Timestamps;
-import cl.multicaja.prepaid.helpers.users.model.User;
-import cl.multicaja.prepaid.helpers.users.model.UserStatus;
 import cl.multicaja.prepaid.model.v10.*;
 import cl.multicaja.tecnocom.TecnocomService;
 import cl.multicaja.tecnocom.dto.AutorizacionesDTO;
@@ -23,22 +17,22 @@ import cl.multicaja.tecnocom.dto.MovimientosDTO;
 import cl.multicaja.tecnocom.model.response.Response;
 import org.junit.Assert;
 import org.junit.BeforeClass;
+import org.junit.Ignore;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.InjectMocks;
-import org.mockito.Mock;
 import org.mockito.Mockito;
 import org.mockito.Spy;
 import org.mockito.junit.MockitoJUnitRunner;
 
 import java.math.BigDecimal;
-import java.sql.Timestamp;
+import java.time.LocalDateTime;
 import java.util.*;
 
 import static cl.multicaja.core.model.Errors.*;
-import static cl.multicaja.core.test.TestBase.getRandomNumericString;
 
 @RunWith(MockitoJUnitRunner.Silent.class)
+@Ignore
 public class Test_PrepaidEJBBean10_getTransactions {
 
   @Spy
@@ -52,8 +46,6 @@ public class Test_PrepaidEJBBean10_getTransactions {
 
   @Spy
   TecnocomService tecnocomService;
-  @Spy
-  UserClient userClient;
 
   @InjectMocks
   @Spy
@@ -79,76 +71,9 @@ public class Test_PrepaidEJBBean10_getTransactions {
   }
 
   @Test
-  public void userMcDisabled() throws Exception {
-    User user = Mockito.mock(User.class);
-    user.setGlobalStatus(UserStatus.DISABLED);
-
-    Mockito.doReturn(user).when(userClient).getUserById(null, Long.MAX_VALUE);
-
-    try{
-      prepaidEJBBean10.getTransactions(null, Long.MAX_VALUE,"","",Integer.MAX_VALUE);
-      Assert.fail("should not be here");
-    } catch (ValidationException ex) {
-      Assert.assertEquals("Debe retornar error userMc disabled", CLIENTE_BLOQUEADO_O_BORRADO.getValue(), ex.getCode());
-    }
-  }
-
-  @Test
-  public void userMcLocked() throws Exception {
-    User user = Mockito.mock(User.class);
-    user.setGlobalStatus(UserStatus.LOCKED);
-
-    Mockito.doReturn(user).when(userClient).getUserById(null, Long.MAX_VALUE);
-
-    try{
-      prepaidEJBBean10.getTransactions(null, Long.MAX_VALUE,"","",Integer.MAX_VALUE);
-      Assert.fail("should not be here");
-    } catch (ValidationException ex) {
-      Assert.assertEquals("Debe retornar error userMc locked", CLIENTE_BLOQUEADO_O_BORRADO.getValue(), ex.getCode());
-    }
-  }
-
-  @Test
-  public void userMcDeleted() throws Exception {
-    User user = Mockito.mock(User.class);
-    user.setGlobalStatus(UserStatus.DELETED);
-
-    Mockito.doReturn(user).when(userClient).getUserById(null, Long.MAX_VALUE);
-
-    try{
-     prepaidEJBBean10.getTransactions(null, Long.MAX_VALUE,"","",Integer.MAX_VALUE);
-      Assert.fail("should not be here");
-    } catch (ValidationException ex) {
-      Assert.assertEquals("Debe retornar error userMc deleted", CLIENTE_BLOQUEADO_O_BORRADO.getValue(), ex.getCode());
-    }
-  }
-
-  @Test
-  public void userMcPreregistered() throws Exception {
-    User user = new User();
-    user.setGlobalStatus(UserStatus.PREREGISTERED);
-
-    Mockito.doReturn(user).when(userClient).getUserById(null, Long.MAX_VALUE);
-
-    try{
-     prepaidEJBBean10.getTransactions(null, Long.MAX_VALUE,"","",Integer.MAX_VALUE);
-      Assert.fail("should not be here");
-    } catch (ValidationException ex) {
-      Assert.assertEquals("Debe retornar error userMc preregistered", CLIENTE_BLOQUEADO_O_BORRADO.getValue(), ex.getCode());
-    }
-  }
-
-  @Test
   public void prepaidUserNull() throws Exception {
-    User user = new User();
-    Rut rut = new Rut();
-    rut.setValue(11111111);
-    user.setRut(rut);
-    user.setGlobalStatus(UserStatus.ENABLED);
 
-    Mockito.doReturn(user).when(userClient).getUserById(headers, Long.MAX_VALUE);
     Mockito.doReturn(null).when(prepaidUserEJBBean10).getPrepaidUserByUserIdMc(headers, Long.MAX_VALUE);
-
     try{
      prepaidEJBBean10.getTransactions(headers, Long.MAX_VALUE,"","",Integer.MAX_VALUE);
       Assert.fail("should not be here");
@@ -160,16 +85,11 @@ public class Test_PrepaidEJBBean10_getTransactions {
 
   @Test
   public void prepaidUserDisabled() throws Exception {
-    User user = new User();
-    Rut rut = new Rut();
-    rut.setValue(11111111);
-    user.setRut(rut);
-    user.setGlobalStatus(UserStatus.ENABLED);
+
 
     PrepaidUser10 prepaidUser = new PrepaidUser10();
     prepaidUser.setStatus(PrepaidUserStatus.DISABLED);
 
-    Mockito.doReturn(user).when(userClient).getUserById(null, Long.MAX_VALUE);
     Mockito.doReturn(prepaidUser).when(prepaidUserEJBBean10).getPrepaidUserByUserIdMc(Mockito.any(), Mockito.anyLong());
 
     try{
@@ -185,11 +105,6 @@ public class Test_PrepaidEJBBean10_getTransactions {
    */
   @Test
   public void prepaidCardPending() throws Exception {
-    User user = new User();
-    Rut rut = new Rut();
-    rut.setValue(11111111);
-    user.setRut(rut);
-    user.setGlobalStatus(UserStatus.ENABLED);
 
     PrepaidUser10 prepaidUser = new PrepaidUser10();
     prepaidUser.setStatus(PrepaidUserStatus.ACTIVE);
@@ -198,7 +113,6 @@ public class Test_PrepaidEJBBean10_getTransactions {
     PrepaidCard10 prepaidCard = new PrepaidCard10();
     prepaidCard.setStatus(PrepaidCardStatus.PENDING);
 
-    Mockito.doReturn(user).when(userClient).getUserById(headers, Long.MAX_VALUE);
     Mockito.doReturn(prepaidUser).when(prepaidUserEJBBean10).getPrepaidUserByUserIdMc(headers, Long.MAX_VALUE);
     Mockito.doReturn(prepaidCard).when(prepaidCardEJBBean10).getLastPrepaidCardByUserId(headers, Long.MAX_VALUE);
 
@@ -213,17 +127,11 @@ public class Test_PrepaidEJBBean10_getTransactions {
 
   @Test
   public void firstTopupPending() throws Exception {
-    User user = new User();
-    Rut rut = new Rut();
-    rut.setValue(11111111);
-    user.setRut(rut);
-    user.setGlobalStatus(UserStatus.ENABLED);
 
     PrepaidUser10 prepaidUser = new PrepaidUser10();
     prepaidUser.setStatus(PrepaidUserStatus.ACTIVE);
     prepaidUser.setId(Long.MAX_VALUE);
 
-    Mockito.doReturn(user).when(userClient).getUserById(null, Long.MAX_VALUE);
     Mockito.doReturn(prepaidUser).when(prepaidUserEJBBean10).getPrepaidUserByUserIdMc(Mockito.any(), Mockito.anyLong());
     Mockito.doReturn(null).when(prepaidCardEJBBean10).getLastPrepaidCardByUserId(null, Long.MAX_VALUE);
     Mockito.doReturn(null).when(prepaidMovementEJBBean10).getLastPrepaidMovementByIdPrepaidUserAndOneStatus(Long.MAX_VALUE, PrepaidMovementStatus.PENDING, PrepaidMovementStatus.IN_PROCESS);
@@ -238,11 +146,6 @@ public class Test_PrepaidEJBBean10_getTransactions {
 
   @Test
   public void firstTopupInProcess() throws Exception {
-    User user = new User();
-    Rut rut = new Rut();
-    rut.setValue(11111111);
-    user.setRut(rut);
-    user.setGlobalStatus(UserStatus.ENABLED);
 
     PrepaidUser10 prepaidUser = new PrepaidUser10();
     prepaidUser.setStatus(PrepaidUserStatus.ACTIVE);
@@ -251,7 +154,6 @@ public class Test_PrepaidEJBBean10_getTransactions {
     PrepaidMovement10 prepaidMovement = new PrepaidMovement10();
     prepaidMovement.setEstado(PrepaidMovementStatus.IN_PROCESS);
 
-    Mockito.doReturn(user).when(userClient).getUserById(null, Long.MAX_VALUE);
     Mockito.doReturn(prepaidUser).when(prepaidUserEJBBean10).getPrepaidUserByUserIdMc(Mockito.any(), Mockito.anyLong());
     Mockito.doReturn(null).when(prepaidCardEJBBean10).getLastPrepaidCardByUserId(null, Long.MAX_VALUE);
     Mockito.doReturn(prepaidMovement).when(prepaidMovementEJBBean10).getLastPrepaidMovementByIdPrepaidUserAndOneStatus(Long.MAX_VALUE, PrepaidMovementStatus.PENDING, PrepaidMovementStatus.IN_PROCESS);
@@ -267,11 +169,6 @@ public class Test_PrepaidEJBBean10_getTransactions {
 
   @Test
   public void getTransactionOk() throws Exception {
-    User user = new User();
-    Rut rut = new Rut();
-    rut.setValue(11111111);
-    user.setRut(rut);
-    user.setGlobalStatus(UserStatus.ENABLED);
 
     PrepaidUser10 prepaidUser = new PrepaidUser10();
     prepaidUser.setStatus(PrepaidUserStatus.ACTIVE);
@@ -283,7 +180,7 @@ public class Test_PrepaidEJBBean10_getTransactions {
     prepaidCard10.setProcessorUserId("1");
 
     Timestamps timestamps = new Timestamps();
-    timestamps.setCreatedAt(new Timestamp(new Date().getTime()));
+    timestamps.setCreatedAt(LocalDateTime.now());
     prepaidCard10.setTimestamps(timestamps);
 
     Response response = new Response();
@@ -333,7 +230,6 @@ public class Test_PrepaidEJBBean10_getTransactions {
     autorizacionesDTO.setFectrn(fecFac);
     authDto.setListAutorizacionesDTOS(autorizacionesDTOS);
 
-    Mockito.doReturn(user).when(userClient).getUserById(new HashMap<>(), Long.MAX_VALUE);
     Mockito.doReturn(prepaidUser).when(prepaidUserEJBBean10).getPrepaidUserByUserIdMc(new HashMap<>(), Long.MAX_VALUE);
     Mockito.doReturn(prepaidCard10).when(prepaidCardEJBBean10).getLastPrepaidCardByUserId(new HashMap<>(),Long.MAX_VALUE);
     Mockito.doReturn(null).when(prepaidMovementEJBBean10).

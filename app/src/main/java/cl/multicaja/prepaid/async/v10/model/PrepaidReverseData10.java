@@ -1,7 +1,6 @@
 package cl.multicaja.prepaid.async.v10.model;
 
 import cl.multicaja.core.model.Errors;
-import cl.multicaja.prepaid.helpers.users.model.User;
 import cl.multicaja.prepaid.model.v10.*;
 import org.apache.commons.lang3.builder.ToStringBuilder;
 import org.apache.commons.lang3.builder.ToStringStyle;
@@ -15,9 +14,10 @@ public class PrepaidReverseData10 implements Serializable {
 
   private PrepaidTopup10 prepaidTopup10;
   private PrepaidWithdraw10 prepaidWithdraw10;
-  private User user;
+
   private PrepaidUser10 prepaidUser10;
   private PrepaidCard10 prepaidCard10;
+
   private PrepaidMovement10 prepaidMovementReverse;
 
   private Errors numError;
@@ -27,9 +27,8 @@ public class PrepaidReverseData10 implements Serializable {
     super();
   }
 
-  public PrepaidReverseData10(PrepaidTopup10 prepaidTopup, PrepaidCard10 prepaidCard10,User user,PrepaidUser10 prepaidUser10, PrepaidMovement10 prepaidMovementReverse) {
+  public PrepaidReverseData10(PrepaidTopup10 prepaidTopup, PrepaidCard10 prepaidCard10,PrepaidUser10 prepaidUser10, PrepaidMovement10 prepaidMovementReverse) {
     this.prepaidTopup10 = prepaidTopup;
-    this.user = user;
     this.prepaidUser10 = prepaidUser10;
     this.prepaidCard10 = prepaidCard10;
     this.prepaidMovementReverse = prepaidMovementReverse;
@@ -40,6 +39,7 @@ public class PrepaidReverseData10 implements Serializable {
     this.prepaidUser10 = user;
     this.prepaidMovementReverse = prepaidMovementReverse;
   }
+
 
   public PrepaidTopup10 getPrepaidTopup10() {
     return prepaidTopup10;
@@ -55,14 +55,6 @@ public class PrepaidReverseData10 implements Serializable {
 
   public void setPrepaidWithdraw10(PrepaidWithdraw10 prepaidWithdraw10) {
     this.prepaidWithdraw10 = prepaidWithdraw10;
-  }
-
-  public User getUser() {
-    return user;
-  }
-
-  public void setUser(User user) {
-    this.user = user;
   }
 
   public PrepaidUser10 getPrepaidUser10() {

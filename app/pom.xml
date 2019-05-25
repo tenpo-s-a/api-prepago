@@ -55,19 +55,31 @@
     <dependency>
       <groupId>cl.multicaja</groupId>
       <artifactId>multicaja-base</artifactId>
-      <version>7de20c527745225fd4cbe108a2398ae38b052b9f</version>
+      <version>8d769878a0b2015f112c3b87f3fcfa0ef9380573</version>
     </dependency>
 
     <dependency>
       <groupId>cl.multicaja</groupId>
       <artifactId>multicaja-async</artifactId>
-      <version>54eceecfc6fd1c572fe8c247ec941c2e4f80e98b</version>
+      <version>7e501c5e01f5000558e2ec35cae9e7c2d30718bb</version>
     </dependency>
 
     <dependency>
       <groupId>cl.multicaja</groupId>
       <artifactId>tecnocom-gateway</artifactId>
-      <version>38ebd78383e0f541dbebed98ef53f2f74469898a</version>
+      <version>a1aecab0dfece9e6b216351d34cceeb78f1e079c</version>
+    </dependency>
+
+    <dependency>
+      <groupId>cl.multicaja.prepago.external.source.lib</groupId>
+      <artifactId>prepaid-external-source-lib</artifactId>
+      <version>c176cba2d7c63698baf03f03285406b7b12817f9</version>
+    </dependency>
+
+    <dependency>
+      <groupId>cl.multicaja.prepago.external.source.lib</groupId>
+      <artifactId>prepaid-external-source-lib</artifactId>
+      <version>721cb6babf074f02634a0533a70348c0754d269d</version>
     </dependency>
 
     <dependency>
@@ -146,9 +158,33 @@
     </dependency>
 
     <dependency>
+      <groupId>org.apache.camel</groupId>
+      <artifactId>camel-kafka</artifactId>
+      <version>2.21.1</version>
+    </dependency>
+    <dependency>
+      <groupId>org.scala-lang</groupId>
+      <artifactId>scala-library</artifactId>
+      <version>2.10.4</version>
+    </dependency>
+
+    <dependency>
       <groupId>com.opencsv</groupId>
       <artifactId>opencsv</artifactId>
       <version>4.1</version>
+    </dependency>
+
+    <!-- https://mvnrepository.com/artifact/org.hibernate/hibernate-core -->
+    <dependency>
+      <groupId>org.hibernate</groupId>
+      <artifactId>hibernate-core</artifactId>
+      <version>5.4.2.Final</version>
+    </dependency>
+
+    <dependency>
+      <groupId>org.springframework.security</groupId>
+      <artifactId>spring-security-crypto</artifactId>
+      <version>${spring.version}</version>
     </dependency>
 
   </dependencies>

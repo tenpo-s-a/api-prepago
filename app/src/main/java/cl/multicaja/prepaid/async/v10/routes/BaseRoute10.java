@@ -5,12 +5,13 @@ import cl.multicaja.accounting.ejb.v10.PrepaidClearingEJBBean10;
 import cl.multicaja.camel.CamelRouteBuilder;
 import cl.multicaja.cdt.ejb.v10.CdtEJBBean10;
 import cl.multicaja.core.utils.ConfigUtils;
-import cl.multicaja.core.utils.EncryptUtil;
 import cl.multicaja.core.utils.NumberUtils;
 import cl.multicaja.core.utils.PdfUtils;
 import cl.multicaja.prepaid.ejb.v10.*;
+import cl.multicaja.prepaid.ejb.v11.PrepaidCardEJBBean11;
+import cl.multicaja.prepaid.ejb.v11.PrepaidMovementEJBBean11;
+import cl.multicaja.prepaid.helpers.EncryptHelper;
 import cl.multicaja.prepaid.helpers.tecnocom.TecnocomServiceHelper;
-import cl.multicaja.prepaid.helpers.users.UserClient;
 import cl.multicaja.prepaid.utils.ParametersUtil;
 import cl.multicaja.tecnocom.TecnocomService;
 import org.apache.camel.CamelContext;
@@ -29,10 +30,16 @@ public abstract class BaseRoute10 extends CamelRouteBuilder {
   private PrepaidCardEJBBean10 prepaidCardEJBBean10;
 
   @EJB
+  private PrepaidCardEJBBean11 prepaidCardEJBBean11;
+
+  @EJB
   private PrepaidEJBBean10 prepaidEJBBean10;
 
   @EJB
   private PrepaidMovementEJBBean10 prepaidMovementEJBBean10;
+
+  @EJB
+  private PrepaidMovementEJBBean11 prepaidMovementEJBBean11;
 
   @EJB
   private CdtEJBBean10 cdtEJBBean10;
@@ -58,13 +65,15 @@ public abstract class BaseRoute10 extends CamelRouteBuilder {
   @EJB
   private BackofficeEJBBean10 backofficeEJBBEan10;
 
+  @EJB
+  private AccountEJBBean10 accountEJBBean10;
+
 
   private ParametersUtil parametersUtil;
   private ConfigUtils configUtils;
-  private EncryptUtil encryptUtil;
+  private EncryptHelper encryptHelper;
   private PdfUtils pdfUtils;
   private NumberUtils numberUtils;
-  private UserClient userClient;
 
   public BaseRoute10() {
     super();
@@ -89,12 +98,14 @@ public abstract class BaseRoute10 extends CamelRouteBuilder {
     return this.configUtils;
   }
 
-  public EncryptUtil getEncryptUtil(){
-    if(this.encryptUtil == null){
-      this.encryptUtil = EncryptUtil.getInstance();
+  public EncryptHelper getEncryptHelper() {
+    if(encryptHelper == null){
+      encryptHelper = EncryptHelper.getInstance();
     }
-    return this.encryptUtil;
+    return encryptHelper;
   }
+
+
 
   public NumberUtils getNumberUtils() {
     if (this.numberUtils == null) {
@@ -117,17 +128,6 @@ public abstract class BaseRoute10 extends CamelRouteBuilder {
     return pdfUtils;
   }
 
-  public UserClient getUserClient(){
-    if(userClient == null){
-      userClient = new UserClient();
-    }
-    return userClient;
-  }
-
-  public void setUserClient(UserClient userClient) {
-    this.userClient = userClient;
-  }
-
   public PrepaidUserEJBBean10 getPrepaidUserEJBBean10() {
     return prepaidUserEJBBean10;
   }
@@ -144,6 +144,14 @@ public abstract class BaseRoute10 extends CamelRouteBuilder {
     this.prepaidCardEJBBean10 = prepaidCardEJBBean10;
   }
 
+  public PrepaidCardEJBBean11 getPrepaidCardEJBBean11() {
+    return prepaidCardEJBBean11;
+  }
+
+  public void setPrepaidCardEJBBean11(PrepaidCardEJBBean11 prepaidCardEJBBean11) {
+    this.prepaidCardEJBBean11 = prepaidCardEJBBean11;
+  }
+
   public PrepaidEJBBean10 getPrepaidEJBBean10() {
     return prepaidEJBBean10;
   }
@@ -152,13 +160,20 @@ public abstract class BaseRoute10 extends CamelRouteBuilder {
     this.prepaidEJBBean10 = prepaidEJBBean10;
   }
 
-
   public PrepaidMovementEJBBean10 getPrepaidMovementEJBBean10() {
     return prepaidMovementEJBBean10;
   }
 
   public void setPrepaidMovementEJBBean10(PrepaidMovementEJBBean10 prepaidMovementEJBBean10) {
     this.prepaidMovementEJBBean10 = prepaidMovementEJBBean10;
+  }
+
+  public PrepaidMovementEJBBean11 getPrepaidMovementEJBBean11() {
+    return prepaidMovementEJBBean11;
+  }
+
+  public void setPrepaidMovementEJBBean11(PrepaidMovementEJBBean11 prepaidMovementEJBBean11) {
+    this.prepaidMovementEJBBean11 = prepaidMovementEJBBean11;
   }
 
   public CdtEJBBean10 getCdtEJBBean10() {
@@ -231,5 +246,13 @@ public abstract class BaseRoute10 extends CamelRouteBuilder {
 
   public void setBackofficeEJBBEan10(BackofficeEJBBean10 backofficeEJBBEan10) {
     this.backofficeEJBBEan10 = backofficeEJBBEan10;
+  }
+
+  public AccountEJBBean10 getAccountEJBBean10() {
+    return accountEJBBean10;
+  }
+
+  public void setAccountEJBBean10(AccountEJBBean10 accountEJBBean10) {
+    this.accountEJBBean10 = accountEJBBean10;
   }
 }

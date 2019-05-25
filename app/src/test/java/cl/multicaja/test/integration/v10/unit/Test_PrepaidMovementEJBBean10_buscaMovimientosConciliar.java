@@ -1,8 +1,10 @@
 package cl.multicaja.test.integration.v10.unit;
 
-import cl.multicaja.prepaid.helpers.users.model.User;
 import cl.multicaja.prepaid.model.v10.*;
-import org.junit.*;
+import org.junit.After;
+import org.junit.Assert;
+import org.junit.Before;
+import org.junit.Test;
 
 import java.util.List;
 
@@ -22,10 +24,9 @@ public class Test_PrepaidMovementEJBBean10_buscaMovimientosConciliar  extends Te
       Assert.assertNull("Debe ser null",lstMovement10s);
     }
     {
-      User user = registerUser();
-      PrepaidUser10 prepaidUser = buildPrepaidUser10(user);
-      prepaidUser = createPrepaidUser10(prepaidUser);
-      PrepaidTopup10 prepaidTopup = buildPrepaidTopup10(user);
+      PrepaidUser10 prepaidUser = buildPrepaidUserv2();
+      prepaidUser = createPrepaidUserV2(prepaidUser);
+      PrepaidTopup10 prepaidTopup = buildPrepaidTopup10();
       PrepaidMovement10 prepaidMovement10 = buildPrepaidMovement10(prepaidUser, prepaidTopup);
       prepaidMovement10.setConTecnocom(ReconciliationStatusType.RECONCILED);
       prepaidMovement10.setConSwitch(ReconciliationStatusType.RECONCILED);
@@ -69,13 +70,12 @@ public class Test_PrepaidMovementEJBBean10_buscaMovimientosConciliar  extends Te
       List<PrepaidMovement10> lstMovement10s = getPrepaidMovementEJBBean10().getMovementsForConciliate(null);
       Assert.assertNull("Debe ser null",lstMovement10s);
     }
-    User user = registerUser();
-    PrepaidUser10 prepaidUser = buildPrepaidUser10(user);
-    prepaidUser = createPrepaidUser10(prepaidUser);
+    PrepaidUser10 prepaidUser = buildPrepaidUserv2();
+    prepaidUser = createPrepaidUserV2(prepaidUser);
 
     // se agrega un movmiento de carga
     {
-      PrepaidTopup10 prepaidTopup = buildPrepaidTopup10(user);
+      PrepaidTopup10 prepaidTopup = buildPrepaidTopup10();
       PrepaidMovement10 prepaidMovement10 = buildPrepaidMovement10(prepaidUser, prepaidTopup);
       prepaidMovement10.setConTecnocom(ReconciliationStatusType.RECONCILED);
       prepaidMovement10.setConSwitch(ReconciliationStatusType.RECONCILED);
@@ -110,7 +110,7 @@ public class Test_PrepaidMovementEJBBean10_buscaMovimientosConciliar  extends Te
       createPrepaidMovement10(prepaidMovement10);
 
       // se agrega un movimiento de retiro web
-      PrepaidWithdraw10 prepaidWithdraw = buildPrepaidWithdraw10(user);
+      PrepaidWithdraw10 prepaidWithdraw = buildPrepaidWithdrawV2();
       prepaidWithdraw.setMerchantCode(NewPrepaidBaseTransaction10.WEB_MERCHANT_CODE);
       PrepaidMovement10 prepaidWithdrawMovement = buildPrepaidMovement10(prepaidUser, prepaidWithdraw);
 

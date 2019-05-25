@@ -5,6 +5,7 @@ import cl.multicaja.accounting.helpers.mastercard.model.IpmFile;
 import cl.multicaja.accounting.helpers.mastercard.model.IpmFileStatus;
 import cl.multicaja.prepaid.async.v10.processors.BaseProcessor10;
 import cl.multicaja.prepaid.async.v10.routes.BaseRoute10;
+import cl.multicaja.prepaid.utils.PgpUtil;
 import org.apache.camel.Exchange;
 import org.apache.camel.Processor;
 import org.apache.camel.component.file.GenericFile;
@@ -17,6 +18,8 @@ import java.time.ZoneOffset;
 import java.time.ZonedDateTime;
 import java.util.List;
 
+//TODO: eliminar ya que el IPM se leera en prepaid-batch-worker
+@Deprecated
 public class PendingMastercardAccountingFile10 extends BaseProcessor10 {
 
   private static Log log = LogFactory.getLog(PendingMastercardAccountingFile10.class);
@@ -61,7 +64,7 @@ public class PendingMastercardAccountingFile10 extends BaseProcessor10 {
             throw new Exception(msg);
           }
 
-          MastercardIpmFileHelper.decryptFile(inputStream, privateKey, publicKey, tempFile, passphrase);
+          PgpUtil.decryptFile(inputStream, privateKey, publicKey, tempFile, passphrase);
 
           IpmFile csvIpmFile = new IpmFile();
 
@@ -105,8 +108,7 @@ public class PendingMastercardAccountingFile10 extends BaseProcessor10 {
 
           getRoute().getPrepaidAccountingEJBBean10().processMovementForAccounting(null, ZonedDateTime.now(ZoneOffset.UTC).toLocalDateTime());
 
-          // Expirar aquellos movimientos que no hayan sido confirmados despues de 7 archivos ipm
-          getRoute().getPrepaidAccountingEJBBean10().expireIpmMovements();
+
 
         } catch (Exception e) {
           log.info(String.format("Error processing file: %s", fileName));

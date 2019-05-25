@@ -1,5 +1,6 @@
 package cl.multicaja.test.db;
 
+import cl.multicaja.core.utils.db.InParam;
 import cl.multicaja.core.utils.db.NullParam;
 import cl.multicaja.test.TestDbBasePg;
 import org.junit.AfterClass;
@@ -68,16 +69,17 @@ public class Test_20180514105358_create_sp_mc_prp_buscar_tarjetas_v10 extends Te
    * @return
    * @throws SQLException
    */
-  public static Map<String, Object> searchCards(Long id, Long idUsuario, Integer expiracion, String estado, String contrato,String encryptedPan) throws SQLException {
+  public static Map<String, Object> searchCards(Long id, Long idUsuario, Integer expiracion, String estado, String contrato, String encryptedPan, String pan) throws SQLException {
     Object[] params = {
       id != null ? id : new NullParam(Types.BIGINT),
       idUsuario != null ? idUsuario : new NullParam(Types.BIGINT),
       expiracion != null ? expiracion : new NullParam(Types.INTEGER),
       estado != null ? estado : new NullParam(Types.VARCHAR),
       contrato != null ? contrato : new NullParam(Types.VARCHAR),
-      encryptedPan != null ? encryptedPan: new NullParam(Types.VARCHAR)
+      encryptedPan != null ? encryptedPan: new NullParam(Types.VARCHAR),
+      pan != null ? new InParam(pan, Types.VARCHAR) : new NullParam(Types.VARCHAR)
     };
-    return dbUtils.execute(SCHEMA + ".mc_prp_buscar_tarjetas_v10", params);
+    return dbUtils.execute(SCHEMA + ".mc_prp_buscar_tarjetas_v11", params);
   }
 
   @Test
@@ -85,7 +87,7 @@ public class Test_20180514105358_create_sp_mc_prp_buscar_tarjetas_v10 extends Te
 
     Map<String, Object> obj1 = insertCard("ACTIVA");
 
-    Map<String, Object> resp = searchCards((long) obj1.get("id"), (long) obj1.get("id_usuario"), (int) obj1.get("expiracion"), (String) obj1.get("estado"), (String) obj1.get("contrato"),null);
+    Map<String, Object> resp = searchCards((long) obj1.get("id"), (long) obj1.get("id_usuario"), (int) obj1.get("expiracion"), (String) obj1.get("estado"), (String) obj1.get("contrato"),null, null);
 
     List result = (List)resp.get("result");
 
@@ -107,7 +109,7 @@ public class Test_20180514105358_create_sp_mc_prp_buscar_tarjetas_v10 extends Te
 
     Map<String, Object> obj1 = insertCard("ACTIVA");
 
-    Map<String, Object> resp = searchCards((long) obj1.get("id"), null, null, null, null,null);
+    Map<String, Object> resp = searchCards((long) obj1.get("id"), null, null, null, null,null, null);
 
     List result = (List)resp.get("result");
 
@@ -125,7 +127,7 @@ public class Test_20180514105358_create_sp_mc_prp_buscar_tarjetas_v10 extends Te
 
     //Caso en donde no deberia encontrar un registro
 
-    Map<String, Object> resp2 = searchCards(((long) obj1.get("id")) + 1, null, null, null, null,null);
+    Map<String, Object> resp2 = searchCards(((long) obj1.get("id")) + 1, null, null, null, null,null, null);
 
     Assert.assertNull("no debe retornar una lista", resp2.get("result"));
   }
@@ -135,7 +137,7 @@ public class Test_20180514105358_create_sp_mc_prp_buscar_tarjetas_v10 extends Te
 
     Map<String, Object> obj1 = insertCard("ACTIVA");
 
-    Map<String, Object> resp = searchCards(null, (long) obj1.get("id_usuario"), null, null, null,null);
+    Map<String, Object> resp = searchCards(null, (long) obj1.get("id_usuario"), null, null, null,null, null);
 
     List result = (List)resp.get("result");
 
@@ -153,7 +155,7 @@ public class Test_20180514105358_create_sp_mc_prp_buscar_tarjetas_v10 extends Te
 
     //Caso en donde no deberia encontrar un registro
 
-    Map<String, Object> resp2 = searchCards(null, ((long) obj1.get("id_usuario")) + 1, null, null, null,null);
+    Map<String, Object> resp2 = searchCards(null, ((long) obj1.get("id_usuario")) + 1, null, null, null,null, null);
 
     Assert.assertNull("no debe retornar una lista", resp2.get("result"));
   }
@@ -163,7 +165,7 @@ public class Test_20180514105358_create_sp_mc_prp_buscar_tarjetas_v10 extends Te
 
     Map<String, Object> obj1 = insertCard("ACTIVA");
 
-    Map<String, Object> resp = searchCards(null, null, (int) obj1.get("expiracion"), null, null,null);
+    Map<String, Object> resp = searchCards(null, null, (int) obj1.get("expiracion"), null, null,null, null);
 
     List result = (List)resp.get("result");
 
@@ -181,7 +183,7 @@ public class Test_20180514105358_create_sp_mc_prp_buscar_tarjetas_v10 extends Te
 
     //Caso en donde no deberia encontrar un registro
 
-    Map<String, Object> resp2 = searchCards(null, null, ((int) obj1.get("expiracion")) + 1, null, null,null);
+    Map<String, Object> resp2 = searchCards(null, null, ((int) obj1.get("expiracion")) + 1, null, null,null, null);
 
     Assert.assertNull("no debe retornar una lista", resp2.get("result"));
   }
@@ -198,7 +200,7 @@ public class Test_20180514105358_create_sp_mc_prp_buscar_tarjetas_v10 extends Te
     Map<String, Object> obj1 = insertCard(status);
     Map<String, Object> obj2 = insertCard(status);
 
-    Map<String, Object> resp = searchCards(null, null, null, (String) obj1.get("estado"), null,null);
+    Map<String, Object> resp = searchCards(null, null, null, (String) obj1.get("estado"), null,null, null);
 
     List result = (List)resp.get("result");
 
@@ -225,7 +227,7 @@ public class Test_20180514105358_create_sp_mc_prp_buscar_tarjetas_v10 extends Te
 
     //Caso en donde no deberia encontrar un registro
 
-    Map<String, Object> resp2 = searchCards(null, null, null, (String) obj1.get("estado") + 1, null,null);
+    Map<String, Object> resp2 = searchCards(null, null, null, (String) obj1.get("estado") + 1, null,null, null);
 
     Assert.assertNull("no debe retornar una lista", resp2.get("result"));
   }
@@ -235,7 +237,7 @@ public class Test_20180514105358_create_sp_mc_prp_buscar_tarjetas_v10 extends Te
 
     Map<String, Object> obj1 = insertCard("ACTIVA");
 
-    Map<String, Object> resp = searchCards(null, null, null, null, (String) obj1.get("contrato"),null);
+    Map<String, Object> resp = searchCards(null, null, null, null, (String) obj1.get("contrato"),null, null);
 
     List result = (List)resp.get("result");
 
@@ -253,7 +255,63 @@ public class Test_20180514105358_create_sp_mc_prp_buscar_tarjetas_v10 extends Te
 
     //Caso en donde no deberia encontrar un registro
 
-    Map<String, Object> resp2 = searchCards(null, null, null, null, (String) obj1.get("contrato") + 1,null);
+    Map<String, Object> resp2 = searchCards(null, null, null, null, (String) obj1.get("contrato") + 1,null, null);
+
+    Assert.assertNull("no debe retornar una lista", resp2.get("result"));
+  }
+
+  @Test
+  public void searchUserBy_encryptedpan() throws SQLException {
+
+    Map<String, Object> obj1 = insertCard("ACTIVA");
+
+    Map<String, Object> resp = searchCards(null, null, null, null, null,(String) obj1.get("pan_encriptado"), null);
+
+    List result = (List)resp.get("result");
+
+    Assert.assertNotNull("debe retornar una lista", result);
+    Assert.assertEquals("Debe contener un elemento", 1 , result.size());
+
+    Map<String, Object> mCard1 = (Map)result.get(0);
+
+    checkColumns(mCard1);
+
+    Set<String> keys = obj1.keySet();
+    for (String k : keys) {
+      Assert.assertEquals("Debe ser la misma tarjeta", obj1.get(k), mCard1.get("_" + k));
+    }
+
+    //Caso en donde no deberia encontrar un registro
+
+    Map<String, Object> resp2 = searchCards(null, null, null, null, null,"123", null);
+
+    Assert.assertNull("no debe retornar una lista", resp2.get("result"));
+  }
+
+  @Test
+  public void searchUserBy_pan() throws SQLException {
+
+    Map<String, Object> obj1 = insertCard("ACTIVA");
+
+    Map<String, Object> resp = searchCards(null, null, null, null, null, null, (String) obj1.get("pan"));
+
+    List result = (List)resp.get("result");
+
+    Assert.assertNotNull("debe retornar una lista", result);
+    Assert.assertEquals("Debe contener un elemento", 1 , result.size());
+
+    Map<String, Object> mCard1 = (Map)result.get(0);
+
+    checkColumns(mCard1);
+
+    Set<String> keys = obj1.keySet();
+    for (String k : keys) {
+      Assert.assertEquals("Debe ser la misma tarjeta", obj1.get(k), mCard1.get("_" + k));
+    }
+
+    //Caso en donde no deberia encontrar un registro
+
+    Map<String, Object> resp2 = searchCards(null, null, null, null, null, null,"123");
 
     Assert.assertNull("no debe retornar una lista", resp2.get("result"));
   }

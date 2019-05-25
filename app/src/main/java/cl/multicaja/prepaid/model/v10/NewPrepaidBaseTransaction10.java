@@ -2,7 +2,9 @@ package cl.multicaja.prepaid.model.v10;
 
 import cl.multicaja.core.model.BaseModel;
 import com.fasterxml.jackson.annotation.JsonIgnore;
+import com.fasterxml.jackson.annotation.JsonInclude;
 
+@JsonInclude(JsonInclude.Include.NON_NULL)
 public abstract class NewPrepaidBaseTransaction10 extends BaseModel {
 
   @JsonIgnore
@@ -10,6 +12,8 @@ public abstract class NewPrepaidBaseTransaction10 extends BaseModel {
 
   private NewAmountAndCurrency10 amount;
   private String transactionId;
+
+  @JsonInclude(JsonInclude.Include.NON_NULL)
   private Integer rut;
   private String merchantCode;
   private String merchantName;

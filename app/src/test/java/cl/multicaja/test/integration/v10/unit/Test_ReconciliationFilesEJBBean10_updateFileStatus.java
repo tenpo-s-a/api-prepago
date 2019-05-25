@@ -31,12 +31,12 @@ public class Test_ReconciliationFilesEJBBean10_updateFileStatus extends TestBase
 
     getReconciliationFilesEJBBean10().updateFileStatus(null, reconciliationFile10.getId(), FileStatus.OK);
 
-    List<ReconciliationFile10> reconciliationFile10List = getReconciliationFilesEJBBean10().getReconciliationFile(null, reconciliationFile10.getFileName(), null, null, null);
+    List<ReconciliationFile10> reconciliationFile10List = getReconciliationFilesEJBBean10().getReconciliationFile(null, null, reconciliationFile10.getFileName(), null, null, null);
     ReconciliationFile10 foundFile = reconciliationFile10List.get(0);
 
     Assert.assertEquals("Debe tener estado OK", FileStatus.OK, foundFile.getStatus());
 
-    reconciliationFile10List = getReconciliationFilesEJBBean10().getReconciliationFile(null, anotherFile.getFileName(), null, null, null);
+    reconciliationFile10List = getReconciliationFilesEJBBean10().getReconciliationFile(null, null, anotherFile.getFileName(), null, null, null);
     foundFile = reconciliationFile10List.get(0);
 
     Assert.assertEquals("No debe haber cambiado", FileStatus.READING, foundFile.getStatus());

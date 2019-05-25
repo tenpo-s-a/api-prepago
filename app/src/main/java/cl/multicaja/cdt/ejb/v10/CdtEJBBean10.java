@@ -138,7 +138,7 @@ public class CdtEJBBean10 implements CdtEJB10 {
 
     if("0".equals(numError)){
       cdtTransaction10.setTransactionReference(numberUtils.toLong(outputData.get("IdMovimiento")));
-      cdtTransaction10.setId(numberUtils.toLong(outputData.get("Id")));
+      cdtTransaction10.setId(numberUtils.toLong(outputData.get("IdMovimiento")));
     } else {
       log.error("addCdtTransaction resp: " + outputData + " - " + cdtTransaction10);
       cdtTransaction10.setNumError(numError);
@@ -153,7 +153,6 @@ public class CdtEJBBean10 implements CdtEJB10 {
     if(idRef == null) {
       throw new BadRequestException(PARAMETRO_FALTANTE_$VALUE).setData(new KeyValue("value", "idCuenta"));
     }
-
 
     Object[] params = new Object[] {
       idRef,

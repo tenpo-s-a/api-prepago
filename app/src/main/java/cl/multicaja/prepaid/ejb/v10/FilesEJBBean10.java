@@ -1,9 +1,5 @@
 package cl.multicaja.prepaid.ejb.v10;
 
-import cl.multicaja.core.utils.db.NullParam;
-import cl.multicaja.core.utils.db.RowMapper;
-import cl.multicaja.prepaid.helpers.users.UserClient;
-import cl.multicaja.prepaid.helpers.users.model.*;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 
@@ -11,11 +7,7 @@ import javax.ejb.LocalBean;
 import javax.ejb.Stateless;
 import javax.ejb.TransactionManagement;
 import javax.ejb.TransactionManagementType;
-import java.sql.Timestamp;
-import java.sql.Types;
-import java.util.Collections;
 import java.util.HashMap;
-import java.util.List;
 import java.util.Map;
 
 /**
@@ -30,16 +22,6 @@ public class FilesEJBBean10 extends PrepaidBaseEJBBean10 implements FilesEJB10 {
 
   private final String APP_NAME = "api-prepaid";
 
-  private UserClient userClient;
-
-  @Override
-  public UserClient getUserClient() {
-    if(userClient == null) {
-      userClient = UserClient.getInstance();
-    }
-    return userClient;
-  }
-
   @Override
   public Map<String, Object> info() throws Exception {
     Map<String, Object> map = new HashMap<>();
@@ -50,7 +32,7 @@ public class FilesEJBBean10 extends PrepaidBaseEJBBean10 implements FilesEJB10 {
   /**
     APP FILES
    */
-  @Override
+  /*@Override
   public List<AppFile> getAppFiles(Map<String, Object> headers, Long id, String name, String version, AppFileStatus status) throws Exception {
     // si viene algun parametro en null se establece NullParam
     Object[] params = {
@@ -88,20 +70,26 @@ public class FilesEJBBean10 extends PrepaidBaseEJBBean10 implements FilesEJB10 {
     return res != null ? res : Collections.EMPTY_LIST;
   }
 
+   */
+
   /**
     USER FILES
    */
-  @Override
+  /*@Override
   public List<UserFile> getUsersFile(Map<String, Object> headers, Long id, Long userId, String name, String version, UserFileStatus status) throws Exception {
     return this.getUserClient().getUserFiles(headers, userId, APP_NAME, name, version, status);
   }
 
-  @Override
+   */
+
+  /*@Override
   public UserFile getUserFileById(Map<String, Object> headers, Long userIdMc, Long id) throws Exception {
     return this.getUserClient().getUserFileById(headers, userIdMc, id);
   }
 
-  @Override
+   */
+
+  /*@Override
   public UserFile createUserFile(Map<String, Object> headers, Long userId, Long appFileId, String name, String version, String description, String mimeType, String location) throws Exception {
 
     UserFile file = new UserFile();
@@ -115,4 +103,6 @@ public class FilesEJBBean10 extends PrepaidBaseEJBBean10 implements FilesEJB10 {
 
     return this.getUserClient().createUserFile(headers, userId, file);
   }
+
+   */
 }

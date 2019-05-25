@@ -1,7 +1,6 @@
 package cl.multicaja.prepaid.model.v10;
 
 
-import cl.multicaja.prepaid.helpers.users.model.Timestamps;
 import com.fasterxml.jackson.annotation.JsonIgnore;
 
 import java.util.List;
@@ -12,15 +11,21 @@ import java.util.Map;
  */
 public class PrepaidWithdraw10 extends NewPrepaidWithdraw10 implements IPrepaidTransaction10 {
 
+  @JsonIgnore
   private String status;
   private Timestamps timestamps;
+  @JsonIgnore
+  private List<PrepaidMovementFee10> feeList;
+  @JsonIgnore
   private NewAmountAndCurrency10 fee;
+  @JsonIgnore
   private NewAmountAndCurrency10 total;
   @JsonIgnore
   private String messageId;
 
   // Utilizados para la respuesta al POS/switch
   private Long id;
+  @JsonIgnore
   private Long userId;
   private String mcVoucherType;
   private List<Map<String, String>> mcVoucherData;
@@ -69,6 +74,10 @@ public class PrepaidWithdraw10 extends NewPrepaidWithdraw10 implements IPrepaidT
   public NewAmountAndCurrency10 getFee() {
     return fee;
   }
+
+  public void setFeeList(List<PrepaidMovementFee10> feeList) { this.feeList = feeList; }
+
+  public List<PrepaidMovementFee10> getFeeList() { return this.feeList; }
 
   public void setFee(NewAmountAndCurrency10 fee) {
     this.fee = fee;

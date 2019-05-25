@@ -10,9 +10,12 @@ import cl.multicaja.tecnocom.constants.CodigoMoneda;
 import cl.multicaja.tecnocom.constants.IndicadorNormalCorrector;
 import cl.multicaja.tecnocom.constants.TipoFactura;
 
+import javax.ejb.Local;
+import java.math.BigDecimal;
 import java.sql.Date;
 import java.sql.SQLException;
 import java.sql.Timestamp;
+import java.time.LocalDateTime;
 import java.util.List;
 import java.util.Map;
 
@@ -119,7 +122,11 @@ public interface PrepaidMovementEJB10 {
 
   List<PrepaidMovement10> getPrepaidMovements(Long id, Long idMovimientoRef, Long idPrepaidUser, String idTxExterno, PrepaidMovementType tipoMovimiento,
                                               PrepaidMovementStatus estado, String cuenta, CodigoMoneda clamon, IndicadorNormalCorrector indnorcor, TipoFactura tipofac, Date fecfac, String numaut,
-                                              ReconciliationStatusType estadoConSwitch, ReconciliationStatusType estadoConTecnocom, MovementOriginType origen,String pan) throws Exception;
+                                              ReconciliationStatusType estadoConSwitch, ReconciliationStatusType estadoConTecnocom, MovementOriginType origen, String pan) throws Exception;
+
+  List<PrepaidMovement10> getPrepaidMovements(Long id, Long idMovimientoRef, Long idPrepaidUser, String idTxExterno, PrepaidMovementType tipoMovimiento,
+                                              PrepaidMovementStatus estado, String cuenta, CodigoMoneda clamon, IndicadorNormalCorrector indnorcor, TipoFactura tipofac, Date fecfac, String numaut,
+                                              ReconciliationStatusType estadoConSwitch, ReconciliationStatusType estadoConTecnocom, MovementOriginType origen, String pan, String codcom) throws Exception;
   /**
    *
    * @param id
@@ -237,34 +244,88 @@ public interface PrepaidMovementEJB10 {
    */
   ReconciliedMovement10 getReconciliedMovementByIdMovRef(Long idMovRef) throws BaseException, SQLException;
 
-
   /**
    *
    * @param headers
-   * @param id_archivo_origen
+   * @param filesInfo
    * @param originType
-   * @param fileName
-   * @param fechaDeTransaccion
-   * @param responsable
-   * @param descripcion
+   * @param dateOfTransaction
+   * @param responsible
+   * @param description
    * @param movRef
+   * @param movementType
+   * @param sentStatus
+   * @return
    * @throws Exception
    */
-  void createMovementResearch(Map<String, Object> headers, String id_archivo_origen,
-                              ReconciliationOriginType originType,
-                              String fileName,
-                              Timestamp fechaDeTransaccion,
-                              ResearchMovementResponsibleStatusType responsable,
-                              ResearchMovementDescriptionType descripcion,
-                              Long movRef) throws Exception;
+  Map<String,Object> createResearchMovement(
+    Map<String, Object> headers,
+    String filesInfo,
+    String originType,
+    LocalDateTime dateOfTransaction,
+    String responsible,
+    String description,
+    Long movRef,
+    String movementType,
+    String sentStatus
+  )throws Exception;
 
   /**
-   * Busca un movimiento de investigacion en la tabla de conciliados
    *
-   * @param idMovRef id de referencia del movimiento a investigar
+   * @param id
+   * @param sentStatus
    * @return
+   * @throws Exception
    */
-  ResearchMovement10 getResearchMovementByIdMovRef(String idMovRef) throws BaseException, SQLException;
+  Map<String,Object> updateResearchMovement(Long id, String sentStatus)throws Exception;
+
+  /**
+   *
+   * @param id
+   * @param beginDateTime
+   * @param endDateTime
+   * @param sentStatus
+   * @param movRef
+   * @return
+   * @throws Exception
+   */
+  List<ResearchMovement10> getResearchMovement(Long id, Timestamp beginDateTime, Timestamp endDateTime, String sentStatus, BigDecimal movRef) throws Exception;
+
+
+  /**
+   *
+   * @param id
+   * @return
+   * @throws Exception
+   */
+  ResearchMovement10 getResearchMovementById(Long id) throws Exception;
+
+
+  /**
+   *
+   * @param startDateTime
+   * @param endDateTime
+   * @return
+   * @throws Exception
+   */
+  List<ResearchMovement10> getResearchMovementByDateTimeRange(Timestamp startDateTime,Timestamp endDateTime) throws Exception;
+
+
+  /**
+   *
+   * @param movRef
+   * @return
+   * @throws Exception
+   */
+  List<ResearchMovement10> getResearchMovementByMovRef(BigDecimal movRef) throws Exception;
+
+  /**
+   *
+   * @param sentStatus
+   * @return
+   * @throws Exception
+   */
+  List<ResearchMovement10> getResearchMovementBySentStatus(String sentStatus) throws Exception;
 
   /**
    *

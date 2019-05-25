@@ -6,11 +6,18 @@ import com.fasterxml.jackson.annotation.JsonInclude;
 /**
  * @author abarazarte
  */
-@JsonInclude(JsonInclude.Include.NON_NULL)
 public class NewPrepaidWithdraw10 extends NewPrepaidBaseTransaction10 {
 
+  @JsonInclude(JsonInclude.Include.NON_NULL)
   private String password;
-  private Long bankAccountId;
+  @JsonInclude(JsonInclude.Include.NON_NULL)
+  private Long bankId;
+  @JsonInclude(JsonInclude.Include.NON_NULL)
+  private String accountType;
+  @JsonInclude(JsonInclude.Include.NON_NULL)
+  private Long accountNumber;
+  @JsonInclude(JsonInclude.Include.NON_NULL)
+  private String accountRut;
 
   public NewPrepaidWithdraw10() {
     super(PrepaidMovementType.WITHDRAW);
@@ -38,12 +45,36 @@ public class NewPrepaidWithdraw10 extends NewPrepaidBaseTransaction10 {
     this.password = password;
   }
 
-  public Long getBankAccountId() {
-    return bankAccountId;
+  public Long getBankId() {
+    return bankId;
   }
 
-  public void setBankAccountId(Long bankAccountId) {
-    this.bankAccountId = bankAccountId;
+  public void setBankId(Long bankId) {
+    this.bankId = bankId;
+  }
+
+  public String getAccountType() {
+    return accountType;
+  }
+
+  public void setAccountType(String accountType) {
+    this.accountType = accountType;
+  }
+
+  public Long getAccountNumber() {
+    return accountNumber;
+  }
+
+  public void setAccountNumber(Long accountNumber) {
+    this.accountNumber = accountNumber;
+  }
+
+  public String getAccountRut() {
+    return accountRut;
+  }
+
+  public void setAccountRut(String accountRut) {
+    this.accountRut = accountRut;
   }
 
   @Override

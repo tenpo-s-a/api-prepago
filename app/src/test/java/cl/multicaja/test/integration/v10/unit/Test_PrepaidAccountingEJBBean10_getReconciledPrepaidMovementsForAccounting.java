@@ -3,7 +3,6 @@ package cl.multicaja.test.integration.v10.unit;
 import cl.multicaja.core.exceptions.BadRequestException;
 import cl.multicaja.core.utils.ConfigUtils;
 import cl.multicaja.core.utils.db.DBUtils;
-import cl.multicaja.prepaid.helpers.users.model.User;
 import cl.multicaja.prepaid.model.v10.*;
 import org.junit.AfterClass;
 import org.junit.Assert;
@@ -38,10 +37,10 @@ public class Test_PrepaidAccountingEJBBean10_getReconciledPrepaidMovementsForAcc
   @Test
   public void searchMovementForConciliate()throws Exception {
     {
-      User user = registerUser();
-      PrepaidUser10 prepaidUser = buildPrepaidUser10(user);
-      prepaidUser = createPrepaidUser10(prepaidUser);
-      PrepaidTopup10 prepaidTopup = buildPrepaidTopup10(user);
+      PrepaidUser10 prepaidUser = buildPrepaidUserv2();
+      prepaidUser = createPrepaidUserV2(prepaidUser);
+
+      PrepaidTopup10 prepaidTopup = buildPrepaidTopup10();
 
       // CREA MOVIMIENTOS
       PrepaidMovement10 prepaidMovement10 = buildPrepaidMovement10(prepaidUser, prepaidTopup);
@@ -98,7 +97,6 @@ public class Test_PrepaidAccountingEJBBean10_getReconciledPrepaidMovementsForAcc
 
       ZonedDateTime utc = Instant.now().atZone(ZoneId.of("UTC"));
 
-      Thread.sleep(1000);
       List<PrepaidAccountingMovement> lstMovement10s = getPrepaidAccountingEJBBean10().getReconciledPrepaidMovementsForAccounting(getDefaultHeaders(), utc.toLocalDateTime());
       Assert.assertEquals("Debe ser 3 ", 3,lstMovement10s.size());
       for (PrepaidAccountingMovement m : lstMovement10s) {

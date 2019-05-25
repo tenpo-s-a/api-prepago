@@ -17,24 +17,20 @@ import static cl.multicaja.core.model.Errors.PARAMETRO_NO_CUMPLE_FORMATO_$VALUE;
 
 public class Test_wsNotificationTecnocom extends TestBaseUnitApi {
 
-
   private NotificationTecnocom notificationTecnocom;
   private NotificationTecnocomHeader notificationTecnocomHeader;
   private NotificationTecnocomBody notificationTecnocomBody;
-
 
   private HttpResponse callNotification(NotificationTecnocom notificationTecnocom, HttpHeader[] headers){
     HttpResponse httpResponse = apiPOST(String.format("/1.0/prepaid/processor/notification"), toJson(notificationTecnocom),headers);
     return httpResponse;
   }
 
-
   @Test
   public void testCallNotificationAllParamsWithSuccessProcess() {
 
     String messageResponse;
     String base64String = Base64.getEncoder().encodeToString(("Test").getBytes(StandardCharsets.UTF_8));
-
     HttpHeader[] headers = {
       new HttpHeader("Content-Type","application/json")
     };

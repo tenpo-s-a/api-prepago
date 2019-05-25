@@ -1,5 +1,6 @@
 # Local development
 *.env
+!env/*.env
 *.dev
 .DS_Store
 .classpath
@@ -9,6 +10,7 @@
 *.iml
 pg/pg-prepaid.iml
 app/datos-mock.cache
+.factorypath
 
 target/
 

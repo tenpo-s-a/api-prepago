@@ -23,7 +23,7 @@ import java.io.Serializable;
  */
 @SuppressWarnings("unchecked")
 
-//FIXME: verificar fallo
+//TODO: verificar fallo
 @Ignore
 public class Test_RetrySendMessagesWithDelay extends TestBaseUnitAsync {
 

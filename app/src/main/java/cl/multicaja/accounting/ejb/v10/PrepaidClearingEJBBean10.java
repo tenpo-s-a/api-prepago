@@ -5,7 +5,6 @@ import cl.multicaja.core.exceptions.BadRequestException;
 import cl.multicaja.core.exceptions.BaseException;
 import cl.multicaja.core.exceptions.ValidationException;
 import cl.multicaja.core.model.ZONEID;
-import cl.multicaja.core.utils.DateUtils;
 import cl.multicaja.core.utils.KeyValue;
 import cl.multicaja.core.utils.db.InParam;
 import cl.multicaja.core.utils.db.NullParam;
@@ -14,20 +13,26 @@ import cl.multicaja.core.utils.db.RowMapper;
 import cl.multicaja.prepaid.ejb.v10.PrepaidBaseEJBBean10;
 import cl.multicaja.prepaid.ejb.v10.PrepaidMovementEJBBean10;
 import cl.multicaja.prepaid.ejb.v10.PrepaidUserEJBBean10;
-import cl.multicaja.prepaid.helpers.users.model.Rut;
-import cl.multicaja.prepaid.helpers.users.model.Timestamps;
 import cl.multicaja.prepaid.model.v10.*;
+import cl.multicaja.prepaid.model.v11.AccountStatus;
 import cl.multicaja.tecnocom.constants.CodigoMoneda;
+import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fasterxml.jackson.databind.ObjectMapper;
 import com.opencsv.CSVReader;
 import com.opencsv.CSVWriter;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
+import org.springframework.dao.EmptyResultDataAccessException;
+import org.springframework.jdbc.support.GeneratedKeyHolder;
+import org.springframework.jdbc.support.KeyHolder;
 
 import javax.ejb.*;
 import java.io.*;
 import java.math.RoundingMode;
 import java.nio.charset.StandardCharsets;
+import java.sql.PreparedStatement;
+import java.sql.ResultSet;
 import java.sql.Timestamp;
 import java.sql.Types;
 import java.time.*;
@@ -52,6 +57,16 @@ public class PrepaidClearingEJBBean10 extends PrepaidBaseEJBBean10 implements Pr
   @EJB
   private PrepaidUserEJBBean10 prepaidUserEJBBean10;
 
+  private ResearchMovementInformationFiles researchMovementInformationFiles;
+
+  private static final String INSERT_CLEARING = "INSERT INTO prepaid_accounting.clearing(\n" +
+    "             accounting_id, user_account_id, file_id, status, created, \n" +
+    "            updated, bank_id, account_number, account_type, account_rut)\n" +
+    "    VALUES ( ?, ?, ?, ?, ?, \n" +
+    "            ?, ?, ?, ?, ?);\n";
+
+  private static final String FIND_BY_ID = String.format("SELECT * FROM %s.clearing id = ?",getSchemaAccounting());
+
   public PrepaidAccountingFileEJBBean10 getPrepaidAccountingFileEJBBean10() {
     return prepaidAccountingFileEJBBean10;
   }
@@ -74,6 +89,68 @@ public class PrepaidClearingEJBBean10 extends PrepaidBaseEJBBean10 implements Pr
 
   public void setPrepaidUserEJBBean10(PrepaidUserEJBBean10 prepaidUserEJBBean10) {
     this.prepaidUserEJBBean10 = prepaidUserEJBBean10;
+  }
+
+  protected String toJson(Object obj) throws JsonProcessingException {
+    return new ObjectMapper().writeValueAsString(obj);
+  }
+
+  public ClearingData10 insertClearing(ClearingData10 clearing10)throws Exception {
+    if(clearing10 == null){
+      throw new BadRequestException(PARAMETRO_FALTANTE_$VALUE).setData(new KeyValue("value", "clearing10"));
+    }
+    //Error Id Accounting Null
+    if(clearing10.getAccountingId() == null){
+      throw new BadRequestException(PARAMETRO_FALTANTE_$VALUE).setData(new KeyValue("value", "accountingId()"));
+    }
+
+    KeyHolder keyHolder = new GeneratedKeyHolder();
+    getDbUtils().getJdbcTemplate().update(connection -> {
+      PreparedStatement ps = connection
+        .prepareStatement(INSERT_CLEARING, new String[] {"id"});
+      ps.setLong(1, clearing10.getAccountingId());
+      ps.setLong(2, 0);
+      ps.setLong(3,clearing10.getFileId());
+      ps.setString(4, clearing10.getStatus().getValue());
+      ps.setTimestamp(5, Timestamp.from(Instant.now()));
+      ps.setTimestamp(6, Timestamp.from(Instant.now()));
+      if(clearing10.getUserBankAccount() == null ){
+        ps.setLong(7,0L);
+        ps.setString(8,"");
+        ps.setString(9,"");
+        ps.setLong(10,0L);
+      } else {
+        ps.setLong(7,clearing10.getUserBankAccount().getBankId());
+        ps.setLong(8,clearing10.getUserBankAccount().getAccountNumber());
+        ps.setString(9,clearing10.getUserBankAccount().getAccountType());
+        ps.setString(10,clearing10.getUserBankAccount().getRut());
+      }
+      ps.setLong(5, 0L);
+      ps.setString(6, AccountStatus.ACTIVE.toString());
+      ps.setTimestamp(7, Timestamp.from(Instant.now()));
+      ps.setTimestamp(8, Timestamp.from(Instant.now()));
+      ps.setTimestamp(9, Timestamp.from(Instant.now()));
+      ps.setTimestamp(10, Timestamp.from(Instant.now()));
+      return ps;
+    }, keyHolder);
+    try{
+      return  this.findById((long) keyHolder.getKey());
+    }catch (Exception e){
+      return null;
+    }
+  }
+
+  public ClearingData10 findById(Long clearingId)throws Exception {
+    if(clearingId == null){
+      throw new BadRequestException(PARAMETRO_FALTANTE_$VALUE).setData(new KeyValue("value", "clearingId"));
+    }
+    log.info(String.format("[findById] Buscando Clearing por -> clearingId [%d]", clearingId));
+    try{
+      return getDbUtils().getJdbcTemplate().queryForObject(FIND_BY_ID, this.getClearingRowMapper(), clearingId);
+    }catch (EmptyResultDataAccessException e){
+      log.error(String.format("[findById] Buscando Clearing por -> clearingId [%d] no existe", clearingId));
+      return null;
+    }
   }
 
   @Override
@@ -159,7 +236,6 @@ public class PrepaidClearingEJBBean10 extends PrepaidBaseEJBBean10 implements Pr
     return data;
   }
 
-  //TODO: este metodo no tiene test usando el parametro "status"
   @Override
   public List<ClearingData10> searchClearingData(Map<String, Object> header, Long id, AccountingStatusType status, Long accountingId) throws Exception {
 
@@ -176,7 +252,7 @@ public class PrepaidClearingEJBBean10 extends PrepaidBaseEJBBean10 implements Pr
     Map<String, Object> resp = getDbUtils().execute(getSchemaAccounting() + ".mc_acc_search_clearing_data_v10",  rm, params);
     List<ClearingData10> res = (List<ClearingData10>)resp.get("result");
     log.info(res);
-    return res != null ? res : Collections.EMPTY_LIST;
+    return res != null ? res : Collections.emptyList();
   }
 
   @Override
@@ -259,8 +335,8 @@ public class PrepaidClearingEJBBean10 extends PrepaidBaseEJBBean10 implements Pr
       data.setTransactionDate((Timestamp) row.get("_transaction_date"));
       data.setConciliationDate((Timestamp) row.get("_conciliation_date"));
       Timestamps timestamps = new Timestamps();
-      timestamps.setCreatedAt((Timestamp)row.get("_created"));
-      timestamps.setUpdatedAt((Timestamp)row.get("_updated"));
+      timestamps.setCreatedAt(((Timestamp)row.get("_created")).toLocalDateTime());
+      timestamps.setUpdatedAt(((Timestamp)row.get("_updated")).toLocalDateTime());
       data.setTimestamps(timestamps);
 
       //data.setAccountingId(getNumberUtils().toLong(row.get("_accounting_id"))); //IdAccounting
@@ -283,6 +359,8 @@ public class PrepaidClearingEJBBean10 extends PrepaidBaseEJBBean10 implements Pr
     return searchFullClearingData(headers,to,null,AccountingStatusType.PENDING);
   }
 
+
+  //FIXME: Corregir esto despues. ACTION: Esto es una preparación de ambiente para el test de resolución de respuesta del banco, debería ir en los tests
   /**
    * Busca los movimientos en clearing y genera un archivo csv que se envia por correo
    * @param headers
@@ -309,17 +387,7 @@ public class PrepaidClearingEJBBean10 extends PrepaidBaseEJBBean10 implements Pr
         //Obtener el Id del usuario
         Long prepaidUserId = getPrepaidMovementEJBBean10().getPrepaidMovementById(mov.getIdTransaction()).getIdPrepaidUser();
         Long userIdMc = getPrepaidUserEJBBean10().getPrepaidUserById(null, prepaidUserId).getUserIdMc();
-        UserAccount userAccount = getUserClient().getUserBankAccountById(null, userIdMc, mov.getUserBankAccount().getId());
-        if(userAccount == null) {
-          throw new ValidationException(CUENTA_NO_ASOCIADA_A_USUARIO);
-        }
-        mov.getUserBankAccount().setAccountNumber(userAccount.getAccountNumber());
-        mov.getUserBankAccount().setAccountType(userAccount.getAccountType());
-        mov.getUserBankAccount().setBankName(userAccount.getBankName());
-        Rut r = new Rut();
-        r.setValue(userAccount.getRut().getValue());
-        r.setDv(userAccount.getRut().getDv());
-        mov.getUserBankAccount().setRut(r);
+        //TODO: Verificar como se cargaran los datos de las cuentas de transferencia
       }
     }
 
@@ -373,13 +441,13 @@ public class PrepaidClearingEJBBean10 extends PrepaidBaseEJBBean10 implements Pr
     return atTimezone.format(DateTimeFormatter.ofPattern(pattern));
   }
 
-
+  //FIXME: Corregir esto despues. ACTION: Esto es una preparación de ambiente para el test de resolución de respuesta del banco, debería ir en los tests
   public File createClearingCSV(String filename, String fileId, List<ClearingData10> lstClearingMovement10s) throws IOException {
     File file = new File(filename);
     FileWriter outputFile = new FileWriter(file);
     CSVWriter writer = new CSVWriter(outputFile,',');
 
-    // TODO: Agregar tasa de intercambio
+    // FIXME: Agregar tasa de intercambio ACTION: Revisar en el proyecto prepaid batch worker
     String[] header = new String[]{"ID_PREPAGO","ID_LIQUIDACION", "ID_TRX", "ID_CUENTA_ORIGEN", "TIPO_TRX", "MOV_CONTABLE",
       "FECHA_TRX", "FECHA_CONCILIACION", "MONTO_TRX_PESOS", "MONTO_TRX_MCARD_PESOS", "MONTO_TRX_USD", "VALOR_USD",
       "DIF_TIPO_CAMBIO", "COMISION_PREPAGO_PESOS", "IVA_COMISION_PREPAGO_PESOS", "COMISION_RECAUDADOR_MC_PESOS",
@@ -418,11 +486,12 @@ public class PrepaidClearingEJBBean10 extends PrepaidBaseEJBBean10 implements Pr
         mov.getCollectorFee().toBigInteger().toString(), //COMISION_RECAUDADOR_MC_PESOS
         mov.getCollectorFeeIva().toBigInteger().toString(), //IVA_COMISION_RECAUDADOR_MC_PESOS
         mov.getAmountBalance().getValue().toBigInteger().toString(), //MONTO_AFECTO_A_SALDO_PESOS
+
         "", //ID_CUENTA_DESTINO - Este campo es utilizado solo por MulticajaRed. No lo utiliza ni setea Prepago
-        accountId > 0 ? (mov.getUserBankAccount().getRut() != null ? String.format("%s-%s", mov.getUserBankAccount().getRut().getValue(), mov.getUserBankAccount().getRut().getDv()) : "") : "", //RUT
-        accountId > 0 ? mov.getUserBankAccount().getBankName() : "", //BANCO
-        accountId > 0 ? getNumberUtils().toLong(mov.getUserBankAccount().getAccountNumber()).toString() : "", //NRO_CUENTA
-        accountId > 0 ? mov.getUserBankAccount().getAccountType() : "", //TIPO_CUENTA
+        mov.getUserBankAccount().getRut() != null ? mov.getUserBankAccount().getRut() : "", //RUT
+        "BANCO", //BANCO
+        mov.getUserBankAccount().getAccountNumber() != null ? String.valueOf(mov.getUserBankAccount().getAccountNumber()) : "", //NRO_CUENTA
+        mov.getUserBankAccount().getAccountType() != null ? mov.getUserBankAccount().getAccountType(): "", //TIPO_CUENTA
         mov.getStatus().getValue() //ESTADO_LIQUIDACION
       };
       writer.writeNext(data);
@@ -438,7 +507,6 @@ public class PrepaidClearingEJBBean10 extends PrepaidBaseEJBBean10 implements Pr
     log.info(String.format("Registro procesados: %d", clearingData10s.size()));
     processClearingBankResponse(clearingData10s, fileName, fileId);
     log.info("processClearingResponse OUT");
-    getPrepaidMovementEJBBean10().clearingResolution(); // llamar a F3
   }
 
   private List<ClearingData10> processClearingResponseDataFile(InputStream inputStream) throws IOException, ValidationException {
@@ -467,21 +535,16 @@ public class PrepaidClearingEJBBean10 extends PrepaidBaseEJBBean10 implements Pr
           LocalDateTime localDateTime = getDateUtils().dateStringToLocalDateTime(record[6],DATE_PATTERN);
           ZonedDateTime ldtZoned = localDateTime.atZone(ZoneId.of(ZONEID.AMERICA_SANTIAGO.getValue()));
           ZonedDateTime utcZoned = ldtZoned.withZoneSameInstant(ZoneId.of("UTC"));
-          timestamps.setCreatedAt(Timestamp.valueOf(utcZoned.toLocalDateTime()));
+          timestamps.setCreatedAt(utcZoned.toLocalDateTime());
 
           clearingData.setTimestamps(timestamps);
 
-          Rut accountRut = new Rut();
           String stringRut = String.valueOf(record[19]);
-          System.out.println("Rut: " + stringRut);
-          String[] rutParts = stringRut.split("-");
-          accountRut.setValue(Integer.valueOf(rutParts[0]));
-          accountRut.setDv(rutParts[1]);
 
           UserAccount userAccount = new UserAccount();
-          userAccount.setRut(accountRut);
+          userAccount.setRut(stringRut);
           userAccount.setBankName(String.valueOf(record[20]));
-          userAccount.setAccountNumber(String.valueOf(record[21]));
+          userAccount.setAccountNumber(Long.valueOf(String.valueOf(record[21])));
           userAccount.setAccountType(String.valueOf(record[22]));
 
           clearingData.setUserBankAccount(userAccount);
@@ -499,6 +562,7 @@ public class PrepaidClearingEJBBean10 extends PrepaidBaseEJBBean10 implements Pr
       return clearingData10s;
   }
 
+  // F1 de clearing
   private void processClearingBankResponse(List<ClearingData10> clearingDataInFile, String fileName, String fileId) throws Exception {
     //TODO (poca prioridad): Es posible que el archivo de respuesta tenga transacciones de mas de 1 dia
     final List<ClearingData10>  clearingDataInTable = searchClearignDataByFileId(null, fileId);
@@ -516,15 +580,13 @@ public class PrepaidClearingEJBBean10 extends PrepaidBaseEJBBean10 implements Pr
         if(AccountingStatusType.PENDING.equals(data.getStatus()) && reconciliedMovement10 == null) { // Aun no ha sido procesado?
           if(result != null) { //Existe tambien en el archivo?
             PrepaidUser10 prepaidUser10 = getPrepaidUserEJBBean10().getPrepaidUserById(null, prepaidMovement10.getIdPrepaidUser());
-            UserAccount userAccount = getUserClient().getUserBankAccountById(null, prepaidUser10.getUserIdMc(), data.getUserBankAccount().getId());
 
+            //TODO: Verificar datos de cuenta bancaria, ya que los datos ahora estan en la tabla de Clearing
+            //Que coincidan los datos del archivo con los de clearing
             //Coinciden todos sus valores
             if(data.getAmount().getValue().compareTo(result.getAmount().getValue()) == 0 &&
               data.getAmountBalance().getValue().compareTo(result.getAmountBalance().getValue()) == 0 &&
-              data.getAmountMastercard().getValue().compareTo(result.getAmountMastercard().getValue()) == 0 &&
-              getNumberUtils().toLong(userAccount.getAccountNumber()).toString().equals(result.getUserBankAccount().getAccountNumber()) &&
-              userAccount.getRut().getValue().equals(result.getUserBankAccount().getRut().getValue())
-            ) {
+              data.getAmountMastercard().getValue().compareTo(result.getAmountMastercard().getValue()) == 0) {
               // Si existe en el archivo y concuerda se actualiza al estado que dice el banco.
               updateClearingData(null, data.getId(),null, result.getStatus());
             } else { // Si  viene en el archivo, pero los montos no concuerdan, marcar.
@@ -538,14 +600,22 @@ public class PrepaidClearingEJBBean10 extends PrepaidBaseEJBBean10 implements Pr
           // O su estado clearing es distinto de PENDING
           // O ya esta conciliado
 
-          //TODO: Esta OK este Research?
+          List<ResearchMovementInformationFiles> researchMovementInformationFilesList1 = new ArrayList<>();
+          ResearchMovementInformationFiles researchMovementInformationFiles = new ResearchMovementInformationFiles();
+          researchMovementInformationFiles.setIdArchivo((Long.valueOf(fileId)));
+          researchMovementInformationFiles.setIdEnArchivo(data.getResearchId());
+          researchMovementInformationFiles.setNombreArchivo(fileName);
+          researchMovementInformationFiles.setTipoArchivo(AccountingFileType.CLEARING.toString());
+          researchMovementInformationFilesList1.add(researchMovementInformationFiles);
           createClearingResearch(
-            data.getIdTransaction(),
-            fileName,
+            researchMovementInformationFilesList1,
+            ReconciliationOriginType.CLEARING,
             data.getTimestamps().getCreatedAt(),
-            ResearchMovementResponsibleStatusType.RECONCILIATION_MULTICAJA,
+            ResearchMovementResponsibleStatusType.OTI_PREPAID,
             ResearchMovementDescriptionType.MOVEMENT_WAS_PROCESSED,
-            data.getId());
+            data.getIdTransaction(),
+            PrepaidMovementType.PURCHASE,
+            ResearchMovementSentStatusType.SENT_RESEARCH_PENDING);
 
           // Los movimientos con clearing resuelto y no conciliados deben conciliarse (para que no pasen a clearingResolution)
           if(!AccountingStatusType.PENDING.equals(data.getStatus()) && reconciliedMovement10 == null) {
@@ -563,14 +633,22 @@ public class PrepaidClearingEJBBean10 extends PrepaidBaseEJBBean10 implements Pr
         if(result == null) {
           //Agregar a Investigar
 
-          //TODO: Esta OK este Research?
-          this.createClearingResearch(
-            data.getIdTransaction(),
-            fileName,
+          List<ResearchMovementInformationFiles> researchMovementInformationFilesList2 = new ArrayList<>();
+          ResearchMovementInformationFiles researchMovementInformationFiles = new ResearchMovementInformationFiles();
+          researchMovementInformationFiles.setIdArchivo((Long.valueOf(fileId)));
+          researchMovementInformationFiles.setIdEnArchivo(data.getResearchId());
+          researchMovementInformationFiles.setNombreArchivo(fileName);
+          researchMovementInformationFiles.setTipoArchivo(AccountingFileType.CLEARING.toString());
+          researchMovementInformationFilesList2.add(researchMovementInformationFiles);
+          createClearingResearch(
+            researchMovementInformationFilesList2,
+            ReconciliationOriginType.CLEARING,
             data.getTimestamps().getCreatedAt(),
-            ResearchMovementResponsibleStatusType.RECONCIALITION_MULTICAJA_OTI,
+            ResearchMovementResponsibleStatusType.RECONCIALITION_MULTICAJA_OTI_PREPAGO,
             ResearchMovementDescriptionType.MOVEMENT_NOT_FOUND_IN_DB,
-            new Long(0));
+            data.getIdTransaction(),
+            PrepaidMovementType.PURCHASE,
+            ResearchMovementSentStatusType.SENT_RESEARCH_PENDING);
 
         }
       } else {
@@ -580,16 +658,31 @@ public class PrepaidClearingEJBBean10 extends PrepaidBaseEJBBean10 implements Pr
     }
   }
 
-  // Agrega movimiento a investigar
   public void createClearingResearch(
-    Long movementId, String fileName, Timestamp dateOfTransaction, ResearchMovementResponsibleStatusType responsible,
-    ResearchMovementDescriptionType description, Long movRef) throws Exception {
+    List<ResearchMovementInformationFiles> researchMovementInformationFilesList,
+    ReconciliationOriginType reconciliationOriginType,
+    LocalDateTime dateOfTransaction,
+    ResearchMovementResponsibleStatusType researchMovementResponsibleStatusType,
+    ResearchMovementDescriptionType researchMovementDescriptionType,
+    Long movRef,
+    PrepaidMovementType prepaidMovementType,
+    ResearchMovementSentStatusType researchMovementSentStatusType
+  ) throws Exception{
 
-    String idToResearch = String.format("idMov=%d", movementId);
 
-    getPrepaidMovementEJBBean10().createMovementResearch(null, idToResearch,
-      ReconciliationOriginType.CLEARING, fileName,dateOfTransaction,responsible,description,movRef);
+    String jsonSent = this.toJson(researchMovementInformationFilesList);
+    getPrepaidMovementEJBBean10().createResearchMovement(
+      null,
+      jsonSent,
+      reconciliationOriginType.name(),
+      dateOfTransaction,
+      researchMovementResponsibleStatusType.getValue(),
+      researchMovementDescriptionType.getValue(),
+      movRef,
+      prepaidMovementType.name(),
+      researchMovementSentStatusType.getValue());
   }
+
 
   @Override
   public List<ClearingData10> getWebWithdrawForReconciliation(Map<String, Object> headers) throws Exception {
@@ -602,6 +695,30 @@ public class PrepaidClearingEJBBean10 extends PrepaidBaseEJBBean10 implements Pr
     return list != null ? list : Collections.EMPTY_LIST;
   }
 
+  private org.springframework.jdbc.core.RowMapper<ClearingData10> getClearingRowMapper() {
+    return (ResultSet rs, int rowNum) -> {
+      ClearingData10 c = new ClearingData10();
+      c.setId(rs.getLong("id"));
+      c.setAccountingId(rs.getLong("accounting_id"));
+      c.setFileId(rs.getLong("file_id"));
+      c.setStatus(AccountingStatusType.fromValue(rs.getString("status")));
+
+      UserAccount ua = new UserAccount();
+      ua.setBankId(rs.getLong("bank_id"));
+      ua.setAccountNumber(rs.getLong("account_number"));
+      ua.setAccountType(rs.getString("account_type"));
+      ua.setRut(rs.getString("account_rut"));
+      c.setUserBankAccount(ua);
+
+      Timestamps timestamps = new Timestamps();
+      timestamps.setCreatedAt(rs.getTimestamp("created").toLocalDateTime());
+      timestamps.setUpdatedAt(rs.getTimestamp("_updated").toLocalDateTime());
+      c.setTimestamps(timestamps);
+
+       return c;
+    };
+  }
+
   private RowMapper getClearingDataRowMapper() {
     return (Map<String, Object> row) -> {
       ClearingData10 clearing10 = new ClearingData10();
@@ -612,8 +729,8 @@ public class PrepaidClearingEJBBean10 extends PrepaidBaseEJBBean10 implements Pr
       clearing10.setStatus(AccountingStatusType.fromValue(String.valueOf(row.get("_status"))));
       clearing10.setFileId(getNumberUtils().toLong(row.get("_file_id")));
       Timestamps timestamps = new Timestamps();
-      timestamps.setCreatedAt((Timestamp)row.get("_created"));
-      timestamps.setUpdatedAt((Timestamp)row.get("_updated"));
+      timestamps.setCreatedAt(((Timestamp)row.get("_created")).toLocalDateTime());
+      timestamps.setUpdatedAt(((Timestamp)row.get("_updated")).toLocalDateTime());
       clearing10.setTimestamps(timestamps);
       return clearing10;
     };

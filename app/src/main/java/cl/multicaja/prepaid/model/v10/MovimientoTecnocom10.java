@@ -1,14 +1,20 @@
 package cl.multicaja.prepaid.model.v10;
 
+import cl.multicaja.core.exceptions.BadRequestException;
+import cl.multicaja.prepaid.ejb.v10.TecnocomReconciliationEJBBean10;
+import cl.multicaja.prepaid.helpers.tecnocom.model.TecnocomReconciliationRegisterType;
 import cl.multicaja.tecnocom.constants.CodigoMoneda;
 import cl.multicaja.tecnocom.constants.TipoFactura;
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
 
 import java.io.Serializable;
 import java.math.BigDecimal;
-import java.sql.Date;
 import java.sql.Timestamp;
+import java.time.LocalDate;
 
-public class MovimientoTecnocom10 implements Serializable{
+public class MovimientoTecnocom10 implements Serializable {
+  private static Log log = LogFactory.getLog(MovimientoTecnocom10.class);
 
   private Long id;
   private Long idArchivo;
@@ -19,7 +25,7 @@ public class MovimientoTecnocom10 implements Serializable{
   private NewAmountAndCurrency10 impFac;
   private Integer indNorCor;
   private TipoFactura tipoFac;
-  private Date  fecFac;
+  private LocalDate fecFac;
   private String numRefFac;
   private NewAmountAndCurrency10 impDiv;
   private BigDecimal cmbApli;
@@ -44,8 +50,10 @@ public class MovimientoTecnocom10 implements Serializable{
   private Boolean hasError;
   private String errorDetails;
   private String originOpe;
+  // Corrige nombre comercio
+  private String nomcomred;
 
-
+  private TecnocomReconciliationRegisterType tipoReg;
 
   public Long getId() {
     return id;
@@ -119,11 +127,11 @@ public class MovimientoTecnocom10 implements Serializable{
     this.tipoFac = tipoFac;
   }
 
-  public Date getFecFac() {
+  public LocalDate getFecFac() {
     return fecFac;
   }
 
-  public void setFecFac(Date fecFac) {
+  public void setFecFac(LocalDate fecFac) {
     this.fecFac = fecFac;
   }
 
@@ -311,23 +319,15 @@ public class MovimientoTecnocom10 implements Serializable{
     this.contrato = contrato;
   }
 
-  public TecnocomOperationType getOperationType() {
-    TecnocomOperationType operationType;
-    switch (tipoFac){
-      case COMPRA_INTERNACIONAL:
-      case SUSCRIPCION_INTERNACIONAL:
-      case ANULA_COMPRA_INTERNACIONAL:
-      case ANULA_SUSCRIPCION_INTERNACIONAL:
-        operationType = TecnocomOperationType.AU;
-        break;
-      default:
-        operationType = TecnocomOperationType.OP;
-        break;
-    }
-    return operationType;
+  public String getNomcomred() {
+    return nomcomred;
   }
 
-  public PrepaidMovementType getMovementType() {
+  public void setNomcomred(String nomcomred) {
+    this.nomcomred = nomcomred;
+  }
+
+  public PrepaidMovementType getMovementType() throws BadRequestException {
     PrepaidMovementType type = null;
     switch (this.getTipoFac()) {
       case CARGA_EFECTIVO_COMERCIO_MULTICAJA:
@@ -353,8 +353,28 @@ public class MovimientoTecnocom10 implements Serializable{
       case ANULA_COMPRA_INTERNACIONAL:
         type = PrepaidMovementType.PURCHASE;
         break;
+      case DEVOLUCION_COMPRA_INTERNACIONAL:
+      case ANULA_DEVOLUCION_COMPRA_INTERNACIONAL:
+        type = PrepaidMovementType.REFUND;
+        break;
+      default:
+        String msg = String.format("Error - MovimientoTecnocom de tipo %s no tiene asignado movementType", this.getTipoFac().toString());
+        log.error(msg);
+        throw new IllegalStateException();
     }
     return type;
+  }
+
+  public TecnocomReconciliationRegisterType getTipoReg() {
+    return tipoReg;
+  }
+
+  public void setTipoReg(TecnocomReconciliationRegisterType tipoReg) {
+    this.tipoReg = tipoReg;
+  }
+
+  public String getIdForResearch() {
+    return String.format("[Numaut:%s.Date:%s]", getNumAut(), getFecFac().toString());
   }
 
 }

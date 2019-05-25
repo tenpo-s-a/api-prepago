@@ -6,11 +6,12 @@ import cl.multicaja.cdt.model.v10.CdtTransaction10;
 import cl.multicaja.core.model.Errors;
 import cl.multicaja.prepaid.async.v10.model.PrepaidTopupData10;
 import cl.multicaja.prepaid.async.v10.routes.BaseRoute10;
-import cl.multicaja.prepaid.helpers.freshdesk.model.v10.NewTicket;
-import cl.multicaja.prepaid.helpers.freshdesk.model.v10.Ticket;
-import cl.multicaja.prepaid.helpers.users.model.EmailBody;
-import cl.multicaja.prepaid.helpers.users.model.User;
+import cl.multicaja.prepaid.external.freshdesk.model.NewTicket;
+import cl.multicaja.prepaid.external.freshdesk.model.Ticket;
+import cl.multicaja.prepaid.helpers.freshdesk.model.v10.FreshdeskServiceHelper;
+import cl.multicaja.prepaid.kafka.events.model.TransactionType;
 import cl.multicaja.prepaid.model.v10.*;
+import cl.multicaja.prepaid.model.v11.Account;
 import cl.multicaja.prepaid.utils.TemplateUtils;
 import cl.multicaja.tecnocom.constants.CodigoRetorno;
 import cl.multicaja.tecnocom.dto.InclusionMovimientosDTO;
@@ -27,9 +28,7 @@ import java.time.format.DateTimeFormatter;
 import java.util.HashMap;
 import java.util.Map;
 
-import static cl.multicaja.prepaid.async.v10.routes.MailRoute10.PENDING_SEND_MAIL_TOPUP_REQ;
 import static cl.multicaja.prepaid.async.v10.routes.PrepaidTopupRoute10.*;
-import static cl.multicaja.prepaid.model.v10.MailTemplates.*;
 
 /**
  * @autor vutreras
@@ -42,7 +41,6 @@ public class PendingTopup10 extends BaseProcessor10 {
     super(route);
   }
 
-
   public ProcessorRoute processPendingTopup() {
     return new ProcessorRoute<ExchangeData<PrepaidTopupData10>, ExchangeData<PrepaidTopupData10>>() {
       @Override
@@ -53,9 +51,7 @@ public class PendingTopup10 extends BaseProcessor10 {
           req.retryCountNext();
 
           PrepaidTopupData10 data = req.getData();
-
           PrepaidTopup10 prepaidTopup = data.getPrepaidTopup10();
-
           PrepaidMovement10 prepaidMovement = data.getPrepaidMovement10();
 
           if(req.getRetryCount() > getMaxRetryCount()) {
@@ -76,60 +72,33 @@ public class PendingTopup10 extends BaseProcessor10 {
             return redirectRequest(createJMSEndpoint(ERROR_TOPUP_REQ), exchange, req, false);
           }
 
-          User user = data.getUser();
+          PrepaidUser10 prepaidUser10 = data.getPrepaidUser10();
 
-          if (user == null) {
-            log.error("Error user es null");
+          if (prepaidUser10 == null) {
+            log.error("Error prepaidUser10 es null");
             return null;
           }
 
-          if (user.getRut() == null) {
-            log.error("Error user.getRut() es null");
+          if (prepaidUser10.getDocumentNumber() == null) {
+            log.error("Error DocumentNumber es null");
             return null;
           }
 
-          if(user.getIsBlacklisted()) {
-            log.error(String.format("Error usuario %s en lista negra", user.getId()));
-            PrepaidMovementStatus status = PrepaidMovementStatus.ERROR_IN_PROCESS_PENDING_TOPUP;
-            getRoute().getPrepaidMovementEJBBean10().updatePrepaidMovementStatus(null, prepaidMovement.getId(), status);
-            prepaidMovement.setEstado(status);
-            return redirectRequest(createJMSEndpoint(ERROR_TOPUP_REQ), exchange, req, false);
-          }
+          Account account = getRoute().getAccountEJBBean10().findByUserId(prepaidUser10.getId());
+          log.info(account);
 
-          Integer rut = user.getRut().getValue();
+          PrepaidCard10 prepaidCard = getRoute().getPrepaidCardEJBBean11().getByUserIdAndStatus(null, prepaidUser10.getId(),
+                                                                                                              PrepaidCardStatus.ACTIVE,
+                                                                                                              PrepaidCardStatus.LOCKED,
+                                                                                                              PrepaidCardStatus.PENDING);
 
-          if (rut == null){
-            log.error("Error rut es null");
-            return null;
-          }
-
-          PrepaidUser10 prepaidUser = getRoute().getPrepaidUserEJBBean10().getPrepaidUserByRut(null, rut);
-
-          if (prepaidUser == null){
-            log.error("Error al buscar PrepaidUser10 con rut: " + rut);
-            return null;
-          }
-          prepaidUser = getRoute().getPrepaidUserEJBBean10().getUserLevel(user, prepaidUser);
-
-          data.setPrepaidUser10(prepaidUser);
-
-          PrepaidCard10 prepaidCard = getRoute().getPrepaidCardEJBBean10().getLastPrepaidCardByUserIdAndOneOfStatus(null, prepaidUser.getId(),
-                                                                                                      PrepaidCardStatus.ACTIVE,
-                                                                                                      PrepaidCardStatus.LOCKED,
-                                                                                                      PrepaidCardStatus.PENDING);
-
-           log.info("[BEFORE prepaidMovement] "+prepaidMovement);
-           //prepaidMovement = getRoute().getPrepaidMovementEJBBean10().getPrepaidMovementById2(prepaidMovement.getId());
-           log.info("[AFTER prepaidMovement] "+prepaidMovement);
           if (prepaidCard != null) {
 
             data.setPrepaidCard10(prepaidCard);
-
-            String contrato = prepaidCard.getProcessorUserId();
             String nomcomred = prepaidTopup.getMerchantName();
-            String pan = getRoute().getEncryptUtil().decrypt(prepaidCard.getEncryptedPan());
+            String pan = getRoute().getEncryptHelper().decryptPan(prepaidCard.getEncryptedPan());
 
-            InclusionMovimientosDTO inclusionMovimientosDTO = getRoute().getTecnocomServiceHelper().topup(contrato, pan, nomcomred, prepaidMovement);
+            InclusionMovimientosDTO inclusionMovimientosDTO = getRoute().getTecnocomServiceHelper().topup(account.getAccountNumber(), pan, nomcomred, prepaidMovement);
 
             log.info(String.format("Respuesta inclusion: Codigo -> %s, Descripcion -> %s", inclusionMovimientosDTO.getRetorno(), inclusionMovimientosDTO.getDescRetorno()));
 
@@ -169,7 +138,7 @@ public class PendingTopup10 extends BaseProcessor10 {
               CdtTransaction10 cdtTransaction = data.getCdtTransaction10();
 
               CdtTransaction10 cdtTransactionConfirm = new CdtTransaction10();
-              cdtTransactionConfirm.setAmount(cdtTransaction.getAmount().subtract(prepaidTopup.getFee().getValue()));
+              cdtTransactionConfirm.setAmount(cdtTransaction.getAmount());
               cdtTransactionConfirm.setTransactionType(prepaidTopup.getCdtTransactionTypeConfirm());
               cdtTransactionConfirm.setAccountId(cdtTransaction.getAccountId());
               cdtTransactionConfirm.setTransactionReference(cdtTransaction.getTransactionReference());
@@ -182,18 +151,17 @@ public class PendingTopup10 extends BaseProcessor10 {
 
               data.setCdtTransactionConfirm10(cdtTransactionConfirm);
 
-              //TODO: Se debe guardar el movimiento en accounting -> PENDING y clearing -> INITIAL
-              log.info("Enviando comprobante de carga por mail");
+              getRoute().getPrepaidMovementEJBBean11().publishTransactionAuthorizedEvent(prepaidUser10.getUuid(), data.getAccount().getUuid(), prepaidCard.getUuid(), prepaidMovement, prepaidTopup.getFeeList(), TransactionType.CASH_IN_MULTICAJA);
+
+              // Expira cache del saldo de la cuenta
+              getRoute().getAccountEJBBean10().expireBalanceCache(account.getId());
+
               Endpoint toAccounting = createJMSEndpoint(PENDING_SEND_MOVEMENT_TO_ACCOUNTING_REQ);
               redirectRequest(toAccounting, exchange, req, Boolean.FALSE);
 
               if (!cdtTransaction.isNumErrorOk()) {
                 log.error(String.format("Error en CDT %s", cdtTransaction.getMsjError()));
               }
-
-              log.info("Enviando comprobante de carga por mail");
-              Endpoint mailEndpoint = createJMSEndpoint(PENDING_SEND_MAIL_TOPUP_REQ);
-              redirectRequest(mailEndpoint, exchange, req, Boolean.FALSE);
 
               //segun la historia: https://www.pivotaltracker.com/story/show/158044562
               if (PrepaidCardStatus.PENDING.equals(prepaidCard.getStatus())) {
@@ -226,6 +194,8 @@ public class PendingTopup10 extends BaseProcessor10 {
               data.getPrepaidMovement10().setEstado(status);
               data.getPrepaidMovement10().setEstadoNegocio(businessStatus);
 
+              getRoute().getPrepaidMovementEJBBean11().publishTransactionRejectedEvent(prepaidUser10.getUuid(), data.getAccount().getUuid(), prepaidCard.getUuid(), prepaidMovement, prepaidTopup.getFeeList(), TransactionType.CASH_IN_MULTICAJA);
+
               Endpoint endpoint = createJMSEndpoint(ERROR_TOPUP_REQ);
               return redirectRequest(endpoint, exchange, req, false);
             }
@@ -234,10 +204,7 @@ public class PendingTopup10 extends BaseProcessor10 {
 
             //https://www.pivotaltracker.com/story/show/157816408
             //3-En caso de tener estado bloqueado duro o expirada no se deberá seguir ningún proceso
-
-            prepaidCard = getRoute().getPrepaidCardEJBBean10().getLastPrepaidCardByUserIdAndOneOfStatus(null, prepaidUser.getId(),
-                                                                                        PrepaidCardStatus.LOCKED_HARD,
-                                                                                        PrepaidCardStatus.EXPIRED);
+            prepaidCard = getRoute().getPrepaidCardEJBBean11().getInvalidCardByUserId(null, prepaidUser10.getId());
 
             if (prepaidCard == null) {
               Endpoint endpoint = createJMSEndpoint(PENDING_EMISSION_REQ);
@@ -248,8 +215,8 @@ public class PendingTopup10 extends BaseProcessor10 {
             }
           }
         }catch (Exception e){
-          e.printStackTrace();
-          log.error(String.format("Error desconocido al realizar carga %s",e));
+          log.error("Error desconocido al realizar carga");
+          log.error(e);
           req.getData().setNumError(Errors.ERROR_INDETERMINADO);
           req.getData().setMsjError(e.getLocalizedMessage());
           return redirectRequest(createJMSEndpoint(ERROR_TOPUP_REQ), exchange, req, true);
@@ -270,30 +237,35 @@ public class PendingTopup10 extends BaseProcessor10 {
           Errors.TECNOCOM_ERROR_REINTENTABLE.equals(data.getNumError())
         ) {
           String template = getRoute().getParametersUtil().getString("api-prepaid", "template_ticket_cola_1", "v1.0");
-          template = TemplateUtils.freshDeskTemplateColas1(template, "Error al realizar carga", String.format("%s %s", data.getUser().getName(), data.getUser().getLastname_1()), String.format("%s-%s", data.getUser().getRut().getValue(), data
-            .getUser().getRut().getDv()), data.getUser().getId(), data.getPrepaidMovement10().getNumaut(), data.getPrepaidTopup10().getAmount().getValue().longValue());
+          template = TemplateUtils.freshDeskTemplateColas1(template, "Error al realizar carga", String.format("%s %s", data.getPrepaidUser10().getName(), data.getPrepaidUser10().getLastName()), String.format("%s", data.getPrepaidUser10().getDocumentNumber(), data
+            ), data.getPrepaidUser10().getId(), data.getPrepaidMovement10().getNumaut(), data.getPrepaidTopup10().getAmount().getValue().longValue());
 
           NewTicket newTicket = createTicket(String.format("Error al realizar carga %s", data.getPrepaidTopup10().getTransactionOriginType().name()),
             template,
-            String.valueOf(data.getUser().getRut().getValue()),
+            data.getPrepaidUser10().getUuid(),
             data.getPrepaidTopup10().getMessageId(),
             QueuesNameType.TOPUP,
             req.getReprocesQueue());
 
-          Ticket ticket = getRoute().getUserClient().createFreshdeskTicket(null, data.getUser().getId(), newTicket);
-          if (ticket.getId() != null) {
-            log.info("Ticket Creado Exitosamente");
+          Ticket ticket = FreshdeskServiceHelper.getInstance().getFreshdeskService().createTicket(newTicket);
+          if (ticket != null && ticket.getId() != null) {
+            log.info("[processErrorTopup][Ticket_Success][ticketId]:"+ticket.getId());
+          }else{
+            log.info("[processErrorTopup][Ticket_Fail][ticketData]:"+newTicket.toString());
           }
+
         } else if (Errors.ERROR_INDETERMINADO.equals(data.getNumError())) {
-          //TODO: que hacer con los errores indeterminados? deberian devolverse? investigarse?
+          //FIXME: que hacer con los errores indeterminados? deberian devolverse? investigarse?
           // Estos son errores de excepcion no esperados. Probablemente no deberian devolverse
-          // tan rapido. Investigar?
+          // tan rapido. Investigar? Verificar con Negocio
         } else if (PrepaidMovementStatus.REJECTED.equals(data.getPrepaidMovement10().getEstado())) {
           // Comienza el proceso de devolucion
 
+          //FIXME: Que se hace en este caso? se levante un evento a la capa B?
+
           // Se le envia un correo al usuario notificandole que hubo un problema con la carga
           Map<String, Object> templateDataToUser = new HashMap<String, Object>();
-          templateDataToUser.put("user_name", data.getUser().getName());
+          templateDataToUser.put("user_name", data.getPrepaidUser10().getName());
           templateDataToUser.put("amount", getRoute().getNumberUtils().toClp(String.valueOf(data.getPrepaidTopup10().getTotal().getValue().doubleValue())));
 
           PrepaidMovement10 refundMovement = getRoute().getPrepaidMovementEJBBean10().getPrepaidMovementById(data.getPrepaidMovement10().getId());
@@ -305,11 +277,12 @@ public class PendingTopup10 extends BaseProcessor10 {
           templateDataToUser.put("date", local.format(DateTimeFormatter.ofPattern("yyyy-MM-dd")));
           templateDataToUser.put("time", local.format(DateTimeFormatter.ofPattern("HH:mm")));
 
-          EmailBody emailBody = new EmailBody();
+          /*EmailBody emailBody = new EmailBody();
           emailBody.setTemplateData(templateDataToUser);
           emailBody.setTemplate(TEMPLATE_MAIL_ERROR_TOPUP_TO_USER);
-          emailBody.setAddress(data.getUser().getEmail().getValue());
-          getRoute().getMailPrepaidEJBBean10().sendMailAsync(null, data.getUser().getId(), emailBody);
+          emailBody.setAddress("soporte@multicaja.cl");// TODO: Esto hay que verificarlo
+          //getRoute().getMailPrepaidEJBBean10().sendMailAsync(null, data.getUser().getId(), emailBody);
+           */
         }
         return req;
       }

@@ -14,16 +14,14 @@ import cl.multicaja.core.utils.*;
 import cl.multicaja.core.utils.Constants;
 import cl.multicaja.core.utils.db.DBUtils;
 import cl.multicaja.core.utils.http.HttpHeader;
-import cl.multicaja.prepaid.async.v10.MailDelegate10;
-import cl.multicaja.prepaid.async.v10.PrepaidTopupDelegate10;
-import cl.multicaja.prepaid.async.v10.ProductChangeDelegate10;
-import cl.multicaja.prepaid.async.v10.ReprocesQueueDelegate10;
+import cl.multicaja.prepaid.async.v10.*;
 import cl.multicaja.prepaid.ejb.v10.*;
+import cl.multicaja.prepaid.ejb.v11.PrepaidCardEJBBean11;
+import cl.multicaja.prepaid.ejb.v11.PrepaidMovementEJBBean11;
 import cl.multicaja.prepaid.helpers.CalculationsHelper;
 import cl.multicaja.prepaid.helpers.tecnocom.TecnocomServiceHelper;
-import cl.multicaja.prepaid.helpers.users.UserClient;
-import cl.multicaja.prepaid.helpers.users.model.*;
 import cl.multicaja.prepaid.model.v10.*;
+import cl.multicaja.prepaid.model.v11.*;
 import cl.multicaja.prepaid.utils.ParametersUtil;
 import cl.multicaja.tecnocom.TecnocomService;
 import cl.multicaja.tecnocom.constants.*;
@@ -34,14 +32,23 @@ import cl.multicaja.accounting.model.v10.UserAccountNew;
 import org.apache.commons.lang3.RandomUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.junit.Assert;
+import org.springframework.dao.EmptyResultDataAccessException;
+import org.springframework.jdbc.support.GeneratedKeyHolder;
+import org.springframework.jdbc.support.KeyHolder;
 
+import javax.persistence.EntityManager;
+import javax.persistence.EntityManagerFactory;
+import javax.persistence.Persistence;
 import java.math.BigDecimal;
+import java.sql.PreparedStatement;
 import java.sql.SQLException;
 import java.sql.Timestamp;
+import java.time.Instant;
+import java.time.LocalDateTime;
+import java.time.ZoneId;
 import java.util.*;
 
-import static cl.multicaja.core.model.Errors.LIMITES_ERROR_GENERICO_$VALUE;
-import static cl.multicaja.core.model.Errors.PARAMETRO_FALTANTE_$VALUE;
+import static cl.multicaja.core.model.Errors.*;
 
 /**
  * @autor vutreras
@@ -63,10 +70,10 @@ public class TestBaseUnit extends TestApiBase {
   private static PrepaidCardEJBBean10 prepaidCardEJBBean10;
   private static PrepaidEJBBean10 prepaidEJBBean10;
   private static PrepaidMovementEJBBean10 prepaidMovementEJBBean10;
+  private static PrepaidMovementEJBBean11 prepaidMovementEJBBean11;
   private static MailPrepaidEJBBean10 mailPrepaidEJBBean10;
   private static FilesEJBBean10 filesEJBBean10;
   private static ReprocesQueueDelegate10 reprocesQueueDelegate10;
-  private static UserClient userClient;
   private static ProductChangeDelegate10 productChangeDelegate10;
   private static PrepaidAccountingEJBBean10 prepaidAccountingEJBBean10;
   private static TecnocomReconciliationEJBBean10 tecnocomReconciliationEJBBean10;
@@ -77,6 +84,12 @@ public class TestBaseUnit extends TestApiBase {
   private static PrepaidClearingEJBBean10 prepaidClearingEJBBean10;
   private static BackofficeEJBBean10 backofficeEJBBEan10;
   private static MailDelegate10 mailDelegate;
+  private static PrepaidInvoiceDelegate10 prepaidInvoiceDelegate10;
+  private static KafkaEventDelegate10 kafkaEventDelegate10;
+  private static AccountEJBBean10 accountEJBBean10;
+  private static PrepaidCardEJBBean11 prepaidCardEJBBean11;
+  private static IpmEJBBean10 ipmEJBBean10;
+
   protected static CalculationsHelper calculationsHelper = CalculationsHelper.getInstance();
   {
     calculationsHelper.setMastercardCurrencyUpdateEJBBean10(getMastercardCurrencyUpdateEJBBean10());
@@ -99,19 +112,12 @@ public class TestBaseUnit extends TestApiBase {
     return configUtils;
   }
 
-  public static UserClient getUserClient() {
-    if (userClient == null) {
-      userClient = new UserClient();
-    }
-    return userClient;
-  }
-
   public static CalculationsHelper getCalculationsHelper(){
     return  CalculationsHelper.getInstance();
   }
 
   /**
-   *
+   *Get Schema Prepaid 
    * @return
    */
   public static String getSchema() {
@@ -139,7 +145,19 @@ public class TestBaseUnit extends TestApiBase {
     }
     return mailDelegate;
   }
+  public static PrepaidInvoiceDelegate10 getInvoiceDelegate10(){
+    if(prepaidInvoiceDelegate10 == null) {
+      prepaidInvoiceDelegate10 = new PrepaidInvoiceDelegate10();
+    }
+    return prepaidInvoiceDelegate10;
+  }
 
+  public static KafkaEventDelegate10 getKafkaEventDelegate10() {
+    if(kafkaEventDelegate10 == null) {
+      kafkaEventDelegate10 = new KafkaEventDelegate10();
+    }
+    return kafkaEventDelegate10;
+  }
   /**
    *
    * @return
@@ -184,15 +202,50 @@ public class TestBaseUnit extends TestApiBase {
       prepaidMovementEJBBean10.setDelegate(getPrepaidTopupDelegate10());
       prepaidMovementEJBBean10.setPrepaidUserEJB10(getPrepaidUserEJBBean10());
       prepaidMovementEJBBean10.setCdtEJB10(getCdtEJBBean10());
-      prepaidMovementEJBBean10.setPrepaidCardEJB10(getPrepaidCardEJBBean10());
-      prepaidMovementEJBBean10.setUserClient(getUserClient());
+      prepaidMovementEJBBean10.setPrepaidCardEJB11(getPrepaidCardEJBBean11());
       prepaidMovementEJBBean10.setPrepaidEJBBean10(getPrepaidEJBBean10());
       prepaidMovementEJBBean10.setPrepaidAccountingEJB10(getPrepaidAccountingEJBBean10());
       prepaidMovementEJBBean10.setMailDelegate(getMailDelegate());
       prepaidMovementEJBBean10.setPrepaidClearingEJB10(getPrepaidClearingEJBBean10());
       prepaidMovementEJBBean10.setMailPrepaidEJBBean10(getMailPrepaidEJBBean10());
+      prepaidMovementEJBBean10.setTecnocomReconciliationEJBBean(getTecnocomReconciliationEJBBean10());
+      prepaidMovementEJBBean10.setMcRedReconciliationEJBBean(getMcRedReconciliationEJBBean10());
+      prepaidMovementEJBBean10.setReconciliationFilesEJBBean10(getReconciliationFilesEJBBean10());
+
+
     }
     return prepaidMovementEJBBean10;
+  }
+
+  public static PrepaidMovementEJBBean11 getPrepaidMovementEJBBean11(){
+    if (prepaidMovementEJBBean11 == null) {
+      prepaidMovementEJBBean11 = new PrepaidMovementEJBBean11();
+      prepaidMovementEJBBean11.setKafkaEventDelegate10(getKafkaEventDelegate10());
+      prepaidMovementEJBBean11.setDelegate(getPrepaidTopupDelegate10());
+      prepaidMovementEJBBean11.setPrepaidUserEJB10(getPrepaidUserEJBBean10());
+      prepaidMovementEJBBean11.setCdtEJB10(getCdtEJBBean10());
+      prepaidMovementEJBBean11.setPrepaidCardEJB11(getPrepaidCardEJBBean11());
+      prepaidMovementEJBBean11.setPrepaidEJBBean10(getPrepaidEJBBean10());
+      prepaidMovementEJBBean11.setPrepaidAccountingEJB10(getPrepaidAccountingEJBBean10());
+      prepaidMovementEJBBean11.setMailDelegate(getMailDelegate());
+      prepaidMovementEJBBean11.setPrepaidClearingEJB10(getPrepaidClearingEJBBean10());
+      prepaidMovementEJBBean11.setMailPrepaidEJBBean10(getMailPrepaidEJBBean10());
+      prepaidMovementEJBBean11.setTecnocomReconciliationEJBBean(getTecnocomReconciliationEJBBean10());
+      prepaidMovementEJBBean11.setMcRedReconciliationEJBBean(getMcRedReconciliationEJBBean10());
+      prepaidMovementEJBBean11.setReconciliationFilesEJBBean10(getReconciliationFilesEJBBean10());
+      prepaidMovementEJBBean11.setAccountEJBBean10(getAccountEJBBean10());
+    }
+    return prepaidMovementEJBBean11;
+  }
+
+  public static AccountEJBBean10 getAccountEJBBean10(){
+    if (accountEJBBean10 == null) {
+      accountEJBBean10 = new AccountEJBBean10();
+      accountEJBBean10.setKafkaEventDelegate10(getKafkaEventDelegate10());
+      accountEJBBean10.setPrepaidUserEJBBean10(getPrepaidUserEJBBean10());
+      accountEJBBean10.setPrepaidCardEJBBean11(getPrepaidCardEJBBean11());
+    }
+    return accountEJBBean10;
   }
 
   /**
@@ -204,6 +257,7 @@ public class TestBaseUnit extends TestApiBase {
       prepaidUserEJBBean10 = new PrepaidUserEJBBean10();
       prepaidUserEJBBean10.setPrepaidCardEJB10(getPrepaidCardEJBBean10());
       prepaidUserEJBBean10.setPrepaidMovementEJB10(getPrepaidMovementEJBBean10());
+      prepaidUserEJBBean10.setAccountEJBBean10(getAccountEJBBean10());
     }
     return prepaidUserEJBBean10;
   }
@@ -215,9 +269,20 @@ public class TestBaseUnit extends TestApiBase {
   public static PrepaidCardEJBBean10 getPrepaidCardEJBBean10() {
     if (prepaidCardEJBBean10 == null) {
       prepaidCardEJBBean10 = new PrepaidCardEJBBean10();
+      prepaidCardEJBBean10.setKafkaEventDelegate10(getKafkaEventDelegate10());
     }
     return prepaidCardEJBBean10;
   }
+
+  public static PrepaidCardEJBBean11 getPrepaidCardEJBBean11() {
+    if (prepaidCardEJBBean11 == null) {
+      prepaidCardEJBBean11 = new PrepaidCardEJBBean11();
+      prepaidCardEJBBean11.setKafkaEventDelegate10(getKafkaEventDelegate10());
+      prepaidCardEJBBean11.setPrepaidUserEJBBean10(getPrepaidUserEJBBean10());
+    }
+    return prepaidCardEJBBean11;
+  }
+
   public static MailPrepaidEJBBean10 getMailPrepaidEJBBean10(){
 
     if (mailPrepaidEJBBean10 == null) {
@@ -254,12 +319,15 @@ public class TestBaseUnit extends TestApiBase {
       prepaidEJBBean10.setDelegate(getPrepaidTopupDelegate10());
       prepaidEJBBean10.setCdtEJB10(getCdtEJBBean10());
       prepaidEJBBean10.setPrepaidMovementEJB10(getPrepaidMovementEJBBean10());
+      prepaidEJBBean10.setPrepaidMovementEJB11(getPrepaidMovementEJBBean11());
       prepaidEJBBean10.setPrepaidUserEJB10(getPrepaidUserEJBBean10());
-      prepaidEJBBean10.setPrepaidCardEJB10(getPrepaidCardEJBBean10());
+      prepaidEJBBean10.setPrepaidCardEJB11(getPrepaidCardEJBBean11());
       prepaidEJBBean10.setFilesEJBBean10(getFilesEJBBean10());
       prepaidEJBBean10.setDelegateReprocesQueue(getReprocesQueueDelegate10());
       prepaidEJBBean10.setProductChangeDelegate(getProductChangeDelegate10());
       prepaidEJBBean10.setMailDelegate(getMailDelegate());
+      prepaidEJBBean10.setKafkaEventDelegate10(getKafkaEventDelegate10());
+      prepaidEJBBean10.setAccountEJBBean10(getAccountEJBBean10());
     }
     return prepaidEJBBean10;
   }
@@ -286,7 +354,7 @@ public class TestBaseUnit extends TestApiBase {
       prepaidAccountingEJBBean10.setPrepaidAccountingFileEJBBean10(getPrepaidAccountingFileEJBBean10());
 
       prepaidAccountingEJBBean10.setPrepaidCardEJB10(getPrepaidCardEJBBean10());
-      prepaidAccountingEJBBean10.setPrepaidMovementEJBBean10(getPrepaidMovementEJBBean10());
+      prepaidAccountingEJBBean10.setPrepaidMovementEJBBean11(getPrepaidMovementEJBBean11());
     }
     return prepaidAccountingEJBBean10;
   }
@@ -294,11 +362,16 @@ public class TestBaseUnit extends TestApiBase {
   public static TecnocomReconciliationEJBBean10 getTecnocomReconciliationEJBBean10() {
     if(tecnocomReconciliationEJBBean10 == null) {
       tecnocomReconciliationEJBBean10 = new TecnocomReconciliationEJBBean10();
-      tecnocomReconciliationEJBBean10.setPrepaidCardEJBBean10(getPrepaidCardEJBBean10());
+      tecnocomReconciliationEJBBean10.setPrepaidCardEJBBean11(getPrepaidCardEJBBean11());
       tecnocomReconciliationEJBBean10.setPrepaidMovementEJBBean10(getPrepaidMovementEJBBean10());
+      tecnocomReconciliationEJBBean10.setPrepaidMovementEJBBean11(getPrepaidMovementEJBBean11());
+      tecnocomReconciliationEJBBean10.setPrepaidUserEJBBean10(getPrepaidUserEJBBean10());
       tecnocomReconciliationEJBBean10.setPrepaidAccountingEJBBean10(getPrepaidAccountingEJBBean10());
       tecnocomReconciliationEJBBean10.setPrepaidClearingEJBBean10(getPrepaidClearingEJBBean10());
       tecnocomReconciliationEJBBean10.setReconciliationFilesEJBBean10(getReconciliationFilesEJBBean10());
+      tecnocomReconciliationEJBBean10.setPrepaidInvoiceDelegate10(getInvoiceDelegate10());
+      tecnocomReconciliationEJBBean10.setAccountEJBBean10(getAccountEJBBean10());
+      tecnocomReconciliationEJBBean10.setIpmEJBBean10(getIpmEJBBean10());
     }
     return tecnocomReconciliationEJBBean10;
   }
@@ -307,6 +380,10 @@ public class TestBaseUnit extends TestApiBase {
     if(mcRedReconciliationEJBBean10 == null) {
       mcRedReconciliationEJBBean10 = new McRedReconciliationEJBBean10();
       mcRedReconciliationEJBBean10.setPrepaidMovementEJBBean10(getPrepaidMovementEJBBean10());
+      mcRedReconciliationEJBBean10.setReconciliationFilesEJBBean10(getReconciliationFilesEJBBean10());
+      mcRedReconciliationEJBBean10.setPrepaidEJBBean10(getPrepaidEJBBean10());
+      mcRedReconciliationEJBBean10.setPrepaidInvoiceDelegate10(getInvoiceDelegate10());
+      mcRedReconciliationEJBBean10.setPrepaidUserEJBBean10(getPrepaidUserEJBBean10());
     }
     return mcRedReconciliationEJBBean10;
   }
@@ -333,213 +410,18 @@ public class TestBaseUnit extends TestApiBase {
     return TecnocomServiceHelper.getInstance().getTecnocomService();
   }
 
-  /**
-   * realiza un signUp con rut e email
-   *
-   * @param rut
-   * @param email
-   * @return
-   * @throws Exception
-   */
-  public SignUp signupUser(Integer rut, String email) throws Exception {
-    return getUserClient().signUp(null, new SignUPNew(email,rut));
-  }
-
-  /**
-   * realiza un signUp con datos aleatorios
-   *
-   * @return
-   * @throws Exception
-   */
-  public SignUp signupUser() throws Exception {
-    Integer rut = getUniqueRutNumber();
-    String email = getUniqueEmail();
-    return this.signupUser(rut, email);
-  }
-
-  /**
-   * realiza un signUp con datos aleatorios y retorna el usuario creado
-   *
-   * @return
-   * @throws Exception
-   */
-  public User signupUserAndGetUser() throws Exception {
-    SignUp singUP = signupUser();
-    return getUserClient().getUserById(null, singUP.getUserId());
-  }
-
-  /**
-   * actualiza un usuario
-   *
-   * @param u
-   * @return
-   * @throws Exception
-   */
-  public User updateUser(User u) throws Exception {
-    return getUserClient().updateUser(null,u.getId(),u);
-  }
-
-  /**
-   * registra un usuario y además lo deja habilitado completamente
-   *
-   * @return
-   * @throws Exception
-   */
-  public User registerUser() throws Exception {
-    return registerUser(String.valueOf(numberUtils.random(1111,9999)), UserStatus.ENABLED);
-  }
-
-  /**
-   * registra un usuario y además lo deja en algun estado
-   *
-   * @return
-   * @throws Exception
-   */
-  public User registerUser(UserStatus status) throws Exception {
-    return registerUser(String.valueOf(numberUtils.random(1111,9999)),status);
-  }
-
-  /**
-   * registra un usuario y además lo deja en algun estado de identidad
-   *
-   * @return
-   * @throws Exception
-   */
-  public User registerUser(UserIdentityStatus status) throws Exception {
-    return registerUser(String.valueOf(numberUtils.random(1111,9999)), UserStatus.ENABLED, status);
-  }
-
-  /**
-   * registra un usuario con clave
-   *
-   * @param password
-   * @return
-   * @throws Exception
-   */
-  public User registerUser(String password) throws Exception {
-    return registerUser(password ,UserStatus.ENABLED);
-  }
-
-  /**
-   * registra un usuario con clave y estado especifico
-   *
-   * @param password
-   * @param status
-   * @return
-   * @throws Exception
-   */
-  public User registerUser(String password, UserStatus status) throws Exception {
-    return registerUser(password, status, UserIdentityStatus.NORMAL);
-  }
-
-  /**
-   * registra un usuario con clave y estado especifico
-   *
-   * @param password
-   * @param status
-   * @return
-   * @throws Exception
-   */
-  public User registerUser(String password, UserStatus status, UserIdentityStatus identityStatus) throws Exception {
-    User user = signupUserAndGetUser();
-    user.setName(null);
-    user.setLastname_1(null);
-    user.setLastname_2(null);
-    user.setOccupation(null);
-    user = getUserClient().fillUser(null,user);
-    user.setGlobalStatus(status);
-    user.getRut().setStatus(RutStatus.VERIFIED);
-    user.getEmail().setStatus(EmailStatus.VERIFIED);
-    user.setNameStatus(NameStatus.VERIFIED);
-    user.setIdentityStatus(identityStatus);
-    user.setPassword(password);
-    user = updateUser(user);
-    return user;
-  }
-
-  /**
-   * actualiza la clave de un usuario
-   *
-   * @param user
-   * @param newPassword
-   * @return
-   * @throws Exception
-   */
-  public User updateUserPassword(User user, String newPassword) throws Exception {
-    UserPasswordNew pass = new UserPasswordNew();
-    pass.setValue(newPassword);
-    user = getUserClient().updateUserPassword(null, user.getId(), pass);
-    return user;
-  }
-
-  /**
-   *
-   * @return
-   * @throws Exception
-   */
-  public User registerUserFirstTopup() throws Exception {
-    return registerUserFirstTopup(String.valueOf(numberUtils.random(1111,9999)),UserStatus.ENABLED);
-  }
-
-  /**
-   *
-   * @param password
-   * @param status
-   * @return
-   * @throws Exception
-   */
-  public User registerUserFirstTopup(String password, UserStatus status) throws Exception {
-    User user = signupUserAndGetUser();
-    user.setName(null);
-    user.setLastname_1(null);
-    user.setLastname_2(null);
-    user.setOccupation(null);
-    user = getUserClient().fillUser(null,user);
-    user.setGlobalStatus(status);
-    user.getRut().setStatus(RutStatus.UNVERIFIED);
-    user.getEmail().setStatus(EmailStatus.UNVERIFIED);
-    user.setNameStatus(NameStatus.VERIFIED);
-    user.setPassword(password);
-    user = updateUser(user);
-    return user;
-  }
-
-  public User registerUserBlackListed() throws Exception {
-    return registerUserBlackListed(String.valueOf(numberUtils.random(1111,9999)),UserStatus.ENABLED);
-  }
-  public User registerUserBlackListed(String password, UserStatus status) throws Exception {
-    User user = signupUserAndGetUser();
-    user.setName(null);
-    user.setLastname_1(null);
-    user.setLastname_2(null);
-    user.setOccupation(null);
-    user = getUserClient().fillUser(null,user);
-    user.setGlobalStatus(status);
-    user.getRut().setStatus(RutStatus.UNVERIFIED);
-    user.getEmail().setStatus(EmailStatus.UNVERIFIED);
-    user.setNameStatus(NameStatus.VERIFIED);
-    user.setPassword(password);
-    user.setIdentityStatus(UserIdentityStatus.TERRORIST);
-    user = updateUser(user);
-    return user;
-  }
-  /**
-   *
-   * @return
-   */
-  public PrepaidUser10 buildPrepaidUser10(User user) {
-    PrepaidUser10 prepaidUser = new PrepaidUser10();
-    prepaidUser.setUserIdMc(user != null ? user.getId() : null);
-    prepaidUser.setRut(user != null ? user.getRut().getValue() : null);
-    prepaidUser.setStatus(PrepaidUserStatus.ACTIVE);
-    prepaidUser.setBalanceExpiration(0L);
-    return prepaidUser;
+  public static IpmEJBBean10 getIpmEJBBean10() {
+    if (ipmEJBBean10 == null) {
+      ipmEJBBean10 = new IpmEJBBean10();
+    }
+    return ipmEJBBean10;
   }
 
   /**
    *
    * @return
    */
+  @Deprecated
   public PrepaidUser10 buildPrepaidUser10() {
     PrepaidUser10 prepaidUser = new PrepaidUser10();
     prepaidUser.setUserIdMc(getUniqueLong());
@@ -547,6 +429,62 @@ public class TestBaseUnit extends TestApiBase {
     prepaidUser.setStatus(PrepaidUserStatus.ACTIVE);
     prepaidUser.setBalanceExpiration(0L);
     return prepaidUser;
+  }
+  public PrepaidUser10 buildPrepaidUserv2() {
+    return buildPrepaidUserv2(PrepaidUserLevel.LEVEL_1);
+  }
+
+  public PrepaidUser10 buildPrepaidUserv2(PrepaidUserLevel userLevel) {
+
+    PrepaidUser10 prepaidUser = new PrepaidUser10();
+    prepaidUser.setUserIdMc(getUniqueLong());
+    prepaidUser.setStatus(PrepaidUserStatus.ACTIVE);
+    prepaidUser.setBalanceExpiration(0L);
+    prepaidUser.setDocumentNumber(getUniqueRutNumber().toString());
+    prepaidUser.setRut(Integer.parseInt(prepaidUser.getDocumentNumber()));
+    prepaidUser.setName(getRandomString(10));
+    prepaidUser.setLastName(getRandomString(10));
+    prepaidUser.setUuid(UUID.randomUUID().toString());
+    prepaidUser.setDocumentType(DocumentType.DNI_CL);
+    prepaidUser.setUserLevel(userLevel);
+    prepaidUser.setUserPlan(UserPlanType.FREE);
+    return prepaidUser;
+  }
+
+  public PrepaidMovementFee10 buildPrepaidMovementFee10(PrepaidMovement10 prepaidMovement10) {
+    PrepaidMovementFee10 prepaidMovementFee = new PrepaidMovementFee10();
+    prepaidMovementFee.setMovementId(prepaidMovement10.getId());
+    prepaidMovementFee.setFeeType(PrepaidMovementFeeType.EXCHANGE_RATE_DIF);
+    prepaidMovementFee.setAmount(new BigDecimal(numberUtils.random(3000L, 50000L)));
+    prepaidMovementFee.setIva(prepaidMovementFee.getAmount().multiply(new BigDecimal(0.19)));
+    return prepaidMovementFee;
+  }
+
+  public Account createRandomAccount(PrepaidUser10 prepaidUser) throws Exception {
+    return accountEJBBean10.insertAccount(prepaidUser.getId(),getRandomNumericString(20));
+  }
+
+  /**
+   *
+   * @return
+   */
+  public PrepaidUser10 buildPrepaidUser11(){
+
+    PrepaidUser10 user = new PrepaidUser10();
+
+    Integer rutOrDocumentNumber = getUniqueRutNumber();
+
+    user.setUserIdMc(Long.valueOf(getRandomNumericString(10)));
+    user.setDocumentType(DocumentType.DNI_CL);
+    user.setRut(rutOrDocumentNumber);
+    user.setStatus(PrepaidUserStatus.ACTIVE);
+    user.setName(getRandomString(10));
+    user.setLastName(getRandomString(10));
+    user.setDocumentNumber(rutOrDocumentNumber.toString());
+    user.setUserLevel(PrepaidUserLevel.LEVEL_1);
+    user.setUuid(UUID.randomUUID().toString());
+    user.setUserPlan(UserPlanType.FREE);
+    return user;
   }
 
   /**
@@ -574,6 +512,27 @@ public class TestBaseUnit extends TestApiBase {
     return prepaidCard;
   }
 
+
+
+  public PrepaidCard10 buildPrepaidCard10(PrepaidUser10 prepaidUser,Long accountId) throws Exception {
+    int expiryYear = numberUtils.random(1000, 9999);
+    int expiryMonth = numberUtils.random(1, 99);
+    int expiryDate = numberUtils.toInt(expiryYear + "" + StringUtils.leftPad(String.valueOf(expiryMonth), 2, "0"));
+    String pan = getRandomNumericString(16);
+
+    PrepaidCard10 prepaidCard = new PrepaidCard10();
+    prepaidCard.setIdUser(prepaidUser != null ? prepaidUser.getId() : null);
+    prepaidCard.setPan(Utils.replacePan(pan));
+    prepaidCard.setEncryptedPan(EncryptUtil.getInstance().encrypt(pan));
+    prepaidCard.setExpiration(expiryDate);
+    prepaidCard.setStatus(PrepaidCardStatus.ACTIVE);
+    prepaidCard.setProcessorUserId(getRandomNumericString(20));
+    prepaidCard.setNameOnCard("Tarjeta de: " + getRandomString(5));
+    prepaidCard.setProducto(getRandomNumericString(2));
+    prepaidCard.setNumeroUnico(getRandomNumericString(8));
+    prepaidCard.setAccountId(accountId);
+    return prepaidCard;
+  }
   /**
    *
    * @param prepaidUser
@@ -634,74 +593,81 @@ public class TestBaseUnit extends TestApiBase {
     return buildPrepaidCard10(prepaidUser);
   }
 
-  /**
-   * construye una tarjeta desde tecnocom
-   * @param user
-   * @param prepaidUser
-   * @return
-   */
-  public PrepaidCard10 buildPrepaidCard10FromTecnocom(User user, PrepaidUser10 prepaidUser) throws Exception {
+  public Account buildAccountFromTecnocom(PrepaidUser10 prepaidUser) throws Exception {
 
     TipoAlta tipoAlta = prepaidUser.getUserLevel() == PrepaidUserLevel.LEVEL_2 ? TipoAlta.NIVEL2 : TipoAlta.NIVEL1;
-    AltaClienteDTO altaClienteDTO = getTecnocomService().altaClientes(user.getName(), user.getLastname_1(), user.getLastname_2(), user.getRut().getValue().toString(), TipoDocumento.RUT, tipoAlta);
+    AltaClienteDTO altaClienteDTO = getTecnocomService().altaClientes(prepaidUser.getName(), prepaidUser.getLastName(), "", prepaidUser.getDocumentNumber(), TipoDocumento.RUT, tipoAlta);
 
-    DatosTarjetaDTO datosTarjetaDTO = getTecnocomService().datosTarjeta(altaClienteDTO.getContrato());
+    Account account = new Account();
+    account.setUserId(prepaidUser.getId());
+    account.setAccountNumber(altaClienteDTO.getContrato());
+    account.setProcessor(AccountProcessor.TECNOCOM_CL.name());
+    account.setUpdatedAt(LocalDateTime.now());
+    account.setUpdatedAt(LocalDateTime.now());
+    account.setUuid(UUID.randomUUID().toString());
+    account.setStatus(AccountStatus.ACTIVE);
+    account.setExpireBalance(0l);
+    account.setBalanceInfo("");
 
-    PrepaidCard10 prepaidCard = new PrepaidCard10();
-    prepaidCard.setIdUser(prepaidUser.getId());
-    prepaidCard.setProcessorUserId(altaClienteDTO.getContrato());
-    prepaidCard.setPan(Utils.replacePan(datosTarjetaDTO.getPan()));
-    prepaidCard.setEncryptedPan(encryptUtil.encrypt(datosTarjetaDTO.getPan()));
-    prepaidCard.setStatus(PrepaidCardStatus.ACTIVE);
-    prepaidCard.setExpiration(datosTarjetaDTO.getFeccadtar());
-    prepaidCard.setNameOnCard(user.getName() + " " + user.getLastname_1());
-    prepaidCard.setProducto(datosTarjetaDTO.getProducto());
-    prepaidCard.setNumeroUnico(datosTarjetaDTO.getIdentclitar());
-
-    return prepaidCard;
+    return account;
   }
 
   /**
    *
    * @param user
+   * @param account
    * @return
+   * @throws Exception
    */
-  public PrepaidTopup10 buildPrepaidTopup10(User user) {
+  public PrepaidCard10 buildPrepaidCardWithTecnocomData(PrepaidUser10 user, Account account) throws Exception {
+    DatosTarjetaDTO datosTarjetaDTO = getTecnocomService().datosTarjeta(account.getAccountNumber());
+    PrepaidCard10 prepaidCard = new PrepaidCard10();
+    prepaidCard.setIdUser(user.getId());
+    prepaidCard.setProcessorUserId("");
+    prepaidCard.setPan(Utils.replacePan(datosTarjetaDTO.getPan()));
+    prepaidCard.setEncryptedPan(encryptUtil.encrypt(datosTarjetaDTO.getPan()));
+    prepaidCard.setStatus(PrepaidCardStatus.ACTIVE);
+    prepaidCard.setExpiration(datosTarjetaDTO.getFeccadtar());
+    prepaidCard.setNameOnCard(user.getName() + " " + user.getLastName());
+    prepaidCard.setProducto(datosTarjetaDTO.getProducto());
+    prepaidCard.setNumeroUnico(datosTarjetaDTO.getIdentclitar());
+    prepaidCard.setUuid(UUID.randomUUID().toString());
+    prepaidCard.setAccountId(account.getId());
+    prepaidCard.setHashedPan(getRandomString(20));
+    return prepaidCard;
+  }
 
-    String merchantCode = numberUtils.random(0,2) == 0 ? NewPrepaidTopup10.WEB_MERCHANT_CODE : getUniqueLong().toString();
+  public PrepaidTopup10 buildPrepaidTopup10() {
+
+    String merchantCode = numberUtils.random(0,2) == 0 ? NewPrepaidTopup10.WEB_MERCHANT_CODE : getRandomNumericString(15);
 
     PrepaidTopup10 prepaidTopup = new PrepaidTopup10();
-    prepaidTopup.setRut(user != null ? user.getRut().getValue() : null);
     prepaidTopup.setMerchantCode(merchantCode);
     prepaidTopup.setTransactionId(getUniqueInteger().toString());
 
     NewAmountAndCurrency10 newAmountAndCurrency = new NewAmountAndCurrency10();
-    newAmountAndCurrency.setValue(new BigDecimal(3119));
+    newAmountAndCurrency.setValue(new BigDecimal(3238));
     newAmountAndCurrency.setCurrencyCode(CodigoMoneda.CHILE_CLP);
     prepaidTopup.setAmount(newAmountAndCurrency);
     prepaidTopup.setTotal(newAmountAndCurrency);
     prepaidTopup.setMerchantCategory(1);
     prepaidTopup.setMerchantName(getRandomString(6));
 
+
     return prepaidTopup;
   }
 
-  /**
-   *
-   * @param user
-   * @return
-   */
-  public NewPrepaidTopup10 buildNewPrepaidTopup10(User user) {
 
-    String merchantCode = numberUtils.random() ? NewPrepaidTopup10.WEB_MERCHANT_CODE : getUniqueLong().toString();
+  public NewPrepaidTopup10 buildNewPrepaidTopup10() {
+
+    String merchantCode = numberUtils.random() ? NewPrepaidTopup10.WEB_MERCHANT_CODE : getRandomNumericString(15);
 
     NewPrepaidTopup10 prepaidTopup = new NewPrepaidTopup10();
-    prepaidTopup.setRut(user != null ? user.getRut().getValue() : null);
     prepaidTopup.setMerchantCode(merchantCode);
     prepaidTopup.setTransactionId(getUniqueInteger().toString());
 
     NewAmountAndCurrency10 newAmountAndCurrency = new NewAmountAndCurrency10();
-    newAmountAndCurrency.setValue(new BigDecimal(3119));
+    newAmountAndCurrency.setValue(new BigDecimal(3238));
 
     newAmountAndCurrency.setCurrencyCode(CodigoMoneda.CHILE_CLP);
     prepaidTopup.setAmount(newAmountAndCurrency);
@@ -712,58 +678,36 @@ public class TestBaseUnit extends TestApiBase {
     return prepaidTopup;
   }
 
-  /**
-   *
-   * @param user
-   * @return
-   */
-  public NewPrepaidWithdraw10 buildNewPrepaidWithdraw10(User user) throws Exception {
-    return buildNewPrepaidWithdraw10(user, String.valueOf(numberUtils.random(1111,9999)));
+  public NewPrepaidWithdraw10 buildNewPrepaidWithdrawV2() throws Exception {
+    return buildNewPrepaidWithdrawV2(getRandomNumericString(15));
   }
 
-  public NewPrepaidWithdraw10 buildNewPrepaidWithdraw10(User user, String password) throws Exception {
-    String merchantCode = numberUtils.random(0,2) == 0 ? NewPrepaidBaseTransaction10.WEB_MERCHANT_CODE : getUniqueLong().toString();
-    return buildNewPrepaidWithdraw10(user, password, merchantCode);
-  }
-
-  public NewPrepaidWithdraw10 buildNewPrepaidWithdraw10(User user, String password, String merchantCode) throws Exception {
+  public NewPrepaidWithdraw10 buildNewPrepaidWithdrawV2(String merchantCode) throws Exception {
 
     NewPrepaidWithdraw10 prepaidWithdraw = new NewPrepaidWithdraw10();
-    prepaidWithdraw.setRut(user != null ? user.getRut().getValue() : null);
     prepaidWithdraw.setMerchantCode(merchantCode);
     prepaidWithdraw.setTransactionId(getUniqueInteger().toString());
-
     NewAmountAndCurrency10 newAmountAndCurrency = new NewAmountAndCurrency10();
     newAmountAndCurrency.setValue(new BigDecimal(RandomUtils.nextLong(2000,9000)));
     newAmountAndCurrency.setCurrencyCode(CodigoMoneda.CHILE_CLP);
     prepaidWithdraw.setAmount(newAmountAndCurrency);
-
     prepaidWithdraw.setMerchantCategory(1);
     prepaidWithdraw.setMerchantName(getRandomString(6));
-
-    prepaidWithdraw.setPassword(password);
-
-    // Los retiros web requieren que el usuario tenga una cuenta asociada
-    if (NewPrepaidBaseTransaction10.WEB_MERCHANT_CODE.equals(merchantCode)) {
-      UserAccount bankAccount = createBankAccount(user);
-      prepaidWithdraw.setBankAccountId(bankAccount.getId());
+    if(NewPrepaidBaseTransaction10.WEB_MERCHANT_CODE.equals(merchantCode)){
+      UserAccount userAccount = randomBankAccount();
+      prepaidWithdraw.setBankId(userAccount.getBankId());
+      prepaidWithdraw.setAccountNumber(userAccount.getAccountNumber());
+      prepaidWithdraw.setAccountType(userAccount.getAccountType());
+      prepaidWithdraw.setAccountRut(userAccount.getRut());
     }
-
     return prepaidWithdraw;
   }
 
-  /**
-   *
-   * @param user
-   * @return
-   */
-  public PrepaidWithdraw10 buildPrepaidWithdraw10(User user) {
+
+  public PrepaidWithdraw10 buildPrepaidWithdrawV2(){
 
     String merchantCode = numberUtils.random(0,2) == 0 ? NewPrepaidTopup10.WEB_MERCHANT_CODE : getUniqueLong().toString();
-
     PrepaidWithdraw10 prepaidWithdraw = new PrepaidWithdraw10();
-
-    prepaidWithdraw.setRut(user != null ? user.getRut().getValue() : null);
     prepaidWithdraw.setMerchantCode(merchantCode);
     prepaidWithdraw.setTransactionId(getUniqueInteger().toString());
 
@@ -787,19 +731,11 @@ public class TestBaseUnit extends TestApiBase {
   }
 
 
-
-  /**
-   *
-   * @param user
-   * @param prepaidTopup
-   * @return
-   * @throws BaseException
-   */
-  public CdtTransaction10 buildCdtTransaction10(User user, PrepaidTopup10 prepaidTopup) throws BaseException {
+  public CdtTransaction10 buildCdtTransaction10(PrepaidUser10 user, PrepaidTopup10 prepaidTopup) throws BaseException {
     CdtTransaction10 cdtTransaction = new CdtTransaction10();
     cdtTransaction.setAmount(prepaidTopup.getAmount().getValue());
     cdtTransaction.setTransactionType(prepaidTopup.getCdtTransactionType());
-    cdtTransaction.setAccountId(getConfigUtils().getProperty(APP_NAME) + "_" + user.getRut().getValue());
+    cdtTransaction.setAccountId(getConfigUtils().getProperty(APP_NAME) + "_" + user.getDocumentNumber());
     cdtTransaction.setGloss(prepaidTopup.getCdtTransactionType().getName()+" "+prepaidTopup.getAmount().getValue());
     cdtTransaction.setTransactionReference(0L);
     cdtTransaction.setExternalTransactionId(prepaidTopup.getTransactionId());
@@ -814,17 +750,18 @@ public class TestBaseUnit extends TestApiBase {
    * @return
    * @throws BaseException
    */
-  public CdtTransaction10 buildCdtTransaction10(User user, PrepaidWithdraw10 prepaidWithdraw) throws BaseException {
+  public CdtTransaction10 buildCdtTransaction10(PrepaidUser10 user, PrepaidWithdraw10 prepaidWithdraw) throws BaseException {
     CdtTransaction10 cdtTransaction = new CdtTransaction10();
     cdtTransaction.setAmount(prepaidWithdraw.getAmount().getValue());
     cdtTransaction.setTransactionType(prepaidWithdraw.getCdtTransactionType());
-    cdtTransaction.setAccountId(getConfigUtils().getProperty(APP_NAME) + "_" + user.getRut().getValue());
+    cdtTransaction.setAccountId(getConfigUtils().getProperty(APP_NAME) + "_" + user.getDocumentNumber());
     cdtTransaction.setGloss(prepaidWithdraw.getCdtTransactionType().getName()+" "+prepaidWithdraw.getAmount().getValue());
     cdtTransaction.setTransactionReference(0L);
     cdtTransaction.setExternalTransactionId(prepaidWithdraw.getTransactionId());
     cdtTransaction.setIndSimulacion(false);
     return cdtTransaction;
   }
+
 
   /**
    *
@@ -849,12 +786,14 @@ public class TestBaseUnit extends TestApiBase {
     return cdtTransaction;
   }
 
+
   /**
    *
    * @param prepaidUser
    * @return
    * @throws Exception
    */
+  @Deprecated
   public PrepaidUser10 createPrepaidUser10(PrepaidUser10 prepaidUser) throws Exception {
 
     prepaidUser = getPrepaidUserEJBBean10().createPrepaidUser(null, prepaidUser);
@@ -870,10 +809,62 @@ public class TestBaseUnit extends TestApiBase {
 
   /**
    *
-   * @param prepaidCard
+   * @param user
+   * @throws BaseException
+   */
+  public PrepaidUser10 updatePrepaidUser(PrepaidUser10 user) throws Exception{
+    if(user == null){
+      throw new BadRequestException(PARAMETRO_FALTANTE_$VALUE).setData(new KeyValue("value", "User"));
+    }
+
+    return getPrepaidUserEJBBean10().updatePrepaidUser(null, user);
+  }
+
+  /**
+   *
+   * @param uiid
    * @return
    * @throws Exception
    */
+  public PrepaidUser10 findPrepaidUserByExtId(String uiid) throws Exception{
+
+    return getPrepaidUserEJBBean10().findByExtId(null,uiid);
+  }
+
+  /**
+   *
+   * @param prepaidUser
+   * @return
+   * @throws Exception
+   */
+  public PrepaidUser10 createPrepaidUserV2(PrepaidUser10 prepaidUser) throws Exception {
+
+    prepaidUser = getPrepaidUserEJBBean10().createUser(null, prepaidUser);
+
+    Assert.assertNotNull("debe retornar un usuario", prepaidUser);
+    Assert.assertEquals("debe tener id", true, prepaidUser.getId() > 0);
+    Assert.assertNotNull("debe tener status", prepaidUser.getStatus());
+    Assert.assertNotNull("debe tener uuid", prepaidUser.getUuid());
+
+    return prepaidUser;
+  }
+
+  public Account createAccount(Long userId, String accountNum) throws Exception {
+
+    Account account = getAccountEJBBean10().insertAccount(userId,accountNum);
+
+    Assert.assertNotNull("debe retornar un account", account);
+    Assert.assertNotEquals("debe tener id", 0L, account.getId().longValue());
+
+    return account;
+  }
+
+    /**
+     *
+     * @param prepaidCard
+     * @return
+     * @throws Exception
+     */
   public PrepaidCard10 createPrepaidCard10(PrepaidCard10 prepaidCard) throws Exception {
 
     prepaidCard = getPrepaidCardEJBBean10().createPrepaidCard(null, prepaidCard);
@@ -884,6 +875,26 @@ public class TestBaseUnit extends TestApiBase {
     Assert.assertNotNull("debe tener status", prepaidCard.getStatus());
 
     return prepaidCard;
+  }
+
+
+  public PrepaidCard10 createPrepaidCardV2(PrepaidCard10 prepaidCard) throws Exception {
+
+    prepaidCard = getPrepaidCardEJBBean11().insertPrepaidCard(null, prepaidCard);
+
+    Assert.assertNotNull("debe retornar una tarjeta", prepaidCard);
+    Assert.assertEquals("debe tener id", true, prepaidCard.getId() > 0);
+    Assert.assertNotNull("debe tener status", prepaidCard.getStatus());
+
+    return prepaidCard;
+  }
+
+  public PrepaidMovementFee10 createPrepaidMovementFee10(PrepaidMovementFee10 fee) throws Exception {
+    fee = getPrepaidMovementEJBBean11().addPrepaidMovementFee(fee);
+
+    Assert.assertNotNull("debe retornar una comision", fee);
+    Assert.assertEquals("debe tener id", true, fee.getId() > 0);
+    return fee;
   }
 
   /*
@@ -974,15 +985,6 @@ public class TestBaseUnit extends TestApiBase {
     return buildPrepaidMovement10(prepaidUser, prepaidWithdraw, null, cdtTransaction, PrepaidMovementType.WITHDRAW);
   }
 
-
-  /**
-   *
-   * @param prepaidUser
-   * @param prepaidTopup
-   * @param prepaidCard
-   * @param cdtTransaction
-   * @return
-   */
   public PrepaidMovement10 buildPrepaidMovement10(PrepaidUser10 prepaidUser, NewPrepaidBaseTransaction10 prepaidTopup, PrepaidCard10 prepaidCard, CdtTransaction10 cdtTransaction, PrepaidMovementType type) {
 
     String codent = null;
@@ -1019,6 +1021,7 @@ public class TestBaseUnit extends TestApiBase {
     PrepaidMovement10 prepaidMovement = new PrepaidMovement10();
     prepaidMovement.setIdMovimientoRef(cdtTransaction != null ? cdtTransaction.getTransactionReference() : getUniqueLong());
     prepaidMovement.setIdPrepaidUser(prepaidUser.getId());
+
     prepaidMovement.setIdTxExterno(cdtTransaction != null ? cdtTransaction.getExternalTransactionId() : getUniqueLong().toString());
     prepaidMovement.setTipoMovimiento(type);
     prepaidMovement.setMonto(BigDecimal.valueOf(getUniqueInteger()));
@@ -1056,9 +1059,94 @@ public class TestBaseUnit extends TestApiBase {
     prepaidMovement.setConSwitch(ReconciliationStatusType.PENDING);
     prepaidMovement.setOriginType(MovementOriginType.API);
     prepaidMovement.setEstadoNegocio(BusinessStatusType.IN_PROCESS);
+    prepaidMovement.setNomcomred(prepaidTopup != null ? prepaidTopup.getMerchantName() != null ? prepaidTopup.getMerchantName() : getRandomString(10) : getRandomString(10));
 
     return prepaidMovement;
   }
+
+
+
+  public PrepaidMovement10 buildPrepaidMovementV2(PrepaidUser10 prepaidUser, NewPrepaidBaseTransaction10 prepaidTopup, PrepaidCard10 prepaidCard, CdtTransaction10 cdtTransaction, PrepaidMovementType type) throws Exception {
+
+    String codent = null;
+    try {
+      codent = parametersUtil.getString("api-prepaid", "cod_entidad", "v10");
+    } catch (SQLException e) {
+      codent = getConfigUtils().getProperty("tecnocom.codEntity");
+    }
+
+    TipoFactura tipoFactura;
+    if(PrepaidMovementType.TOPUP.equals(type)) {
+      tipoFactura = TipoFactura.CARGA_TRANSFERENCIA;
+    } else {
+      tipoFactura = TipoFactura.RETIRO_TRANSFERENCIA;
+    }
+
+    if (prepaidTopup != null) {
+      if (TransactionOriginType.POS.equals(prepaidTopup.getTransactionOriginType())) {
+        if (PrepaidMovementType.TOPUP.equals(type)) {
+          tipoFactura = TipoFactura.CARGA_EFECTIVO_COMERCIO_MULTICAJA;
+        } else {
+          tipoFactura = TipoFactura.RETIRO_EFECTIVO_COMERCIO_MULTICJA;
+        }
+      }
+    }
+    Account account = getAccountEJBBean10().findByUserId(prepaidUser.getId());
+    String centalta = "";
+    String cuenta = "";
+    if(account != null && !StringUtils.isBlank(account.getAccountNumber())) {
+      String accountNumber = account.getAccountNumber();
+      centalta = accountNumber.substring(4, 8);
+      cuenta = accountNumber.substring(12);
+    }
+
+    PrepaidMovement10 prepaidMovement = new PrepaidMovement10();
+    prepaidMovement.setIdMovimientoRef(cdtTransaction != null ? cdtTransaction.getTransactionReference() : getUniqueLong());
+    prepaidMovement.setIdPrepaidUser(prepaidUser.getId());
+
+    prepaidMovement.setIdTxExterno(cdtTransaction != null ? cdtTransaction.getExternalTransactionId() : getUniqueLong().toString());
+    prepaidMovement.setTipoMovimiento(type);
+    prepaidMovement.setMonto(BigDecimal.valueOf(getUniqueInteger()));
+    prepaidMovement.setEstado(PrepaidMovementStatus.PENDING);
+    prepaidMovement.setEstadoNegocio(BusinessStatusType.IN_PROCESS);
+    prepaidMovement.setCodent(codent);
+    prepaidMovement.setCentalta(centalta); //contrato (Numeros del 5 al 8) - se debe actualizar despues
+    prepaidMovement.setCuenta(cuenta); ////contrato (Numeros del 9 al 20) - se debe actualizar despues
+    prepaidMovement.setClamon(CodigoMoneda.CHILE_CLP);
+    prepaidMovement.setIndnorcor(IndicadorNormalCorrector.NORMAL); //0-Normal
+    prepaidMovement.setTipofac(tipoFactura);
+    prepaidMovement.setFecfac(new Date(System.currentTimeMillis()));
+    prepaidMovement.setNumreffac(""); //se debe actualizar despues, es el id de PrepaidMovement10
+    prepaidMovement.setPan(prepaidCard != null ? prepaidCard.getPan() : ""); // se debe actualizar despues
+    prepaidMovement.setClamondiv(0);
+    prepaidMovement.setImpdiv(BigDecimal.ZERO);
+    prepaidMovement.setImpfac(prepaidTopup != null ? prepaidTopup.getAmount().getValue() : null);
+    prepaidMovement.setCmbapli(0); // se debe actualizar despues
+    prepaidMovement.setNumaut(""); // se debe actualizar despues con los 6 ultimos digitos de NumFacturaRef
+    prepaidMovement.setIndproaje(IndicadorPropiaAjena.AJENA); // A-Ajena
+    prepaidMovement.setCodcom(prepaidTopup != null ? prepaidTopup.getMerchantCode() : null);
+    prepaidMovement.setCodact(prepaidTopup != null ? prepaidTopup.getMerchantCategory() : null);
+    prepaidMovement.setImpliq(BigDecimal.ZERO); // se debe actualizar despues
+    prepaidMovement.setClamonliq(0); // se debe actualizar despues
+    prepaidMovement.setCodpais(CodigoPais.CHILE);
+    prepaidMovement.setNompob(""); // se debe actualizar despues
+    prepaidMovement.setNumextcta(0); // se debe actualizar despues
+    prepaidMovement.setNummovext(0); // se debe actualizar despues
+    prepaidMovement.setClamone(0); // se debe actualizar despues
+    prepaidMovement.setTipolin(""); // se debe actualizar despues
+    prepaidMovement.setLinref(0); // se debe actualizar despues
+    prepaidMovement.setNumbencta(1); // se debe actualizar despues
+    prepaidMovement.setNumplastico(0L); // se debe actualizar despues
+    prepaidMovement.setConTecnocom(ReconciliationStatusType.PENDING);
+    prepaidMovement.setConSwitch(ReconciliationStatusType.PENDING);
+    prepaidMovement.setOriginType(MovementOriginType.API);
+    prepaidMovement.setEstadoNegocio(BusinessStatusType.IN_PROCESS);
+    prepaidMovement.setCardId(prepaidCard.getId());
+    prepaidMovement.setNomcomred(prepaidTopup != null ? prepaidTopup.getMerchantName() != null ? prepaidTopup.getMerchantName() : getRandomString(10) : getRandomString(10));
+
+    return prepaidMovement;
+  }
+
   public PrepaidMovement10 buildPrepaidMovement10(PrepaidUser10 prepaidUser, NewPrepaidBaseTransaction10 prepaidTopup, PrepaidCard10 prepaidCard, CdtTransaction10 cdtTransaction, PrepaidMovementType type,PrepaidMovementStatus status) {
 
     String codent = null;
@@ -1088,6 +1176,7 @@ public class TestBaseUnit extends TestApiBase {
     PrepaidMovement10 prepaidMovement = new PrepaidMovement10();
     prepaidMovement.setIdMovimientoRef(cdtTransaction != null ? cdtTransaction.getTransactionReference() : getUniqueLong());
     prepaidMovement.setIdPrepaidUser(prepaidUser.getId());
+
     prepaidMovement.setIdTxExterno(cdtTransaction != null ? cdtTransaction.getExternalTransactionId() : getUniqueLong().toString());
     prepaidMovement.setTipoMovimiento(type);
     prepaidMovement.setMonto(BigDecimal.valueOf(getUniqueInteger()));
@@ -1124,6 +1213,7 @@ public class TestBaseUnit extends TestApiBase {
     prepaidMovement.setConTecnocom(ReconciliationStatusType.PENDING);
     prepaidMovement.setConSwitch(ReconciliationStatusType.PENDING);
     prepaidMovement.setOriginType(MovementOriginType.API);
+    prepaidMovement.setNomcomred(prepaidTopup != null ? prepaidTopup.getMerchantName() != null ? prepaidTopup.getMerchantName() : getRandomString(10) : getRandomString(10));
     return prepaidMovement;
   }
   /*
@@ -1203,6 +1293,7 @@ public class TestBaseUnit extends TestApiBase {
     prepaidMovement.setConTecnocom(ReconciliationStatusType.PENDING);
     prepaidMovement.setConSwitch(ReconciliationStatusType.PENDING);
     prepaidMovement.setOriginType(MovementOriginType.API);
+    prepaidMovement.setNomcomred(reverseRequest != null ? reverseRequest.getMerchantName() != null ? reverseRequest.getMerchantName() : getRandomString(10) : getRandomString(10));
 
     return prepaidMovement;
   }
@@ -1223,12 +1314,17 @@ public class TestBaseUnit extends TestApiBase {
     return prepaidMovement10;
   }
 
-  /**
-   *
-   * @param user
-   * @return
-   */
-  public AltaClienteDTO registerInTecnocom(User user) throws BaseException {
+  public PrepaidMovement10 createPrepaidMovement11(PrepaidMovement10 prepaidMovement10) throws Exception {
+
+    prepaidMovement10 = getPrepaidMovementEJBBean11().addPrepaidMovement(null, prepaidMovement10);
+
+    Assert.assertNotNull("Debe Existir prepaidMovement10",prepaidMovement10);
+    Assert.assertTrue("Debe Contener el Id",prepaidMovement10.getId() > 0);
+
+    return prepaidMovement10;
+  }
+
+  public AltaClienteDTO registerInTecnocomV2(PrepaidUser10 user) throws BaseException {
 
     if (user == null) {
       throw new BadRequestException(PARAMETRO_FALTANTE_$VALUE).setData(new KeyValue("value", "user"));
@@ -1238,23 +1334,19 @@ public class TestBaseUnit extends TestApiBase {
       throw new BadRequestException(PARAMETRO_FALTANTE_$VALUE).setData(new KeyValue("value", "user.name"));
     }
 
-    if (user.getLastname_1() == null) {
+    if (user.getLastName() == null) {
       throw new BadRequestException(PARAMETRO_FALTANTE_$VALUE).setData(new KeyValue("value", "user.lastname_1"));
-    }
-
-    if (user.getLastname_2() == null) {
-      throw new BadRequestException(PARAMETRO_FALTANTE_$VALUE).setData(new KeyValue("value", "user.lastname_2"));
     }
 
     if (user.getRut() == null) {
       throw new BadRequestException(PARAMETRO_FALTANTE_$VALUE).setData(new KeyValue("value", "user.rut"));
     }
 
-    if (user.getRut().getValue() == null) {
+    if (user.getDocumentNumber() == null) {
       throw new BadRequestException(PARAMETRO_FALTANTE_$VALUE).setData(new KeyValue("value", "user.rut.value"));
     }
-
-    return getTecnocomService().altaClientes(user.getName(), user.getLastname_1(), user.getLastname_2(), user.getRut().getValue().toString(), TipoDocumento.RUT, TipoAlta.NIVEL2);
+    TipoAlta tipoAlta =  user.getUserLevel() == PrepaidUserLevel.LEVEL_1 ? TipoAlta.NIVEL1: TipoAlta.NIVEL2;
+    return getTecnocomService().altaClientes(user.getName(), user.getLastName(), "", user.getDocumentNumber(), TipoDocumento.RUT, tipoAlta);
   }
 
   /**
@@ -1262,6 +1354,7 @@ public class TestBaseUnit extends TestApiBase {
    * @param prepaidCard10
    * @return
    */
+  @Deprecated
   public InclusionMovimientosDTO topupInTecnocom(PrepaidCard10 prepaidCard10, BigDecimal impfac) throws BaseException {
 
     if (prepaidCard10 == null) {
@@ -1270,10 +1363,6 @@ public class TestBaseUnit extends TestApiBase {
 
     if (impfac == null) {
       throw new BadRequestException(PARAMETRO_FALTANTE_$VALUE).setData(new KeyValue("value", "amount"));
-    }
-
-    if (StringUtils.isBlank(prepaidCard10.getProcessorUserId())) {
-      throw new BadRequestException(PARAMETRO_FALTANTE_$VALUE).setData(new KeyValue("value", "prepaidCard10.processorUserId"));
     }
 
     if (StringUtils.isBlank(prepaidCard10.getPan())) {
@@ -1299,6 +1388,42 @@ public class TestBaseUnit extends TestApiBase {
     return inclusionMovimientosDTO;
   }
 
+
+  public InclusionMovimientosDTO topupInTecnocom(String accountNumber, PrepaidCard10 prepaidCard10, BigDecimal impfac) throws BaseException {
+
+    if (prepaidCard10 == null) {
+      throw new BadRequestException(PARAMETRO_FALTANTE_$VALUE).setData(new KeyValue("value", "prepaidCard10"));
+    }
+
+    if (impfac == null) {
+      throw new BadRequestException(PARAMETRO_FALTANTE_$VALUE).setData(new KeyValue("value", "amount"));
+    }
+    if(accountNumber == null){
+      throw new BadRequestException(PARAMETRO_FALTANTE_$VALUE).setData(new KeyValue("value", "accountNumber"));
+    }
+    if (StringUtils.isBlank(prepaidCard10.getPan())) {
+      throw new BadRequestException(PARAMETRO_FALTANTE_$VALUE).setData(new KeyValue("value", "prepaidCard10.pan"));
+    }
+
+    String pan = prepaidCard10.getPan();
+    CodigoMoneda clamon = CodigoMoneda.CHILE_CLP;
+    IndicadorNormalCorrector indnorcor = IndicadorNormalCorrector.NORMAL;
+    TipoFactura tipofac = TipoFactura.CARGA_TRANSFERENCIA;
+    String codcom = "1";
+    Integer codact = 1;
+    CodigoMoneda clamondiv = CodigoMoneda.NONE;
+    String nomcomred = "prueba";
+    String numreffac = getUniqueLong().toString();
+    String numaut = TecnocomServiceHelper.getNumautFromIdMov(numreffac);
+
+    InclusionMovimientosDTO inclusionMovimientosDTO = getTecnocomService().inclusionMovimientos(accountNumber, pan, clamon, indnorcor, tipofac,
+      numreffac, impfac, numaut, codcom,
+      nomcomred, codact, clamondiv,impfac);
+
+    return inclusionMovimientosDTO;
+  }
+
+  @Deprecated
   public InclusionMovimientosDTO inclusionMovimientosTecnocom(PrepaidCard10 prepaidCard10, PrepaidMovement10 movement10) throws BaseException {
 
     if (prepaidCard10 == null) {
@@ -1307,10 +1432,6 @@ public class TestBaseUnit extends TestApiBase {
 
     if (movement10 == null) {
       throw new BadRequestException(PARAMETRO_FALTANTE_$VALUE).setData(new KeyValue("value", "amount"));
-    }
-
-    if (StringUtils.isBlank(prepaidCard10.getProcessorUserId())) {
-      throw new BadRequestException(PARAMETRO_FALTANTE_$VALUE).setData(new KeyValue("value", "prepaidCard10.processorUserId"));
     }
 
     if (StringUtils.isBlank(prepaidCard10.getPan())) {
@@ -1324,6 +1445,29 @@ public class TestBaseUnit extends TestApiBase {
       movement10.getCodcom(), movement10.getCodact(), CodigoMoneda.fromValue(movement10.getClamondiv()),movement10.getImpfac());
     return inclusionMovimientosDTO;
   }
+
+  public InclusionMovimientosDTO inclusionMovimientosTecnocom(Account account, PrepaidCard10 prepaidCard10, PrepaidMovement10 movement10) throws BaseException {
+
+    if (prepaidCard10 == null) {
+      throw new BadRequestException(PARAMETRO_FALTANTE_$VALUE).setData(new KeyValue("value", "prepaidCard10"));
+    }
+
+    if (movement10 == null) {
+      throw new BadRequestException(PARAMETRO_FALTANTE_$VALUE).setData(new KeyValue("value", "amount"));
+    }
+
+    if (StringUtils.isBlank(prepaidCard10.getPan())) {
+      throw new BadRequestException(PARAMETRO_FALTANTE_$VALUE).setData(new KeyValue("value", "prepaidCard10.pan"));
+    }
+
+    String numaut = TecnocomServiceHelper.getNumautFromIdMov(movement10.getId().toString());
+
+    InclusionMovimientosDTO inclusionMovimientosDTO = getTecnocomService().inclusionMovimientos(account.getAccountNumber(), EncryptUtil.getInstance().decrypt(prepaidCard10.getEncryptedPan()),
+      movement10.getClamon(),movement10.getIndnorcor(), movement10.getTipofac(), movement10.getNumreffac(), movement10.getImpfac(), numaut, movement10.getCodcom(),
+      movement10.getCodcom(), movement10.getCodact(), CodigoMoneda.fromValue(movement10.getClamondiv()),movement10.getImpfac());
+    return inclusionMovimientosDTO;
+  }
+
   /**
    * Espera por 10 intentos cada 1 segundo la existencia de una tarjeta del cliente prepago
    *
@@ -1351,19 +1495,13 @@ public class TestBaseUnit extends TestApiBase {
     return prepaidCard10;
   }
 
-  protected UserAccount createBankAccount(User user) throws Exception {
-    return createBankAccount(user, 1L, "Cuenta corriente", "mi cuenta de test", getRandomNumericString(8), user.getRut().getValue());
-  }
-
-  protected UserAccount createBankAccount(User user, Long bankId, String type, String name, String number, Integer rut) throws Exception {
-    UserAccountNew newAccountRequest = new UserAccountNew();
-    newAccountRequest.setBankId(bankId);
-    newAccountRequest.setAccountType(type);
-    newAccountRequest.setAccountAlias(name);
-    newAccountRequest.setAccountNumber(number);
-    newAccountRequest.setRut(rut);
-    UserAccount newAccount = getUserClient().createUserBankAccount(null, user.getId(), newAccountRequest);
-    return newAccount;
+  protected UserAccount randomBankAccount(){
+    UserAccount userAccount = new UserAccount();
+    userAccount.setBankId(getUniqueRutNumber().longValue());
+    userAccount.setAccountNumber(getUniqueRutNumber().longValue());
+    userAccount.setAccountType("Vista");
+    userAccount.setRut(getUniqueRutNumber().toString());
+    return userAccount;
   }
 
   public Map<String,Object> getDefaultHeaders(){
@@ -1372,6 +1510,7 @@ public class TestBaseUnit extends TestApiBase {
     header.put(Constants.HEADER_USER_TIMEZONE,"America/Santiago");
     return header;
   }
+
   protected AccountingData10 buildRandomAccouting(AccountingTxType accountingTxType){
     AccountingData10 accounting10 = new AccountingData10();
     accounting10.setTransactionDate(new Timestamp((new Date()).getTime()));
@@ -1646,5 +1785,146 @@ public class TestBaseUnit extends TestApiBase {
       accounting10s.add(accounting10);
     }
     return accounting10s;
+  }
+  protected static EntityManager createEntityManager() {
+    EntityManagerFactory emf = Persistence.createEntityManagerFactory(ConfigUtils.getEnv());
+    EntityManager em = emf.createEntityManager();
+    return em;
+  }
+
+  public boolean isRecentLocalDateTime(LocalDateTime localDateTime, Integer minutesInterval) {
+    LocalDateTime nowTime = LocalDateTime.now(ZoneId.of("UTC"));
+    return nowTime.minusMinutes(minutesInterval).isBefore(localDateTime) && nowTime.plusMinutes(minutesInterval).isAfter(localDateTime);
+  }
+
+  public IpmMovement10 buildIpmMovement10() {
+    IpmMovement10 ipmMovement10 = new IpmMovement10();
+    ipmMovement10.setFileId(RandomUtils.nextLong());
+    ipmMovement10.setMessageType(RandomUtils.nextInt(0, 15));
+    ipmMovement10.setFunctionCode(RandomUtils.nextInt(0, 15));
+    ipmMovement10.setMessageReason(RandomUtils.nextInt(0, 15));
+    ipmMovement10.setMessageNumber(RandomUtils.nextInt(0, 15));
+    ipmMovement10.setPan(getRandomString(12));
+    ipmMovement10.setTransactionAmount(new BigDecimal(RandomUtils.nextInt(3000, 100000)));
+    ipmMovement10.setReconciliationAmount(new BigDecimal(RandomUtils.nextInt(3000, 100000)));
+    ipmMovement10.setCardholderBillingAmount(new BigDecimal(RandomUtils.nextInt(3000, 100000)));
+    ipmMovement10.setReconciliationConversionRate(new BigDecimal(RandomUtils.nextInt(3000, 100000)));
+    ipmMovement10.setCardholderBillingConversionRate(new BigDecimal(RandomUtils.nextInt(3000, 100000)));
+    ipmMovement10.setTransactionLocalDate(LocalDateTime.now(ZoneId.of("UTC")));
+    ipmMovement10.setApprovalCode(getRandomNumericString(6));
+    ipmMovement10.setTransactionCurrencyCode(RandomUtils.nextInt(0, 100));
+    ipmMovement10.setReconciliationCurrencyCode(RandomUtils.nextInt(0, 100));
+    ipmMovement10.setCardholderBillingCurrencyCode(RandomUtils.nextInt(0, 100));
+    ipmMovement10.setMerchantCode(getRandomNumericString(15));
+    ipmMovement10.setMerchantName(getRandomString(12));
+    ipmMovement10.setMerchantState(getRandomString(5));
+    ipmMovement10.setMerchantCountry(getRandomString(2));
+    ipmMovement10.setTransactionLifeCycleId(getRandomNumericString(5));
+    ipmMovement10.setReconciled(false);
+    Timestamps timestamps = new Timestamps();
+    timestamps.setCreatedAt(LocalDateTime.now(ZoneId.of("UTC")));
+    timestamps.setUpdatedAt(LocalDateTime.now(ZoneId.of("UTC")));
+    ipmMovement10.setTimestamps(timestamps);
+    return ipmMovement10;
+  }
+
+  public IpmMovement10 createIpmMovement(IpmMovement10 movement) throws Exception {
+    String insertMovementSql = String.format(
+      "INSERT INTO %s.ipm_file_data (" +
+        "  file_id, " +
+        "  message_type, " +
+        "  function_code, " +
+        "  message_reason, " +
+        "  message_number, " +
+        "  pan, " +
+        "  transaction_amount, " +
+        "  reconciliation_amount, " +
+        "  cardholder_billing_amount, " +
+        "  reconciliation_conversion_rate, " +
+        "  cardholder_billing_conversion_rate, " +
+        "  transaction_local_date, " +
+        "  approval_code, " +
+        "  transaction_currency_code, " +
+        "  reconciliation_currency_code, " +
+        "  cardholder_billing_currency_code, " +
+        "  merchant_code, " +
+        "  merchant_name, " +
+        "  merchant_state, " +
+        "  merchant_country, " +
+        "  transaction_life_cycle_id, " +
+        "  reconciled, " +
+        "  created_at, " +
+        "  updated_at " +
+        ") VALUES (" +
+        "  ?, " +
+        "  ?, " +
+        "  ?, " +
+        "  ?, " +
+        "  ?, " +
+        "  ?, " +
+        "  ?, " +
+        "  ?, " +
+        "  ?, " +
+        "  ?, " +
+        "  ?, " +
+        "  ?, " +
+        "  ?, " +
+        "  ?, " +
+        "  ?, " +
+        "  ?, " +
+        "  ?, " +
+        "  ?, " +
+        "  ?, " +
+        "  ?, " +
+        "  ?, " +
+        "  ?, " +
+        "  ?, " +
+        "  ? " +
+        ")", getSchemaAccounting());
+
+    KeyHolder keyHolder = new GeneratedKeyHolder();
+
+    getDbUtils().getJdbcTemplate().update(connection -> {
+      PreparedStatement ps = connection.prepareStatement(insertMovementSql, new String[] {"id"});
+      ps.setLong(1, movement.getFileId());
+      ps.setLong(2, movement.getMessageType());
+      ps.setInt(3, movement.getFunctionCode());
+      ps.setInt(4, movement.getMessageReason());
+      ps.setInt(5, movement.getMessageNumber());
+      ps.setString(6, movement.getPan());
+      ps.setBigDecimal(7, movement.getTransactionAmount());
+      ps.setBigDecimal(8, movement.getReconciliationAmount());
+      ps.setBigDecimal(9, movement.getCardholderBillingAmount());
+      ps.setBigDecimal(10, movement.getReconciliationConversionRate());
+      ps.setBigDecimal(11, movement.getCardholderBillingConversionRate());
+      ps.setTimestamp(12, Timestamp.valueOf(movement.getTransactionLocalDate()));
+      ps.setString(13, movement.getApprovalCode());
+      ps.setInt(14, movement.getTransactionCurrencyCode());
+      ps.setInt(15, movement.getReconciliationCurrencyCode());
+      ps.setInt(16, movement.getCardholderBillingCurrencyCode());
+      ps.setString(17, movement.getMerchantCode());
+      ps.setString(18, movement.getMerchantName());
+      ps.setString(19, movement.getMerchantState());
+      ps.setString(20, movement.getMerchantCountry());
+      ps.setString(21, movement.getTransactionLifeCycleId());
+      ps.setBoolean(22, movement.getReconciled());
+      ps.setTimestamp(23, Timestamp.valueOf(LocalDateTime.ofInstant(Instant.now(), ZoneId.of("UTC"))));
+      ps.setTimestamp(24, Timestamp.valueOf(LocalDateTime.ofInstant(Instant.now(), ZoneId.of("UTC"))));
+
+      return ps;
+    }, keyHolder);
+
+    return getIpmMovementById((long) keyHolder.getKey());
+  }
+
+  public IpmMovement10 getIpmMovementById(Long id) {
+    String findMovementByIdSql = String.format("SELECT * FROM %s.ipm_file_data WHERE id = ?", getSchemaAccounting());
+
+    try {
+      return getDbUtils().getJdbcTemplate()
+        .queryForObject(findMovementByIdSql, getIpmEJBBean10().getIpmMovementMapper(), id);
+    } catch (EmptyResultDataAccessException ex) {
+      return null;
+    }
   }
 }

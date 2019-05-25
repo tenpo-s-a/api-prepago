@@ -5,13 +5,14 @@ import cl.multicaja.core.utils.Utils;
 import cl.multicaja.core.utils.db.DBUtils;
 import cl.multicaja.prepaid.helpers.tecnocom.TecnocomFileHelper;
 import cl.multicaja.prepaid.helpers.tecnocom.model.TecnocomReconciliationFile;
-import cl.multicaja.prepaid.helpers.tecnocom.model.TecnocomReconciliationFileDetail;
-import cl.multicaja.prepaid.helpers.users.model.User;
 import cl.multicaja.prepaid.model.v10.*;
+import cl.multicaja.prepaid.model.v11.Account;
 import cl.multicaja.tecnocom.constants.IndicadorNormalCorrector;
 import cl.multicaja.tecnocom.constants.TipoFactura;
 import cl.multicaja.test.integration.v10.async.TestBaseUnitAsync;
-import org.junit.*;
+import org.junit.Assert;
+import org.junit.Before;
+import org.junit.Test;
 
 import java.io.InputStream;
 import java.math.BigDecimal;
@@ -27,6 +28,7 @@ public class Test_PendingTecnocomReconciliationFile10 extends TestBaseUnitAsync 
   private List<String> contracts = Arrays.asList("09870001000000000091", "09870001000000000092", "09870001000000000093","09870001000000000012","09870001000000000013");
   private List<PrepaidUser10> users = new ArrayList<>();
   private List<PrepaidCard10> prepaidCards = new ArrayList<>();
+  private List<Account> accounts = new ArrayList<>();
   private static TecnocomReconciliationFile onlineFile;
   private static TecnocomReconciliationFile apiFile;
 
@@ -34,32 +36,37 @@ public class Test_PendingTecnocomReconciliationFile10 extends TestBaseUnitAsync 
     getDbUtils().getJdbcTemplate().execute(String.format("TRUNCATE %s.prp_usuario CASCADE", getSchema()));
     getDbUtils().getJdbcTemplate().execute(String.format("TRUNCATE %s.prp_movimientos_tecnocom CASCADE", getSchema()));
     getDbUtils().getJdbcTemplate().execute(String.format("TRUNCATE %s.prp_movimientos_tecnocom_hist CASCADE", getSchema()));
+    getDbUtils().getJdbcTemplate().execute(String.format("TRUNCATE %s.prp_archivos_conciliacion CASCADE", getSchema()));
+    getDbUtils().getJdbcTemplate().execute(String.format("TRUNCATE %s.prp_tarjeta CASCADE", getSchema()));
   }
 
   private void prepareUsersAndCards() throws Exception {
 
     users.clear();
     prepaidCards.clear();
-
+    accounts.clear();
     for (int i = 0; i < pans.size(); i++) {
       String pan = pans.get(i);
       String processorUserId =  contracts.get(i);
 
       System.out.println(String.format("%s -> %s", pan, processorUserId));
-
-      // Crea usuario
-      User user = registerUser();
-
+      
       // Crea usuario prepago
-      PrepaidUser10 prepaidUser10 = buildPrepaidUser10(user);
+      PrepaidUser10 prepaidUser10 = buildPrepaidUserv2();
+      prepaidUser10 = createPrepaidUserV2(prepaidUser10);
 
-      PrepaidCard10 prepaidCard10 = buildPrepaidCard10();
+      Account account = createAccount(prepaidUser10.getId(),processorUserId);
+
+      PrepaidCard10 prepaidCard10 = buildPrepaidCard10(prepaidUser10);
       prepaidCard10.setPan(Utils.replacePan(pan));
-      prepaidCard10.setProcessorUserId(processorUserId);
-      prepaidCard10 = createPrepaidCard10(prepaidCard10);
+      prepaidCard10.setAccountId(account.getId());
+      prepaidCard10.setUuid(UUID.randomUUID().toString());
+      prepaidCard10.setHashedPan(pan); // Solo para los test, guardaremos el hashed pan en claro como hashed.
+      prepaidCard10 = createPrepaidCardV2(prepaidCard10);
 
       users.add(prepaidUser10);
       prepaidCards.add(prepaidCard10);
+      accounts.add(account);
     }
   }
 
@@ -95,7 +102,7 @@ public class Test_PendingTecnocomReconciliationFile10 extends TestBaseUnitAsync 
     Long fileId = null;
     try {
       InputStream is = putSuccessFileIntoSftp(filename);
-      fileId =getTecnocomReconciliationEJBBean10().processFile(is, filename);
+      fileId = getTecnocomReconciliationEJBBean10().processFile(is, filename);
     } catch (Exception e) {
       e.printStackTrace();
       Assert.fail("Should not be here");
@@ -128,7 +135,7 @@ public class Test_PendingTecnocomReconciliationFile10 extends TestBaseUnitAsync 
     Assert.assertNull("No debe tener movimientos", movements);
     ReconciliationFile10 reconciliationFile10 = new ReconciliationFile10();
     reconciliationFile10.setFileName(getRandomString(10));
-    reconciliationFile10.setStatus(FileStatus.READING);
+    reconciliationFile10.setStatus(FileStatus.OK);
     reconciliationFile10.setType(ReconciliationFileType.TECNOCOM_FILE);
     reconciliationFile10.setProcess(ReconciliationOriginType.TECNOCOM);
 
@@ -146,13 +153,13 @@ public class Test_PendingTecnocomReconciliationFile10 extends TestBaseUnitAsync 
     // Se agregan transacciones con monto diferente
     for (MovimientoTecnocom10 trx : satList) {
 
-      Long userId = prepaidCards.stream()
-        .filter(card -> trx.getContrato().equals(card.getProcessorUserId()))
+      Long userId = accounts.stream()
+        .filter(account -> trx.getContrato().equals(account.getAccountNumber()))
         .findAny()
         .get()
-        .getIdUser();
+        .getUserId();
 
-      String pan = Utils.replacePan(encryptUtil.decrypt(trx.getPan()));
+      String pan = Utils.replacePan(trx.getPan()); // En los test, el pan viene en claro
       PrepaidMovement10 movement10 = TecnocomFileHelper.getInstance().buildMovement(userId, pan, trx);
       movement10.setConTecnocom(ReconciliationStatusType.PENDING);
       movement10.setConSwitch(ReconciliationStatusType.PENDING);
@@ -214,7 +221,7 @@ public class Test_PendingTecnocomReconciliationFile10 extends TestBaseUnitAsync 
 
     ReconciliationFile10 reconciliationFile10 = new ReconciliationFile10();
     reconciliationFile10.setFileName(getRandomString(10));
-    reconciliationFile10.setStatus(FileStatus.READING);
+    reconciliationFile10.setStatus(FileStatus.OK);
     reconciliationFile10.setType(ReconciliationFileType.TECNOCOM_FILE);
     reconciliationFile10.setProcess(ReconciliationOriginType.TECNOCOM);
 
@@ -232,13 +239,14 @@ public class Test_PendingTecnocomReconciliationFile10 extends TestBaseUnitAsync 
     // Se agregan transacciones con monto diferente
     for (MovimientoTecnocom10 trx :satList) {
 
-      Long userId = prepaidCards.stream()
-        .filter(card -> trx.getContrato().equals(card.getProcessorUserId()))
+      Long userId = accounts.stream()
+        .filter(account -> trx.getContrato().equals(account.getAccountNumber()))
         .findAny()
         .get()
-        .getIdUser();
+        .getUserId();
 
-      String pan = Utils.replacePan(encryptUtil.decrypt(trx.getPan()));
+
+      String pan = Utils.replacePan(trx.getPan()); // En los test, el pan viene en claro
       PrepaidMovement10 movement10 = TecnocomFileHelper.getInstance().buildMovement(userId, pan, trx);
       movement10.setConTecnocom(ReconciliationStatusType.PENDING);
       movement10.setConSwitch(ReconciliationStatusType.PENDING);
@@ -298,7 +306,7 @@ public class Test_PendingTecnocomReconciliationFile10 extends TestBaseUnitAsync 
 
     ReconciliationFile10 reconciliationFile10 = new ReconciliationFile10();
     reconciliationFile10.setFileName(getRandomString(10));
-    reconciliationFile10.setStatus(FileStatus.READING);
+    reconciliationFile10.setStatus(FileStatus.OK);
     reconciliationFile10.setType(ReconciliationFileType.TECNOCOM_FILE);
     reconciliationFile10.setProcess(ReconciliationOriginType.TECNOCOM);
 
@@ -316,14 +324,15 @@ public class Test_PendingTecnocomReconciliationFile10 extends TestBaseUnitAsync 
     // Se agregan transacciones con monto diferente
     for (MovimientoTecnocom10 trx : satList) {
 
-      Long userId = prepaidCards.stream()
-        .filter(card -> trx.getContrato().equals(card.getProcessorUserId()))
+      Long userId = accounts.stream()
+        .filter(account -> trx.getContrato().equals(account.getAccountNumber()))
         .findAny()
         .get()
-        .getIdUser();
+        .getUserId();
 
 
-      String pan = Utils.replacePan(encryptUtil.decrypt(trx.getPan()));
+
+      String pan = Utils.replacePan(trx.getPan()); // En los test, el pan viene en claro
       PrepaidMovement10 movement10 = TecnocomFileHelper.getInstance().buildMovement(userId, pan, trx);
       movement10.setConTecnocom(ReconciliationStatusType.PENDING);
       movement10.setConSwitch(ReconciliationStatusType.PENDING);
@@ -384,7 +393,7 @@ public class Test_PendingTecnocomReconciliationFile10 extends TestBaseUnitAsync 
 
     ReconciliationFile10 reconciliationFile10 = new ReconciliationFile10();
     reconciliationFile10.setFileName(getRandomString(10));
-    reconciliationFile10.setStatus(FileStatus.READING);
+    reconciliationFile10.setStatus(FileStatus.OK);
     reconciliationFile10.setType(ReconciliationFileType.TECNOCOM_FILE);
     reconciliationFile10.setProcess(ReconciliationOriginType.TECNOCOM);
 
@@ -402,14 +411,14 @@ public class Test_PendingTecnocomReconciliationFile10 extends TestBaseUnitAsync 
     // Se agregan transacciones con monto diferente
     for (MovimientoTecnocom10 trx : satList) {
 
-      Long userId = prepaidCards.stream()
-        .filter(card -> trx.getContrato().equals(card.getProcessorUserId()))
+      Long userId = accounts.stream()
+        .filter(account -> trx.getContrato().equals(account.getAccountNumber()))
         .findAny()
         .get()
-        .getIdUser();
+        .getUserId();
 
 
-      String pan = Utils.replacePan(encryptUtil.decrypt(trx.getPan()));
+      String pan = Utils.replacePan(trx.getPan()); // En los test, el pan viene en claro
       PrepaidMovement10 movement10 = TecnocomFileHelper.getInstance().buildMovement(userId, pan, trx);
       movement10.setConTecnocom(ReconciliationStatusType.PENDING);
       movement10.setConSwitch(ReconciliationStatusType.PENDING);
@@ -474,7 +483,7 @@ public class Test_PendingTecnocomReconciliationFile10 extends TestBaseUnitAsync 
 
     ReconciliationFile10 reconciliationFile10 = new ReconciliationFile10();
     reconciliationFile10.setFileName(getRandomString(10));
-    reconciliationFile10.setStatus(FileStatus.READING);
+    reconciliationFile10.setStatus(FileStatus.OK);
     reconciliationFile10.setType(ReconciliationFileType.TECNOCOM_FILE);
     reconciliationFile10.setProcess(ReconciliationOriginType.TECNOCOM);
 
@@ -492,14 +501,15 @@ public class Test_PendingTecnocomReconciliationFile10 extends TestBaseUnitAsync 
     // Se agregan transacciones con monto diferente
     for (MovimientoTecnocom10 trx : satList) {
 
-      Long userId = prepaidCards.stream()
-        .filter(card -> trx.getContrato().equals(card.getProcessorUserId()))
+      Long userId = accounts.stream()
+        .filter(account -> trx.getContrato().equals(account.getAccountNumber()))
         .findAny()
         .get()
-        .getIdUser();
+        .getUserId();
 
 
-      String pan = Utils.replacePan(encryptUtil.decrypt(trx.getPan()));
+
+      String pan = Utils.replacePan(trx.getPan()); // En los test, el pan viene en claro
       PrepaidMovement10 movement10 = TecnocomFileHelper.getInstance().buildMovement(userId, pan, trx);
       movement10.setConTecnocom(ReconciliationStatusType.PENDING);
       movement10.setConSwitch(ReconciliationStatusType.PENDING);
@@ -560,7 +570,7 @@ public class Test_PendingTecnocomReconciliationFile10 extends TestBaseUnitAsync 
 
     ReconciliationFile10 reconciliationFile10 = new ReconciliationFile10();
     reconciliationFile10.setFileName(getRandomString(10));
-    reconciliationFile10.setStatus(FileStatus.READING);
+    reconciliationFile10.setStatus(FileStatus.OK);
     reconciliationFile10.setType(ReconciliationFileType.TECNOCOM_FILE);
     reconciliationFile10.setProcess(ReconciliationOriginType.TECNOCOM);
 
@@ -578,14 +588,14 @@ public class Test_PendingTecnocomReconciliationFile10 extends TestBaseUnitAsync 
     // Se agregan transacciones con monto diferente
     for (MovimientoTecnocom10 trx : satList) {
 
-      Long userId = prepaidCards.stream()
-        .filter(card -> trx.getContrato().equals(card.getProcessorUserId()))
+      Long userId = accounts.stream()
+        .filter(account -> trx.getContrato().equals(account.getAccountNumber()))
         .findAny()
         .get()
-        .getIdUser();
+        .getUserId();
 
 
-      String pan = Utils.replacePan(encryptUtil.decrypt(trx.getPan()));
+      String pan = Utils.replacePan(trx.getPan()); // En los test, el pan viene en claro
       PrepaidMovement10 movement10 = TecnocomFileHelper.getInstance().buildMovement(userId, pan, trx);
       movement10.setConTecnocom(ReconciliationStatusType.PENDING);
       movement10.setConSwitch(ReconciliationStatusType.PENDING);
@@ -638,90 +648,6 @@ public class Test_PendingTecnocomReconciliationFile10 extends TestBaseUnitAsync 
   }
 
   @Test
-  public void processApiTransactions_differentAmount() throws Exception {
-
-    List<PrepaidMovement10> movements = getPrepaidMovementEJBBean10().getPrepaidMovements(null, null, null, null, null, null,
-      null, null, null, null, null, null);
-
-    Assert.assertNull("No debe tener movimientos", movements);
-
-    ReconciliationFile10 reconciliationFile10 = new ReconciliationFile10();
-    reconciliationFile10.setFileName(getRandomString(10));
-    reconciliationFile10.setStatus(FileStatus.READING);
-    reconciliationFile10.setType(ReconciliationFileType.TECNOCOM_FILE);
-    reconciliationFile10.setProcess(ReconciliationOriginType.TECNOCOM);
-
-    reconciliationFile10 = getReconciliationFilesEJBBean10().createReconciliationFile(null,reconciliationFile10);
-
-    Assert.assertNotNull("Debe ser != null", reconciliationFile10);
-    Assert.assertNotEquals("Debe tener id",0L,reconciliationFile10.getId().longValue());
-
-    // Insertar movimientos en tecnocom
-    getTecnocomReconciliationEJBBean10().insertTecnocomMovement(reconciliationFile10.getId(),onlineFile.getDetails());
-
-    // Se buscan movimientos SAT
-    List<MovimientoTecnocom10> satList = getTecnocomReconciliationEJBBean10().buscaMovimientosTecnocom(reconciliationFile10.getId(),OriginOpeType.SAT_ORIGIN);
-
-    // Se agregan transacciones con monto diferente
-    for (MovimientoTecnocom10 trx : satList) {
-
-      Long userId = prepaidCards.stream()
-        .filter(card -> trx.getContrato().equals(card.getProcessorUserId()))
-        .findAny()
-        .get()
-        .getIdUser();
-
-      String pan = Utils.replacePan(encryptUtil.decrypt(trx.getPan()));
-      PrepaidMovement10 movement10 = TecnocomFileHelper.getInstance().buildMovement(userId, pan, trx);
-      movement10.setConTecnocom(ReconciliationStatusType.PENDING);
-      movement10.setConSwitch(ReconciliationStatusType.PENDING);
-      movement10.setOriginType(MovementOriginType.API);
-      movement10.setEstado(PrepaidMovementStatus.PROCESS_OK);
-      movement10.setIdMovimientoRef(Long.valueOf(0));
-      movement10.setIdTxExterno("");
-      movement10.setMonto(movement10.getMonto().add(BigDecimal.valueOf(500)));
-      getPrepaidMovementEJBBean10().addPrepaidMovement(null, movement10);
-
-    }
-
-    movements = getPrepaidMovementEJBBean10().getPrepaidMovements(null, null, null, null, null, null,
-      null, null, null, null, null, null, ReconciliationStatusType.PENDING, ReconciliationStatusType.PENDING, MovementOriginType.API,null);
-
-    Assert.assertNotNull("Debe tener movimientos", movements);
-    Assert.assertFalse("Debe tener movimientos", movements.isEmpty());
-    Assert.assertEquals("Debe tener 16 movimientos", 16, movements.size());
-
-
-    //Se eliminan movimientos de la tabla intermedia
-    getTecnocomReconciliationEJBBean10().eliminaMovimientosTecnocom(reconciliationFile10.getId());
-
-    Long fileId = null;
-    final String filename = "PLJ61110.FINT0003";
-    try {
-      InputStream is = putSuccessFileIntoSftp(filename);
-      fileId = getTecnocomReconciliationEJBBean10().processFile(is, filename);
-    } catch (Exception e) {
-      Assert.fail("Should not be here");
-    }
-    // Procesa los datos insertados en la tabla
-    getTecnocomReconciliationEJBBean10().processTecnocomTableData(fileId);
-
-    movements = getPrepaidMovementEJBBean10().getPrepaidMovements(null, null, null, null, null, null,
-      null, null, null, null, null, null, ReconciliationStatusType.PENDING, ReconciliationStatusType.NOT_RECONCILED, MovementOriginType.API,null);
-
-    Assert.assertNotNull("Debe tener movimientos", movements);
-    Assert.assertFalse("Debe tener movimientos", movements.isEmpty());
-    Assert.assertEquals("Debe tener 16 movimientos", 16, movements.size());
-
-    for (PrepaidMovement10 movement: movements) {
-      Assert.assertEquals("Debe tener estado PROCESS_OK", PrepaidMovementStatus.PROCESS_OK, movement.getEstado());
-      Assert.assertEquals("Debe tener estado conciliacion tecnocom NOT_RECONCILED", ReconciliationStatusType.NOT_RECONCILED, movement.getConTecnocom());
-      Assert.assertEquals("Debe tener estado conciliacion switch PENDING", ReconciliationStatusType.PENDING, movement.getConSwitch());
-      Assert.assertEquals("Debe tener origen API", MovementOriginType.API, movement.getOriginType());
-    }
-  }
-
-  @Test
   public void processApiTransactions_NotReConciled() throws Exception {
 
     List<PrepaidMovement10> movements = getPrepaidMovementEJBBean10().getPrepaidMovements(null, null, null, null, null, null,
@@ -731,7 +657,7 @@ public class Test_PendingTecnocomReconciliationFile10 extends TestBaseUnitAsync 
 
     ReconciliationFile10 reconciliationFile10 = new ReconciliationFile10();
     reconciliationFile10.setFileName(getRandomString(10));
-    reconciliationFile10.setStatus(FileStatus.READING);
+    reconciliationFile10.setStatus(FileStatus.OK);
     reconciliationFile10.setType(ReconciliationFileType.TECNOCOM_FILE);
     reconciliationFile10.setProcess(ReconciliationOriginType.TECNOCOM);
 
@@ -749,14 +675,15 @@ public class Test_PendingTecnocomReconciliationFile10 extends TestBaseUnitAsync 
     // Se agregan transacciones con monto diferente
     for (MovimientoTecnocom10 trx : satList) {
 
-      Long userId = prepaidCards.stream()
-        .filter(card -> trx.getContrato().equals(card.getProcessorUserId()))
+      Long userId = accounts.stream()
+        .filter(account -> trx.getContrato().equals(account.getAccountNumber()))
         .findAny()
         .get()
-        .getIdUser();
+        .getUserId();
 
 
-      String pan = Utils.replacePan(encryptUtil.decrypt(trx.getPan()));
+
+      String pan = Utils.replacePan(trx.getPan()); // En los test, el pan viene en claro
       PrepaidMovement10 movement10 = TecnocomFileHelper.getInstance().buildMovement(userId, pan, trx);
       movement10.setConTecnocom(ReconciliationStatusType.PENDING);
       movement10.setConSwitch(ReconciliationStatusType.PENDING);
@@ -768,10 +695,10 @@ public class Test_PendingTecnocomReconciliationFile10 extends TestBaseUnitAsync 
 
     }
 
-    User user = registerUser();
-    PrepaidUser10 prepaidUser = buildPrepaidUser10(user);
-    prepaidUser = createPrepaidUser10(prepaidUser);
-    PrepaidTopup10 prepaidTopup = buildPrepaidTopup10(user);
+    PrepaidUser10 prepaidUser = buildPrepaidUserv2();
+    prepaidUser = createPrepaidUserV2(prepaidUser);
+
+    PrepaidTopup10 prepaidTopup = buildPrepaidTopup10();
 
     PrepaidMovement10 prepaidMovement10 = buildPrepaidMovement10(prepaidUser, prepaidTopup);
     prepaidMovement10.setConTecnocom(ReconciliationStatusType.PENDING);

@@ -1,12 +1,15 @@
 package cl.multicaja.prepaid.helpers.tecnocom;
 
+import cl.multicaja.core.exceptions.BadRequestException;
 import cl.multicaja.core.utils.NumberUtils;
+import cl.multicaja.core.utils.encryption.PgpHelper;
 import cl.multicaja.prepaid.helpers.tecnocom.model.*;
 import cl.multicaja.prepaid.model.v10.*;
 import cl.multicaja.tecnocom.constants.CodigoMoneda;
 import cl.multicaja.tecnocom.constants.CodigoPais;
 import cl.multicaja.tecnocom.constants.IndicadorNormalCorrector;
 import cl.multicaja.tecnocom.constants.IndicadorPropiaAjena;
+import org.apache.commons.io.IOUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
@@ -245,11 +248,11 @@ public class TecnocomFileHelper {
           footerLine = line;
         } else {
           TecnocomReconciliationFileDetail detail = new TecnocomReconciliationFileDetail(line);
-          if(TecnocomOperationType.OP.equals(detail.getOperationType())) {
-            file.getDetails().add(new TecnocomReconciliationFileDetail(line));
+          if(TecnocomReconciliationRegisterType.OP.equals(detail.getTiporeg())) {
+            file.getDetails().add(detail);
           }
-          else if (TecnocomOperationType.AU.equals(detail.getOperationType())){
-            file.getDetails().add(new TecnocomReconciliationFileDetail(line));
+          else if (TecnocomReconciliationRegisterType.AU.equals(detail.getTiporeg())){
+            file.getDetails().add(detail);
           }
           if(!line.startsWith(String.format("%sD", pattern))) {
             if(!file.isSuspicious()) {
@@ -269,7 +272,7 @@ public class TecnocomFileHelper {
     return file;
   }
 
-  public PrepaidMovement10 buildMovement(Long userId, String pan, MovimientoTecnocom10 batchTrx) {
+  public PrepaidMovement10 buildMovement(Long userId, String pan, MovimientoTecnocom10 batchTrx) throws BadRequestException {
 
     PrepaidMovement10 prepaidMovement = new PrepaidMovement10();
 
@@ -286,7 +289,7 @@ public class TecnocomFileHelper {
     prepaidMovement.setClamon(batchTrx.getImpFac().getCurrencyCode());
     prepaidMovement.setIndnorcor(IndicadorNormalCorrector.fromValue(batchTrx.getTipoFac().getCorrector()));
     prepaidMovement.setTipofac(batchTrx.getTipoFac());
-    prepaidMovement.setFecfac(batchTrx.getFecFac());
+    prepaidMovement.setFecfac(java.sql.Date.valueOf(batchTrx.getFecFac()));
     prepaidMovement.setNumreffac(""); //se debe actualizar despues, es el id de PrepaidMovement10
     prepaidMovement.setPan(pan);
     prepaidMovement.setClamondiv(0);
@@ -308,6 +311,7 @@ public class TecnocomFileHelper {
     prepaidMovement.setLinref(NumberUtils.getInstance().toInteger(batchTrx.getLinRef()));
     prepaidMovement.setNumbencta(1);
     prepaidMovement.setNumplastico(0L);
+    prepaidMovement.setNomcomred(""); //FIXME: MovimientoTecnocom debe traer el merchant name. Si lo debe traer. Se agrego el campo en la tabla prp_movimiento_tecnocom
 
     return prepaidMovement;
   }

@@ -1,0 +1,65 @@
+---
+apiVersion: extensions/v1beta1
+kind: Deployment
+metadata:
+  name: api-prepaid-mock
+  namespace: prepaid
+  labels:
+    app: api-prepaid
+    version: v2
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: api-prepaid
+      version: v2
+  template:
+    metadata:
+      labels:
+        app: api-prepaid
+        version: v2
+    spec:
+      containers:
+      - name: api-prepaid
+        image: ${IMAGE}
+        ports:
+        - containerPort: 8080
+        imagePullPolicy: Always
+        volumeMounts:
+        - name: volume
+          mountPath: /mock/data
+        env:
+          - name: DB_USERNAME
+            value: ${DB_USERNAME}@${DB_HOST_NAME}
+          - name: DB_PASSWORD
+            value: ${DB_PASSWORD}
+          - name: DB_NAME
+            value: ${DB_NAME}
+          - name: DB_HOST_FQDN
+            value: ${DB_HOST_FQDN}
+          - name: API_ENVIRONMENT
+            value: ${API_ENVIRONMENT}
+          - name: TECNOCOM_MOCK_IMPL
+            value: "true"
+          - name: TECNOCOM_MOCK_DATA_PATH
+            value: "/mock/data"
+      imagePullSecrets:
+        - name: container-reg-credentials
+      volumes:
+        - name: volume
+          persistentVolumeClaim:
+            claimName: tcmockfile
+---
+apiVersion: v1
+kind: PersistentVolumeClaim
+metadata:
+  name: tcmockfile
+  namespace: prepaid
+spec:
+  accessModes:
+    - ReadWriteMany
+  storageClassName: azurefile
+  resources:
+    requests:
+      storage: 1Gi
+---

@@ -1,11 +1,9 @@
 package cl.multicaja.prepaid.ejb.v10;
 
-import cl.multicaja.prepaid.model.v10.CcrDetailRecord10;
-import cl.multicaja.prepaid.model.v10.CurrencyUsd;
 import cl.multicaja.prepaid.model.v10.PrepaidCard10;
 import cl.multicaja.prepaid.model.v10.PrepaidCardStatus;
+import cl.multicaja.prepaid.model.v10.*;
 
-import java.io.InputStream;
 import java.util.List;
 import java.util.Map;
 
@@ -103,6 +101,17 @@ public interface PrepaidCardEJB10 {
   void updatePrepaidCard(Map<String, Object> headers, Long cardId, Long userId, PrepaidCardStatus oldStatus, PrepaidCard10 prepaidCard) throws Exception;
 
   /**
+   * Activa la tarjeta mastercard (level 1 a level 2)
+   *
+   * @param headers
+   * @param userUuid
+   * @param accountUuid
+   * @return
+   * @throws Exception
+   */
+  PrepaidCardResponse10 upgradePrepaidCard(Map<String, Object> headers, String userUuid, String accountUuid) throws Exception;
+
+  /**
    *  busca una tarjeta por pan y numero de contrato
    * @param headers
    * @param pan pan encriptado
@@ -112,4 +121,19 @@ public interface PrepaidCardEJB10 {
    */
   PrepaidCard10 getPrepaidCardByPanAndProcessorUserId(Map<String, Object> headers, String pan, String processorUserId) throws Exception;
 
+  /**
+   *  busca una tarjeta por pan hash
+   * @param headers
+   * @param panHash pan hasheado
+   * @return
+   * @throws Exception
+   */
+  PrepaidCard10 getPrepaidCardByPanHashAndAccountNumber(Map<String, Object> headers, String panHash, String account) throws Exception;
+
+  /**
+   *  Busca una tarjeta por id y publica evento de tarjeta creada
+   * @param cardId id interno de la tarjeta
+   * @throws Exception
+   */
+  void publishCardEvent(String externalUserId, String accountUuid, Long cardId, String endpoint) throws Exception;
 }

@@ -1,24 +1,25 @@
 package cl.multicaja.test.integration.v10.api;
 
 import cl.multicaja.core.utils.http.HttpResponse;
-import cl.multicaja.prepaid.helpers.users.model.User;
 import cl.multicaja.prepaid.model.v10.PrepaidCard10;
 import cl.multicaja.prepaid.model.v10.PrepaidTransaction10;
 import cl.multicaja.prepaid.model.v10.PrepaidTransactionExtend10;
 import cl.multicaja.prepaid.model.v10.PrepaidUser10;
+import cl.multicaja.prepaid.model.v11.Account;
 import cl.multicaja.tecnocom.dto.AltaClienteDTO;
 import cl.multicaja.tecnocom.dto.InclusionMovimientosDTO;
 import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.PropertyNamingStrategy;
 import org.junit.Assert;
-import org.junit.BeforeClass;
+import org.junit.Ignore;
 import org.junit.Test;
 
 import java.math.BigDecimal;
 import java.util.List;
-import java.util.ListIterator;
 
+//TODO: Revisar, esto no se utilizara
+@Ignore
 public class Test_getTransaction_v10 extends TestBaseUnitApi {
 
   private HttpResponse getTransactions(Long userIdMc, String fecha_desde, String fecha_hasta) {
@@ -42,31 +43,31 @@ public class Test_getTransaction_v10 extends TestBaseUnitApi {
     }
   }
 
+
   @Test
   public void getTransactionsOk() throws Exception{
     {
-      User user = registerUser();
-      PrepaidUser10 prepaidUser10 = buildPrepaidUser10(user);
-      prepaidUser10 = createPrepaidUser10(prepaidUser10);
+      PrepaidUser10 prepaidUser = buildPrepaidUserv2();
+      prepaidUser = createPrepaidUserV2(prepaidUser);
 
-      AltaClienteDTO altaClienteDTO = registerInTecnocom(user);
-      Assert.assertTrue("debe ser exitoso", altaClienteDTO.isRetornoExitoso());
+      Account account = buildAccountFromTecnocom(prepaidUser);
+      account = createAccount(account.getUserId(),account.getAccountNumber());
 
-      PrepaidCard10 prepaidCard10 = buildPrepaidCard10(prepaidUser10, altaClienteDTO);
-      prepaidCard10 = createPrepaidCard10(prepaidCard10);
+      PrepaidCard10 prepaidCard10 = buildPrepaidCardWithTecnocomData(prepaidUser,account);
+      prepaidCard10 = createPrepaidCardV2(prepaidCard10);
 
       int amount = numberUtils.random(3000, 10000);
       BigDecimal impfac = BigDecimal.valueOf(amount);
 
-      InclusionMovimientosDTO inclusionMovimientosDTO = topupInTecnocom(prepaidCard10, impfac);
+      InclusionMovimientosDTO inclusionMovimientosDTO = topupInTecnocom(account.getAccountNumber(), prepaidCard10, impfac);
       Assert.assertTrue("debe ser exitoso", inclusionMovimientosDTO.isRetornoExitoso());
 
-      HttpResponse resp = createRandomAuthorization(user.getId());
+      HttpResponse resp = createRandomAuthorization(prepaidUser.getId());
       Assert.assertEquals("status 200", 200, resp.getStatus());
       BigDecimal randomAmount = resp.toObject(BigDecimal.class);
       System.out.println("Se hizo una autorización de: " + randomAmount);
 
-      HttpResponse respHttp = getTransactions(user.getId(),"","");
+      HttpResponse respHttp = getTransactions(prepaidUser.getId(),"","");
       Assert.assertEquals("status 200", 200, respHttp.getStatus());
 
       ObjectMapper mapper = new ObjectMapper();

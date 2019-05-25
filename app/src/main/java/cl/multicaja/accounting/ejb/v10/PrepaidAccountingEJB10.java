@@ -85,12 +85,6 @@ public interface PrepaidAccountingEJB10 {
   void processIpmFileTransactions(Map<String, Object> headers, IpmFile ipmFile) throws Exception;
 
   /**
-   * Busca los movimientos de compra y subscriopciones que no hayan sido
-   * confirmados por 7 archivos ipm (o mas) y los deja en estado EXPIRED
-   */
-  void expireIpmMovements() throws SQLException;
-
-  /**
    * Obtiene el tipo de transaccion del mensaje IPM
    * @param trx
    * @return

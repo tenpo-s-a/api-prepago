@@ -1,12 +1,15 @@
 package cl.multicaja.prepaid.async.v10.processors;
 
 import cl.multicaja.prepaid.async.v10.routes.BaseRoute10;
+import cl.multicaja.prepaid.utils.PgpUtil;
 import org.apache.camel.Exchange;
 import org.apache.camel.Processor;
 import org.apache.camel.component.file.GenericFile;
+import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 
+import java.io.File;
 import java.io.InputStream;
 
 /**
@@ -24,15 +27,18 @@ public class PendingTecnocomReconciliationFile10 extends BaseProcessor10 {
     return new Processor() {
       @Override
       public void process(Exchange exchange) throws Exception {
-        final InputStream inputStream = exchange.getIn().getBody(InputStream.class);
-        String fileName = exchange.getIn().getBody(GenericFile.class).getFileName();
-        log.info("Proccess file name : " + fileName);
-        try {
-          Long fileId = getRoute().getTecnocomReconciliationEJBBean10().processFile(inputStream, fileName);
+        Long fileId = exchange.getMessage().getHeader("fileId", Long.class);
+        log.info("[processReconciliationFile] Processing file: " + fileId);
+        try{
+          //Procesa la data guardada en la tabla
+          //FIXME: se debe verificar la lectura de los movimientos desde la tabla para hacer las comparaciones correspondientes
+          // Se debe buscar la tarjeta por el hash del pan
           getRoute().getTecnocomReconciliationEJBBean10().processTecnocomTableData(fileId);
+          // llamar a F3
+          getRoute().getPrepaidMovementEJBBean10().clearingResolution();
+
         } catch(Exception e) {
-          log.info("Error processing file: " + fileName);
-          inputStream.close();
+          log.info("Error processing file: " + fileId);
           throw e;
         }
       }

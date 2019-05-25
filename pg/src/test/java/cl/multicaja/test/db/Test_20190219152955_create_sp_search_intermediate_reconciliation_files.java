@@ -26,7 +26,6 @@ import java.util.concurrent.ExecutionException;
 public class Test_20190219152955_create_sp_search_intermediate_reconciliation_files extends TestDbBasePg {
 
   private DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss");
-  private static final String SP_NAME = SCHEMA + ".prp_busca_archivo_conciliacion";
   private static final String TABLE_NAME = "prp_archivos_conciliacion";
 
   @BeforeClass
@@ -51,9 +50,10 @@ public class Test_20190219152955_create_sp_search_intermediate_reconciliation_fi
   */
 
   public Map<String, Object> searchArchivosReconciliacionLog(
-    String nombreDeArchivo, String proceso, String tipo, String status) throws SQLException {
+    Long fileId, String nombreDeArchivo, String proceso, String tipo, String status) throws SQLException {
 
     Object[] params = {
+      fileId != null ? fileId : new NullParam(Types.BIGINT),
       nombreDeArchivo != null ? nombreDeArchivo : new NullParam(Types.VARCHAR),
       proceso != null ? proceso : new NullParam(Types.VARCHAR),
       tipo != null ? tipo : new NullParam(Types.VARCHAR),
@@ -61,7 +61,7 @@ public class Test_20190219152955_create_sp_search_intermediate_reconciliation_fi
     };
 
     
-    return dbUtils.execute(SCHEMA + ".prp_busca_archivo_conciliacion", params);
+    return dbUtils.execute(SCHEMA + ".prp_busca_archivo_conciliacion_v11", params);
   }
 
   /**
@@ -119,11 +119,41 @@ public class Test_20190219152955_create_sp_search_intermediate_reconciliation_fi
 
     Map<String, Object> insertDataResponse = insertArchivoReconcialicionLog(nombreDeArchivo,proceso,tipo,status);
 
-    Map<String, Object> searchDataResponse = searchArchivosReconciliacionLog(nombreDeArchivo,proceso, tipo, status);
+    Map<String, Object> searchDataResponse = searchArchivosReconciliacionLog(numberUtils.toLong(insertDataResponse.get("id")), nombreDeArchivo, proceso, tipo, status);
     List result = (List)searchDataResponse.get("result");
 
     Assert.assertNotNull("debe retornar una lista", result);
     Assert.assertEquals("Debe contener un elemento", 1 , result.size());
+
+    Map<String, Object> archRecon = (Map)result.get(0);
+
+    String keyToFind;
+    for (Map.Entry<String, Object> entry : archRecon.entrySet()) {
+      keyToFind = entry.getKey().substring(1,entry.getKey().length()).trim();
+
+      System.out.println("Campo: "+keyToFind+" valorRetInsercion: "+insertDataResponse.get(keyToFind)+" valorRetBusq: "+entry.getValue());
+      Assert.assertEquals("Para el campo "+keyToFind+" sus valores coinciden",
+        insertDataResponse.get(keyToFind),entry.getValue());
+    }
+
+  }
+
+  @Test
+  public void testFindByFileId() throws Exception{
+    String nombreDeArchivo;
+    String proceso;
+    String tipo;
+    String status;
+
+    nombreDeArchivo = "Archivo Prueba "+getRandomNumericString(10);
+    proceso = "TECNOCOM";
+    tipo = "CARGAS";
+    status = "OK";
+
+    Map<String, Object> insertDataResponse = insertArchivoReconcialicionLog(nombreDeArchivo,proceso,tipo,status);
+
+    Map<String, Object> searchDataResponse = searchArchivosReconciliacionLog(numberUtils.toLong(insertDataResponse.get("id")), null,null, null, null);
+    List result = (List)searchDataResponse.get("result");
 
     Map<String, Object> archRecon = (Map)result.get(0);
 
@@ -152,7 +182,7 @@ public class Test_20190219152955_create_sp_search_intermediate_reconciliation_fi
 
     Map<String, Object> insertDataResponse = insertArchivoReconcialicionLog(nombreDeArchivo,proceso,tipo,status);
 
-    Map<String, Object> searchDataResponse = searchArchivosReconciliacionLog(nombreDeArchivo,null, null, null);
+    Map<String, Object> searchDataResponse = searchArchivosReconciliacionLog(null, nombreDeArchivo,null, null, null);
     List result = (List)searchDataResponse.get("result");
 
     Map<String, Object> archRecon = (Map)result.get(0);
@@ -189,7 +219,7 @@ public class Test_20190219152955_create_sp_search_intermediate_reconciliation_fi
 
     Map<String, Object> insertDataResponse = insertArchivoReconcialicionLog(nombreDeArchivo,proceso,tipo,status);
 
-    Map<String, Object> searchDataResponse = searchArchivosReconciliacionLog(null,proceso, null, null);
+    Map<String, Object> searchDataResponse = searchArchivosReconciliacionLog(null, null,proceso, null, null);
     List result = (List)searchDataResponse.get("result");
 
     Map<String, Object> archRecon = (Map)result.get(0);
@@ -220,7 +250,7 @@ public class Test_20190219152955_create_sp_search_intermediate_reconciliation_fi
 
     Map<String, Object> insertDataResponse = insertArchivoReconcialicionLog(nombreDeArchivo,proceso,tipo,status);
 
-    Map<String, Object> searchDataResponse = searchArchivosReconciliacionLog(null,null, tipo, null);
+    Map<String, Object> searchDataResponse = searchArchivosReconciliacionLog(null, null,null, tipo, null);
     List result = (List)searchDataResponse.get("result");
 
     Map<String, Object> archRecon = (Map)result.get(0);
@@ -251,7 +281,7 @@ public class Test_20190219152955_create_sp_search_intermediate_reconciliation_fi
 
     Map<String, Object> insertDataResponse = insertArchivoReconcialicionLog(nombreDeArchivo,proceso,tipo,status);
 
-    Map<String, Object> searchDataResponse = searchArchivosReconciliacionLog(null,null, null, status);
+    Map<String, Object> searchDataResponse = searchArchivosReconciliacionLog(null, null,null, null, status);
     List result = (List)searchDataResponse.get("result");
 
     Map<String, Object> archRecon = (Map)result.get(0);

@@ -1,15 +1,17 @@
 package cl.multicaja.test.integration.v10.unit;
 
 import cl.multicaja.core.exceptions.BadRequestException;
-import cl.multicaja.prepaid.model.v10.NewAmountAndCurrency10;
-import cl.multicaja.prepaid.model.v10.PrepaidTopup10;
-import cl.multicaja.prepaid.model.v10.PrepaidWithdraw10;
-import cl.multicaja.prepaid.model.v10.TransactionOriginType;
+import cl.multicaja.prepaid.model.v10.*;
+import cl.multicaja.prepaid.model.v11.IvaType;
+import cl.multicaja.prepaid.model.v11.PrepaidMovementFeeType;
 import cl.multicaja.tecnocom.constants.CodigoMoneda;
+import org.junit.Assert;
 import org.junit.Ignore;
 import org.junit.Test;
 
 import java.math.BigDecimal;
+import java.util.ArrayList;
+import java.util.List;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotNull;
@@ -20,188 +22,81 @@ import static org.junit.Assert.assertNotNull;
 public class Test_PrepaidEJBBean10_calculateTopupFeeAndTotal extends TestBaseUnit {
 
   @Test(expected = BadRequestException.class)
-  public void shouldReturnExceptionWhen_TopupNull() throws Exception {
-    getPrepaidEJBBean10().calculateFeeAndTotal(null);
+  public void calculateFeeAndTotal_nullTransaction() throws Exception {
+    getPrepaidEJBBean10().calculateFeeAndTotal(null, new ArrayList<>());
   }
 
   @Test(expected = BadRequestException.class)
-  public void shouldReturnExceptionWhen_TopupAmountNull() throws Exception {
-    PrepaidTopup10 topup = new PrepaidTopup10();
-    getPrepaidEJBBean10().calculateFeeAndTotal(topup);
+  public void calculateFeeAndTotal_nullFeeList() throws Exception {
+    PrepaidTopup10 prepaidTopup10 = buildPrepaidTopup10();
+    getPrepaidEJBBean10().calculateFeeAndTotal(prepaidTopup10, null);
   }
 
-  @Test(expected = BadRequestException.class)
-  public void shouldReturnExceptionWhen_TopupAmountValueNull() throws Exception {
-    PrepaidTopup10 topup = new PrepaidTopup10();
-    NewAmountAndCurrency10 amount = new NewAmountAndCurrency10();
-    topup.setAmount(amount);
-
-    getPrepaidEJBBean10().calculateFeeAndTotal(topup);
-  }
-
-  @Test(expected = BadRequestException.class)
-  public void shouldReturnExceptionWhen_TopupMerchantCodeNull() throws Exception {
-    PrepaidTopup10 topup = new PrepaidTopup10();
-    NewAmountAndCurrency10 amount = new NewAmountAndCurrency10();
-    amount.setValue(BigDecimal.valueOf(100));
-    topup.setAmount(amount);
-
-    getPrepaidEJBBean10().calculateFeeAndTotal(topup);
-  }
-
-  /*
-    Calcula la comision WEB -> $0
-   */
   @Test
-  public void shouldCalculateWebTopupFee()  throws Exception{
-    PrepaidTopup10 topup = new PrepaidTopup10();
-    NewAmountAndCurrency10 amount = new NewAmountAndCurrency10();
-    amount.setCurrencyCode(CodigoMoneda.CHILE_CLP);
-    amount.setValue(BigDecimal.valueOf(5000));
-    topup.setAmount(amount);
-    topup.setMerchantCode("999999999999991");
+  public void calculateFeeAndTotal_topup() throws Exception {
+    PrepaidTopup10 prepaidTopup10 = buildPrepaidTopup10();
+    NewAmountAndCurrency10 amount = new NewAmountAndCurrency10(new BigDecimal(5000));
+    prepaidTopup10.setAmount(amount);
 
-    getPrepaidEJBBean10().calculateFeeAndTotal(topup);
+    CalculatorParameter10 calculatorParameter10 = getPrepaidEJBBean10().getCalculationsHelper().getCalculatorParameter10();
+    BigDecimal baseFee,percentageFee;
+    PrepaidMovementFeeType feeType;
+    if(PrepaidTopup10.WEB_MERCHANT_CODE.equals(prepaidTopup10.getMerchantCode())){
+      baseFee = calculatorParameter10.getTOPUP_WEB_FEE_AMOUNT();
+      percentageFee = calculatorParameter10.getTOPUP_WEB_FEE_PERCENTAGE();
+      feeType = PrepaidMovementFeeType.TOPUP_WEB_FEE;
+    }else {
+      baseFee = calculatorParameter10.getTOPUP_POS_FEE_AMOUNT();
+      percentageFee = calculatorParameter10.getTOPUP_POS_FEE_PERCENTAGE();
+      feeType = PrepaidMovementFeeType.TOPUP_POS_FEE;
+    }
+    List<PrepaidMovementFee10> feeList = getPrepaidEJBBean10().calculateFeeList(prepaidTopup10.getAmount().getValue(),baseFee,percentageFee, IvaType.PLUS_IVA,feeType);
+    prepaidTopup10 = (PrepaidTopup10) getPrepaidEJBBean10().calculateFeeAndTotal(prepaidTopup10, feeList);
 
-    assertEquals("Deberia ser de tipo WEB", TransactionOriginType.WEB, topup.getTransactionOriginType());
-    assertNotNull("Deberia tener comision", topup.getFee());
-    assertNotNull("Deberia tener total", topup.getTotal());
-    assertEquals("Deberia tener monto de comision = 0", BigDecimal.valueOf(0), topup.getFee().getValue());
-    assertEquals("Deberia tener total = 5000", BigDecimal.valueOf(5000), topup.getTotal().getValue());
+    if(PrepaidTopup10.WEB_MERCHANT_CODE.equals(prepaidTopup10.getMerchantCode())){
+      //TODO: Verificar cuanto tiene que ser la comision carga web
+      //Assert.assertEquals("Debe tener fee total 15", new BigDecimal(152L), prepaidTopup10.getFee().getValue());
+      //Assert.assertEquals("Debe tener total 5000 - 15 = 4985", new BigDecimal(4762L), prepaidTopup10.getTotal().getValue());
+
+    }else {
+      Assert.assertEquals("Debe tener fee total 238", new BigDecimal(238L), prepaidTopup10.getFee().getValue());
+      Assert.assertEquals("Debe tener total 5000 - 238 = 4762", new BigDecimal(4762L), prepaidTopup10.getTotal().getValue());
+
+    }
   }
 
-  /*
-    Calcula la comision POS -> $100 + IVA
-   */
   @Test
-  public void shouldCalculatePosTopupFee_100() throws Exception {
-    PrepaidTopup10 topup = new PrepaidTopup10();
-    NewAmountAndCurrency10 amount = new NewAmountAndCurrency10();
-    amount.setCurrencyCode(CodigoMoneda.CHILE_CLP);
-    amount.setValue(BigDecimal.valueOf(5000));
-    topup.setAmount(amount);
-    topup.setMerchantCode("1234567890");
+  public void calculateFeeAndTotal_withdraw() throws Exception {
+    PrepaidWithdraw10 prepaidWithdraw10 = buildPrepaidWithdrawV2();
+    NewAmountAndCurrency10 amount = new NewAmountAndCurrency10(new BigDecimal(5000));
+    prepaidWithdraw10.setAmount(amount);
 
-    getPrepaidEJBBean10().calculateFeeAndTotal(topup);
+    CalculatorParameter10 calculatorParameter10 = getPrepaidEJBBean10().getCalculationsHelper().getCalculatorParameter10();
 
-    assertEquals("Deberia ser de tipo POS", TransactionOriginType.POS, topup.getTransactionOriginType());
-    assertNotNull("Deberia tener comision", topup.getFee());
-    assertNotNull("Deberia tener total", topup.getTotal());
-    assertEquals("Deberia tener monto de comision = 119", BigDecimal.valueOf(119), topup.getFee().getValue());
-    assertEquals("Deberia tener total = 4881", BigDecimal.valueOf(4881), topup.getTotal().getValue());
+    BigDecimal baseFee,percentageFee;
+    PrepaidMovementFeeType feeType;
+    if(PrepaidTopup10.WEB_MERCHANT_CODE.equals(prepaidWithdraw10.getMerchantCode())){
+      baseFee = calculatorParameter10.getWITHDRAW_WEB_FEE_AMOUNT();
+      percentageFee = calculatorParameter10.getWITHDRAW_WEB_FEE_PERCENTAGE();
+      feeType = PrepaidMovementFeeType.WITHDRAW_WEB_FEE;
+    }else {
+      baseFee = calculatorParameter10.getWITHDRAW_POS_FEE_AMOUNT();
+      percentageFee = calculatorParameter10.getWITHDRAW_POS_FEE_PERCENTAGE();
+      feeType = PrepaidMovementFeeType.WITHDRAW_POS_FEE;
+    }
+    List<PrepaidMovementFee10> feeList = getPrepaidEJBBean10().calculateFeeList(prepaidWithdraw10.getAmount().getValue(),baseFee,percentageFee, IvaType.PLUS_IVA,feeType);
+
+    prepaidWithdraw10 = (PrepaidWithdraw10) getPrepaidEJBBean10().calculateFeeAndTotal(prepaidWithdraw10, feeList);
+    if(PrepaidTopup10.WEB_MERCHANT_CODE.equals(prepaidWithdraw10.getMerchantCode())){
+      //TODO: Verificar cuanto tiene que ser la comision carga web
+      //Assert.assertEquals("Debe tener fee total 15", new BigDecimal(238), prepaidWithdraw10.getFee().getValue());
+      //Assert.assertEquals("Debe tener total 5000 + 15 = 5015", new BigDecimal(5238L), prepaidWithdraw10.getTotal().getValue());
+    }else {
+      Assert.assertEquals("Debe tener fee total 238", new BigDecimal(238), prepaidWithdraw10.getFee().getValue());
+      Assert.assertEquals("Debe tener total 5000 - 238 = 4762", new BigDecimal(5238L), prepaidWithdraw10.getTotal().getValue());
+
+    }
   }
 
-  /*
-    Calcula la comision POS -> (0,5% * TopupAmount) + IVA
-   */
-  @Test
-  public void shouldCalculatePosTopupFee() throws Exception{
-    PrepaidTopup10 topup = new PrepaidTopup10();
-    NewAmountAndCurrency10 amount = new NewAmountAndCurrency10();
-    amount.setCurrencyCode(CodigoMoneda.CHILE_CLP);
-    amount.setValue(BigDecimal.valueOf(50000));
-    topup.setAmount(amount);
-    topup.setMerchantCode("1234567890");
 
-    getPrepaidEJBBean10().calculateFeeAndTotal(topup);
-
-    assertEquals("Deberia ser de tipo POS", TransactionOriginType.POS, topup.getTransactionOriginType());
-    assertNotNull("Deberia tener comision", topup.getFee());
-    assertNotNull("Deberia tener total", topup.getTotal());
-    assertEquals("Deberia tener monto de comision = 297", BigDecimal.valueOf(298), topup.getFee().getValue());
-    assertEquals("Deberia tener total = 49703", BigDecimal.valueOf(49702), topup.getTotal().getValue());
-  }
-
-  @Test(expected = BadRequestException.class)
-  public void shouldReturnExceptionWhen_WithdrawNull() throws Exception {
-    getPrepaidEJBBean10().calculateFeeAndTotal(null);
-  }
-
-  @Test(expected = BadRequestException.class)
-  public void shouldReturnExceptionWhen_WithdrawAmountNull() throws Exception {
-    PrepaidWithdraw10 withdraw = new PrepaidWithdraw10();
-    getPrepaidEJBBean10().calculateFeeAndTotal(withdraw);
-  }
-
-  @Test(expected = BadRequestException.class)
-  public void shouldReturnExceptionWhen_WithdrawAmountValueNull() throws Exception {
-    PrepaidWithdraw10 withdraw = new PrepaidWithdraw10();
-    NewAmountAndCurrency10 amount = new NewAmountAndCurrency10();
-    withdraw.setAmount(amount);
-
-    getPrepaidEJBBean10().calculateFeeAndTotal(withdraw);
-  }
-
-  @Test(expected = BadRequestException.class)
-  public void shouldReturnExceptionWhen_WithdrawMerchantCodeNull() throws Exception {
-    PrepaidWithdraw10 withdraw = new PrepaidWithdraw10();
-    NewAmountAndCurrency10 amount = new NewAmountAndCurrency10();
-    amount.setValue(BigDecimal.valueOf(100));
-    withdraw.setAmount(amount);
-
-    getPrepaidEJBBean10().calculateFeeAndTotal(withdraw);
-  }
-
-  /*
-    Calcula la comision WEB -> $100
-   */
-  @Test
-  public void shouldCalculateWebWithdrawFee()  throws Exception{
-    PrepaidWithdraw10 withdraw = new PrepaidWithdraw10();
-    NewAmountAndCurrency10 amount = new NewAmountAndCurrency10();
-    amount.setCurrencyCode(CodigoMoneda.CHILE_CLP);
-    amount.setValue(BigDecimal.valueOf(5000));
-    withdraw.setAmount(amount);
-    withdraw.setMerchantCode("999999999999991");
-
-    withdraw = (PrepaidWithdraw10) getPrepaidEJBBean10().calculateFeeAndTotal(withdraw);
-
-    assertEquals("Deberia ser de tipo WEB", TransactionOriginType.WEB, withdraw.getTransactionOriginType());
-    assertNotNull("Deberia tener comision", withdraw.getFee());
-    assertNotNull("Deberia tener total", withdraw.getTotal());
-    assertEquals("Deberia tener monto de comision = 100", BigDecimal.valueOf(100), withdraw.getFee().getValue());
-    assertEquals("Deberia tener total = 5000", BigDecimal.valueOf(5100), withdraw.getTotal().getValue());
-  }
-
-  /*
-    Calcula la comision POS -> $100 + IVA
-   */
-  @Test
-  public void shouldCalculatePosWithdrawFee_100() throws Exception {
-    PrepaidWithdraw10 withdraw = new PrepaidWithdraw10();
-    NewAmountAndCurrency10 amount = new NewAmountAndCurrency10();
-    amount.setCurrencyCode(CodigoMoneda.CHILE_CLP);
-    amount.setValue(BigDecimal.valueOf(5000));
-    withdraw.setAmount(amount);
-    withdraw.setMerchantCode("1234567890");
-
-    getPrepaidEJBBean10().calculateFeeAndTotal(withdraw);
-
-    assertEquals("Deberia ser de tipo POS", TransactionOriginType.POS, withdraw.getTransactionOriginType());
-    assertNotNull("Deberia tener comision", withdraw.getFee());
-    assertNotNull("Deberia tener total", withdraw.getTotal());
-    assertEquals("Deberia tener monto de comision = 119", BigDecimal.valueOf(119), withdraw.getFee().getValue());
-    assertEquals("Deberia tener total = 4881", BigDecimal.valueOf(5119), withdraw.getTotal().getValue());
-  }
-
-  /*
-    Calcula la comision POS -> (0,5% * TopupAmount) + IVA
-   */
-  @Test
-  public void shouldCalculatePosWithdrawFee() throws Exception{
-    PrepaidWithdraw10 withdraw = new PrepaidWithdraw10();
-    NewAmountAndCurrency10 amount = new NewAmountAndCurrency10();
-    amount.setCurrencyCode(CodigoMoneda.CHILE_CLP);
-    amount.setValue(BigDecimal.valueOf(50000));
-    withdraw.setAmount(amount);
-    withdraw.setMerchantCode("1234567890");
-
-    getPrepaidEJBBean10().calculateFeeAndTotal(withdraw);
-
-    assertEquals("Deberia ser de tipo POS", TransactionOriginType.POS, withdraw.getTransactionOriginType());
-    assertNotNull("Deberia tener comision", withdraw.getFee());
-    assertNotNull("Deberia tener total", withdraw.getTotal());
-    assertEquals("Deberia tener monto de comision = 297", BigDecimal.valueOf(298), withdraw.getFee().getValue());
-    assertEquals("Deberia tener total = 50297", BigDecimal.valueOf(50298), withdraw.getTotal().getValue());
-  }
 }

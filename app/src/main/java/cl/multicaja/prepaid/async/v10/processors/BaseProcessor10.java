@@ -11,6 +11,7 @@ import cl.multicaja.prepaid.async.v10.model.PrepaidProductChangeData10;
 import cl.multicaja.prepaid.async.v10.model.PrepaidReverseData10;
 import cl.multicaja.prepaid.async.v10.model.PrepaidTopupData10;
 import cl.multicaja.prepaid.async.v10.routes.BaseRoute10;
+import cl.multicaja.prepaid.external.freshdesk.model.*;
 import cl.multicaja.prepaid.helpers.freshdesk.model.v10.*;
 import cl.multicaja.prepaid.model.v10.CdtTransactionType;
 import cl.multicaja.prepaid.model.v10.NewPrepaidBaseTransaction10;
@@ -23,6 +24,7 @@ import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 
 import javax.jms.Queue;
+import java.util.Arrays;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -134,7 +136,7 @@ public abstract class BaseProcessor10 {
     //que el mensaje sera con tiempo de espera
     if (delayTimeoutToRedirect > 0 && !ConfigUtils.isEnvTest()) {
       log.debug("Estableciendo delayTimeoutToRedirect: " + delayTimeoutToRedirect);
-      headers.put(ScheduledMessage.AMQ_SCHEDULED_DELAY, delayTimeoutToRedirect); //TODO si se migra a azure se debe investigar como se envian mensajes programados
+      headers.put(ScheduledMessage.AMQ_SCHEDULED_DELAY, delayTimeoutToRedirect);
       headers.remove("scheduledJobId"); //es necesario remover el scheduledJobId si existe con anterioridad en el mensaje
     }
 
@@ -173,6 +175,9 @@ public abstract class BaseProcessor10 {
     long[] array = getArrayDelayTimeoutToRedirect();
     if (retryCount < 0 || array == null || array.length == 0 || retryCount > array.length) {
       return 0L;
+    }
+    if(retryCount == 0) {
+      return array[retryCount];
     }
     return array[retryCount-1];
   }
@@ -255,7 +260,7 @@ public abstract class BaseProcessor10 {
     // Incluir datos en CDT.
     CdtTransaction10 cdtTx = new CdtTransaction10();
     cdtTx.setAmount(prepaidTopup10.getAmount().getValue());
-    cdtTx.setAccountId(String.format("PREPAGO_%d",user.getRut().longValue()));
+    cdtTx.setAccountId(String.format("PREPAGO_%s",user.getDocumentNumber()));
     cdtTx.setTransactionReference(txRef);
     cdtTx.setIndSimulacion(false);
     cdtTx.setExternalTransactionId(prepaidTopup10.getTransactionId());
@@ -269,9 +274,9 @@ public abstract class BaseProcessor10 {
     newTicket.setDescription(template);
     newTicket.setGroupId(GroupId.OPERACIONES);
     newTicket.setUniqueExternalId(uniqueExternalId);
-    newTicket.setType(TicketType.COLAS_NEGATIVAS);
-    newTicket.setStatus(StatusType.OPEN);
-    newTicket.setPriority(PriorityType.URGENT);
+    newTicket.setType(TicketType.COLAS_NEGATIVAS.getValue());
+    newTicket.setStatus(Long.valueOf(StatusType.OPEN.getValue()));
+    newTicket.setPriority(Long.valueOf(PriorityType.URGENT.getValue()));
     newTicket.setSubject(subject);
     newTicket.setProductId(43000001595L);
     // Ticket Custom Fields:

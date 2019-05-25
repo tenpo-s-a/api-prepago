@@ -1,10 +1,5 @@
 package cl.multicaja.prepaid.ejb.v10;
 
-import cl.multicaja.core.exceptions.NotFoundException;
-import cl.multicaja.core.exceptions.ValidationException;
-import cl.multicaja.prepaid.helpers.users.model.User;
-import cl.multicaja.prepaid.model.v10.PrepaidBalance10;
-import cl.multicaja.prepaid.model.v10.PrepaidBalanceInfo10;
 import cl.multicaja.prepaid.model.v10.PrepaidUser10;
 import cl.multicaja.prepaid.model.v10.PrepaidUserStatus;
 
@@ -79,44 +74,15 @@ public interface PrepaidUserEJB10 {
    */
   void updatePrepaidUserStatus(Map<String, Object> headers, Long userId, PrepaidUserStatus status) throws Exception;
 
-  /**
-   *  Verifica el nivel del usuario
-   *
-   * @param oUser usuario multicaja
-   * @param prepaidUser10 usuario prepago
-   * @throws NotFoundException 102001 si el usuario MC es null
-   * @throws ValidationException 101004 si el rut, status del rut o el nameStatus es null
-   * @throws NotFoundException 302003 si el usuario prepago es null
-   * @return el nivel del usuario
-   */
-  PrepaidUser10 getUserLevel(User oUser, PrepaidUser10 prepaidUser10) throws Exception;
 
   /**
-   * Retorna el saldo del cliente prepago
    *
    * @param headers
-   * @param userIdMc id de usuario multicaja
-   * @return
-   */
-  PrepaidBalance10 getPrepaidUserBalance(Map<String, Object> headers, Long userIdMc) throws Exception;
-
-  /**
-   * Actualiza el saldo del cliente prepago
-   *
-   * @param headers
-   * @param userId id de usuario prepago
-   * @param balance
-   * @throws Exception
-   */
-  void updatePrepaidUserBalance(Map<String, Object> headers, Long userId, PrepaidBalanceInfo10 balance) throws Exception;
-
-  /**
-   * Incrementa el contador de intentos de verificacion de identidad
-   * @param headers
-   * @param prepaidUser
+   * @param user
    * @return
    * @throws Exception
    */
-  PrepaidUser10 incrementIdentityVerificationAttempt(Map<String, Object> headers, PrepaidUser10 prepaidUser) throws Exception;
+  PrepaidUser10 updatePrepaidUser(Map<String,Object> headers, PrepaidUser10 user)throws Exception;
+
 
 }

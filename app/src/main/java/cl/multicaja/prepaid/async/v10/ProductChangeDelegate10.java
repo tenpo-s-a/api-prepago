@@ -4,12 +4,11 @@ import cl.multicaja.camel.CamelFactory;
 import cl.multicaja.camel.ExchangeData;
 import cl.multicaja.camel.JMSHeader;
 import cl.multicaja.camel.ProcessorMetadata;
-import cl.multicaja.core.utils.Utils;
 import cl.multicaja.prepaid.async.v10.model.PrepaidProductChangeData10;
-import cl.multicaja.prepaid.async.v10.model.PrepaidTopupData10;
 import cl.multicaja.prepaid.async.v10.routes.ProductChangeRoute10;
-import cl.multicaja.prepaid.helpers.users.model.User;
 import cl.multicaja.prepaid.model.v10.PrepaidCard10;
+import cl.multicaja.prepaid.model.v10.PrepaidUser10;
+import cl.multicaja.prepaid.model.v11.Account;
 import cl.multicaja.tecnocom.constants.TipoAlta;
 import org.apache.camel.ProducerTemplate;
 import org.apache.commons.logging.Log;
@@ -48,20 +47,20 @@ public class ProductChangeDelegate10 {
   /**
    * Envia un registro de topup al proceso asincrono
    *
-   * @param user
+   * @param prepaidUser
    * @param prepaidCard10
    * @return
    */
-  public String sendProductChange(User user, PrepaidCard10 prepaidCard10, TipoAlta tipoAlta) {
+  public String sendProductChange(PrepaidUser10 prepaidUser, Account account, PrepaidCard10 prepaidCard10, TipoAlta tipoAlta) {
 
     if (!camelFactory.isCamelRunning()) {
       log.error("====== No fue posible enviar mensaje al proceso asincrono, camel no se encuentra en ejecución =======");
       return null;
     }
 
-    String messageId = String.format("%s#%s#%s", user.getId(), user.getRut().getValue(), user.getRut().getValue());
+    String messageId = String.format("%s#%s", prepaidUser.getId(), prepaidUser.getDocumentNumber());
     Queue qReq = camelFactory.createJMSQueue(ProductChangeRoute10.PENDING_PRODUCT_CHANGE_REQ);
-    PrepaidProductChangeData10 data = new PrepaidProductChangeData10(user, prepaidCard10, tipoAlta);
+    PrepaidProductChangeData10 data = new PrepaidProductChangeData10(prepaidUser, account, prepaidCard10, tipoAlta);
 
     ExchangeData<PrepaidProductChangeData10> req = new ExchangeData<>(data);
     req.setRetryCount(0);

@@ -7,11 +7,7 @@ import cl.multicaja.core.utils.db.InParam;
 import cl.multicaja.core.utils.db.NullParam;
 import cl.multicaja.core.utils.db.OutParam;
 import cl.multicaja.core.utils.db.RowMapper;
-import cl.multicaja.prepaid.helpers.users.model.Timestamps;
-import cl.multicaja.prepaid.model.v10.FileStatus;
-import cl.multicaja.prepaid.model.v10.ReconciliationFile10;
-import cl.multicaja.prepaid.model.v10.ReconciliationFileType;
-import cl.multicaja.prepaid.model.v10.ReconciliationOriginType;
+import cl.multicaja.prepaid.model.v10.*;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 
@@ -66,7 +62,7 @@ public class ReconciliationFilesEJBBean10 extends PrepaidBaseEJBBean10 implement
 
     if ("0".equals(resp.get("_error_code"))) {
       reconciliationFile10.setId(getNumberUtils().toLong(resp.get("_r_id")));
-      List<ReconciliationFile10> reconciliationFile10List = this.getReconciliationFile(null, reconciliationFile10.getFileName(), null, null, null);
+      List<ReconciliationFile10> reconciliationFile10List = this.getReconciliationFile(null, reconciliationFile10.getId(), reconciliationFile10.getFileName(), null, null, null);
       return reconciliationFile10List.get(0);
     } else {
       log.error("addReconciliationFile resp: " + resp);
@@ -75,8 +71,9 @@ public class ReconciliationFilesEJBBean10 extends PrepaidBaseEJBBean10 implement
   }
 
   @Override
-  public List<ReconciliationFile10> getReconciliationFile(Map<String, Object> headers, String fileName, ReconciliationOriginType process, ReconciliationFileType fileType, FileStatus fileStatus) throws Exception {
+  public List<ReconciliationFile10> getReconciliationFile(Map<String, Object> headers, Long fileId, String fileName, ReconciliationOriginType process, ReconciliationFileType fileType, FileStatus fileStatus) throws Exception {
     Object[] params = {
+      fileId != null ? new InParam(fileId, Types.BIGINT) : new NullParam(Types.BIGINT),
       fileName != null ? new InParam(fileName, Types.VARCHAR) : new NullParam(Types.VARCHAR),
       process != null ? new InParam(process.toString(), Types.VARCHAR) : new NullParam(Types.VARCHAR),
       fileType != null ? new InParam(fileType.toString(), Types.VARCHAR) : new NullParam(Types.VARCHAR),
@@ -92,8 +89,8 @@ public class ReconciliationFilesEJBBean10 extends PrepaidBaseEJBBean10 implement
         reconciliationFile10.setType(ReconciliationFileType.valueOf(String.valueOf(row.get("_tipo"))));
         reconciliationFile10.setStatus(FileStatus.valueOf(String.valueOf(row.get("_status"))));
         Timestamps timestamps = new Timestamps();
-        timestamps.setCreatedAt((Timestamp)row.get("_created_at"));
-        timestamps.setUpdatedAt((Timestamp)row.get("_updated_at"));
+        timestamps.setCreatedAt(((Timestamp)row.get("_created_at")).toLocalDateTime());
+        timestamps.setUpdatedAt(((Timestamp)row.get("_updated_at")).toLocalDateTime());
         reconciliationFile10.setTimestamps(timestamps);
         return reconciliationFile10;
       } catch(Exception e) {
@@ -103,7 +100,7 @@ public class ReconciliationFilesEJBBean10 extends PrepaidBaseEJBBean10 implement
       }
     };
 
-    Map<String, Object> resp = getDbUtils().execute(getSchema() + ".prp_busca_archivo_conciliacion", rm, params);
+    Map<String, Object> resp = getDbUtils().execute(getSchema() + ".prp_busca_archivo_conciliacion_v11", rm, params);
     log.info("Respuesta Busca archivo conciliacion: "+resp);
     return (List)resp.get("result");
   }

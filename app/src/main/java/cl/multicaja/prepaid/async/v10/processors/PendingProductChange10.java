@@ -5,9 +5,11 @@ import cl.multicaja.camel.ProcessorRoute;
 import cl.multicaja.core.model.Errors;
 import cl.multicaja.prepaid.async.v10.model.PrepaidProductChangeData10;
 import cl.multicaja.prepaid.async.v10.routes.BaseRoute10;
-import cl.multicaja.prepaid.helpers.users.model.EmailBody;
-import cl.multicaja.prepaid.helpers.users.model.User;
+import cl.multicaja.prepaid.async.v10.routes.KafkaEventsRoute10;
 import cl.multicaja.prepaid.model.v10.PrepaidCard10;
+import cl.multicaja.prepaid.model.v10.PrepaidUser10;
+import cl.multicaja.prepaid.model.v10.PrepaidUserLevel;
+import cl.multicaja.prepaid.model.v11.Account;
 import cl.multicaja.tecnocom.constants.CodigoRetorno;
 import cl.multicaja.tecnocom.constants.TipoAlta;
 import cl.multicaja.tecnocom.constants.TipoDocumento;
@@ -45,9 +47,10 @@ public class PendingProductChange10 extends BaseProcessor10 {
           req.retryCountNext();
           PrepaidProductChangeData10 data = req.getData();
 
-          User user = data.getUser();
+          PrepaidUser10 user = data.getPrepaidUser();
           PrepaidCard10 prepaidCard = data.getPrepaidCard();
           TipoAlta tipoAlta = data.getTipoAlta();
+          Account account = data.getAccount();
 
           if(req.getRetryCount() > getMaxRetryCount()) {
             return redirectRequestProductChange(createJMSEndpoint(ERROR_PRODUCT_CHANGE_REQ), exchange, req, false);
@@ -55,16 +58,14 @@ public class PendingProductChange10 extends BaseProcessor10 {
 
           if(prepaidCard == null) {
             log.debug("No se debe realizar cambio de producto ya que el cliente todavia no tiene tarjeta prepago");
-
-            //Envio de mail -> validacion de identidad ok
-            sendSuccessMail(user, Boolean.FALSE);
           } else {
             log.debug(String.format("Realizando el cambio de producto al usuario: %d", user.getId()));
 
-            log.info(String.format("LLamando cambio de producto %s", prepaidCard.getProcessorUserId()));
+            log.info(String.format("LLamando cambio de producto %s", account.getAccountNumber()));
 
             // se hace el cambio de producto
-            CambioProductoDTO dto = getRoute().getTecnocomService().cambioProducto(prepaidCard.getProcessorUserId(), user.getRut().getValue().toString(), TipoDocumento.RUT, tipoAlta);
+            //TODO: debe usar getDocumentType en vez de tipoDocumento.RUT
+            CambioProductoDTO dto = getRoute().getTecnocomService().cambioProducto(account.getAccountNumber(), user.getDocumentNumber(), TipoDocumento.RUT, tipoAlta);
 
             log.info("Respuesta cambio de producto");
             log.info(dto.getRetorno());
@@ -72,19 +73,22 @@ public class PendingProductChange10 extends BaseProcessor10 {
 
             if(dto.isRetornoExitoso()) {
               log.debug("********** Cambio de producto realizado **********");
-
-              //Envio de mail -> validacion de identidad ok
-              sendSuccessMail(user, Boolean.TRUE);
-
+              // Tecnocom responde OK, hacemos los cambios de estado en la bd y las notificaciones
+              changeProduct(user, account, prepaidCard, tipoAlta);
             } else if (dto.getRetorno().equals(CodigoRetorno._200)) {
+              log.debug("********** Cambio de producto rechazado rechazado **********");
+              // Si tecnocom responde que el nivel ya fue cambiado
               if(dto.getDescRetorno().contains("MPA0928")) {
-                log.debug("********** Cambio de producto realizado anteriormente **********");
-                req.getData().setMsjError(dto.getDescRetorno());
-
-                //Envio de mail -> validacion de identidad ok
-                sendSuccessMail(user, Boolean.TRUE);
+                // Revisamos si tenemos cambiado el nivel en nuestra DB
+                PrepaidUser10 storedUser10 = getRoute().getPrepaidUserEJBBean10().findById(null, user.getId());
+                if(PrepaidUserLevel.LEVEL_2.equals(storedUser10.getUserLevel())) {
+                  req.getData().setNumError(Errors.CLIENTE_YA_TIENE_NIVEL_2);
+                  req.getData().setMsjError("MPA0928 - EL NUEVO PRODUCTO DEBE SER DIFERENTE AL ANTERIOR");
+                } else {
+                  // Si no lo tenemos cambiado, hacemos los cambios y lanzamos las notificaciones
+                  changeProduct(user, account, prepaidCard, tipoAlta);
+                }
               } else {
-                log.debug("********** Cambio de producto rechazado rechazado **********");
                 req.getData().setNumError(Errors.ERROR_INDETERMINADO);
                 req.getData().setMsjError(dto.getDescRetorno());
                 return redirectRequestProductChange(createJMSEndpoint(ERROR_PRODUCT_CHANGE_REQ), exchange, req, false);
@@ -115,6 +119,19 @@ public class PendingProductChange10 extends BaseProcessor10 {
     };
   }
 
+  private void changeProduct(PrepaidUser10 user, Account account, PrepaidCard10 prepaidCard, TipoAlta tipoAlta) throws Exception {
+    String accountUuid = account != null ? account.getUuid() : "[noUuid]";
+
+    // Subir el nivel del usuario
+    getRoute().getPrepaidUserEJBBean10().updatePrepaidUserLevel(user.getId(), PrepaidUserLevel.LEVEL_2);
+
+    // Notificar el cierre de la tarjeta antigua
+    getRoute().getPrepaidCardEJBBean11().publishCardEvent(user.getUserIdMc().toString(), accountUuid, prepaidCard.getId(), KafkaEventsRoute10.SEDA_CARD_CLOSED_EVENT);
+
+    // Notificar que se ha creado una tarjeta nueva
+    getRoute().getPrepaidCardEJBBean11().publishCardEvent(user.getUserIdMc().toString(), accountUuid, prepaidCard.getId(), KafkaEventsRoute10.SEDA_CARD_CREATED_EVENT);
+  }
+  /*
   private void sendSuccessMail(User user, Boolean hasCard) throws Exception {
 
     Map<String, Object> templateData = new HashMap<>();
@@ -127,7 +144,7 @@ public class PendingProductChange10 extends BaseProcessor10 {
     emailBody.setTemplate(hasCard ? TEMPLATE_MAIL_IDENTITY_VALIDATION_OK_WITH_CARD : TEMPLATE_MAIL_IDENTITY_VALIDATION_OK_WITHOUT_CARD);
 
     getRoute().getUserClient().sendMail(null, user.getId(), emailBody);
-  }
+  }*/
 
   public ProcessorRoute processErrorProductChange() {
     return new ProcessorRoute<ExchangeData<PrepaidProductChangeData10>, ExchangeData<PrepaidProductChangeData10>>() {
@@ -138,9 +155,9 @@ public class PendingProductChange10 extends BaseProcessor10 {
         log.info("processErrorProductChange - REQ: " + req);
         req.retryCountNext();
         Map<String, Object> templateData = new HashMap<>();
-        templateData.put("idUsuario", req.getData().getUser().getId().toString());
-        templateData.put("rutCliente", req.getData().getUser().getRut().getValue().toString() + "-" + req.getData().getUser().getRut().getDv());
-        getRoute().getMailPrepaidEJBBean10().sendInternalEmail(TEMPLATE_MAIL_ERROR_PRODUCT_CHANGE, templateData);
+        templateData.put("idUsuario", req.getData().getPrepaidUser().getId().toString());
+        templateData.put("rutCliente", req.getData().getPrepaidUser().getDocumentNumber());
+        //getRoute().getMailPrepaidEJBBean10().sendInternalEmail(TEMPLATE_MAIL_ERROR_PRODUCT_CHANGE, templateData);
         return req;
       }
     };

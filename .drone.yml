@@ -8,18 +8,7 @@ pipeline:
     volumes:
       - /tmp/cache:/cache
     when:
-      event: [ push ]
-
-  dbusers_migration:
-    image: mccontainerregistry.azurecr.io/api-users-dbmigration:dbmigration-462fd8e2aa5c2482d0a8990dee681ad8688fb57c
-    commands:
-      - sleep 15
-      - cd /app/pg && ./db-create.sh -Denv=ci
-      - cd /app/pg && ./migrate-up.sh -Denv=ci
-    when:
-      event: [ push ]
-      branch:
-        exclude: master
+      event: [ push, tag ]
 
   db_test:
     image: maven:3.6.0-jdk-8-alpine
@@ -75,7 +64,77 @@ pipeline:
       - touch ./app/integration-test.log
       - tail -n 500 ./app/integration-test.log
     when:
+      event: [ push ]
       status: [ success, failure ]
+      branch:
+        exclude: master
+
+  consul:
+    image: hashicorp/consul-template:alpine
+    commands:
+      - /bin/consul-template -template "./app/src/main/resources/api-prepaid/staging.properties.tmpl:./app/src/main/resources/api-prepaid/staging.properties" -once
+      - /bin/consul-template -template "./app/src/main/resources/api-prepaid/uat.properties.tmpl:./app/src/main/resources/api-prepaid/uat.properties" -once
+      - /bin/consul-template -template "./app/src/main/resources/api-prepaid/uat_mock.properties.tmpl:./app/src/main/resources/api-prepaid/uat_mock.properties" -once
+    secrets:
+      - consul_http_addr
+      - consul_http_token
+    when:
+      event: [ push ]
+      branch: master
+
+  consul_prod:
+    image: hashicorp/consul-template:alpine
+    commands:
+      - /bin/consul-template -template "./app/src/main/resources/api-prepaid/production.properties.tmpl:./app/src/main/resources/api-prepaid/production.properties" -once
+    secrets:
+      - consul_http_addr
+      - consul_http_token
+    when:
+      event: [ tag ]
+      ref: refs/tags/prod-*
+
+  build:
+    image: maven:3.6.0-jdk-8-alpine
+    commands:
+      - ./drone-mvn-cache.sh
+      - cd app && ./package.sh
+    when:
+      event: [ push ]
+      branch: master
+
+  build_prod:
+    image: maven:3.6.0-jdk-8-alpine
+    commands:
+      - ./drone-mvn-cache.sh
+      - cd app && ./package.sh
+    when:
+      event: [ tag ]
+      ref: refs/tags/prod-*
+
+  publish_image:
+    registry: mccontainerregistry.azurecr.io
+    image: plugins/docker
+    repo: mccontainerregistry.azurecr.io/api-prepago
+    tags:
+      - ${DRONE_COMMIT_SHA}
+      - latest
+    secrets: [ docker_username, docker_password ]
+    when:
+      event: [ push ]
+      branch: master
+
+  publish_image_prod:
+    registry: mcdtenpocontainerregistry.azurecr.io
+    image: plugins/docker
+    repo: mcdtenpocontainerregistry.azurecr.io/api-prepago
+    tags:
+      - ${DRONE_COMMIT_SHA}
+      - ${DRONE_TAG}
+      - latest
+    secrets: [ docker_username, docker_password ]
+    when:
+      event: [ tag ]
+      ref: refs/tags/prod-*
 
   db_migration_staging:
     image: maven:3.6.0-jdk-8-alpine
@@ -88,14 +147,143 @@ pipeline:
       event: [ push ]
       branch: master
 
-  build:
+  db_consul_uat:
+    image: hashicorp/consul-template:alpine
+    commands:
+      - /bin/consul-template -template "./pg/environments/uat.properties.tmpl:./pg/environments/uat.properties" -once
+      - /bin/consul-template -template "./pg/environments/uat_mock.properties.tmpl:./pg/environments/uat_mock.properties" -once
+    environment:
+      - DB_NAME=prepago_api
+      - DB_MOCK_NAME=prepago_api_mock
+    secrets:
+      - consul_http_addr
+      - consul_http_token
+    when:
+      event: [ tag ]
+      ref: refs/tags/snapshot*
+
+  db_consul_prod:
+    image: hashicorp/consul-template:alpine
+    commands:
+      - /bin/consul-template -template "./pg/environments/production.properties.tmpl:./pg/environments/production.properties" -once
+    environment:
+      - DB_NAME=prepago_api
+    secrets:
+      - consul_http_addr
+      - consul_http_token
+    when:
+      event: [ tag ]
+      ref: refs/tags/prod-*
+
+  db_migration_uat:
     image: maven:3.6.0-jdk-8-alpine
     commands:
       - ./drone-mvn-cache.sh
-      - cd app && ./package.sh
+      - cd pg
+      - ./db-create.sh -Denv=uat
+      - ./migrate-up.sh -Denv=uat
+    when:
+      event: [ tag ]
+      ref: refs/tags/snapshot*
+
+  db_mock_migration_uat:
+    image: maven:3.6.0-jdk-8-alpine
+    commands:
+      - ./drone-mvn-cache.sh
+      - cd pg
+      - ./db-create.sh -Denv=uat_mock
+      - ./migrate-up.sh -Denv=uat_mock
+    when:
+      event: [ tag ]
+      ref: refs/tags/snapshot*
+
+  db_migration_prod:
+    image: maven:3.6.0-jdk-8-alpine
+    commands:
+      - ./drone-mvn-cache.sh
+      - cd pg
+      - ./db-create.sh -Denv=production
+      - ./migrate-up.sh -Denv=production
+    when:
+      event: [ tag ]
+      ref: refs/tags/prod-*
+
+  deploy_to_staging:
+    image: mccontainerregistry.azurecr.io/tools/drone-phoenix:1.0.0
+    cluster: staging
+    template: kube.staging.yml
+    vars:
+      - IMAGE=mccontainerregistry.azurecr.io/api-prepago:${DRONE_COMMIT_SHA}
+      - DB_NAME=prepago_api_dev
+      - API_ENVIRONMENT=staging
+      - DB_USERNAME=prepago
+      - DB_PASSWORD=N8BC2VQ74PrGv4SeXdHvcT8VPT7pTWU2
+      - DB_HOST_FQDN=prepaid-postgresql-staging.postgres.database.azure.com
+      - DB_HOST_NAME=prepaid-postgresql-staging
     when:
       event: [ push ]
       branch: master
+
+  deploy_to_uat:
+    image: mccontainerregistry.azurecr.io/tools/drone-phoenix:1.0.0
+    cluster: delta
+    template: kube.uat.yml
+    vars:
+      - IMAGE=mccontainerregistry.azurecr.io/api-prepago:${DRONE_COMMIT_SHA}
+      - DB_NAME=prepago_api
+      - API_ENVIRONMENT=uat
+    consul_kv: env/uat.env
+    when:
+      event: [ tag ]
+      ref: refs/tags/snapshot*
+
+  deploy_mock_to_uat:
+    image: mccontainerregistry.azurecr.io/tools/drone-phoenix:1.0.0
+    cluster: delta
+    template: deployment-mock.uat.yml
+    vars:
+      - IMAGE=mccontainerregistry.azurecr.io/api-prepago:${DRONE_COMMIT_SHA}
+      - DB_NAME=prepago_api_mock
+      - API_ENVIRONMENT=uat_mock
+    consul_kv: env/uat.env
+    when:
+      event: [ tag ]
+      ref: refs/tags/snapshot*
+
+  deploy_virtual_service_to_uat:
+    image: mccontainerregistry.azurecr.io/tools/drone-phoenix:1.0.0
+    cluster: delta
+    template: virtual-service.uat.yml
+    consul_kv: env/uat.env
+    when:
+      event: [ tag ]
+      ref: refs/tags/snapshot*
+
+  deploy_destination_rule_to_uat:
+    image: mccontainerregistry.azurecr.io/tools/drone-phoenix:1.0.0
+    cluster: delta
+    template: destination-rule.uat.yml
+    when:
+      event: [ tag ]
+      ref: refs/tags/snapshot*
+
+  deploy_to_prod:
+    image: mcdtenpocontainerregistry.azurecr.io/tools/drone-phoenix:1.0.0
+    cluster: atlas
+    template: kube.production.yml
+    consul_kv: env/production.env
+    vars:
+      - IMAGE=mcdtenpocontainerregistry.azurecr.io/api-prepago:${DRONE_COMMIT_SHA}
+      - DB_NAME=prepago_api
+      - API_ENVIRONMENT=production
+    secrets:
+      - source: consul_http_addr
+        target: CONSUL_HTTP_ADDR
+      - source: consul_http_token
+        target: CONSUL_HTTP_TOKEN
+    when:
+      event: [ tag ]
+      ref: refs/tags/prod-*
 
   rebuild-cache:
     image: drillster/drone-volume-cache
@@ -105,114 +293,20 @@ pipeline:
     volumes:
       - /tmp/cache:/cache
     when:
-      event: [ push ]
-
-  publish_dbmigration_image:
-    registry: mccontainerregistry.azurecr.io
-    image: plugins/docker
-    repo: mccontainerregistry.azurecr.io/api-prepago-dbmigration
-    tags:
-      - dbmigration-${DRONE_COMMIT_SHA}
-    dockerfile: Dockerfile.ci.migration
-    secrets: [ docker_username, docker_password ]
-    when:
-      event: [ push ]
-      branch: master
-
-  publish_ci_image:
-    registry: mccontainerregistry.azurecr.io
-    image: plugins/docker
-    repo: mccontainerregistry.azurecr.io/api-prepago
-    tags:
-      - ci-${DRONE_COMMIT_SHA}
-    dockerfile: Dockerfile.ci
-    secrets: [ docker_username, docker_password ]
-    when:
-      event: [ push ]
-      branch: master
-
-  publish_image:
-    registry: mccontainerregistry.azurecr.io
-    image: plugins/docker
-    repo: mccontainerregistry.azurecr.io/api-prepago
-    tags:
-      - ${DRONE_COMMIT_SHA}
-    secrets: [ docker_username, docker_password ]
-    when:
-      event: [ push ]
-      branch: master
-
-  kong_staging:
-    image: mccontainerregistry.azurecr.io/tools/drone-terraform:2.0.0
-    root_dir: terraform
-    init_options:
-      backend-config:
-        - "path=apps/api-prepaid/staging/terraform-state"
-    vars:
-      kong_admin_uri: https://kong.staging.multicajadigital.cloud/admin
-      cluster_environment: staging
-    secrets:
-      - source: consul_http_addr
-        target: CONSUL_HTTP_ADDR
-      - source: consul_http_token
-        target: CONSUL_HTTP_TOKEN
-    when:
-      event: [ push ]
-      branch: [ master ]
-
-  kong_production:
-    image: mccontainerregistry.azurecr.io/tools/drone-terraform:2.0.0
-    root_dir: terraform
-    init_options:
-      backend-config:
-        - "path=apps/api-prepaid/production/terraform-state"
-    vars:
-      kong_admin_uri: https://kong.production.multicajadigital.cloud/admin
-      cluster_environment: production
-    secrets:
-      - source: consul_http_addr
-        target: CONSUL_HTTP_ADDR
-      - source: consul_http_token
-        target: CONSUL_HTTP_TOKEN
-    when:
-      event: [ tag ]
-      branch: [ master ]
-
-  deploy_to_staging:
-    image: mccontainerregistry.azurecr.io/tools/drone-phoenix:0.1.4
-    cluster: staging
-    vars:
-      - IMAGE=mccontainerregistry.azurecr.io/api-prepago:${DRONE_COMMIT_SHA}
-    when:
-      event: [ push ]
-      branch: master
-
-  deploy_to_production:
-    image: mccontainerregistry.azurecr.io/tools/drone-phoenix:0.1.4
-    cluster: production
-    vars:
-      - IMAGE=mccontainerregistry.azurecr.io/api-prepago:${DRONE_COMMIT_SHA}
-    when:
-      event: [ tag ]
+      event: [ push, tag ]
 
   slack:
     image: mccontainerregistry.azurecr.io/tools/drone-slack:1.0.0
     channel: drone_deployments
     icon_emoji: ":package:"
     when:
+      ref:
+        exclude: refs/tags/prod-*
       status: [ success, failure ]
 
 services:
   database:
     image: postgres:9.6.3-alpine
-    when:
-      event: [ push ]
-      branch:
-        exclude: master
-
-  api-users:
-    image: mccontainerregistry.azurecr.io/api-users:ci-462fd8e2aa5c2482d0a8990dee681ad8688fb57c
-    log-driver: none
     when:
       event: [ push ]
       branch:

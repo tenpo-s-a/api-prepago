@@ -1,16 +1,18 @@
 package cl.multicaja.test.integration.v10.unit;
 
 import cl.multicaja.core.utils.Utils;
-import cl.multicaja.prepaid.helpers.tecnocom.model.TecnocomReconciliationFile;
-import cl.multicaja.prepaid.helpers.users.model.User;
 import cl.multicaja.prepaid.model.v10.*;
+import cl.multicaja.prepaid.model.v11.Account;
 import org.junit.After;
 import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;
 
 import java.io.InputStream;
-import java.util.*;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.List;
+import java.util.UUID;
 
 /**
  * @author abarazarte
@@ -21,6 +23,7 @@ public class Test_PendingTecnocomReconciliationFileAut10 extends TestBaseUnit {
   private List<String> contracts = Arrays.asList("09870001000000000012","09870001000000000013");
   private List<PrepaidUser10> users = new ArrayList<>();
   private List<PrepaidCard10> prepaidCards = new ArrayList<>();
+  private List<Account> accounts = new ArrayList<>();
 
   private void clearTransactions() {
     getDbUtils().getJdbcTemplate().execute(String.format("TRUNCATE %s.prp_usuario CASCADE", getSchema()));
@@ -32,6 +35,7 @@ public class Test_PendingTecnocomReconciliationFileAut10 extends TestBaseUnit {
 
     users.clear();
     prepaidCards.clear();
+    accounts.clear();
 
     for (int i = 0; i < pans.size(); i++) {
       String pan = pans.get(i);
@@ -39,18 +43,21 @@ public class Test_PendingTecnocomReconciliationFileAut10 extends TestBaseUnit {
 
       System.out.println(String.format("%s -> %s", pan, processorUserId));
 
-      // Crea usuario
-      User user = registerUser();
-
       // Crea usuario prepago
-      PrepaidUser10 prepaidUser10 = buildPrepaidUser10(user);
+      PrepaidUser10 prepaidUser10 = buildPrepaidUserv2(PrepaidUserLevel.LEVEL_2);
+      prepaidUser10 = createPrepaidUserV2(prepaidUser10);
+
+      Account account = createAccount(prepaidUser10.getId(),processorUserId);
 
       PrepaidCard10 prepaidCard10 = buildPrepaidCard10();
       prepaidCard10.setPan(Utils.replacePan(pan));
-      prepaidCard10.setProcessorUserId(processorUserId);
-      prepaidCard10 = createPrepaidCard10(prepaidCard10);
+      prepaidCard10.setHashedPan(pan); // Para tests, se guarda en claro en vez del hash
+      prepaidCard10.setAccountId(account.getId());
+      prepaidCard10.setUuid(UUID.randomUUID().toString());
+      prepaidCard10 = createPrepaidCardV2(prepaidCard10);
 
       users.add(prepaidUser10);
+      accounts.add(account);
       prepaidCards.add(prepaidCard10);
     }
   }

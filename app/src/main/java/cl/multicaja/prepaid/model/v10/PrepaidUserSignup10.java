@@ -1,7 +1,5 @@
 package cl.multicaja.prepaid.model.v10;
 
-import cl.multicaja.prepaid.helpers.users.model.Timestamps;
-
 import java.util.List;
 
 /**

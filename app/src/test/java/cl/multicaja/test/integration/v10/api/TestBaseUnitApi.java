@@ -2,7 +2,6 @@ package cl.multicaja.test.integration.v10.api;
 
 import cl.multicaja.core.utils.ConfigUtils;
 import cl.multicaja.core.utils.http.HttpResponse;
-import cl.multicaja.prepaid.helpers.users.model.User;
 import cl.multicaja.prepaid.model.v10.NewPrepaidBaseTransaction10;
 import cl.multicaja.prepaid.model.v10.NewPrepaidTopup10;
 import cl.multicaja.test.integration.TestSuite;
@@ -56,14 +55,15 @@ public class TestBaseUnitApi extends TestContextHelper {
     destroyCamelContext();
   }
 
-  protected void topupUserBalance(User user, BigDecimal amount) {
-    NewPrepaidTopup10 prepaidTopup = buildNewPrepaidTopup10(user);
+  protected HttpResponse topupUserBalance(String externalUserId, BigDecimal amount) {
+    NewPrepaidTopup10 prepaidTopup = buildNewPrepaidTopup10();
     prepaidTopup.getAmount().setValue(amount);
     prepaidTopup.setMerchantCode(NewPrepaidBaseTransaction10.WEB_MERCHANT_CODE);
 
-    HttpResponse respHttp = apiPOST("/1.0/prepaid/topup", toJson(prepaidTopup));
+    HttpResponse respHttp = apiPOST(String.format("/1.0/prepaid/%s/cash_in",externalUserId), toJson(prepaidTopup));
     System.out.println("respHttp: " + respHttp);
     Assert.assertEquals("Debe cargar ok", 201, respHttp.getStatus());
+    return respHttp;
   }
 
 }

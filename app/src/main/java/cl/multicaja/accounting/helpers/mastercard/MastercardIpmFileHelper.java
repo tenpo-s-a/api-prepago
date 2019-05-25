@@ -15,45 +15,6 @@ public class MastercardIpmFileHelper {
 
   private static Log log = LogFactory.getLog(MastercardIpmFileHelper.class);
 
-  public static void decryptFile(InputStream inputFile, String  privateKey, String publicKey, File outputFile, String pass) throws Exception {
-    if(inputFile == null) {
-      throw new Exception("Input File is null");
-    }
-    if(privateKey == null) {
-      throw new Exception("Private Key is null");
-    }
-    if(publicKey == null) {
-      throw new Exception("Public Key is null");
-    }
-    if(outputFile == null) {
-      throw new Exception("Output file is null");
-    }
-    if(pass == null) {
-      throw new Exception("Password is null");
-    }
-
-    log.info("Decrypting file");
-
-    try {
-      ByteArrayOutputStream decryptedFile = PgpHelper.getInstance().decrypt(
-        IOUtils.toByteArray(inputFile),
-        pass,
-        PgpHelper.ArmoredKeyPair.of(privateKey, publicKey));
-
-      OutputStream outputStream = new FileOutputStream(outputFile);
-      decryptedFile.writeTo(outputStream);
-
-      outputStream.flush();
-      outputStream.close();
-      decryptedFile.close();
-
-      log.info("File decrypted");
-    } catch(Exception e) {
-      log.error("Error decrypting file");
-      throw e;
-    }
-  }
-
   public static IpmFile readCsvIpmData(FileReader file, IpmFile ipmFile) throws Exception {
     if(file == null) {
       throw new Exception("Csv File is null");
