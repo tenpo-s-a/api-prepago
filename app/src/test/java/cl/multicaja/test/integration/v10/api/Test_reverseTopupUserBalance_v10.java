@@ -259,7 +259,7 @@ public class Test_reverseTopupUserBalance_v10 extends TestBaseUnitApi {
     prepaidTopup.getAmount().setValue(BigDecimal.valueOf(5000));
 
     
-    PrepaidMovement10 prepaidMovement = buildReversePrepaidMovement11(prepaidUser, prepaidTopup,prepaidCard10);
+    PrepaidMovement10 prepaidMovement = buildReversePrepaidMovement11(prepaidUser, prepaidTopup);
     prepaidMovement = createPrepaidMovement11(prepaidMovement);
 
     HttpResponse resp = reverseTopupUserBalance(prepaidUser.getUuid(),prepaidTopup);

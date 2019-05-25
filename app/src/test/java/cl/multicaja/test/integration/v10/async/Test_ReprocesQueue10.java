@@ -352,7 +352,7 @@ public class Test_ReprocesQueue10 extends TestBaseUnitAsync {
     tc.getTecnocomService().setRetorno(CodigoRetorno._1010);
     String messageId = sendPendingWithdrawReversal(withdraw10,prepaidUser, reverse, 2);
 
-    Thread.sleep(2000);
+    Thread.sleep(3000);
     {
       // Vuelve a reinjectar en la cola y verifica que se ejecute correctamente.
       //Se setea para que de error de conexion!
@@ -363,7 +363,7 @@ public class Test_ReprocesQueue10 extends TestBaseUnitAsync {
       reprocesQueue.setIdQueue(messageId);
       reprocesQueue.setLastQueue(QueuesNameType.REVERSE_WITHDRAWAL);
       messageId = getPrepaidEJBBean10().reprocessQueue(null,reprocesQueue);
-      Thread.sleep(2000);
+      Thread.sleep(3000);
 
       //se verifica que el mensaje haya sido procesado por el proceso asincrono y lo busca en la cola de procesados
       Queue qResp = camelFactory.createJMSQueue(TransactionReversalRoute10.PENDING_REVERSAL_WITHDRAW_RESP);

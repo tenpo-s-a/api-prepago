@@ -912,10 +912,10 @@ public class TestBaseUnit extends TestApiBase {
     return buildPrepaidMovement10(prepaidUser, prepaidTopup, null, null, PrepaidMovementType.TOPUP);
   }
   public PrepaidMovement10 buildPrepaidMovement11(PrepaidUser10 prepaidUser, PrepaidTopup10 prepaidTopup,PrepaidCard10 prepaidCard10) throws Exception {
-    return buildPrepaidMovement11(prepaidUser, prepaidTopup, prepaidCard10, null, PrepaidMovementType.TOPUP);
+    return buildPrepaidMovement11(prepaidUser, prepaidTopup, prepaidCard10, null, PrepaidMovementType.TOPUP,false);
   }
   public PrepaidMovement10 buildPrepaidMovement11(PrepaidUser10 prepaidUser, PrepaidTopup10 prepaidTopup) throws Exception {
-    return buildPrepaidMovement11(prepaidUser, prepaidTopup, null, null, PrepaidMovementType.TOPUP);
+    return buildPrepaidMovement11(prepaidUser, prepaidTopup, null, null, PrepaidMovementType.TOPUP,false);
   }
   /**
    *
@@ -940,7 +940,7 @@ public class TestBaseUnit extends TestApiBase {
   }
 
   public PrepaidMovement10 buildPrepaidMovement11(PrepaidUser10 prepaidUser, PrepaidTopup10 prepaidTopup, CdtTransaction10 cdtTransaction ) throws Exception {
-    return buildPrepaidMovement11(prepaidUser, prepaidTopup, null, cdtTransaction, PrepaidMovementType.TOPUP);
+    return buildPrepaidMovement11(prepaidUser, prepaidTopup, null, cdtTransaction, PrepaidMovementType.TOPUP,false);
   }
 
 
@@ -966,11 +966,11 @@ public class TestBaseUnit extends TestApiBase {
   }
 
   public PrepaidMovement10 buildPrepaidMovement11(PrepaidUser10 prepaidUser, NewPrepaidBaseTransaction10 prepaidTopup, PrepaidCard10 prepaidCard, CdtTransaction10 cdtTransaction,PrepaidCard10 prepaidCard10) throws Exception {
-    return buildPrepaidMovement11(prepaidUser, prepaidTopup, prepaidCard, cdtTransaction, PrepaidMovementType.TOPUP);
+    return buildPrepaidMovement11(prepaidUser, prepaidTopup, prepaidCard, cdtTransaction, PrepaidMovementType.TOPUP,false);
   }
 
   public PrepaidMovement10 buildPrepaidMovement11(PrepaidUser10 prepaidUser, NewPrepaidBaseTransaction10 prepaidTopup, PrepaidCard10 prepaidCard, CdtTransaction10 cdtTransaction) throws Exception {
-    return buildPrepaidMovement11(prepaidUser, prepaidTopup, prepaidCard, cdtTransaction, PrepaidMovementType.TOPUP);
+    return buildPrepaidMovement11(prepaidUser, prepaidTopup, prepaidCard, cdtTransaction, PrepaidMovementType.TOPUP,false);
   }
 
   /*
@@ -988,7 +988,7 @@ public class TestBaseUnit extends TestApiBase {
   }
 
   public PrepaidMovement10 buildPrepaidMovement11(PrepaidUser10 prepaidUser, PrepaidWithdraw10 prepaidWithdraw) throws Exception {
-    return buildPrepaidMovement11(prepaidUser, prepaidWithdraw, null, null, PrepaidMovementType.WITHDRAW);
+    return buildPrepaidMovement11(prepaidUser, prepaidWithdraw, null, null, PrepaidMovementType.WITHDRAW,false);
   }
 
   /**
@@ -1015,7 +1015,7 @@ public class TestBaseUnit extends TestApiBase {
   }
 
 
-  public PrepaidMovement10 buildPrepaidMovement11(PrepaidUser10 prepaidUser, NewPrepaidBaseTransaction10 prepaidTopup, PrepaidCard10 prepaidCard, CdtTransaction10 cdtTransaction, PrepaidMovementType type) throws Exception {
+  public PrepaidMovement10 buildPrepaidMovement11(PrepaidUser10 prepaidUser, NewPrepaidBaseTransaction10 prepaidTopup, PrepaidCard10 prepaidCard, CdtTransaction10 cdtTransaction, PrepaidMovementType type, Boolean isReverse) throws Exception {
 
     String codent = null;
     try {
@@ -1023,23 +1023,43 @@ public class TestBaseUnit extends TestApiBase {
     } catch (SQLException e) {
       codent = getConfigUtils().getProperty("tecnocom.codEntity");
     }
-
     TipoFactura tipoFactura;
-    if(PrepaidMovementType.TOPUP.equals(type)) {
-      tipoFactura = TipoFactura.CARGA_TRANSFERENCIA;
-    } else {
-      tipoFactura = TipoFactura.RETIRO_TRANSFERENCIA;
-    }
+    if(isReverse == null || !isReverse){
+      if(PrepaidMovementType.TOPUP.equals(type)) {
+        tipoFactura = TipoFactura.CARGA_TRANSFERENCIA;
+      } else {
+        tipoFactura = TipoFactura.RETIRO_TRANSFERENCIA;
+      }
 
-    if (prepaidTopup != null) {
-      if (TransactionOriginType.POS.equals(prepaidTopup.getTransactionOriginType())) {
-        if (PrepaidMovementType.TOPUP.equals(type)) {
-          tipoFactura = TipoFactura.CARGA_EFECTIVO_COMERCIO_MULTICAJA;
-        } else {
-          tipoFactura = TipoFactura.RETIRO_EFECTIVO_COMERCIO_MULTICJA;
+      if (prepaidTopup != null) {
+        if (TransactionOriginType.POS.equals(prepaidTopup.getTransactionOriginType())) {
+          if (PrepaidMovementType.TOPUP.equals(type)) {
+            tipoFactura = TipoFactura.CARGA_EFECTIVO_COMERCIO_MULTICAJA;
+          } else {
+            tipoFactura = TipoFactura.RETIRO_EFECTIVO_COMERCIO_MULTICJA;
+          }
+        }
+      }
+    }else {
+      if(PrepaidMovementType.TOPUP.equals(type)){
+        tipoFactura = TipoFactura.ANULA_CARGA_TRANSFERENCIA;
+      } else {
+        tipoFactura = TipoFactura.ANULA_RETIRO_TRANSFERENCIA;
+      }
+
+      if (prepaidTopup != null) {
+        if (TransactionOriginType.POS.equals(prepaidTopup.getTransactionOriginType())) {
+          if(PrepaidMovementType.TOPUP.equals(type)){
+            tipoFactura = TipoFactura.ANULA_CARGA_EFECTIVO_COMERCIO_MULTICAJA;
+          } else {
+            tipoFactura = TipoFactura.ANULA_RETIRO_EFECTIVO_COMERCIO_MULTICJA;
+          }
         }
       }
     }
+
+
+
 
     Account account = getAccountEJBBean10().findByUserId(prepaidUser.getId());
     String centalta = "";
@@ -1060,9 +1080,9 @@ public class TestBaseUnit extends TestApiBase {
     prepaidMovement.setIdMovimientoRef(cdtTransaction != null ? cdtTransaction.getTransactionReference() : getUniqueLong());
     prepaidMovement.setIdPrepaidUser(prepaidUser.getId());
 
-    prepaidMovement.setIdTxExterno(cdtTransaction != null ? cdtTransaction.getExternalTransactionId() : getUniqueLong().toString());
+    prepaidMovement.setIdTxExterno(prepaidTopup != null ? prepaidTopup.getTransactionId(): getUniqueLong().toString());
     prepaidMovement.setTipoMovimiento(type);
-    prepaidMovement.setMonto(BigDecimal.valueOf(getUniqueInteger()));
+    prepaidMovement.setMonto(prepaidTopup != null ? prepaidTopup.getAmount().getValue() : BigDecimal.valueOf(getUniqueInteger()));
     prepaidMovement.setEstado(PrepaidMovementStatus.PENDING);
     prepaidMovement.setEstadoNegocio(BusinessStatusType.IN_PROCESS);
     prepaidMovement.setCodent(codent);
@@ -1296,7 +1316,7 @@ public class TestBaseUnit extends TestApiBase {
 
     prepaidMovement.setIdTxExterno(cdtTransaction != null ? cdtTransaction.getExternalTransactionId() : getUniqueLong().toString());
     prepaidMovement.setTipoMovimiento(type);
-    prepaidMovement.setMonto(BigDecimal.valueOf(getUniqueInteger()));
+    prepaidMovement.setMonto(prepaidTopup != null ? prepaidTopup.getAmount().getValue() : BigDecimal.valueOf(getUniqueInteger()));
     prepaidMovement.setEstado(status);
     prepaidMovement.setEstadoNegocio(BusinessStatusType.IN_PROCESS);
     prepaidMovement.setCodent(codent);
@@ -1424,7 +1444,7 @@ public class TestBaseUnit extends TestApiBase {
     return prepaidMovement;
   }
   public PrepaidMovement10 buildReversePrepaidMovement11(PrepaidUser10 prepaidUser, NewPrepaidBaseTransaction10 reverseRequest, PrepaidCard10 prepaidCard, PrepaidMovementType type) throws Exception {
-    return buildPrepaidMovement11(prepaidUser,reverseRequest,prepaidCard,null,type);
+    return buildPrepaidMovement11(prepaidUser,reverseRequest,prepaidCard,null,type,true);
   }
   /**
    *
