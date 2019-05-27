@@ -130,7 +130,7 @@ public class Test_TecnocomReconciliationEJBBean10_insertAutorization extends Tes
     PrepaidTopup10 topup = buildPrepaidTopup10();
 
     // Se inserta un movimiento en estado AUTHORIZED
-    PrepaidMovement10 insertedMovement = buildPrepaidMovementV2(prepaidUser, topup, prepaidCard, null, PrepaidMovementType.TOPUP);
+    PrepaidMovement10 insertedMovement = buildPrepaidMovement11(prepaidUser, topup, prepaidCard, null, PrepaidMovementType.TOPUP, false);
     insertedMovement.setEstado(PrepaidMovementStatus.AUTHORIZED);
     insertedMovement.setTipoMovimiento(PrepaidMovementType.SUSCRIPTION);
     insertedMovement.setTipofac(TipoFactura.ANULA_SUSCRIPCION_INTERNACIONAL);
@@ -149,8 +149,8 @@ public class Test_TecnocomReconciliationEJBBean10_insertAutorization extends Tes
     // Crea 1 archivos extra para que se expire el movimiento
     List<ReconciliationFile10> createdFiles = createReconciliationFiles(1);
 
-    // Se inserta un movimiento en estado AUTHORIZED que no expirarara, ya que solo tiene 6 archivos entre medio
-    PrepaidMovement10 doNotExpireMovement = buildPrepaidMovementV2(prepaidUser, topup, prepaidCard, null, PrepaidMovementType.TOPUP);
+    // Se inserta un movimiento en estado AUTHORIZED que no expirarara, ya que solo tiene 1 archivos entre medio
+    PrepaidMovement10 doNotExpireMovement = buildPrepaidMovement11(prepaidUser, topup, prepaidCard, null, PrepaidMovementType.TOPUP, false);
     doNotExpireMovement.setEstado(PrepaidMovementStatus.AUTHORIZED);
     doNotExpireMovement.setTipoMovimiento(PrepaidMovementType.SUSCRIPTION);
     doNotExpireMovement.setTipofac(TipoFactura.SUSCRIPCION_INTERNACIONAL);
@@ -192,7 +192,7 @@ public class Test_TecnocomReconciliationEJBBean10_insertAutorization extends Tes
     PrepaidTopup10 topup = buildPrepaidTopup10();
 
     // Se inserta un movimiento en estado AUTHORIZED
-    PrepaidMovement10 insertedMovement = buildPrepaidMovementV2(prepaidUser, topup, prepaidCard, null, PrepaidMovementType.TOPUP);
+    PrepaidMovement10 insertedMovement = buildPrepaidMovement11(prepaidUser, topup, prepaidCard, null, PrepaidMovementType.TOPUP, false);
     insertedMovement.setEstado(PrepaidMovementStatus.AUTHORIZED);
     insertedMovement.setTipoMovimiento(PrepaidMovementType.PURCHASE);
     insertedMovement.setTipofac(TipoFactura.ANULA_COMPRA_INTERNACIONAL);
@@ -211,8 +211,8 @@ public class Test_TecnocomReconciliationEJBBean10_insertAutorization extends Tes
     // Crea 1 archivos extra para que se expire el movimiento
     List<ReconciliationFile10> createdFiles = createReconciliationFiles(1);
 
-    // Se inserta un movimiento en estado AUTHORIZED que no expirarara, ya que solo tiene 6 archivos entre medio
-    PrepaidMovement10 doNotExpireMovement = buildPrepaidMovementV2(prepaidUser, topup, prepaidCard, null, PrepaidMovementType.TOPUP);
+    // Se inserta un movimiento en estado AUTHORIZED que no expirarara, ya que solo tiene 1 archivo entre medio
+    PrepaidMovement10 doNotExpireMovement = buildPrepaidMovement11(prepaidUser, topup, prepaidCard, null, PrepaidMovementType.TOPUP, false);
     doNotExpireMovement.setEstado(PrepaidMovementStatus.AUTHORIZED);
     doNotExpireMovement.setTipoMovimiento(PrepaidMovementType.PURCHASE);
     doNotExpireMovement.setTipofac(TipoFactura.COMPRA_INTERNACIONAL);

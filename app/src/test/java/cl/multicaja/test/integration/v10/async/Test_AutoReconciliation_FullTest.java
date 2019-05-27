@@ -136,7 +136,7 @@ public class Test_AutoReconciliation_FullTest extends TestBaseUnitAsync {
     List<ReconciliationFile10> createdFiles = createReconciliationFiles(1);
 
     // Se inserta un movimiento extra en estado NOTIFIED, este no debe expirar, ya que solo tendra 1 archivo
-    PrepaidMovement10 doNotExpireMovement = buildPrepaidMovementV2(prepaidUser, topup, prepaidCard, null, PrepaidMovementType.TOPUP);
+    PrepaidMovement10 doNotExpireMovement = buildPrepaidMovement11(prepaidUser, topup, prepaidCard, null, PrepaidMovementType.TOPUP, false);
     doNotExpireMovement.setEstado(PrepaidMovementStatus.NOTIFIED);
     doNotExpireMovement.setTipoMovimiento(PrepaidMovementType.SUSCRIPTION);
     doNotExpireMovement.setTipofac(TipoFactura.SUSCRIPCION_INTERNACIONAL);
@@ -169,7 +169,7 @@ public class Test_AutoReconciliation_FullTest extends TestBaseUnitAsync {
     PrepaidTopup10 topup = buildPrepaidTopup10();
 
     // Se inserta un movimiento en estado NOTIFIED
-    PrepaidMovement10 insertedMovement = buildPrepaidMovementV2(prepaidUser, topup, prepaidCard, null, PrepaidMovementType.TOPUP);
+    PrepaidMovement10 insertedMovement = buildPrepaidMovement11(prepaidUser, topup, prepaidCard, null, PrepaidMovementType.TOPUP, false);
     insertedMovement.setEstado(PrepaidMovementStatus.NOTIFIED);
     insertedMovement.setTipoMovimiento(PrepaidMovementType.PURCHASE);
     insertedMovement.setTipofac(TipoFactura.COMPRA_INTERNACIONAL);
@@ -179,7 +179,7 @@ public class Test_AutoReconciliation_FullTest extends TestBaseUnitAsync {
     List<ReconciliationFile10> createdFiles = createReconciliationFiles(1);
 
     // Se inserta un movimiento extra en estado NOTIFIED, este no debe expirar, ya que solo tendra 1 archivo
-    PrepaidMovement10 doNotExpireMovement = buildPrepaidMovementV2(prepaidUser, topup, prepaidCard, null, PrepaidMovementType.TOPUP);
+    PrepaidMovement10 doNotExpireMovement = buildPrepaidMovement11(prepaidUser, topup, prepaidCard, null, PrepaidMovementType.TOPUP, false);
     doNotExpireMovement.setEstado(PrepaidMovementStatus.NOTIFIED);
     doNotExpireMovement.setTipoMovimiento(PrepaidMovementType.PURCHASE);
     doNotExpireMovement.setTipofac(TipoFactura.COMPRA_INTERNACIONAL);
@@ -212,7 +212,7 @@ public class Test_AutoReconciliation_FullTest extends TestBaseUnitAsync {
     PrepaidTopup10 topup = buildPrepaidTopup10();
 
     // Se inserta un movimiento en estado NOTIFIED
-    PrepaidMovement10 insertedMovement = buildPrepaidMovementV2(prepaidUser, topup, prepaidCard, null, PrepaidMovementType.TOPUP);
+    PrepaidMovement10 insertedMovement = buildPrepaidMovement11(prepaidUser, topup, prepaidCard, null, PrepaidMovementType.TOPUP, false);
     insertedMovement.setEstado(PrepaidMovementStatus.AUTHORIZED);
     insertedMovement.setTipoMovimiento(PrepaidMovementType.SUSCRIPTION);
     insertedMovement.setTipofac(TipoFactura.SUSCRIPCION_INTERNACIONAL);
@@ -231,7 +231,7 @@ public class Test_AutoReconciliation_FullTest extends TestBaseUnitAsync {
     List<ReconciliationFile10> createdFiles = createReconciliationFiles(1);
 
     // Se inserta un movimiento en estado AUTHORIZED que no expirarara, ya que solo tiene 6 archivos entre medio
-    PrepaidMovement10 doNotExpireMovement = buildPrepaidMovementV2(prepaidUser, topup, prepaidCard, null, PrepaidMovementType.TOPUP);
+    PrepaidMovement10 doNotExpireMovement = buildPrepaidMovement11(prepaidUser, topup, prepaidCard, null, PrepaidMovementType.TOPUP, false);
     doNotExpireMovement.setEstado(PrepaidMovementStatus.AUTHORIZED);
     doNotExpireMovement.setTipoMovimiento(PrepaidMovementType.SUSCRIPTION);
     doNotExpireMovement.setTipofac(TipoFactura.SUSCRIPCION_INTERNACIONAL);
@@ -273,7 +273,7 @@ public class Test_AutoReconciliation_FullTest extends TestBaseUnitAsync {
     PrepaidTopup10 topup = buildPrepaidTopup10();
 
     // Se inserta un movimiento en estado NOTIFIED
-    PrepaidMovement10 insertedMovement = buildPrepaidMovementV2(prepaidUser, topup, prepaidCard, null, PrepaidMovementType.TOPUP);
+    PrepaidMovement10 insertedMovement = buildPrepaidMovement11(prepaidUser, topup, prepaidCard, null, PrepaidMovementType.TOPUP, false);
     insertedMovement.setEstado(PrepaidMovementStatus.AUTHORIZED);
     insertedMovement.setTipoMovimiento(PrepaidMovementType.PURCHASE);
     insertedMovement.setTipofac(TipoFactura.COMPRA_INTERNACIONAL);
@@ -292,7 +292,7 @@ public class Test_AutoReconciliation_FullTest extends TestBaseUnitAsync {
     List<ReconciliationFile10> createdFiles = createReconciliationFiles(1);
 
     // Se inserta un movimiento en estado AUTHORIZED que no expirarara, ya que solo tiene 6 archivos entre medio
-    PrepaidMovement10 doNotExpireMovement = buildPrepaidMovementV2(prepaidUser, topup, prepaidCard, null, PrepaidMovementType.TOPUP);
+    PrepaidMovement10 doNotExpireMovement = buildPrepaidMovement11(prepaidUser, topup, prepaidCard, null, PrepaidMovementType.TOPUP, false);
     doNotExpireMovement.setEstado(PrepaidMovementStatus.AUTHORIZED);
     doNotExpireMovement.setTipoMovimiento(PrepaidMovementType.PURCHASE);
     doNotExpireMovement.setTipofac(TipoFactura.COMPRA_INTERNACIONAL);
