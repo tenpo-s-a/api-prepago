@@ -77,9 +77,6 @@ public class TecnocomReconciliationEJBBean10 extends PrepaidBaseEJBBean10 implem
   private PrepaidCardEJBBean11 prepaidCardEJBBean11;
 
   @EJB
-  private PrepaidMovementEJBBean10 prepaidMovementEJBBean10;
-
-  @EJB
   private PrepaidMovementEJBBean11 prepaidMovementEJBBean11;
 
   @EJB
@@ -146,14 +143,6 @@ public class TecnocomReconciliationEJBBean10 extends PrepaidBaseEJBBean10 implem
 
   public void setPrepaidUserEJBBean10(PrepaidUserEJBBean10 prepaidUserEJBBean10) {
     this.prepaidUserEJBBean10 = prepaidUserEJBBean10;
-  }
-
-  public PrepaidMovementEJBBean10 getPrepaidMovementEJBBean10() {
-    return prepaidMovementEJBBean10;
-  }
-
-  public void setPrepaidMovementEJBBean10(PrepaidMovementEJBBean10 prepaidMovementEJBBean10) {
-    this.prepaidMovementEJBBean10 = prepaidMovementEJBBean10;
   }
 
   public PrepaidMovementEJBBean11 getPrepaidMovementEJBBean11() {
@@ -253,7 +242,7 @@ public class TecnocomReconciliationEJBBean10 extends PrepaidBaseEJBBean10 implem
     this.eliminaMovimientosTecnocom(fileId);
 
     // Expira los movimientos
-    this.getPrepaidMovementEJBBean10().expireNotReconciledMovements(ReconciliationFileType.TECNOCOM_FILE);
+    this.getPrepaidMovementEJBBean11().expireNotReconciledMovements(ReconciliationFileType.TECNOCOM_FILE);
     this.getPrepaidMovementEJBBean11().expireNotReconciledAuthorizations(); //expira los movimientos con estado NOTIFIED y AUTHORIZED
 
   }
@@ -365,7 +354,7 @@ public class TecnocomReconciliationEJBBean10 extends PrepaidBaseEJBBean10 implem
           movement10.setEstado(PrepaidMovementStatus.PROCESS_OK);
           movement10.setIdMovimientoRef(Long.valueOf(0));
           movement10.setIdTxExterno("");
-          movement10 = getPrepaidMovementEJBBean10().addPrepaidMovement(null, movement10);
+          movement10 = getPrepaidMovementEJBBean11().addPrepaidMovement(null, movement10);
 
           // Expira cache del saldo de la cuenta
           //getAccountEJBBean10().expireBalanceCache(account.getId());
@@ -390,12 +379,12 @@ public class TecnocomReconciliationEJBBean10 extends PrepaidBaseEJBBean10 implem
 
         } else if(ReconciliationStatusType.PENDING.equals(originalMovement.getConTecnocom())) {
           if(!originalMovement.getMonto().equals(trx.getImpFac().getValue())){
-            getPrepaidMovementEJBBean10().updateStatusMovementConTecnocom(null,
+            getPrepaidMovementEJBBean11().updateStatusMovementConTecnocom(null,
               originalMovement.getId(),
               ReconciliationStatusType.NOT_RECONCILED);
           } else {
             //Actualiza el estado_con_tecnocom a conciliado
-            getPrepaidMovementEJBBean10().updateStatusMovementConTecnocom(null,
+            getPrepaidMovementEJBBean11().updateStatusMovementConTecnocom(null,
               originalMovement.getId(),
               ReconciliationStatusType.RECONCILED);
           }
@@ -465,7 +454,7 @@ public class TecnocomReconciliationEJBBean10 extends PrepaidBaseEJBBean10 implem
             researchMovementInformationFiles.setTipoArchivo(file.getType().toString());
             researchMovementInformationFilesList.add(researchMovementInformationFiles);
 
-            getPrepaidMovementEJBBean10().createResearchMovement(
+            getPrepaidMovementEJBBean11().createResearchMovement(
               null,
               new ObjectMapper().writeValueAsString(researchMovementInformationFilesList),
               ReconciliationOriginType.TECNOCOM.toString(),
@@ -480,7 +469,7 @@ public class TecnocomReconciliationEJBBean10 extends PrepaidBaseEJBBean10 implem
             throw new ValidationException(ERROR_PROCESSING_FILE.getValue(), msg);
 
           } else if(ReconciliationStatusType.PENDING.equals(originalMovement.getConTecnocom())) {
-            getPrepaidMovementEJBBean10().updateStatusMovementConTecnocom(null,
+            getPrepaidMovementEJBBean11().updateStatusMovementConTecnocom(null,
                 originalMovement.getId(),
                 ReconciliationStatusType.RECONCILED);
           } else {
@@ -533,16 +522,16 @@ public class TecnocomReconciliationEJBBean10 extends PrepaidBaseEJBBean10 implem
           throw new ValidationException(ERROR_PROCESSING_FILE.getValue(), msg);
         }
 
-        PrepaidMovement10 prepaidMovement10 = getPrepaidMovementEJBBean11().getPrepaidMovementForAut(account.getUserId(), trx.getTipoFac(), IndicadorNormalCorrector.fromValue(trx.getIndNorCor()), trx.getNumAut(), trx.getCodCom());
+        PrepaidMovement10 prepaidMovement10 = getPrepaidMovementEJBBean11().getPrepaidMovementForAut(prepaidCard10.getId(), trx.getTipoFac(), IndicadorNormalCorrector.fromValue(trx.getIndNorCor()), trx.getNumAut(), trx.getCodCom());
 
         if (prepaidMovement10 == null) {
           // No existe en nuestra tabla, debe insertarlo
-          prepaidMovement10 = buildMovementAut(prepaidCard10.getIdUser(), prepaidCard10.getPan(), trx, prepaidCard10.getId());
+          prepaidMovement10 = buildMovementAut(prepaidCard10.getPan(), trx, prepaidCard10.getId());
 
           // Se crea el movimiento con los mismos estados del archivo
           prepaidMovement10.setEstado(newMovementStatus);
           prepaidMovement10.setConTecnocom(newTecnocomStatus);
-          prepaidMovement10 = getPrepaidMovementEJBBean10().addPrepaidMovement(null, prepaidMovement10);
+          prepaidMovement10 = getPrepaidMovementEJBBean11().addPrepaidMovement(null, prepaidMovement10);
 
           // Se consulta al servicio de comisiones y se insertan las comisiones recibidas
           List<PrepaidMovementFee10> feeList = insertMovementFees(prepaidMovement10);
@@ -583,7 +572,7 @@ public class TecnocomReconciliationEJBBean10 extends PrepaidBaseEJBBean10 implem
           PrepaidMovementStatus originalStatus = prepaidMovement10.getEstado();
 
           // Se actualiza al mismo estado que se encuentre en el archivo
-          getPrepaidMovementEJBBean10().updatePrepaidMovementStatus(null, prepaidMovement10.getId(), newMovementStatus);
+          getPrepaidMovementEJBBean11().updatePrepaidMovementStatus(null, prepaidMovement10.getId(), newMovementStatus);
 
           // Se actualiza el estado de tecnocom para dejar conciliado o pendiente el movimiento
           getPrepaidMovementEJBBean11().updateStatusMovementConTecnocom(null, prepaidMovement10.getId(), newTecnocomStatus);
@@ -726,11 +715,11 @@ public class TecnocomReconciliationEJBBean10 extends PrepaidBaseEJBBean10 implem
     getPrepaidClearingEJBBean10().insertClearingData(null,clearingData10);
   }
 
-  private PrepaidMovement10 buildMovementAut(Long userId, String pan, MovimientoTecnocom10 batchTrx, Long cardId) throws BadRequestException {
+  private PrepaidMovement10 buildMovementAut(String pan, MovimientoTecnocom10 batchTrx, Long cardId) throws BadRequestException {
 
     PrepaidMovement10 prepaidMovement = new PrepaidMovement10();
     prepaidMovement.setIdMovimientoRef(0L);
-    prepaidMovement.setIdPrepaidUser(userId);
+    prepaidMovement.setIdPrepaidUser(0L);
     prepaidMovement.setIdTxExterno(batchTrx.getNumAut());
     prepaidMovement.setTipoMovimiento(batchTrx.getMovementType());
     prepaidMovement.setMonto(batchTrx.getImpFac().getValue());
@@ -742,7 +731,7 @@ public class TecnocomReconciliationEJBBean10 extends PrepaidBaseEJBBean10 implem
     prepaidMovement.setClamon(batchTrx.getImpFac().getCurrencyCode());
     prepaidMovement.setIndnorcor(IndicadorNormalCorrector.fromValue(batchTrx.getIndNorCor()));
     prepaidMovement.setTipofac(TipoFactura.valueOfEnumByCodeAndCorrector(batchTrx.getTipoFac().getCode(), batchTrx.getIndNorCor()));
-    prepaidMovement.setFecfac(new Date(batchTrx.getFecTrn().getTime()));
+    prepaidMovement.setFecfac(java.util.Date.from(batchTrx.getFecFac().atStartOfDay(ZoneId.of("America/Santiago")).toInstant()));
     prepaidMovement.setNumreffac(""); //se debe actualizar despues, es el id de PrepaidMovement10
     prepaidMovement.setPan(pan);
     prepaidMovement.setClamondiv(batchTrx.getImpDiv().getCurrencyCode().getValue());

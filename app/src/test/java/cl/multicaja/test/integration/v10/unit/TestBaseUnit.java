@@ -363,7 +363,6 @@ public class TestBaseUnit extends TestApiBase {
     if(tecnocomReconciliationEJBBean10 == null) {
       tecnocomReconciliationEJBBean10 = new TecnocomReconciliationEJBBean10();
       tecnocomReconciliationEJBBean10.setPrepaidCardEJBBean11(getPrepaidCardEJBBean11());
-      tecnocomReconciliationEJBBean10.setPrepaidMovementEJBBean10(getPrepaidMovementEJBBean10());
       tecnocomReconciliationEJBBean10.setPrepaidMovementEJBBean11(getPrepaidMovementEJBBean11());
       tecnocomReconciliationEJBBean10.setPrepaidUserEJBBean10(getPrepaidUserEJBBean10());
       tecnocomReconciliationEJBBean10.setPrepaidAccountingEJBBean10(getPrepaidAccountingEJBBean10());

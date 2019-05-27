@@ -7,7 +7,6 @@ import cl.multicaja.cdt.model.v10.CdtTransaction10;
 import cl.multicaja.core.exceptions.BadRequestException;
 import cl.multicaja.core.exceptions.BaseException;
 import cl.multicaja.core.utils.KeyValue;
-import cl.multicaja.core.utils.db.InParam;
 import cl.multicaja.prepaid.async.v10.KafkaEventDelegate10;
 import cl.multicaja.prepaid.ejb.v10.PrepaidMovementEJBBean10;
 import cl.multicaja.prepaid.external.freshdesk.model.NewTicket;
@@ -221,16 +220,17 @@ public class PrepaidMovementEJBBean11 extends PrepaidMovementEJBBean10 {
   }
 
 
-  public PrepaidMovement10 getPrepaidMovementForAut(Long idPrepaidUser, TipoFactura tipoFactura, IndicadorNormalCorrector indnorcor, String numaut, String codcom) throws Exception {
-    if (idPrepaidUser == null) {
-      throw new BadRequestException(PARAMETRO_FALTANTE_$VALUE).setData(new KeyValue("value", "idPrepaidUser"));
+  public PrepaidMovement10 getPrepaidMovementForAut(Long cardId, TipoFactura tipoFactura, IndicadorNormalCorrector indnorcor, String numaut, String codcom) throws Exception {
+    if (cardId == null) {
+      throw new BadRequestException(PARAMETRO_FALTANTE_$VALUE).setData(new KeyValue("value", "cardId"));
     }
     if (numaut == null) {
       throw new BadRequestException(PARAMETRO_FALTANTE_$VALUE).setData(new KeyValue("value", "numaut"));
     }
-    List<PrepaidMovement10> lst = this.getPrepaidMovements(null, null, idPrepaidUser, null, null, null, null, null, indnorcor, tipoFactura, null, numaut, null, null, null, null, codcom);
+    List<PrepaidMovement10> lst = this.getPrepaidMovements(null, null, null, null, null, null, null, null, indnorcor, tipoFactura, null, numaut, null, null, null, null, codcom, cardId);
     return lst != null && !lst.isEmpty() ? lst.get(0) : null;
   }
+
   @Override
   public void processReconciliationRules() throws Exception {
     List<PrepaidMovement10> lstPrepaidMovement10s = this.getMovementsForConciliate(null);
@@ -318,7 +318,7 @@ public class PrepaidMovementEJBBean11 extends PrepaidMovementEJBBean10 {
       movement.setClamon(CodigoMoneda.fromValue(rs.getInt("clamon")));
       movement.setIndnorcor(IndicadorNormalCorrector.fromValue(rs.getInt("indnorcor")));
       movement.setTipofac(TipoFactura.valueOfEnumByCodeAndCorrector(rs.getInt("tipofac"),rs.getInt("indnorcor")));
-      movement.setFecfac(rs.getDate("fecfac"));
+      movement.setFecfac(new java.util.Date(rs.getDate("fecfac").getTime()));
       movement.setNumreffac(rs.getString("numreffac"));
       movement.setPan(rs.getString("pan"));
       movement.setClamondiv(rs.getInt("clamondiv"));
