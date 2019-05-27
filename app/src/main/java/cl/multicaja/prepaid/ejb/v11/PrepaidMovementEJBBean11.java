@@ -431,39 +431,55 @@ public class PrepaidMovementEJBBean11 extends PrepaidMovementEJBBean10 {
     };
   }
 
+  /**
+   * Busca y expira aquellos movimientos (NOTIFIED y AUTHORIZED) que ya
+   * han pasado varios archivos y no han sido confirmados (OP).
+   *
+   * @throws Exception
+   */
   public void expireNotReconciledAuthorizations() throws Exception {
-    StringBuilder queryExpire = new StringBuilder();
-    queryExpire.append("UPDATE %s.prp_movimiento mov SET estado_con_tecnocom = 'NOT_RECONCILED', estado = 'EXPIRED' " );
-    queryExpire.append("WHERE (mov.tipo_movimiento = 'SUSCRIPTION' OR mov.tipo_movimiento = 'PURCHASE') ");
-    queryExpire.append("AND mov.estado_con_tecnocom = 'PENDING' ");
-    queryExpire.append("AND mov.estado = '%s' ");
-    queryExpire.append("AND (SELECT COUNT(f.id) ");
-    queryExpire.append("FROM %s.prp_archivos_conciliacion f ");
-    queryExpire.append("WHERE f.created_at >= mov.fecha_creacion AND f.tipo = 'TECNOCOM_FILE' AND f.status = 'OK' ) >= %d");
-    String expiredQuery = queryExpire.toString();
 
-    //Expira los movimientos con estado Notified que ya cumplieron 2 archivos
-    List<PrepaidMovement10> notifiedMovements = this.searchMovementsForExpire(PrepaidMovementStatus.NOTIFIED.toString(), 2);
+    // Expira todos los movimientos con estado NOTIFIED, que ya cumplieron 2 archivos
+    {
+      // Busca los movimientos que cumplen las condiciones de expirado
+      List<PrepaidMovement10> notifiedMovements = this.searchAuthorizationsForExpire(PrepaidMovementStatus.NOTIFIED, 2, null);
 
-    String expiredNotifiedQuery = String.format(expiredQuery,getSchema(), PrepaidMovementStatus.NOTIFIED.toString(), getSchema(), 2);
-    log.info("Expirando autorizaciones notificadas: " + expiredNotifiedQuery);
-    getDbUtils().getJdbcTemplate().execute(expiredNotifiedQuery);
+      // Marca los movimientos como expirados
+      updateAuthorizationsAsExpired(PrepaidMovementStatus.NOTIFIED, 2, null);
 
-    //Levanta eventos por cada movimiento expirado para notificadas
-    this.lauchEventReverse(notifiedMovements);
+      // Levanta eventos por cada movimiento notificado expirado
+      this.lauchEventReverse(notifiedMovements);
+    }
 
-    //Expira los movimientos con estado Authorized que ya cumplieron 7 archivos
-    List<PrepaidMovement10> authorizedMovements = this.searchMovementsForExpire(PrepaidMovementStatus.AUTHORIZED.toString(), 7);
+    // Expira compras y suscripciones con estado AUTHORIZED que ya cumplieron 7 archivos
+    {
+      // Busca los movimientos que cumplen las condiciones de expirado
+      List<PrepaidMovement10> authorizedMovements = this.searchAuthorizationsForExpire(PrepaidMovementStatus.AUTHORIZED, 7, IndicadorNormalCorrector.NORMAL);
 
-    String expiredAuthorizedQuery = String.format(expiredQuery,getSchema(), PrepaidMovementStatus.AUTHORIZED.toString(), getSchema(), 7);
-    log.info("Expirando autorizaciones autorizadas: " + expiredAuthorizedQuery);
-    getDbUtils().getJdbcTemplate().execute(expiredAuthorizedQuery);
+      // Marca los movimientos como expirados
+      updateAuthorizationsAsExpired(PrepaidMovementStatus.AUTHORIZED, 7, IndicadorNormalCorrector.NORMAL);
 
-    //Levanta eventos por cada movimiento expirado para autorizadas
-    this.lauchEventReverse(authorizedMovements);
+      // Levanta eventos por cada movimiento expirado para autorizadas
+      this.lauchEventReverse(authorizedMovements);
 
-    //Se cierran los estados para accounting y clearing
-    this.closingStatusForAccountingAndClearing(authorizedMovements);
+      // Se cierran los estados para accounting y clearing
+      this.closingStatusForAccountingAndClearing(authorizedMovements);
+    }
+
+    // Expira las reversas (de compra y suscripcion) con estado AUTHORIZED que ya cumplieron 2 archivos
+    {
+      // Busca los movimientos que cumplen las condiciones de expirado
+      List<PrepaidMovement10> reversedMovements = this.searchAuthorizationsForExpire(PrepaidMovementStatus.AUTHORIZED, 2, IndicadorNormalCorrector.CORRECTORA);
+
+      // Marca los movimientos como expirados
+      updateAuthorizationsAsExpired(PrepaidMovementStatus.AUTHORIZED, 2, IndicadorNormalCorrector.CORRECTORA);
+
+      // Levanta eventos por cada movimiento expirado para autorizadas
+      this.lauchEventReverse(reversedMovements);
+
+      // Se cierran los estados para accounting y clearing
+      this.closingStatusForAccountingAndClearing(reversedMovements);
+    }
   }
 
   public void lauchEventReverse(List<PrepaidMovement10> movement10s) throws Exception {
@@ -472,43 +488,77 @@ public class PrepaidMovementEJBBean11 extends PrepaidMovementEJBBean10 {
       PrepaidCard10 prepaidCard10 = getPrepaidCardEJB11().getPrepaidCardById(null, movement.getCardId());
       Account account10 = getAccountEJBBean10().findById(prepaidCard10.getAccountId());
       PrepaidUser10 prepaidUser10 = getPrepaidUserEJB10().findById(null, account10.getUserId());
-      List<PrepaidMovementFee10> feeList = new ArrayList<>();
+      List<PrepaidMovementFee10> feeList = new ArrayList<>(); // Todo: Falta rellenar las comisiones de este movimiento
 
       // Compras o Anulacion de compras
       if (movement.getTipofac().getCode() == TipoFactura.COMPRA_INTERNACIONAL.getCode()) {
         transactionType = TransactionType.PURCHASE;
       }
-      // Suscripciones o Anulaciones de suscripciones
+      // Suscripciones o Anulaciones de suscripcion
       else if (movement.getTipofac().getCode() == TipoFactura.SUSCRIPCION_INTERNACIONAL.getCode()) {
         transactionType = TransactionType.SUSCRIPTION;
       }
 
-      publishTransactionReversedEvent(
-        prepaidUser10.getUuid(),
-        account10.getUuid(),
-        prepaidCard10.getUuid(),
-        movement,
-        feeList,
-        transactionType
-      );
+      if (movement.getTipofac() == TipoFactura.COMPRA_INTERNACIONAL || movement.getTipofac() == TipoFactura.SUSCRIPCION_INTERNACIONAL) {
+        publishTransactionReversedEvent(
+          prepaidUser10.getUuid(),
+          account10.getUuid(),
+          prepaidCard10.getUuid(),
+          movement,
+          feeList,
+          transactionType
+        );
+      } else { // Publicar movimiento contrario a anulacion (una compra autorizada)
+        publishTransactionAuthorizedEvent(
+          prepaidUser10.getUuid(),
+          account10.getUuid(),
+          prepaidCard10.getUuid(),
+          movement,
+          feeList,
+          transactionType
+        );
+      }
     }
   }
 
-  public List<PrepaidMovement10> searchMovementsForExpire(String movement, int numFiles){
+  private List<PrepaidMovement10> searchAuthorizationsForExpire(PrepaidMovementStatus movementStatus, int numFiles, IndicadorNormalCorrector indnorcor) {
     StringBuilder queryExpire = new StringBuilder();
-    queryExpire.append("select * from  %s.prp_movimiento mov " );
+    queryExpire.append("SELECT * FROM %s.prp_movimiento mov " );
     queryExpire.append("WHERE (mov.tipo_movimiento = 'SUSCRIPTION' OR mov.tipo_movimiento = 'PURCHASE') ");
+    queryExpire.append("AND mov.indnorcor = %s ");
     queryExpire.append("AND mov.estado_con_tecnocom = 'PENDING' ");
     queryExpire.append("AND mov.estado = '%s' ");
     queryExpire.append("AND (SELECT COUNT(f.id) ");
     queryExpire.append("FROM %s.prp_archivos_conciliacion f ");
-    queryExpire.append("WHERE f.created_at >= mov.fecha_creacion AND f.tipo = 'TECNOCOM_FILE' AND f.status = 'OK' ) >= %d");
+    queryExpire.append("WHERE f.created_at >= mov.fecha_creacion AND f.tipo = 'TECNOCOM_FILE' AND f.status = 'OK') >= %d");
     String expiredQuerySelected = queryExpire.toString();
 
-    String expiredQuerySelect = String.format(expiredQuerySelected,getSchema(),movement,getSchema(),numFiles);
-    log.info("Buscando autorizaciones: " + expiredQuerySelect);
+    // Si no viene indnocor definido, se ignora esa condicion (mov.indnorcor = mov.indnorcor)
+    String corrector = indnorcor != null ? indnorcor.getValue().toString() : "mov.indnorcor";
+    String expiredQuerySelect = String.format(expiredQuerySelected, getSchema(), corrector, movementStatus.toString(), getSchema(), numFiles);
 
+    log.info("Buscando autorizaciones: " + expiredQuerySelect);
     return getDbUtils().getJdbcTemplate().query(expiredQuerySelect, this.getMovementMapper());
+  }
+
+  private void updateAuthorizationsAsExpired(PrepaidMovementStatus movementStatus, int numberOfFiles, IndicadorNormalCorrector indnorcor) {
+    StringBuilder queryExpire = new StringBuilder();
+    queryExpire.append("UPDATE %s.prp_movimiento mov SET estado_con_tecnocom = 'NOT_RECONCILED', estado = 'EXPIRED' " );
+    queryExpire.append("WHERE (mov.tipo_movimiento = 'SUSCRIPTION' OR mov.tipo_movimiento = 'PURCHASE') ");
+    queryExpire.append("AND mov.indnorcor = %s ");
+    queryExpire.append("AND mov.estado_con_tecnocom = 'PENDING' ");
+    queryExpire.append("AND mov.estado = '%s' ");
+    queryExpire.append("AND (SELECT COUNT(f.id) ");
+    queryExpire.append("FROM %s.prp_archivos_conciliacion f ");
+    queryExpire.append("WHERE f.created_at >= mov.fecha_creacion AND f.tipo = 'TECNOCOM_FILE' AND f.status = 'OK') >= %d");
+    String expiredQuery = queryExpire.toString();
+
+    // Si no viene indnocor definido, se ignora esa condicion (se deja mov.indnorcor = mov.indnorcor)
+    String corrector = indnorcor != null ? indnorcor.getValue().toString() : "mov.indnorcor";
+    String query = String.format(expiredQuery, getSchema(), corrector, movementStatus.toString(), getSchema(), numberOfFiles);
+
+    log.info("Marcando autorizaciones como expiradas: " + query);
+    getDbUtils().getJdbcTemplate().execute(query);
   }
 
   public void closingStatusForAccountingAndClearing(List<PrepaidMovement10> movement10s) throws Exception {

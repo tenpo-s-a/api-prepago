@@ -156,10 +156,10 @@ public class Test_TecnocomReconciliationEJBBean10_insertAutorization extends Tes
     doNotExpireMovement.setTipofac(TipoFactura.SUSCRIPCION_INTERNACIONAL);
     doNotExpireMovement = createPrepaidMovement11(doNotExpireMovement);
 
-    // Crea 6 archivos extra para que se expire el movimiento original
-    List<ReconciliationFile10> extraFiles = createReconciliationFiles(6);
+    // Crea 1 archivos extra para que se expire el movimiento original
+    List<ReconciliationFile10> extraFiles = createReconciliationFiles(1);
 
-    // Como hay 7 archivos tecnocom en la tabla, debe expirar el movimiento original AUTHORIZED
+    // Como hay 2 archivos tecnocom en la tabla, debe expirar el movimiento original AUTHORIZED
     getTecnocomReconciliationEJBBean10().processTecnocomTableData(tecnocomReconciliationFile10.getId());
 
     PrepaidMovement10 foundMovement = getPrepaidMovementEJBBean11().getPrepaidMovementById(insertedMovement.getId());
@@ -184,7 +184,7 @@ public class Test_TecnocomReconciliationEJBBean10_insertAutorization extends Tes
     deleteReconciliationFiles(extraFiles);
 
     // Revisar que exista el evento reversado en la cola kafka
-    checkIfTransactionIsInQueue(KafkaEventsRoute10.TRANSACTION_REVERSED_TOPIC, foundMovement.getIdTxExterno(), "SUSCRIPTION", "REVERSED");
+    checkIfTransactionIsInQueue(KafkaEventsRoute10.TRANSACTION_AUTHORIZED_TOPIC, foundMovement.getIdTxExterno(), "SUSCRIPTION", "AUTHORIZED");
   }
 
   @Test
@@ -218,10 +218,10 @@ public class Test_TecnocomReconciliationEJBBean10_insertAutorization extends Tes
     doNotExpireMovement.setTipofac(TipoFactura.COMPRA_INTERNACIONAL);
     doNotExpireMovement = createPrepaidMovement11(doNotExpireMovement);
 
-    // Crea 6 archivos extra para que se expire el movimiento original
-    List<ReconciliationFile10> extraFiles = createReconciliationFiles(6);
+    // Crea 1 archivos extra para que se expire el movimiento original
+    List<ReconciliationFile10> extraFiles = createReconciliationFiles(1);
 
-    // Como hay 7 archivos tecnocom en la tabla, debe expirar el movimiento original AUTHORIZED
+    // Como hay 2 archivos tecnocom en la tabla, debe expirar el movimiento original AUTHORIZED
     getTecnocomReconciliationEJBBean10().processTecnocomTableData(tecnocomReconciliationFile10.getId());
 
     PrepaidMovement10 foundMovement = getPrepaidMovementEJBBean11().getPrepaidMovementById(insertedMovement.getId());
@@ -246,7 +246,7 @@ public class Test_TecnocomReconciliationEJBBean10_insertAutorization extends Tes
     deleteReconciliationFiles(extraFiles);
 
     // Revisar que exista el evento reversado en la cola kafka
-    checkIfTransactionIsInQueue(KafkaEventsRoute10.TRANSACTION_REVERSED_TOPIC, foundMovement.getIdTxExterno(), "PURCHASE", "REVERSED");
+    checkIfTransactionIsInQueue(KafkaEventsRoute10.TRANSACTION_AUTHORIZED_TOPIC, foundMovement.getIdTxExterno(), "PURCHASE", "AUTHORIZED");
   }
 
   // Devolucion (nunca esta en DB, siempre vienen OP)
@@ -1791,8 +1791,8 @@ public class Test_TecnocomReconciliationEJBBean10_insertAutorization extends Tes
     ExchangeData<String> event = (ExchangeData<String>) camelFactory.createJMSMessenger(30000, 60000)
       .getMessage(qResp, idTxExterno);
 
-    Assert.assertNotNull("Deberia existir un evento de transaccion reversada", event);
-    Assert.assertNotNull("Deberia existir un evento de transaccion reversada", event.getData());
+    Assert.assertNotNull("Deberia existir un evento de transaccion", event);
+    Assert.assertNotNull("Deberia existir un evento de transaccion", event.getData());
 
     TransactionEvent transactionEvent = getJsonParser().fromJson(event.getData(), TransactionEvent.class);
 
