@@ -62,7 +62,7 @@ public class Test_PrepaidAccountingEJBBean10_processIpmFileTransactions extends 
     String movement = "INSERT INTO %s.prp_movimiento VALUES (1030, 0, %d, '275175', 'PURCHASE', 166, 'PENDING', 'IN_PROCESS', 'RECONCILED', 'RECONCILED', 'OPE', '2019-02-25 15:12:55.415489', '2019-02-25 15:12:55.415489', '', '0001', '000000000014', 152, 0, 3007, '2018-08-08', '', '5176081118013603', 840, 25, 166, 0, '275175', 'A', 'USA', 0, 0, 0, 152, '', 0, 0, 0, '', 0, 1, 0, '');";
     DBUtils.getInstance().getJdbcTemplate().execute(String.format(movement, getSchema(),prepaidUser.getId()));
 
-    String accounting = "INSERT INTO %s.accounting VALUES (575, 1030, 'COMPRA_MONEDA', 'Cargo por compra cm', 'IpmFile', 0, 152, 0, 0, 0, 0, 0, 0.00, 0.00, 0, 'PENDING', 0, 'PENDING', '2018-08-08 05:28:21', '2019-02-25 12:12:55', '2019-02-25 15:12:55.489402', '2019-02-25 15:12:55.489402');";
+    String accounting = "INSERT INTO %s.accounting VALUES (575, 1030, 'COMPRA_OTRA_MONEDA', 'Cargo por compra cm', 'IpmFile', 0, 152, 0, 0, 0, 0, 0, 0.00, 0.00, 0, 'PENDING', 0, 'PENDING', '2018-08-08 05:28:21', '2019-02-25 12:12:55', '2019-02-25 15:12:55.489402', '2019-02-25 15:12:55.489402');";
     DBUtils.getInstance().getJdbcTemplate().execute(String.format(accounting, getSchemaAccounting()));
 
     String clearing = "INSERT INTO prepaid_accounting.clearing VALUES (464, 575, 0, 0, 'PENDING', '2019-02-25 15:12:55.670868', '2019-02-25 15:12:55.670868');";
