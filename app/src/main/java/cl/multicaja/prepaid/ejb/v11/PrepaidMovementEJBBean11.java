@@ -480,8 +480,6 @@ public class PrepaidMovementEJBBean11 extends PrepaidMovementEJBBean10 {
     }
   }
 
-
-
   public List<PrepaidMovementFee10> getPrepaidMovementFeesByMovementId(Long movementId) throws BaseException {
     if(movementId == null){
       throw new BadRequestException(PARAMETRO_FALTANTE_$VALUE).setData(new KeyValue("value", "movementId"));
@@ -491,6 +489,9 @@ public class PrepaidMovementEJBBean11 extends PrepaidMovementEJBBean10 {
 
     try {
       return getDbUtils().getJdbcTemplate().query(FIND_FEE_BY_MOVEMENT_ID, getMovementFeeMapper(), movementId);
+    } catch (EmptyResultDataAccessException ex) {
+      log.error(String.format("[getPrepaidMovementFeeById] Fee [feeId: %d] no existe", movementId));
+      return Collections.emptyList();
     } catch (Exception e) {
       throw new BaseException(ERROR_DE_COMUNICACION_CON_BBDD);
     }
@@ -602,7 +603,7 @@ public class PrepaidMovementEJBBean11 extends PrepaidMovementEJBBean10 {
       PrepaidCard10 prepaidCard10 = getPrepaidCardEJB11().getPrepaidCardById(null, movement.getCardId());
       Account account10 = getAccountEJBBean10().findById(prepaidCard10.getAccountId());
       PrepaidUser10 prepaidUser10 = getPrepaidUserEJB10().findById(null, account10.getUserId());
-      List<PrepaidMovementFee10> feeList = new ArrayList<>(); // Todo: Falta rellenar las comisiones de este movimiento
+      List<PrepaidMovementFee10> feeList = getPrepaidMovementFeesByMovementId(movement.getId());
 
       // Compras o Anulacion de compras
       if (movement.getTipofac().getCode() == TipoFactura.COMPRA_INTERNACIONAL.getCode()) {

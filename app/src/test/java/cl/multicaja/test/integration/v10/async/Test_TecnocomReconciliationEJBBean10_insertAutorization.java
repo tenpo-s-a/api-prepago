@@ -137,6 +137,8 @@ public class Test_TecnocomReconciliationEJBBean10_insertAutorization extends Tes
     insertedMovement.setIndnorcor(IndicadorNormalCorrector.CORRECTORA);
     insertedMovement = createPrepaidMovement11(insertedMovement);
 
+    List<PrepaidMovementFee10> prepaidMovementFee10List = prepareFees(insertedMovement, PrepaidMovementFeeType.SUSCRIPTION_INT_FEE, true);
+
     AccountingData10 accdata = buildRandomAccouting();
     accdata.setIdTransaction(insertedMovement.getId());
     accdata.setStatus(AccountingStatusType.PENDING);
@@ -184,7 +186,7 @@ public class Test_TecnocomReconciliationEJBBean10_insertAutorization extends Tes
     deleteReconciliationFiles(extraFiles);
 
     // Revisar que exista el evento reversado en la cola kafka
-    checkIfTransactionIsInQueue(KafkaEventsRoute10.TRANSACTION_AUTHORIZED_TOPIC, foundMovement.getIdTxExterno(), "SUSCRIPTION", "AUTHORIZED");
+    checkIfTransactionIsInQueue(KafkaEventsRoute10.TRANSACTION_AUTHORIZED_TOPIC, foundMovement.getIdTxExterno(), "SUSCRIPTION", "AUTHORIZED", prepaidMovementFee10List);
   }
 
   @Test
@@ -198,6 +200,8 @@ public class Test_TecnocomReconciliationEJBBean10_insertAutorization extends Tes
     insertedMovement.setTipofac(TipoFactura.ANULA_COMPRA_INTERNACIONAL);
     insertedMovement.setIndnorcor(IndicadorNormalCorrector.CORRECTORA);
     insertedMovement = createPrepaidMovement11(insertedMovement);
+
+    List<PrepaidMovementFee10> prepaidMovementFee10List = prepareFees(insertedMovement, PrepaidMovementFeeType.SUSCRIPTION_INT_FEE, true);
 
     AccountingData10 accdata = buildRandomAccouting();
     accdata.setIdTransaction(insertedMovement.getId());
@@ -246,7 +250,7 @@ public class Test_TecnocomReconciliationEJBBean10_insertAutorization extends Tes
     deleteReconciliationFiles(extraFiles);
 
     // Revisar que exista el evento reversado en la cola kafka
-    checkIfTransactionIsInQueue(KafkaEventsRoute10.TRANSACTION_AUTHORIZED_TOPIC, foundMovement.getIdTxExterno(), "PURCHASE", "AUTHORIZED");
+    checkIfTransactionIsInQueue(KafkaEventsRoute10.TRANSACTION_AUTHORIZED_TOPIC, foundMovement.getIdTxExterno(), "PURCHASE", "AUTHORIZED", prepaidMovementFee10List);
   }
 
   // Devolucion (nunca esta en DB, siempre vienen OP)
@@ -308,7 +312,7 @@ public class Test_TecnocomReconciliationEJBBean10_insertAutorization extends Tes
     Assert.assertEquals("Debe tener 0 fees asignadas", 0, prepaidMovementFee10List.size());
 
     // Verificar que exista en la cola de eventos transaction_reversed
-    checkIfTransactionIsInQueue(KafkaEventsRoute10.TRANSACTION_AUTHORIZED_TOPIC, prepaidMovement10.getIdTxExterno(), "REFUND", "AUTHORIZED");
+    checkIfTransactionIsInQueue(KafkaEventsRoute10.TRANSACTION_AUTHORIZED_TOPIC, prepaidMovement10.getIdTxExterno(), "REFUND", "AUTHORIZED", prepaidMovementFee10List);
   }
 
   // Anulacion Compra Internacional en moneda extranjera (DB = no, tipo = OP)
@@ -380,7 +384,7 @@ public class Test_TecnocomReconciliationEJBBean10_insertAutorization extends Tes
     Assert.assertEquals("Debe tener estado PENDING", AccountingStatusType.PENDING, liq.getStatus());
 
     // Verificar que exista en la cola de eventos transaction_reversed
-    checkIfTransactionIsInQueue(KafkaEventsRoute10.TRANSACTION_REVERSED_TOPIC, prepaidMovement10.getIdTxExterno(), "PURCHASE", "REVERSED");
+    checkIfTransactionIsInQueue(KafkaEventsRoute10.TRANSACTION_REVERSED_TOPIC, prepaidMovement10.getIdTxExterno(), "PURCHASE", "REVERSED", prepaidMovementFee10List);
   }
 
   // Anulacion Compra Internacional en pesos (DB = no, tipo = OP)
@@ -462,7 +466,7 @@ public class Test_TecnocomReconciliationEJBBean10_insertAutorization extends Tes
     Assert.assertEquals("Debe tener estado PENDING", AccountingStatusType.PENDING, liq.getStatus());
 
     // Verificar que exista en la cola de eventos transaction_reversed
-    checkIfTransactionIsInQueue(KafkaEventsRoute10.TRANSACTION_REVERSED_TOPIC, prepaidMovement10.getIdTxExterno(), "PURCHASE", "REVERSED");
+    checkIfTransactionIsInQueue(KafkaEventsRoute10.TRANSACTION_REVERSED_TOPIC, prepaidMovement10.getIdTxExterno(), "PURCHASE", "REVERSED", prepaidMovementFee10List);
   }
 
   // Anulacion Compra Internacional en moneda extranjera (DB = no, tipo = AU)
@@ -531,7 +535,7 @@ public class Test_TecnocomReconciliationEJBBean10_insertAutorization extends Tes
     Assert.assertEquals("Debe tener estado INITIAL", AccountingStatusType.INITIAL, liq.getStatus());
 
     // Verificar que exista en la cola de eventos transaction_reversed
-    checkIfTransactionIsInQueue(KafkaEventsRoute10.TRANSACTION_REVERSED_TOPIC, prepaidMovement10.getIdTxExterno(), "PURCHASE", "REVERSED");
+    checkIfTransactionIsInQueue(KafkaEventsRoute10.TRANSACTION_REVERSED_TOPIC, prepaidMovement10.getIdTxExterno(), "PURCHASE", "REVERSED", prepaidMovementFee10List);
   }
 
   // Anulacion Compra Internacional en pesos (DB = no, tipo = AU)
@@ -610,7 +614,7 @@ public class Test_TecnocomReconciliationEJBBean10_insertAutorization extends Tes
     Assert.assertEquals("Debe tener estado INITIAL", AccountingStatusType.INITIAL, liq.getStatus());
 
     // Verificar que exista en la cola de eventos transaction_reversed
-    checkIfTransactionIsInQueue(KafkaEventsRoute10.TRANSACTION_REVERSED_TOPIC, prepaidMovement10.getIdTxExterno(), "PURCHASE", "REVERSED");
+    checkIfTransactionIsInQueue(KafkaEventsRoute10.TRANSACTION_REVERSED_TOPIC, prepaidMovement10.getIdTxExterno(), "PURCHASE", "REVERSED", prepaidMovementFee10List);
   }
 
   // Anulacion Compra Internacional en moneda extranjera (DB = si en NOTIFIED, tipo = AU)
@@ -1035,7 +1039,7 @@ public class Test_TecnocomReconciliationEJBBean10_insertAutorization extends Tes
     Assert.assertEquals("Debe tener estado PENDING", AccountingStatusType.PENDING, liq.getStatus());
 
     // Verificar que exista en la cola de eventos transaction_reversed
-    checkIfTransactionIsInQueue(KafkaEventsRoute10.TRANSACTION_REVERSED_TOPIC, prepaidMovement10.getIdTxExterno(), "SUSCRIPTION", "REVERSED");
+    checkIfTransactionIsInQueue(KafkaEventsRoute10.TRANSACTION_REVERSED_TOPIC, prepaidMovement10.getIdTxExterno(), "SUSCRIPTION", "REVERSED", prepaidMovementFee10List);
   }
 
   // Anulacion Suscripcion Internacional en pesos (DB = no, tipo = OP)
@@ -1117,7 +1121,7 @@ public class Test_TecnocomReconciliationEJBBean10_insertAutorization extends Tes
     Assert.assertEquals("Debe tener estado PENDING", AccountingStatusType.PENDING, liq.getStatus());
 
     // Verificar que exista en la cola de eventos transaction_reversed
-    checkIfTransactionIsInQueue(KafkaEventsRoute10.TRANSACTION_REVERSED_TOPIC, prepaidMovement10.getIdTxExterno(), "SUSCRIPTION", "REVERSED");
+    checkIfTransactionIsInQueue(KafkaEventsRoute10.TRANSACTION_REVERSED_TOPIC, prepaidMovement10.getIdTxExterno(), "SUSCRIPTION", "REVERSED", prepaidMovementFee10List);
   }
 
   // Anulacion Suscription Internacional en moneda extranjera (DB = no, tipo = AU)
@@ -1186,7 +1190,7 @@ public class Test_TecnocomReconciliationEJBBean10_insertAutorization extends Tes
     Assert.assertEquals("Debe tener estado INITIAL", AccountingStatusType.INITIAL, liq.getStatus());
 
     // Verificar que exista en la cola de eventos transaction_reversed
-    checkIfTransactionIsInQueue(KafkaEventsRoute10.TRANSACTION_REVERSED_TOPIC, prepaidMovement10.getIdTxExterno(), "SUSCRIPTION", "REVERSED");
+    checkIfTransactionIsInQueue(KafkaEventsRoute10.TRANSACTION_REVERSED_TOPIC, prepaidMovement10.getIdTxExterno(), "SUSCRIPTION", "REVERSED", prepaidMovementFee10List);
   }
 
   // Anulacion Suscription Internacional en pesos (DB = no, tipo = AU)
@@ -1265,7 +1269,7 @@ public class Test_TecnocomReconciliationEJBBean10_insertAutorization extends Tes
     Assert.assertEquals("Debe tener estado INITIAL", AccountingStatusType.INITIAL, liq.getStatus());
 
     // Verificar que exista en la cola de eventos transaction_reversed
-    checkIfTransactionIsInQueue(KafkaEventsRoute10.TRANSACTION_REVERSED_TOPIC, prepaidMovement10.getIdTxExterno(), "SUSCRIPTION", "REVERSED");
+    checkIfTransactionIsInQueue(KafkaEventsRoute10.TRANSACTION_REVERSED_TOPIC, prepaidMovement10.getIdTxExterno(), "SUSCRIPTION", "REVERSED", prepaidMovementFee10List);
   }
 
   // Anulacion Suscription Internacional en moneda extranjera (DB = si en NOTIFIED, tipo = AU)
@@ -1786,13 +1790,13 @@ public class Test_TecnocomReconciliationEJBBean10_insertAutorization extends Tes
     return getTecnocomReconciliationEJBBean10().insertaMovimientoTecnocom(movimientoTecnocom10);
   }
 
-  private void checkIfTransactionIsInQueue(String queueName, String idTxExterno, String transactionType, String transactionStatus) {
+  private void checkIfTransactionIsInQueue(String queueName, String idTxExterno, String transactionType, String transactionStatus, List<PrepaidMovementFee10> feeList) {
     Queue qResp = camelFactory.createJMSQueue(queueName);
     ExchangeData<String> event = (ExchangeData<String>) camelFactory.createJMSMessenger(30000, 60000)
       .getMessage(qResp, idTxExterno);
 
     Assert.assertNotNull("Deberia existir un evento de transaccion", event);
-    Assert.assertNotNull("Deberia existir un evento de transaccion", event.getData());
+    Assert.assertNotNull("Deberia existir un evento de transaccion con data", event.getData());
 
     TransactionEvent transactionEvent = getJsonParser().fromJson(event.getData(), TransactionEvent.class);
 
@@ -1801,6 +1805,17 @@ public class Test_TecnocomReconciliationEJBBean10_insertAutorization extends Tes
     Assert.assertEquals("Debe tener el mismo userId", prepaidUser.getUuid(), transactionEvent.getUserId());
     Assert.assertEquals("Debe tener el mismo transactiontype", transactionType, transactionEvent.getTransaction().getType());
     Assert.assertEquals("Debe tener el mismo status", transactionStatus, transactionEvent.getTransaction().getStatus());
+
+    if (feeList != null && !feeList.isEmpty()) {
+      List<cl.multicaja.prepaid.kafka.events.model.Fee> eventFeeList = transactionEvent.getTransaction().getFees();
+      Assert.assertEquals("Debe tener todas las fees", feeList.size(), eventFeeList.size());
+
+      for (PrepaidMovementFee10 storedFee : feeList) {
+        cl.multicaja.prepaid.kafka.events.model.Fee foundFee = eventFeeList.stream().filter(f -> f.getType().equals(storedFee.getFeeType().toString())).findAny().orElse(null);
+        Assert.assertNotNull("Debe existir la misma fee en la lista", foundFee);
+        Assert.assertEquals("Debe tener el mismo monto", storedFee.getAmount(), foundFee.getAmount().getValue());
+      }
+    }
   }
 
   private IpmMovement10 prepareIpmMovement(MovimientoTecnocom10 movimientoTecnocom10) throws Exception {

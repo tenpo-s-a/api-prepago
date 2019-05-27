@@ -132,6 +132,9 @@ public class Test_AutoReconciliation_FullTest extends TestBaseUnitAsync {
     insertedMovement.setTipofac(TipoFactura.SUSCRIPCION_INTERNACIONAL);
     insertedMovement = createPrepaidMovement11(insertedMovement);
 
+    // Insertar los fees del movimiento
+    List<PrepaidMovementFee10> prepaidMovementFee10List = prepareFees(insertedMovement, PrepaidMovementFeeType.SUSCRIPTION_INT_FEE, true);
+
     // Crea 1 archivo extra para que se expire el movimiento
     List<ReconciliationFile10> createdFiles = createReconciliationFiles(1);
 
@@ -161,7 +164,7 @@ public class Test_AutoReconciliation_FullTest extends TestBaseUnitAsync {
     deleteReconciliationFiles(extraFiles);
 
     // Revisar que exista el evento reversado en la cola kafka
-    checkIfTransactionIsInQueue(KafkaEventsRoute10.TRANSACTION_REVERSED_TOPIC, foundMovement.getIdTxExterno(), "SUSCRIPTION", "REVERSED");
+    checkIfTransactionIsInQueue(KafkaEventsRoute10.TRANSACTION_REVERSED_TOPIC, foundMovement.getIdTxExterno(), "SUSCRIPTION", "REVERSED", prepaidMovementFee10List);
   }
 
   @Test
@@ -175,6 +178,8 @@ public class Test_AutoReconciliation_FullTest extends TestBaseUnitAsync {
     insertedMovement.setTipofac(TipoFactura.COMPRA_INTERNACIONAL);
     insertedMovement = createPrepaidMovement11(insertedMovement);
 
+    List<PrepaidMovementFee10> prepaidMovementFee10List = prepareFees(insertedMovement, PrepaidMovementFeeType.SUSCRIPTION_INT_FEE, true);
+
     // Crea 1 archivo extra para que se expire el movimiento
     List<ReconciliationFile10> createdFiles = createReconciliationFiles(1);
 
@@ -204,7 +209,7 @@ public class Test_AutoReconciliation_FullTest extends TestBaseUnitAsync {
     deleteReconciliationFiles(extraFiles);
 
     // Revisar que exista el evento reversado en la cola kafka
-    checkIfTransactionIsInQueue(KafkaEventsRoute10.TRANSACTION_REVERSED_TOPIC, foundMovement.getIdTxExterno(), "PURCHASE", "REVERSED");
+    checkIfTransactionIsInQueue(KafkaEventsRoute10.TRANSACTION_REVERSED_TOPIC, foundMovement.getIdTxExterno(), "PURCHASE", "REVERSED", prepaidMovementFee10List);
   }
 
   @Test
@@ -217,6 +222,8 @@ public class Test_AutoReconciliation_FullTest extends TestBaseUnitAsync {
     insertedMovement.setTipoMovimiento(PrepaidMovementType.SUSCRIPTION);
     insertedMovement.setTipofac(TipoFactura.SUSCRIPCION_INTERNACIONAL);
     insertedMovement = createPrepaidMovement11(insertedMovement);
+
+    List<PrepaidMovementFee10> prepaidMovementFee10List = prepareFees(insertedMovement, PrepaidMovementFeeType.SUSCRIPTION_INT_FEE, true);
 
     AccountingData10 accdata = buildRandomAccouting();
     accdata.setIdTransaction(insertedMovement.getId());
@@ -265,7 +272,7 @@ public class Test_AutoReconciliation_FullTest extends TestBaseUnitAsync {
     deleteReconciliationFiles(extraFiles);
 
     // Revisar que exista el evento reversado en la cola kafka
-    checkIfTransactionIsInQueue(KafkaEventsRoute10.TRANSACTION_REVERSED_TOPIC, foundMovement.getIdTxExterno(), "SUSCRIPTION", "REVERSED");
+    checkIfTransactionIsInQueue(KafkaEventsRoute10.TRANSACTION_REVERSED_TOPIC, foundMovement.getIdTxExterno(), "SUSCRIPTION", "REVERSED", prepaidMovementFee10List);
   }
 
   @Test
@@ -278,6 +285,8 @@ public class Test_AutoReconciliation_FullTest extends TestBaseUnitAsync {
     insertedMovement.setTipoMovimiento(PrepaidMovementType.PURCHASE);
     insertedMovement.setTipofac(TipoFactura.COMPRA_INTERNACIONAL);
     insertedMovement = createPrepaidMovement11(insertedMovement);
+
+    List<PrepaidMovementFee10> prepaidMovementFee10List = prepareFees(insertedMovement, PrepaidMovementFeeType.SUSCRIPTION_INT_FEE, true);
 
     AccountingData10 accdata = buildRandomAccouting();
     accdata.setIdTransaction(insertedMovement.getId());
@@ -326,7 +335,7 @@ public class Test_AutoReconciliation_FullTest extends TestBaseUnitAsync {
     deleteReconciliationFiles(extraFiles);
 
     // Revisar que exista el evento reversado en la cola kafka
-    checkIfTransactionIsInQueue(KafkaEventsRoute10.TRANSACTION_REVERSED_TOPIC, foundMovement.getIdTxExterno(), "PURCHASE", "REVERSED");
+    checkIfTransactionIsInQueue(KafkaEventsRoute10.TRANSACTION_REVERSED_TOPIC, foundMovement.getIdTxExterno(), "PURCHASE", "REVERSED", prepaidMovementFee10List);
   }
 
   // Compra en dolares, BD = NO, file = AU
@@ -394,7 +403,7 @@ public class Test_AutoReconciliation_FullTest extends TestBaseUnitAsync {
     Assert.assertEquals("Debe tener estado INITIAL", AccountingStatusType.INITIAL, liq.getStatus());
 
     // Revisar que exista el evento reversado en la cola kafka
-    checkIfTransactionIsInQueue(KafkaEventsRoute10.TRANSACTION_AUTHORIZED_TOPIC, prepaidMovement10.getIdTxExterno(), "PURCHASE", "AUTHORIZED");
+    checkIfTransactionIsInQueue(KafkaEventsRoute10.TRANSACTION_AUTHORIZED_TOPIC, prepaidMovement10.getIdTxExterno(), "PURCHASE", "AUTHORIZED", prepaidMovementFee10List);
   }
 
   // Compra en pesos, BD = NO, file = AU
@@ -472,7 +481,7 @@ public class Test_AutoReconciliation_FullTest extends TestBaseUnitAsync {
     Assert.assertEquals("Debe tener estado INITIAL", AccountingStatusType.INITIAL, liq.getStatus());
 
     // Revisar que exista el evento reversado en la cola kafka
-    checkIfTransactionIsInQueue(KafkaEventsRoute10.TRANSACTION_AUTHORIZED_TOPIC, prepaidMovement10.getIdTxExterno(), "PURCHASE", "AUTHORIZED");
+    checkIfTransactionIsInQueue(KafkaEventsRoute10.TRANSACTION_AUTHORIZED_TOPIC, prepaidMovement10.getIdTxExterno(), "PURCHASE", "AUTHORIZED", prepaidMovementFee10List);
   }
 
   // Compra en dolares, BD = NO, file = OP
@@ -543,7 +552,7 @@ public class Test_AutoReconciliation_FullTest extends TestBaseUnitAsync {
     Assert.assertEquals("Debe tener estado PENDING", AccountingStatusType.PENDING, liq.getStatus());
 
     // Revisar que exista el evento reversado en la cola kafka
-    checkIfTransactionIsInQueue(KafkaEventsRoute10.TRANSACTION_AUTHORIZED_TOPIC, prepaidMovement10.getIdTxExterno(), "PURCHASE", "AUTHORIZED");
+    checkIfTransactionIsInQueue(KafkaEventsRoute10.TRANSACTION_AUTHORIZED_TOPIC, prepaidMovement10.getIdTxExterno(), "PURCHASE", "AUTHORIZED", prepaidMovementFee10List);
   }
 
   // Compra en pesos, BD = NO, file = OP
@@ -624,7 +633,7 @@ public class Test_AutoReconciliation_FullTest extends TestBaseUnitAsync {
     Assert.assertEquals("Debe tener estado PENDING", AccountingStatusType.PENDING, liq.getStatus());
 
     // Revisar que exista el evento reversado en la cola kafka
-    checkIfTransactionIsInQueue(KafkaEventsRoute10.TRANSACTION_AUTHORIZED_TOPIC, prepaidMovement10.getIdTxExterno(), "PURCHASE", "AUTHORIZED");
+    checkIfTransactionIsInQueue(KafkaEventsRoute10.TRANSACTION_AUTHORIZED_TOPIC, prepaidMovement10.getIdTxExterno(), "PURCHASE", "AUTHORIZED", prepaidMovementFee10List);
   }
 
   // Compra en dolares, BD = NOTIFIED, file = AU
@@ -1038,7 +1047,7 @@ public class Test_AutoReconciliation_FullTest extends TestBaseUnitAsync {
     Assert.assertEquals("Debe tener estado INITIAL", AccountingStatusType.INITIAL, liq.getStatus());
 
     // Revisar que exista el evento reversado en la cola kafka
-    checkIfTransactionIsInQueue(KafkaEventsRoute10.TRANSACTION_AUTHORIZED_TOPIC, prepaidMovement10.getIdTxExterno(), "SUSCRIPTION", "AUTHORIZED");
+    checkIfTransactionIsInQueue(KafkaEventsRoute10.TRANSACTION_AUTHORIZED_TOPIC, prepaidMovement10.getIdTxExterno(), "SUSCRIPTION", "AUTHORIZED", prepaidMovementFee10List);
   }
 
   // Suscripcion en pesos, BD = NO, file = AU
@@ -1116,7 +1125,7 @@ public class Test_AutoReconciliation_FullTest extends TestBaseUnitAsync {
     Assert.assertEquals("Debe tener estado INITIAL", AccountingStatusType.INITIAL, liq.getStatus());
 
     // Revisar que exista el evento reversado en la cola kafka
-    checkIfTransactionIsInQueue(KafkaEventsRoute10.TRANSACTION_AUTHORIZED_TOPIC, prepaidMovement10.getIdTxExterno(), "SUSCRIPTION", "AUTHORIZED");
+    checkIfTransactionIsInQueue(KafkaEventsRoute10.TRANSACTION_AUTHORIZED_TOPIC, prepaidMovement10.getIdTxExterno(), "SUSCRIPTION", "AUTHORIZED", prepaidMovementFee10List);
   }
 
   // Suscription en dolares, BD = NO, file = OP
@@ -1187,7 +1196,7 @@ public class Test_AutoReconciliation_FullTest extends TestBaseUnitAsync {
     Assert.assertEquals("Debe tener estado PENDING", AccountingStatusType.PENDING, liq.getStatus());
 
     // Revisar que exista el evento reversado en la cola kafka
-    checkIfTransactionIsInQueue(KafkaEventsRoute10.TRANSACTION_AUTHORIZED_TOPIC, prepaidMovement10.getIdTxExterno(), "SUSCRIPTION", "AUTHORIZED");
+    checkIfTransactionIsInQueue(KafkaEventsRoute10.TRANSACTION_AUTHORIZED_TOPIC, prepaidMovement10.getIdTxExterno(), "SUSCRIPTION", "AUTHORIZED", prepaidMovementFee10List);
   }
 
   // Suscription en pesos, BD = NO, file = OP
@@ -1268,7 +1277,7 @@ public class Test_AutoReconciliation_FullTest extends TestBaseUnitAsync {
     Assert.assertEquals("Debe tener estado PENDING", AccountingStatusType.PENDING, liq.getStatus());
 
     // Revisar que exista el evento reversado en la cola kafka
-    checkIfTransactionIsInQueue(KafkaEventsRoute10.TRANSACTION_AUTHORIZED_TOPIC, prepaidMovement10.getIdTxExterno(), "SUSCRIPTION", "AUTHORIZED");
+    checkIfTransactionIsInQueue(KafkaEventsRoute10.TRANSACTION_AUTHORIZED_TOPIC, prepaidMovement10.getIdTxExterno(), "SUSCRIPTION", "AUTHORIZED", prepaidMovementFee10List);
   }
 
   // Suscription en dolares, BD = NOTIFIED, file = AU
@@ -1775,13 +1784,13 @@ public class Test_AutoReconciliation_FullTest extends TestBaseUnitAsync {
     return prepaidMovement10;
   }
 
-  private void checkIfTransactionIsInQueue(String queueName, String idTxExterno, String transactionType, String transactionStatus) {
+  private void checkIfTransactionIsInQueue(String queueName, String idTxExterno, String transactionType, String transactionStatus, List<PrepaidMovementFee10> feeList) {
     Queue qResp = camelFactory.createJMSQueue(queueName);
     ExchangeData<String> event = (ExchangeData<String>) camelFactory.createJMSMessenger(30000, 60000)
       .getMessage(qResp, idTxExterno);
 
-    Assert.assertNotNull("Deberia existir un evento de transaccion reversada", event);
-    Assert.assertNotNull("Deberia existir un evento de transaccion reversada", event.getData());
+    Assert.assertNotNull("Deberia existir un evento de transaccion", event);
+    Assert.assertNotNull("Deberia existir un evento de transaccion con data", event.getData());
 
     TransactionEvent transactionEvent = getJsonParser().fromJson(event.getData(), TransactionEvent.class);
 
@@ -1790,6 +1799,17 @@ public class Test_AutoReconciliation_FullTest extends TestBaseUnitAsync {
     Assert.assertEquals("Debe tener el mismo userId", prepaidUser.getUuid(), transactionEvent.getUserId());
     Assert.assertEquals("Debe tener el mismo transactiontype", transactionType, transactionEvent.getTransaction().getType());
     Assert.assertEquals("Debe tener el mismo status", transactionStatus, transactionEvent.getTransaction().getStatus());
+
+    if (feeList != null && !feeList.isEmpty()) {
+      List<cl.multicaja.prepaid.kafka.events.model.Fee> eventFeeList = transactionEvent.getTransaction().getFees();
+      Assert.assertEquals("Debe tener todas las fees", feeList.size(), eventFeeList.size());
+
+      for (PrepaidMovementFee10 storedFee : feeList) {
+        cl.multicaja.prepaid.kafka.events.model.Fee foundFee = eventFeeList.stream().filter(f -> f.getType().equals(storedFee.getFeeType().toString())).findAny().orElse(null);
+        Assert.assertNotNull("Debe existir la misma fee en la lista", foundFee);
+        Assert.assertEquals("Debe tener el mismo monto", storedFee.getAmount(), foundFee.getAmount().getValue());
+      }
+    }
   }
 
   private MovimientoTecnocom10 prepareMovimientoTecnocom(TipoFactura tipofac, TecnocomReconciliationRegisterType registerType, CodigoMoneda currencyCode) throws Exception {
