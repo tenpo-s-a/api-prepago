@@ -359,7 +359,7 @@ public class Test_AutoReconciliation_FullTest extends TestBaseUnitAsync {
     Assert.assertEquals("Debe tener estado PENDING", AccountingStatusType.PENDING, acc.getStatus());
     Assert.assertEquals("Debe tener estado PENDING", AccountingStatusType.PENDING, acc.getAccountingStatus());
     Assert.assertEquals("Debe ser del tipo COMPRA_MONEDA", AccountingTxType.COMPRA_MONEDA, acc.getType());
-    Assert.assertEquals("Debe ser del tipo mov COMPRA_MONEDA", AccountingMovementType.COMPRA_OTRA_MONEDA, acc.getAccountingMovementType());
+    Assert.assertEquals("Debe ser del tipo mov COMPRA_MONEDA", AccountingMovementType.COMPRA_MONEDA, acc.getAccountingMovementType());
 
     // Compras Internacionales en moneda extranjera: Regla de contabilidad 1: El monto_trx_pesos se llenara con el monto del archivo de operacion impfac
     Assert.assertEquals("impfac de tecnocom debe ser igual al de contabilidad", prepaidMovement10.getImpfac().setScale(2, RoundingMode.HALF_UP), acc.getAmount().getValue());
@@ -508,7 +508,7 @@ public class Test_AutoReconciliation_FullTest extends TestBaseUnitAsync {
     Assert.assertEquals("Debe tener estado PENDING", AccountingStatusType.PENDING, acc.getStatus());
     Assert.assertEquals("Debe tener estado OK", AccountingStatusType.OK, acc.getAccountingStatus());
     Assert.assertEquals("Debe ser del tipo COMPRA_MONEDA", AccountingTxType.COMPRA_MONEDA, acc.getType());
-    Assert.assertEquals("Debe ser del tipo mov COMPRA_MONEDA", AccountingMovementType.COMPRA_OTRA_MONEDA, acc.getAccountingMovementType());
+    Assert.assertEquals("Debe ser del tipo mov COMPRA_MONEDA", AccountingMovementType.COMPRA_MONEDA, acc.getAccountingMovementType());
 
     // Compras Internacionales en moneda extranjera: Regla de contabilidad 1: El monto_trx_pesos se llenara con el monto del archivo de operacion impfac
     Assert.assertEquals("impfac de tecnocom debe ser igual al de contabilidad", prepaidMovement10.getImpfac().setScale(2, RoundingMode.HALF_UP), acc.getAmount().getValue());
@@ -652,7 +652,7 @@ public class Test_AutoReconciliation_FullTest extends TestBaseUnitAsync {
     Assert.assertEquals("Debe tener estado PENDING", AccountingStatusType.PENDING, acc.getStatus());
     Assert.assertEquals("Debe tener estado PENDING", AccountingStatusType.PENDING, acc.getAccountingStatus());
     Assert.assertEquals("Debe ser del tipo COMPRA_MONEDA", AccountingTxType.COMPRA_MONEDA, acc.getType());
-    Assert.assertEquals("Debe ser del tipo mov COMPRA_MONEDA", AccountingMovementType.COMPRA_OTRA_MONEDA, acc.getAccountingMovementType());
+    Assert.assertEquals("Debe ser del tipo mov COMPRA_MONEDA", AccountingMovementType.COMPRA_MONEDA, acc.getAccountingMovementType());
 
     // Compras Internacionales en moneda extranjera: Regla de contabilidad 1: El monto_trx_pesos se llenara con el monto del archivo de operacion impfac
     Assert.assertEquals("impfac de tecnocom debe ser igual al de contabilidad", prepaidMovement10.getImpfac().setScale(2, RoundingMode.HALF_UP), acc.getAmount().getValue());
@@ -780,7 +780,7 @@ public class Test_AutoReconciliation_FullTest extends TestBaseUnitAsync {
     Assert.assertEquals("Debe tener estado PENDING", AccountingStatusType.PENDING, acc.getStatus());
     Assert.assertEquals("Debe tener estado OK", AccountingStatusType.OK, acc.getAccountingStatus());
     Assert.assertEquals("Debe ser del tipo COMPRA_MONEDA", AccountingTxType.COMPRA_MONEDA, acc.getType());
-    Assert.assertEquals("Debe ser del tipo mov COMPRA_MONEDA", AccountingMovementType.COMPRA_OTRA_MONEDA, acc.getAccountingMovementType());
+    Assert.assertEquals("Debe ser del tipo mov COMPRA_MONEDA", AccountingMovementType.COMPRA_MONEDA, acc.getAccountingMovementType());
 
     // Compras Internacionales en moneda extranjera: Regla de contabilidad 1: El monto_trx_pesos se llenara con el monto del archivo de operacion impfac
     Assert.assertEquals("impfac de tecnocom debe ser igual al de contabilidad", prepaidMovement10.getImpfac().setScale(2, RoundingMode.HALF_UP), acc.getAmount().getValue());

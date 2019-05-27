@@ -483,7 +483,7 @@ public class PrepaidAccountingEJBBean10 extends PrepaidBaseEJBBean10 implements 
       trxOriginType = TransactionOriginType.MASTERCARDINT;
     } else if (TipoFactura.COMPRA_INTERNACIONAL.equals(movement.getTipofac()) && !movement.getClamondiv().equals(CodigoMoneda.CHILE_CLP.getValue())) {
       type = AccountingTxType.COMPRA_MONEDA;
-      movementType = AccountingMovementType.COMPRA_OTRA_MONEDA;
+      movementType = AccountingMovementType.COMPRA_MONEDA;
       trxOriginType = TransactionOriginType.MASTERCARDINT;
     } else if (TipoFactura.ANULA_COMPRA_INTERNACIONAL.equals(movement.getTipofac()) ||
                TipoFactura.ANULA_SUSCRIPCION_INTERNACIONAL.equals(movement.getTipofac())) {
@@ -1258,7 +1258,7 @@ public class PrepaidAccountingEJBBean10 extends PrepaidBaseEJBBean10 implements 
     } else if(CodigoMoneda.CHILE_CLP.getValue().equals(trx.getTransactionCurrencyCode())) {
       return AccountingMovementType.COMPRA_PESOS;
     } else {
-      return AccountingMovementType.COMPRA_OTRA_MONEDA;
+      return AccountingMovementType.COMPRA_MONEDA;
     }
   }
 
