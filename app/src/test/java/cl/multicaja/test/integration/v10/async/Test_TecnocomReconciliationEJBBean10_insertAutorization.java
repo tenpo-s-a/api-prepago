@@ -1787,7 +1787,7 @@ public class Test_TecnocomReconciliationEJBBean10_insertAutorization extends Tes
   }
 
   private void checkIfTransactionIsInQueue(String queueName, String idTxExterno, String transactionType, String transactionStatus) {
-    /*Queue qResp = camelFactory.createJMSQueue(queueName);
+    Queue qResp = camelFactory.createJMSQueue(queueName);
     ExchangeData<String> event = (ExchangeData<String>) camelFactory.createJMSMessenger(30000, 60000)
       .getMessage(qResp, idTxExterno);
 
@@ -1800,7 +1800,7 @@ public class Test_TecnocomReconciliationEJBBean10_insertAutorization extends Tes
     Assert.assertEquals("Debe tener el mismo accountId", account.getUuid(), transactionEvent.getAccountId());
     Assert.assertEquals("Debe tener el mismo userId", prepaidUser.getUuid(), transactionEvent.getUserId());
     Assert.assertEquals("Debe tener el mismo transactiontype", transactionType, transactionEvent.getTransaction().getType());
-    Assert.assertEquals("Debe tener el mismo status", transactionStatus, transactionEvent.getTransaction().getStatus());*/
+    Assert.assertEquals("Debe tener el mismo status", transactionStatus, transactionEvent.getTransaction().getStatus());
   }
 
   private IpmMovement10 prepareIpmMovement(MovimientoTecnocom10 movimientoTecnocom10) throws Exception {
