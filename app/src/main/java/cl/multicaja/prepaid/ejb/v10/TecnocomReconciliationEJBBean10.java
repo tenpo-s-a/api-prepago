@@ -244,7 +244,6 @@ public class TecnocomReconciliationEJBBean10 extends PrepaidBaseEJBBean10 implem
     // Expira los movimientos
     this.getPrepaidMovementEJBBean11().expireNotReconciledMovements(ReconciliationFileType.TECNOCOM_FILE);
     this.getPrepaidMovementEJBBean11().expireNotReconciledAuthorizations(); //expira los movimientos con estado NOTIFIED y AUTHORIZED
-
   }
 
   public void insertTecnocomMovement(Long fileId, List<TecnocomReconciliationFileDetail> reconciliationFileDetailList) throws Exception {

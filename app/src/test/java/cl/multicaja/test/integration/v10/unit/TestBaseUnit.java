@@ -43,9 +43,7 @@ import java.math.BigDecimal;
 import java.sql.PreparedStatement;
 import java.sql.SQLException;
 import java.sql.Timestamp;
-import java.time.Instant;
-import java.time.LocalDateTime;
-import java.time.ZoneId;
+import java.time.*;
 import java.util.*;
 
 import static cl.multicaja.core.model.Errors.*;
@@ -1085,7 +1083,7 @@ public class TestBaseUnit extends TestApiBase {
     prepaidMovement.setClamon(CodigoMoneda.CHILE_CLP);
     prepaidMovement.setIndnorcor(IndicadorNormalCorrector.fromValue(tipoFactura.getCorrector())); //0-Normal
     prepaidMovement.setTipofac(tipoFactura);
-    prepaidMovement.setFecfac(new Date(System.currentTimeMillis()));
+    prepaidMovement.setFecfac(java.util.Date.from(ZonedDateTime.now(ZoneId.of("UTC")).toInstant()));
     prepaidMovement.setNumreffac(""); //se debe actualizar despues, es el id de PrepaidMovement10
     prepaidMovement.setPan(prepaidCard != null ? prepaidCard.getPan() : ""); // se debe actualizar despues
     prepaidMovement.setClamondiv(0);

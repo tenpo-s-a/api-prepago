@@ -10,6 +10,7 @@ import org.junit.Assert;
 import org.junit.BeforeClass;
 import org.junit.Test;
 
+import java.time.ZoneId;
 import java.util.List;
 
 public class Test_PrepaidMovementEJBBean11_getPrepaidMovements extends TestBaseUnit {
@@ -158,7 +159,7 @@ public class Test_PrepaidMovementEJBBean11_getPrepaidMovements extends TestBaseU
     compareMovements(getPrepaidMovement10List, movement);
 
     getPrepaidMovement10List = getPrepaidMovementEJBBean11().getPrepaidMovements(null, null, null,
-      null, null, null, null, null, null, null, (java.sql.Date)movement.getFecfac(), null, null,
+      null, null, null, null, null, null, null, java.sql.Date.valueOf(movement.getFecfac().toInstant().atZone(ZoneId.of("UTC")).toLocalDate()), null, null,
       null, null, null, null);
 
     Assert.assertEquals("Deberia tener largo 3", 3, getPrepaidMovement10List.size());
