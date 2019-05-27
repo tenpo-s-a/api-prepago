@@ -11,7 +11,7 @@ import javax.xml.bind.DatatypeConverter;
 
 public class AESEncryptCardUtilImpl implements EncryptCardUtil {
 
-  private static final Log log = LogFactory.getLog(AESEncryptCardUtilImpl.class);
+    private static final Log log = LogFactory.getLog(AESEncryptCardUtilImpl.class);
 
     private static final String CIPHER_INSTANCE_NAME = "AES/CBC/PKCS5PADDING";
     private static final String ALGORITHM = "AES";

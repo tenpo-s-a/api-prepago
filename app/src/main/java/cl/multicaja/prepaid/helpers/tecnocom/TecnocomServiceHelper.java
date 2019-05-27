@@ -16,6 +16,11 @@ import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 
 import java.math.BigDecimal;
+import java.text.SimpleDateFormat;
+import java.time.ZoneId;
+import java.time.ZonedDateTime;
+import java.time.format.DateTimeFormatter;
+import java.util.Date;
 
 /**
  * Helper para inicializar el servicio de tecnocom
@@ -97,27 +102,30 @@ public final class TecnocomServiceHelper {
     return numaut;
   }
 
-  public InclusionMovimientosDTO issuanceFee(String contrato, String pan, String nomcomred, PrepaidMovement10 prepaidMovement) {
+  public InclusionMovimientosDTO issuanceFee(String contrato, String pan, String nomcomred, PrepaidMovement10 prepaidMovement) throws Exception {
     log.info(String.format("Issuance fee user -> [%s]", contrato));
     return includeMovement(contrato, pan, nomcomred, prepaidMovement);
   }
 
-  public InclusionMovimientosDTO topup(String contrato, String pan, String nomcomred, PrepaidMovement10 prepaidMovement) {
+  public InclusionMovimientosDTO topup(String contrato, String pan, String nomcomred, PrepaidMovement10 prepaidMovement) throws Exception {
     log.info(String.format("Topup balance user -> [%s]", contrato));
     return includeMovement(contrato, pan, nomcomred, prepaidMovement);
   }
 
-  public InclusionMovimientosDTO withdraw(String contrato, String pan, String nomcomred, PrepaidMovement10 prepaidMovement) {
+  public InclusionMovimientosDTO withdraw(String contrato, String pan, String nomcomred, PrepaidMovement10 prepaidMovement) throws Exception {
     log.info(String.format("Withdraw balance user -> [%s]", contrato));
     return includeMovement(contrato, pan, nomcomred, prepaidMovement);
   }
 
-  public InclusionMovimientosDTO reverse(String contrato, String pan, String nomcomred, PrepaidMovement10 prepaidMovement) {
+  public InclusionMovimientosDTO reverse(String contrato, String pan, String nomcomred, PrepaidMovement10 prepaidMovement) throws Exception {
     log.info(String.format("Reverse balance user -> [%s]", contrato));
     return includeMovement(contrato, pan, nomcomred, prepaidMovement);
   }
 
-  private InclusionMovimientosDTO includeMovement(String contrato, String pan, String nomcomred, PrepaidMovement10 prepaidMovement) {
+  private final SimpleDateFormat format = new SimpleDateFormat("yyyy-MM-dd");
+  private final DateTimeFormatter dtf = DateTimeFormatter.ofPattern("yyyy-MM-dd");
+
+  private InclusionMovimientosDTO includeMovement(String contrato, String pan, String nomcomred, PrepaidMovement10 prepaidMovement) throws Exception {
     CodigoMoneda clamon = prepaidMovement.getClamon();
     IndicadorNormalCorrector indnorcor = prepaidMovement.getIndnorcor();
     TipoFactura tipofac = prepaidMovement.getTipofac();
@@ -128,6 +136,10 @@ public final class TecnocomServiceHelper {
     String numreffac = prepaidMovement.getId().toString(); // Se hace internamente en Tecnocomç
     String numaut = TecnocomServiceHelper.getNumautFromIdMov(prepaidMovement.getId().toString());
 
+    ZonedDateTime chileDt = ZonedDateTime.ofInstant(ZonedDateTime.now().toInstant(), ZoneId.of("America/Santiago"));
+
+    Date fecfac = format.parse(chileDt.format(dtf));
+
     if(nomcomred.length() > 27){
       nomcomred = nomcomred.substring(0, 27);
     }
@@ -136,7 +148,7 @@ public final class TecnocomServiceHelper {
 
     return this.getTecnocomService().inclusionMovimientos(contrato, pan, clamon, indnorcor, tipofac,
       numreffac, impfac, numaut, codcom,
-      nomcomred, codact, clamondiv,impfac);
+      nomcomred, codact, clamondiv,impfac, fecfac);
   }
 
 
