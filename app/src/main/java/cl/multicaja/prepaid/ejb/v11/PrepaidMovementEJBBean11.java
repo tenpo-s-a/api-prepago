@@ -318,7 +318,7 @@ public class PrepaidMovementEJBBean11 extends PrepaidMovementEJBBean10 {
       movement.setClamon(CodigoMoneda.fromValue(rs.getInt("clamon")));
       movement.setIndnorcor(IndicadorNormalCorrector.fromValue(rs.getInt("indnorcor")));
       movement.setTipofac(TipoFactura.valueOfEnumByCodeAndCorrector(rs.getInt("tipofac"),rs.getInt("indnorcor")));
-      movement.setFecfac(new java.util.Date(rs.getDate("fecfac").getTime()));
+      movement.setFecfac(java.util.Date.from(rs.getDate("fecfac").toLocalDate().atStartOfDay(ZoneId.of("UTC")).toInstant()));
       movement.setNumreffac(rs.getString("numreffac"));
       movement.setPan(rs.getString("pan"));
       movement.setClamondiv(rs.getInt("clamondiv"));

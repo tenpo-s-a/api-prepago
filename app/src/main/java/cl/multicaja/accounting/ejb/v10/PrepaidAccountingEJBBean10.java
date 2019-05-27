@@ -482,7 +482,7 @@ public class PrepaidAccountingEJBBean10 extends PrepaidBaseEJBBean10 implements 
       movementType = AccountingMovementType.COMPRA_PESOS;
       trxOriginType = TransactionOriginType.MASTERCARDINT;
     } else if (TipoFactura.COMPRA_INTERNACIONAL.equals(movement.getTipofac()) && !movement.getClamondiv().equals(CodigoMoneda.CHILE_CLP.getValue())) {
-      type = AccountingTxType.COMPRA_OTRA_MONEDA;
+      type = AccountingTxType.COMPRA_MONEDA;
       movementType = AccountingMovementType.COMPRA_OTRA_MONEDA;
       trxOriginType = TransactionOriginType.MASTERCARDINT;
     } else if (TipoFactura.ANULA_COMPRA_INTERNACIONAL.equals(movement.getTipofac()) ||
@@ -1051,7 +1051,7 @@ public class PrepaidAccountingEJBBean10 extends PrepaidBaseEJBBean10 implements 
             .add(getCalculationsHelper().calculatePercentageValue(percentage, BigDecimal.valueOf(this.getCalculationsHelper().getCalculatorParameter10().getIVA())));
 
           break;
-        case COMPRA_OTRA_MONEDA:
+        case COMPRA_MONEDA:
           //Monto fijo
           fee = this.getCalculationsHelper().getCalculatorParameter10().getOTHER_CURRENCY_PURCHASE_FEE_AMOUNT();
 
@@ -1117,7 +1117,7 @@ public class PrepaidAccountingEJBBean10 extends PrepaidBaseEJBBean10 implements 
     PrepaidMovementType movementType = null;
     switch (txType) {
       case COMPRA_PESOS:
-      case COMPRA_OTRA_MONEDA:
+      case COMPRA_MONEDA:
         movementType = PrepaidMovementType.PURCHASE;
         break;
       case COMPRA_SUSCRIPCION:
@@ -1130,7 +1130,7 @@ public class PrepaidAccountingEJBBean10 extends PrepaidBaseEJBBean10 implements 
     TipoFactura tipoFactura = null;
     switch (txType) {
       case COMPRA_PESOS:
-      case COMPRA_OTRA_MONEDA:
+      case COMPRA_MONEDA:
         tipoFactura = TipoFactura.COMPRA_INTERNACIONAL;
         break;
       case COMPRA_SUSCRIPCION:
@@ -1236,7 +1236,7 @@ public class PrepaidAccountingEJBBean10 extends PrepaidBaseEJBBean10 implements 
     } else if(CodigoMoneda.CHILE_CLP.getValue().equals(trx.getTransactionCurrencyCode())) {
       return AccountingTxType.COMPRA_PESOS;
     } else {
-      return AccountingTxType.COMPRA_OTRA_MONEDA;
+      return AccountingTxType.COMPRA_MONEDA;
     }
   }
 

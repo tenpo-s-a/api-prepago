@@ -58,6 +58,6 @@ public class Test_PrepaidAccountingEJBBean10_getTransactionType extends TestBase
     ipmMessage.setTransactionCurrencyCode(CodigoMoneda.USA_USD.getValue());
     ipmMessage.setMerchantName("NetFlix.CoM!2314123");
     AccountingTxType type = getPrepaidAccountingEJBBean10().getTransactionType(ipmMessage);
-    Assert.assertEquals("Debe ser compra en otra moneda", AccountingTxType.COMPRA_OTRA_MONEDA, type);
+    Assert.assertEquals("Debe ser compra en otra moneda", AccountingTxType.COMPRA_MONEDA, type);
   }
 }
