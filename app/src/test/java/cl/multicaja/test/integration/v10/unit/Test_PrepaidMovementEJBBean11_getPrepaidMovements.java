@@ -16,7 +16,7 @@ public class Test_PrepaidMovementEJBBean11_getPrepaidMovements extends TestBaseU
   @BeforeClass
   @AfterClass
   public static void clearData(){
-    getDbUtils().getJdbcTemplate().execute(String.format("truncate %s.prp_movimiento cascade", getSchema()));
+    getDbUtils().getJdbcTemplate().execute(String.format("TRUNCATE TABLE %s.prp_movimiento CASCADE", getSchema()));
   }
 
   @Test

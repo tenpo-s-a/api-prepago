@@ -25,8 +25,8 @@ public class Test_PrepaidMovementEJBBean10_updatePendingPrepaidMovementsTecnocom
   @After
   public void afterEachTest() {
 
-    DBUtils.getInstance().getJdbcTemplate().execute(String.format("TRUNCATE %s.prp_movimiento CASCADE", getSchema()));
-    DBUtils.getInstance().getJdbcTemplate().execute(String.format("TRUNCATE %s.prp_usuario CASCADE", getSchema()));
+    DBUtils.getInstance().getJdbcTemplate().execute(String.format("TRUNCATE TABLE %s.prp_movimiento CASCADE", getSchema()));
+    DBUtils.getInstance().getJdbcTemplate().execute(String.format("TRUNCATE TABLE  %s.prp_usuario CASCADE", getSchema()));
   }
 
   @Test(expected = BadRequestException.class)

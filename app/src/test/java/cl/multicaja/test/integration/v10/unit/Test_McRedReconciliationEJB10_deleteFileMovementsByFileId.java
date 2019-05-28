@@ -19,8 +19,8 @@ public class Test_McRedReconciliationEJB10_deleteFileMovementsByFileId extends T
   @Before
   @After
   public void beforeAndAfter() {
-    getDbUtils().getJdbcTemplate().execute(String.format("truncate %s.prp_movimiento_switch cascade", getSchema()));
-    getDbUtils().getJdbcTemplate().execute(String.format("truncate %s.prp_archivos_conciliacion cascade", getSchema()));
+    getDbUtils().getJdbcTemplate().execute(String.format("TRUNCATE TABLE %s.prp_movimiento_switch CASCADE", getSchema()));
+    getDbUtils().getJdbcTemplate().execute(String.format("TRUNCATE TABLE %s.prp_archivos_conciliacion CASCADE", getSchema()));
   }
 
   @Test

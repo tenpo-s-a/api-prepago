@@ -24,8 +24,8 @@ public class Test_PrepaidCardEJBBean11_publishCardEvent extends TestBaseUnitAsyn
   @BeforeClass
   @AfterClass
   public static void clearData(){
-    getDbUtils().getJdbcTemplate().execute(String.format("truncate %s.prp_tarjeta cascade", getSchema()));
-    getDbUtils().getJdbcTemplate().execute(String.format("truncate %s.prp_cuenta cascade", getSchema()));
+    getDbUtils().getJdbcTemplate().execute(String.format("TRUNCATE TABLE %s.prp_tarjeta CASCADE", getSchema()));
+    getDbUtils().getJdbcTemplate().execute(String.format("TRUNCATE TABLE %s.prp_cuenta CASCADE", getSchema()));
   }
 
   @Test

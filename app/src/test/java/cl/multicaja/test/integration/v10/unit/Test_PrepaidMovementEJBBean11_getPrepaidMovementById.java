@@ -15,7 +15,7 @@ public class Test_PrepaidMovementEJBBean11_getPrepaidMovementById extends TestBa
   @BeforeClass
   @AfterClass
   public static void clearData(){
-    getDbUtils().getJdbcTemplate().execute(String.format("truncate %s.prp_movimiento cascade", getSchema()));
+    getDbUtils().getJdbcTemplate().execute(String.format("TRUNCATE TABLE %s.prp_movimiento cascade", getSchema()));
   }
 
   @Test(expected = BadRequestException.class)
