@@ -1813,7 +1813,7 @@ public class Test_TecnocomReconciliationEJBBean10_insertAutorization extends Tes
       for (PrepaidMovementFee10 storedFee : feeList) {
         cl.multicaja.prepaid.kafka.events.model.Fee foundFee = eventFeeList.stream().filter(f -> f.getType().equals(storedFee.getFeeType().toString())).findAny().orElse(null);
         Assert.assertNotNull("Debe existir la misma fee en la lista", foundFee);
-        Assert.assertEquals("Debe tener el mismo monto", storedFee.getAmount().setScale(0, RoundingMode.HALF_UP), foundFee.getAmount().getValue());
+        Assert.assertEquals("Debe tener el mismo monto", storedFee.getAmount().stripTrailingZeros(), foundFee.getAmount().getValue().stripTrailingZeros());
       }
     }
   }
