@@ -29,7 +29,6 @@ import cl.multicaja.tecnocom.constants.*;
 import cl.multicaja.tecnocom.dto.AltaClienteDTO;
 import cl.multicaja.tecnocom.dto.DatosTarjetaDTO;
 import cl.multicaja.tecnocom.dto.InclusionMovimientosDTO;
-import cl.multicaja.accounting.model.v10.UserAccountNew;
 import org.apache.commons.lang3.RandomUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.junit.Assert;
@@ -44,9 +43,7 @@ import java.math.BigDecimal;
 import java.sql.PreparedStatement;
 import java.sql.SQLException;
 import java.sql.Timestamp;
-import java.time.Instant;
-import java.time.LocalDateTime;
-import java.time.ZoneId;
+import java.time.*;
 import java.util.*;
 
 import static cl.multicaja.core.model.Errors.*;
@@ -364,7 +361,6 @@ public class TestBaseUnit extends TestApiBase {
     if(tecnocomReconciliationEJBBean10 == null) {
       tecnocomReconciliationEJBBean10 = new TecnocomReconciliationEJBBean10();
       tecnocomReconciliationEJBBean10.setPrepaidCardEJBBean11(getPrepaidCardEJBBean11());
-      tecnocomReconciliationEJBBean10.setPrepaidMovementEJBBean10(getPrepaidMovementEJBBean10());
       tecnocomReconciliationEJBBean10.setPrepaidMovementEJBBean11(getPrepaidMovementEJBBean11());
       tecnocomReconciliationEJBBean10.setPrepaidUserEJBBean10(getPrepaidUserEJBBean10());
       tecnocomReconciliationEJBBean10.setPrepaidAccountingEJBBean10(getPrepaidAccountingEJBBean10());
@@ -1087,7 +1083,7 @@ public class TestBaseUnit extends TestApiBase {
     prepaidMovement.setClamon(CodigoMoneda.CHILE_CLP);
     prepaidMovement.setIndnorcor(IndicadorNormalCorrector.fromValue(tipoFactura.getCorrector())); //0-Normal
     prepaidMovement.setTipofac(tipoFactura);
-    prepaidMovement.setFecfac(new Date(System.currentTimeMillis()));
+    prepaidMovement.setFecfac(java.util.Date.from(ZonedDateTime.now(ZoneId.of("UTC")).toInstant()));
     prepaidMovement.setNumreffac(""); //se debe actualizar despues, es el id de PrepaidMovement10
     prepaidMovement.setPan(prepaidCard != null ? prepaidCard.getPan() : ""); // se debe actualizar despues
     prepaidMovement.setClamondiv(0);

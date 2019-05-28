@@ -78,7 +78,7 @@ public class Test_TecnocomReconciliationEJBBean10_insertAutorization extends Tes
       prepaidTopup.setMerchantCode(NewPrepaidBaseTransaction10.WEB_MERCHANT_CODE);
       prepaidTopup.setFirstTopup(false);
       CdtTransaction10 cdtTransaction = test.buildCdtTransaction10(prepaidUser, prepaidTopup);
-      PrepaidMovement10 prepaidMovement = test.buildPrepaidMovement10(prepaidUser, prepaidTopup, prepaidCard, cdtTransaction, PrepaidMovementType.TOPUP);
+      PrepaidMovement10 prepaidMovement = test.buildPrepaidMovement11(prepaidUser, prepaidTopup, prepaidCard, cdtTransaction, PrepaidMovementType.TOPUP, false);
       prepaidMovement.setIndnorcor(IndicadorNormalCorrector.NORMAL);
       prepaidMovement.setNumaut(getRandomNumericString(6));
       prepaidMovement.setFechaCreacion(null);
@@ -119,28 +119,148 @@ public class Test_TecnocomReconciliationEJBBean10_insertAutorization extends Tes
     DBUtils.getInstance().getJdbcTemplate().execute(String.format("TRUNCATE %s.clearing CASCADE", getSchemaAccounting()));
     DBUtils.getInstance().getJdbcTemplate().execute(String.format("TRUNCATE %s.accounting CASCADE", getSchemaAccounting()));
     DBUtils.getInstance().getJdbcTemplate().execute(String.format("TRUNCATE %s.accounting_files CASCADE", getSchemaAccounting()));
+    DBUtils.getInstance().getJdbcTemplate().execute(String.format("TRUNCATE %s.ipm_file_data CASCADE", getSchemaAccounting()));
     DBUtils.getInstance().getJdbcTemplate().execute(String.format("TRUNCATE %s.prp_movimientos_tecnocom CASCADE", getSchema()));
     DBUtils.getInstance().getJdbcTemplate().execute(String.format("TRUNCATE %s.prp_movimientos_tecnocom_hist CASCADE", getSchema()));
     DBUtils.getInstance().getJdbcTemplate().execute(String.format("TRUNCATE %s.prp_archivos_conciliacion CASCADE", getSchema()));
   }
 
+  @Test
+  public void processTecnocomTableData_expireAuthorizedSuscription() throws Exception {
+    PrepaidTopup10 topup = buildPrepaidTopup10();
+
+    // Se inserta un movimiento en estado AUTHORIZED
+    PrepaidMovement10 insertedMovement = buildPrepaidMovement11(prepaidUser, topup, prepaidCard, null, PrepaidMovementType.TOPUP, false);
+    insertedMovement.setEstado(PrepaidMovementStatus.AUTHORIZED);
+    insertedMovement.setTipoMovimiento(PrepaidMovementType.SUSCRIPTION);
+    insertedMovement.setTipofac(TipoFactura.ANULA_SUSCRIPCION_INTERNACIONAL);
+    insertedMovement.setIndnorcor(IndicadorNormalCorrector.CORRECTORA);
+    insertedMovement = createPrepaidMovement11(insertedMovement);
+
+    List<PrepaidMovementFee10> prepaidMovementFee10List = prepareFees(insertedMovement, PrepaidMovementFeeType.SUSCRIPTION_INT_FEE, true);
+
+    AccountingData10 accdata = buildRandomAccouting();
+    accdata.setIdTransaction(insertedMovement.getId());
+    accdata.setStatus(AccountingStatusType.PENDING);
+    accdata.setAccountingStatus(AccountingStatusType.PENDING);
+    getPrepaidAccountingEJBBean10().saveAccountingData(null, accdata);
+
+    ClearingData10 liqInsert = createClearingData(accdata, AccountingStatusType.INITIAL);
+    getPrepaidClearingEJBBean10().insertClearingData(null, liqInsert);
+
+    // Crea 1 archivos extra para que se expire el movimiento
+    List<ReconciliationFile10> createdFiles = createReconciliationFiles(1);
+
+    // Se inserta un movimiento en estado AUTHORIZED que no expirarara, ya que solo tiene 1 archivos entre medio
+    PrepaidMovement10 doNotExpireMovement = buildPrepaidMovement11(prepaidUser, topup, prepaidCard, null, PrepaidMovementType.TOPUP, false);
+    doNotExpireMovement.setEstado(PrepaidMovementStatus.AUTHORIZED);
+    doNotExpireMovement.setTipoMovimiento(PrepaidMovementType.SUSCRIPTION);
+    doNotExpireMovement.setTipofac(TipoFactura.SUSCRIPCION_INTERNACIONAL);
+    doNotExpireMovement = createPrepaidMovement11(doNotExpireMovement);
+
+    // Crea 1 archivos extra para que se expire el movimiento original
+    List<ReconciliationFile10> extraFiles = createReconciliationFiles(1);
+
+    // Como hay 2 archivos tecnocom en la tabla, debe expirar el movimiento original AUTHORIZED
+    getTecnocomReconciliationEJBBean10().processTecnocomTableData(tecnocomReconciliationFile10.getId());
+
+    PrepaidMovement10 foundMovement = getPrepaidMovementEJBBean11().getPrepaidMovementById(insertedMovement.getId());
+    Assert.assertEquals("Debe haber cambiado estado con tecnocom a NOT_RECONCILED", ReconciliationStatusType.NOT_RECONCILED, foundMovement.getConTecnocom());
+    Assert.assertEquals("Debe haber cambiado a estado EXPIRED", PrepaidMovementStatus.EXPIRED, foundMovement.getEstado());
+
+    // Este movimiento no debe cambiar sus estados, dado que no han pasado suficientes archivos (solo 1)
+    PrepaidMovement10 foundNotExpiredMovement = getPrepaidMovementEJBBean11().getPrepaidMovementById(doNotExpireMovement.getId());
+    Assert.assertEquals("Debe seguir en estado_con_ecnocom PENDING", ReconciliationStatusType.PENDING, foundNotExpiredMovement.getConTecnocom());
+    Assert.assertEquals("Debe seguir en estado AUTHORIZED", PrepaidMovementStatus.AUTHORIZED, foundNotExpiredMovement.getEstado());
+
+    // Verificar que exista en la tablas de contabilidad (acc y liq) en sus estados (INITIAL y PENDING)
+    AccountingData10 acc = getPrepaidAccountingEJBBean10().searchAccountingByIdTrx(null,foundMovement.getId());
+    Assert.assertNotNull("Debe existir en accounting", acc);
+    Assert.assertEquals("Debe tener estado NOT_OK", AccountingStatusType.NOT_OK, acc.getAccountingStatus());
+
+    ClearingData10 liq = getPrepaidClearingEJBBean10().searchClearingDataByAccountingId(null, acc.getId());
+    Assert.assertNotNull("Debe existir en clearing", liq);
+    Assert.assertEquals("Debe tener estado NOT_SEND", AccountingStatusType.NOT_SEND, liq.getStatus());
+
+    deleteReconciliationFiles(createdFiles);
+    deleteReconciliationFiles(extraFiles);
+
+    // Revisar que exista el evento reversado en la cola kafka
+    checkIfTransactionIsInQueue(KafkaEventsRoute10.TRANSACTION_AUTHORIZED_TOPIC, foundMovement.getIdTxExterno(), "SUSCRIPTION", "AUTHORIZED", prepaidMovementFee10List);
+  }
+
+  @Test
+  public void processTecnocomTableData_expireAuthorizedPurchase() throws Exception {
+    PrepaidTopup10 topup = buildPrepaidTopup10();
+
+    // Se inserta un movimiento en estado AUTHORIZED
+    PrepaidMovement10 insertedMovement = buildPrepaidMovement11(prepaidUser, topup, prepaidCard, null, PrepaidMovementType.TOPUP, false);
+    insertedMovement.setEstado(PrepaidMovementStatus.AUTHORIZED);
+    insertedMovement.setTipoMovimiento(PrepaidMovementType.PURCHASE);
+    insertedMovement.setTipofac(TipoFactura.ANULA_COMPRA_INTERNACIONAL);
+    insertedMovement.setIndnorcor(IndicadorNormalCorrector.CORRECTORA);
+    insertedMovement = createPrepaidMovement11(insertedMovement);
+
+    List<PrepaidMovementFee10> prepaidMovementFee10List = prepareFees(insertedMovement, PrepaidMovementFeeType.SUSCRIPTION_INT_FEE, true);
+
+    AccountingData10 accdata = buildRandomAccouting();
+    accdata.setIdTransaction(insertedMovement.getId());
+    accdata.setStatus(AccountingStatusType.PENDING);
+    accdata.setAccountingStatus(AccountingStatusType.PENDING);
+    getPrepaidAccountingEJBBean10().saveAccountingData(null, accdata);
+
+    ClearingData10 liqInsert = createClearingData(accdata, AccountingStatusType.INITIAL);
+    getPrepaidClearingEJBBean10().insertClearingData(null, liqInsert);
+
+    // Crea 1 archivos extra para que se expire el movimiento
+    List<ReconciliationFile10> createdFiles = createReconciliationFiles(1);
+
+    // Se inserta un movimiento en estado AUTHORIZED que no expirarara, ya que solo tiene 1 archivo entre medio
+    PrepaidMovement10 doNotExpireMovement = buildPrepaidMovement11(prepaidUser, topup, prepaidCard, null, PrepaidMovementType.TOPUP, false);
+    doNotExpireMovement.setEstado(PrepaidMovementStatus.AUTHORIZED);
+    doNotExpireMovement.setTipoMovimiento(PrepaidMovementType.PURCHASE);
+    doNotExpireMovement.setTipofac(TipoFactura.COMPRA_INTERNACIONAL);
+    doNotExpireMovement = createPrepaidMovement11(doNotExpireMovement);
+
+    // Crea 1 archivos extra para que se expire el movimiento original
+    List<ReconciliationFile10> extraFiles = createReconciliationFiles(1);
+
+    // Como hay 2 archivos tecnocom en la tabla, debe expirar el movimiento original AUTHORIZED
+    getTecnocomReconciliationEJBBean10().processTecnocomTableData(tecnocomReconciliationFile10.getId());
+
+    PrepaidMovement10 foundMovement = getPrepaidMovementEJBBean11().getPrepaidMovementById(insertedMovement.getId());
+    Assert.assertEquals("Debe haber cambiado estado con tecnocom a NOT_RECONCILED", ReconciliationStatusType.NOT_RECONCILED, foundMovement.getConTecnocom());
+    Assert.assertEquals("Debe haber cambiado a estado EXPIRED", PrepaidMovementStatus.EXPIRED, foundMovement.getEstado());
+
+    // Este movimiento no debe cambiar sus estados, dado que no han pasado suficientes archivos (solo 1)
+    PrepaidMovement10 foundNotExpiredMovement = getPrepaidMovementEJBBean11().getPrepaidMovementById(doNotExpireMovement.getId());
+    Assert.assertEquals("Debe seguir en estado_con_ecnocom PENDING", ReconciliationStatusType.PENDING, foundNotExpiredMovement.getConTecnocom());
+    Assert.assertEquals("Debe seguir en estado AUTHORIZED", PrepaidMovementStatus.AUTHORIZED, foundNotExpiredMovement.getEstado());
+
+    // Verificar que exista en la tablas de contabilidad (acc y liq) en sus estados (INITIAL y PENDING)
+    AccountingData10 acc = getPrepaidAccountingEJBBean10().searchAccountingByIdTrx(null,foundMovement.getId());
+    Assert.assertNotNull("Debe existir en accounting", acc);
+    Assert.assertEquals("Debe tener estado NOT_OK", AccountingStatusType.NOT_OK, acc.getAccountingStatus());
+
+    ClearingData10 liq = getPrepaidClearingEJBBean10().searchClearingDataByAccountingId(null, acc.getId());
+    Assert.assertNotNull("Debe existir en clearing", liq);
+    Assert.assertEquals("Debe tener estado NOT_SEND", AccountingStatusType.NOT_SEND, liq.getStatus());
+
+    deleteReconciliationFiles(createdFiles);
+    deleteReconciliationFiles(extraFiles);
+
+    // Revisar que exista el evento reversado en la cola kafka
+    checkIfTransactionIsInQueue(KafkaEventsRoute10.TRANSACTION_AUTHORIZED_TOPIC, foundMovement.getIdTxExterno(), "PURCHASE", "AUTHORIZED", prepaidMovementFee10List);
+  }
+
   // Devolucion (nunca esta en DB, siempre vienen OP)
   @Test
   public void processTecnocomTableData_whenMovNotInDb_IsRefundOp_movIsInsertedAndLiqAccMustExistInFinalState() throws Exception {
-    // Inserta movimiento que vino en archivo OP
-    MovimientoTecnocom10 movimientoTecnocom10 = createMovimientoTecnocom(tecnocomReconciliationFile10.getId());
-    movimientoTecnocom10.setTipoFac(TipoFactura.DEVOLUCION_COMPRA_INTERNACIONAL);
-    movimientoTecnocom10.setIndNorCor(IndicadorNormalCorrector.NORMAL.getValue());
-    movimientoTecnocom10.setTipoReg(TecnocomReconciliationRegisterType.OP);
-    movimientoTecnocom10 = getTecnocomReconciliationEJBBean10().insertaMovimientoTecnocom(movimientoTecnocom10);
+    // Inserta devolucion que vino en archivo OP
+    MovimientoTecnocom10 movimientoTecnocom10 = prepareMovimientoTecnocom(TipoFactura.DEVOLUCION_COMPRA_INTERNACIONAL, TecnocomReconciliationRegisterType.OP, CodigoMoneda.USA_USD);
 
     // Inserta el movimiento que vino en el archivo IPM (para hacer un match, y reescribir su valor)
-    IpmMovement10 ipmMovement10 = buildIpmMovement10();
-    ipmMovement10.setCardholderBillingAmount(movimientoTecnocom10.getImpFac().getValue().multiply(new BigDecimal(0.995))); // Alterar levemente el valor para que se reescriba
-    ipmMovement10.setPan(prepaidCard.getPan());
-    ipmMovement10.setMerchantCode(movimientoTecnocom10.getCodCom());
-    ipmMovement10.setApprovalCode(movimientoTecnocom10.getNumAut());
-    ipmMovement10 = createIpmMovement(ipmMovement10);
+    IpmMovement10 ipmMovement10 = prepareIpmMovement(movimientoTecnocom10);
 
     getTecnocomReconciliationEJBBean10().processTecnocomTableData(tecnocomReconciliationFile10.getId());
 
@@ -191,44 +311,18 @@ public class Test_TecnocomReconciliationEJBBean10_insertAutorization extends Tes
     List<PrepaidMovementFee10> prepaidMovementFee10List = getPrepaidMovementEJBBean11().getPrepaidMovementFeesByMovementId(prepaidMovement10.getId());
     Assert.assertEquals("Debe tener 0 fees asignadas", 0, prepaidMovementFee10List.size());
 
-    // Verificar que exista en la cola de eventos transaction_authorized
-    Queue qResp = camelFactory.createJMSQueue(KafkaEventsRoute10.TRANSACTION_AUTHORIZED_TOPIC);
-    ExchangeData<String> event = (ExchangeData<String>) camelFactory.createJMSMessenger(30000, 60000)
-      .getMessage(qResp, prepaidMovement10.getIdTxExterno());
-
-    Assert.assertNotNull("Deberia existir un evento de transaccion autorizada", event);
-    Assert.assertNotNull("Deberia existir un evento de transaccion autorizada", event.getData());
-
-    TransactionEvent transactionEvent = getJsonParser().fromJson(event.getData(), TransactionEvent.class);
-
-    Assert.assertEquals("Debe tener el mismo id", prepaidMovement10.getIdTxExterno(), transactionEvent.getTransaction().getRemoteTransactionId());
-    Assert.assertEquals("Debe tener el mismo accountId", account.getUuid(), transactionEvent.getAccountId());
-    Assert.assertEquals("Debe tener el mismo userId", prepaidUser.getUuid(), transactionEvent.getUserId());
-    Assert.assertEquals("Debe tener el mismo transactiontype", "REFUND", transactionEvent.getTransaction().getType());
-    Assert.assertEquals("Debe tener el mismo status", "AUTHORIZED", transactionEvent.getTransaction().getStatus());
+    // Verificar que exista en la cola de eventos transaction_reversed
+    checkIfTransactionIsInQueue(KafkaEventsRoute10.TRANSACTION_AUTHORIZED_TOPIC, prepaidMovement10.getIdTxExterno(), "REFUND", "AUTHORIZED", prepaidMovementFee10List);
   }
 
   // Anulacion Compra Internacional en moneda extranjera (DB = no, tipo = OP)
   @Test
   public void processTecnocomTableData_whenMovNotInDB_IsReversedInternationalPurcharseInForeignCoinOp_movIsInsertedAndLiqAccMustExistInFinalState() throws Exception {
     // Inserta movimiento que vino en archivo OP
-    MovimientoTecnocom10 movimientoTecnocom10 = createMovimientoTecnocom(tecnocomReconciliationFile10.getId());
-    movimientoTecnocom10.setTipoFac(TipoFactura.ANULA_COMPRA_INTERNACIONAL);
-    movimientoTecnocom10.setIndNorCor(IndicadorNormalCorrector.CORRECTORA.getValue());
-    movimientoTecnocom10.setTipoReg(TecnocomReconciliationRegisterType.OP);
-    NewAmountAndCurrency10 impDiv = new NewAmountAndCurrency10();
-    impDiv.setValue(movimientoTecnocom10.getImpFac().getValue());
-    impDiv.setCurrencyCode(CodigoMoneda.USA_USD);
-    movimientoTecnocom10.setImpDiv(impDiv);
-    movimientoTecnocom10 = getTecnocomReconciliationEJBBean10().insertaMovimientoTecnocom(movimientoTecnocom10);
+    MovimientoTecnocom10 movimientoTecnocom10 = prepareMovimientoTecnocom(TipoFactura.ANULA_COMPRA_INTERNACIONAL, TecnocomReconciliationRegisterType.OP, CodigoMoneda.USA_USD);
 
     // Inserta el movimiento que vino en el archivo IPM (para hacer un match, y reescribir su valor)
-    IpmMovement10 ipmMovement10 = buildIpmMovement10();
-    ipmMovement10.setCardholderBillingAmount(movimientoTecnocom10.getImpFac().getValue().multiply(new BigDecimal(0.995))); // Alterar levemente el valor para que se reescriba
-    ipmMovement10.setPan(prepaidCard.getPan());
-    ipmMovement10.setMerchantCode(movimientoTecnocom10.getCodCom());
-    ipmMovement10.setApprovalCode(movimientoTecnocom10.getNumAut());
-    ipmMovement10 = createIpmMovement(ipmMovement10);
+    IpmMovement10 ipmMovement10 = prepareIpmMovement(movimientoTecnocom10);
 
     // Preparar la respuesta del servicio de fees
     prepareCalculateFeesMock(movimientoTecnocom10.getImpFac().getValue(), false);
@@ -290,43 +384,17 @@ public class Test_TecnocomReconciliationEJBBean10_insertAutorization extends Tes
     Assert.assertEquals("Debe tener estado PENDING", AccountingStatusType.PENDING, liq.getStatus());
 
     // Verificar que exista en la cola de eventos transaction_reversed
-    Queue qResp = camelFactory.createJMSQueue(KafkaEventsRoute10.TRANSACTION_REVERSED_TOPIC);
-    ExchangeData<String> event = (ExchangeData<String>) camelFactory.createJMSMessenger(30000, 60000)
-      .getMessage(qResp, prepaidMovement10.getIdTxExterno());
-
-    Assert.assertNotNull("Deberia existir un evento de transaccion autorizada", event);
-    Assert.assertNotNull("Deberia existir un evento de transaccion autorizada", event.getData());
-
-    TransactionEvent transactionEvent = getJsonParser().fromJson(event.getData(), TransactionEvent.class);
-
-    Assert.assertEquals("Debe tener el mismo id", prepaidMovement10.getIdTxExterno(), transactionEvent.getTransaction().getRemoteTransactionId());
-    Assert.assertEquals("Debe tener el mismo accountId", account.getUuid(), transactionEvent.getAccountId());
-    Assert.assertEquals("Debe tener el mismo userId", prepaidUser.getUuid(), transactionEvent.getUserId());
-    Assert.assertEquals("Debe tener el mismo transactiontype", "PURCHASE", transactionEvent.getTransaction().getType());
-    Assert.assertEquals("Debe tener el mismo status", "REVERSED", transactionEvent.getTransaction().getStatus());
+    checkIfTransactionIsInQueue(KafkaEventsRoute10.TRANSACTION_REVERSED_TOPIC, prepaidMovement10.getIdTxExterno(), "PURCHASE", "REVERSED", prepaidMovementFee10List);
   }
 
   // Anulacion Compra Internacional en pesos (DB = no, tipo = OP)
   @Test
   public void processTecnocomTableData_whenMovNotInDB_IsReversedInternationalPurcharseInPesosOp_movIsInsertedAndLiqAccMustExistInFinalState() throws Exception {
     // Inserta movimiento que vino en archivo OP
-    MovimientoTecnocom10 movimientoTecnocom10 = createMovimientoTecnocom(tecnocomReconciliationFile10.getId());
-    movimientoTecnocom10.setTipoFac(TipoFactura.ANULA_COMPRA_INTERNACIONAL);
-    movimientoTecnocom10.setIndNorCor(IndicadorNormalCorrector.CORRECTORA.getValue());
-    movimientoTecnocom10.setTipoReg(TecnocomReconciliationRegisterType.OP);
-    NewAmountAndCurrency10 impDiv = new NewAmountAndCurrency10();
-    impDiv.setValue(movimientoTecnocom10.getImpFac().getValue());
-    impDiv.setCurrencyCode(CodigoMoneda.CHILE_CLP);
-    movimientoTecnocom10.setImpDiv(impDiv);
-    movimientoTecnocom10 = getTecnocomReconciliationEJBBean10().insertaMovimientoTecnocom(movimientoTecnocom10);
+    MovimientoTecnocom10 movimientoTecnocom10 = prepareMovimientoTecnocom(TipoFactura.ANULA_COMPRA_INTERNACIONAL, TecnocomReconciliationRegisterType.OP, CodigoMoneda.CHILE_CLP);
 
     // Inserta el movimiento que vino en el archivo IPM (para hacer un match, y reescribir su valor)
-    IpmMovement10 ipmMovement10 = buildIpmMovement10();
-    ipmMovement10.setCardholderBillingAmount(movimientoTecnocom10.getImpFac().getValue().multiply(new BigDecimal(0.995))); // Alterar levemente el valor para que se reescriba
-    ipmMovement10.setPan(prepaidCard.getPan());
-    ipmMovement10.setMerchantCode(movimientoTecnocom10.getCodCom());
-    ipmMovement10.setApprovalCode(movimientoTecnocom10.getNumAut());
-    ipmMovement10 = createIpmMovement(ipmMovement10);
+    IpmMovement10 ipmMovement10 = prepareIpmMovement(movimientoTecnocom10);
 
     // Preparar la respuesta del servicio de fees
     prepareCalculateFeesMock(movimientoTecnocom10.getImpFac().getValue(), true);
@@ -398,35 +466,14 @@ public class Test_TecnocomReconciliationEJBBean10_insertAutorization extends Tes
     Assert.assertEquals("Debe tener estado PENDING", AccountingStatusType.PENDING, liq.getStatus());
 
     // Verificar que exista en la cola de eventos transaction_reversed
-    Queue qResp = camelFactory.createJMSQueue(KafkaEventsRoute10.TRANSACTION_REVERSED_TOPIC);
-    ExchangeData<String> event = (ExchangeData<String>) camelFactory.createJMSMessenger(30000, 60000)
-      .getMessage(qResp, prepaidMovement10.getIdTxExterno());
-
-    Assert.assertNotNull("Deberia existir un evento de transaccion autorizada", event);
-    Assert.assertNotNull("Deberia existir un evento de transaccion autorizada", event.getData());
-
-    TransactionEvent transactionEvent = getJsonParser().fromJson(event.getData(), TransactionEvent.class);
-
-    Assert.assertEquals("Debe tener el mismo id", prepaidMovement10.getIdTxExterno(), transactionEvent.getTransaction().getRemoteTransactionId());
-    Assert.assertEquals("Debe tener el mismo accountId", account.getUuid(), transactionEvent.getAccountId());
-    Assert.assertEquals("Debe tener el mismo userId", prepaidUser.getUuid(), transactionEvent.getUserId());
-    Assert.assertEquals("Debe tener el mismo transactiontype", "PURCHASE", transactionEvent.getTransaction().getType());
-    Assert.assertEquals("Debe tener el mismo status", "REVERSED", transactionEvent.getTransaction().getStatus());
+    checkIfTransactionIsInQueue(KafkaEventsRoute10.TRANSACTION_REVERSED_TOPIC, prepaidMovement10.getIdTxExterno(), "PURCHASE", "REVERSED", prepaidMovementFee10List);
   }
 
   // Anulacion Compra Internacional en moneda extranjera (DB = no, tipo = AU)
   @Test
   public void processTecnocomTableData_whenMovNotInDB_IsReversedInternationalPurcharseInForeignCoinAu_movIsInsertedAndLiqAccMustExistInInitialState() throws Exception {
     // Inserta movimiento que vino en archivo OP
-    MovimientoTecnocom10 movimientoTecnocom10 = createMovimientoTecnocom(tecnocomReconciliationFile10.getId());
-    movimientoTecnocom10.setTipoFac(TipoFactura.ANULA_COMPRA_INTERNACIONAL);
-    movimientoTecnocom10.setIndNorCor(IndicadorNormalCorrector.CORRECTORA.getValue());
-    movimientoTecnocom10.setTipoReg(TecnocomReconciliationRegisterType.AU);
-    NewAmountAndCurrency10 impDiv = new NewAmountAndCurrency10();
-    impDiv.setValue(movimientoTecnocom10.getImpFac().getValue());
-    impDiv.setCurrencyCode(CodigoMoneda.USA_USD);
-    movimientoTecnocom10.setImpDiv(impDiv);
-    movimientoTecnocom10 = getTecnocomReconciliationEJBBean10().insertaMovimientoTecnocom(movimientoTecnocom10);
+    MovimientoTecnocom10 movimientoTecnocom10 = prepareMovimientoTecnocom(TipoFactura.ANULA_COMPRA_INTERNACIONAL, TecnocomReconciliationRegisterType.AU, CodigoMoneda.USA_USD);
 
     // Preparar la respuesta del servicio de fees
     prepareCalculateFeesMock(movimientoTecnocom10.getImpFac().getValue(), false);
@@ -488,35 +535,14 @@ public class Test_TecnocomReconciliationEJBBean10_insertAutorization extends Tes
     Assert.assertEquals("Debe tener estado INITIAL", AccountingStatusType.INITIAL, liq.getStatus());
 
     // Verificar que exista en la cola de eventos transaction_reversed
-    Queue qResp = camelFactory.createJMSQueue(KafkaEventsRoute10.TRANSACTION_REVERSED_TOPIC);
-    ExchangeData<String> event = (ExchangeData<String>) camelFactory.createJMSMessenger(30000, 60000)
-      .getMessage(qResp, prepaidMovement10.getIdTxExterno());
-
-    Assert.assertNotNull("Deberia existir un evento de transaccion autorizada", event);
-    Assert.assertNotNull("Deberia existir un evento de transaccion autorizada", event.getData());
-
-    TransactionEvent transactionEvent = getJsonParser().fromJson(event.getData(), TransactionEvent.class);
-
-    Assert.assertEquals("Debe tener el mismo id", prepaidMovement10.getIdTxExterno(), transactionEvent.getTransaction().getRemoteTransactionId());
-    Assert.assertEquals("Debe tener el mismo accountId", account.getUuid(), transactionEvent.getAccountId());
-    Assert.assertEquals("Debe tener el mismo userId", prepaidUser.getUuid(), transactionEvent.getUserId());
-    Assert.assertEquals("Debe tener el mismo transactiontype", "PURCHASE", transactionEvent.getTransaction().getType());
-    Assert.assertEquals("Debe tener el mismo status", "REVERSED", transactionEvent.getTransaction().getStatus());
+    checkIfTransactionIsInQueue(KafkaEventsRoute10.TRANSACTION_REVERSED_TOPIC, prepaidMovement10.getIdTxExterno(), "PURCHASE", "REVERSED", prepaidMovementFee10List);
   }
 
   // Anulacion Compra Internacional en pesos (DB = no, tipo = AU)
   @Test
   public void processTecnocomTableData_whenMovNotInDB_IsReversedInternationalPurcharseInPesosAu_movIsInsertedAndLiqAccMustExistInInitialState() throws Exception {
     // Inserta movimiento que vino en archivo OP
-    MovimientoTecnocom10 movimientoTecnocom10 = createMovimientoTecnocom(tecnocomReconciliationFile10.getId());
-    movimientoTecnocom10.setTipoFac(TipoFactura.ANULA_COMPRA_INTERNACIONAL);
-    movimientoTecnocom10.setIndNorCor(IndicadorNormalCorrector.CORRECTORA.getValue());
-    movimientoTecnocom10.setTipoReg(TecnocomReconciliationRegisterType.AU);
-    NewAmountAndCurrency10 impDiv = new NewAmountAndCurrency10();
-    impDiv.setValue(movimientoTecnocom10.getImpFac().getValue());
-    impDiv.setCurrencyCode(CodigoMoneda.CHILE_CLP);
-    movimientoTecnocom10.setImpDiv(impDiv);
-    movimientoTecnocom10 = getTecnocomReconciliationEJBBean10().insertaMovimientoTecnocom(movimientoTecnocom10);
+    MovimientoTecnocom10 movimientoTecnocom10 = prepareMovimientoTecnocom(TipoFactura.ANULA_COMPRA_INTERNACIONAL, TecnocomReconciliationRegisterType.AU, CodigoMoneda.CHILE_CLP);
 
     // Preparar la respuesta del servicio de fees
     prepareCalculateFeesMock(movimientoTecnocom10.getImpFac().getValue(), true);
@@ -588,35 +614,14 @@ public class Test_TecnocomReconciliationEJBBean10_insertAutorization extends Tes
     Assert.assertEquals("Debe tener estado INITIAL", AccountingStatusType.INITIAL, liq.getStatus());
 
     // Verificar que exista en la cola de eventos transaction_reversed
-    Queue qResp = camelFactory.createJMSQueue(KafkaEventsRoute10.TRANSACTION_REVERSED_TOPIC);
-    ExchangeData<String> event = (ExchangeData<String>) camelFactory.createJMSMessenger(30000, 60000)
-      .getMessage(qResp, prepaidMovement10.getIdTxExterno());
-
-    Assert.assertNotNull("Deberia existir un evento de transaccion autorizada", event);
-    Assert.assertNotNull("Deberia existir un evento de transaccion autorizada", event.getData());
-
-    TransactionEvent transactionEvent = getJsonParser().fromJson(event.getData(), TransactionEvent.class);
-
-    Assert.assertEquals("Debe tener el mismo id", prepaidMovement10.getIdTxExterno(), transactionEvent.getTransaction().getRemoteTransactionId());
-    Assert.assertEquals("Debe tener el mismo accountId", account.getUuid(), transactionEvent.getAccountId());
-    Assert.assertEquals("Debe tener el mismo userId", prepaidUser.getUuid(), transactionEvent.getUserId());
-    Assert.assertEquals("Debe tener el mismo transactiontype", "PURCHASE", transactionEvent.getTransaction().getType());
-    Assert.assertEquals("Debe tener el mismo status", "REVERSED", transactionEvent.getTransaction().getStatus());
+    checkIfTransactionIsInQueue(KafkaEventsRoute10.TRANSACTION_REVERSED_TOPIC, prepaidMovement10.getIdTxExterno(), "PURCHASE", "REVERSED", prepaidMovementFee10List);
   }
 
   // Anulacion Compra Internacional en moneda extranjera (DB = si en NOTIFIED, tipo = AU)
   @Test
   public void processTecnocomTableData_whenMovInDBNotified_IsReversedInternationalPurcharseInForeignCoinAU_movIsInsertedAndLiqAccMustExistInInitialState() throws Exception {
     // Inserta movimiento que vino en archivo OP
-    MovimientoTecnocom10 movimientoTecnocom10 = createMovimientoTecnocom(tecnocomReconciliationFile10.getId());
-    movimientoTecnocom10.setTipoFac(TipoFactura.ANULA_COMPRA_INTERNACIONAL);
-    movimientoTecnocom10.setIndNorCor(IndicadorNormalCorrector.CORRECTORA.getValue());
-    movimientoTecnocom10.setTipoReg(TecnocomReconciliationRegisterType.AU);
-    NewAmountAndCurrency10 impDiv = new NewAmountAndCurrency10();
-    impDiv.setValue(movimientoTecnocom10.getImpFac().getValue());
-    impDiv.setCurrencyCode(CodigoMoneda.USA_USD);
-    movimientoTecnocom10.setImpDiv(impDiv);
-    movimientoTecnocom10 = getTecnocomReconciliationEJBBean10().insertaMovimientoTecnocom(movimientoTecnocom10);
+    MovimientoTecnocom10 movimientoTecnocom10 = prepareMovimientoTecnocom(TipoFactura.ANULA_COMPRA_INTERNACIONAL, TecnocomReconciliationRegisterType.AU, CodigoMoneda.USA_USD);
 
     // Insertar el movimiento en la BD
     PrepaidMovement10 insertedMovement = buildPrepaidMovementFromTecnocomMovement(movimientoTecnocom10);
@@ -624,13 +629,7 @@ public class Test_TecnocomReconciliationEJBBean10_insertAutorization extends Tes
     insertedMovement = createPrepaidMovement11(insertedMovement);
 
     // Insertar los fees del movimiento
-    List<PrepaidMovementFee10> prepaidMovementFee10List = new ArrayList<>();
-    PrepaidMovementFee10 prepaidFee = new PrepaidMovementFee10();
-    prepaidFee.setMovementId(insertedMovement.getId());
-    prepaidFee.setFeeType(PrepaidMovementFeeType.PURCHASE_INT_FEE);
-    prepaidFee.setAmount(movimientoTecnocom10.getImpFac().getValue().multiply(new BigDecimal(0.02)).setScale(2, RoundingMode.HALF_UP));
-    prepaidMovementFee10List.add(prepaidFee);
-    getPrepaidMovementEJBBean11().addPrepaidMovementFeeList(prepaidMovementFee10List);
+    List<PrepaidMovementFee10> prepaidMovementFee10List = prepareFees(insertedMovement, PrepaidMovementFeeType.PURCHASE_INT_FEE, false);
 
     getTecnocomReconciliationEJBBean10().processTecnocomTableData(tecnocomReconciliationFile10.getId());
 
@@ -683,15 +682,7 @@ public class Test_TecnocomReconciliationEJBBean10_insertAutorization extends Tes
   @Test
   public void processTecnocomTableData_whenMovInDBNotified_IsReversedInternationalPurcharseInPesosAu_movIsInsertedAndLiqAccMustExistInInitialState() throws Exception {
     // Inserta movimiento que vino en archivo OP
-    MovimientoTecnocom10 movimientoTecnocom10 = createMovimientoTecnocom(tecnocomReconciliationFile10.getId());
-    movimientoTecnocom10.setTipoFac(TipoFactura.ANULA_COMPRA_INTERNACIONAL);
-    movimientoTecnocom10.setIndNorCor(IndicadorNormalCorrector.CORRECTORA.getValue());
-    movimientoTecnocom10.setTipoReg(TecnocomReconciliationRegisterType.AU);
-    NewAmountAndCurrency10 impDiv = new NewAmountAndCurrency10();
-    impDiv.setValue(movimientoTecnocom10.getImpFac().getValue());
-    impDiv.setCurrencyCode(CodigoMoneda.CHILE_CLP);
-    movimientoTecnocom10.setImpDiv(impDiv);
-    movimientoTecnocom10 = getTecnocomReconciliationEJBBean10().insertaMovimientoTecnocom(movimientoTecnocom10);
+    MovimientoTecnocom10 movimientoTecnocom10 = prepareMovimientoTecnocom(TipoFactura.ANULA_COMPRA_INTERNACIONAL, TecnocomReconciliationRegisterType.AU, CodigoMoneda.CHILE_CLP);
 
     // Insertar el movimiento en la BD
     PrepaidMovement10 insertedMovement = buildPrepaidMovementFromTecnocomMovement(movimientoTecnocom10);
@@ -699,18 +690,7 @@ public class Test_TecnocomReconciliationEJBBean10_insertAutorization extends Tes
     insertedMovement = createPrepaidMovement11(insertedMovement);
 
     // Insertar los fees del movimiento
-    List<PrepaidMovementFee10> prepaidMovementFee10List = new ArrayList<>();
-    PrepaidMovementFee10 prepaidFee = new PrepaidMovementFee10();
-    prepaidFee.setMovementId(insertedMovement.getId());
-    prepaidFee.setFeeType(PrepaidMovementFeeType.PURCHASE_INT_FEE);
-    prepaidFee.setAmount(movimientoTecnocom10.getImpFac().getValue().multiply(new BigDecimal(0.02)).multiply(new BigDecimal(0.84)).setScale(2, RoundingMode.HALF_UP));
-    prepaidMovementFee10List.add(prepaidFee);
-    PrepaidMovementFee10 ivaFee = new PrepaidMovementFee10();
-    ivaFee.setMovementId(insertedMovement.getId());
-    ivaFee.setFeeType(PrepaidMovementFeeType.IVA);
-    ivaFee.setAmount(movimientoTecnocom10.getImpFac().getValue().multiply(new BigDecimal(0.02)).multiply(new BigDecimal(0.16)).setScale(2, RoundingMode.HALF_UP));
-    prepaidMovementFee10List.add(ivaFee);
-    getPrepaidMovementEJBBean11().addPrepaidMovementFeeList(prepaidMovementFee10List);
+    List<PrepaidMovementFee10> prepaidMovementFee10List = prepareFees(insertedMovement, PrepaidMovementFeeType.PURCHASE_INT_FEE, true);
 
     getTecnocomReconciliationEJBBean10().processTecnocomTableData(tecnocomReconciliationFile10.getId());
 
@@ -768,23 +748,10 @@ public class Test_TecnocomReconciliationEJBBean10_insertAutorization extends Tes
   @Test
   public void processTecnocomTableData_whenMovInDBNotified_IsReversedInternationalPurcharseInForeignCoinOP_movIsInsertedAndLiqAccMustExistInFinalState() throws Exception {
     // Inserta movimiento que vino en archivo OP
-    MovimientoTecnocom10 movimientoTecnocom10 = createMovimientoTecnocom(tecnocomReconciliationFile10.getId());
-    movimientoTecnocom10.setTipoFac(TipoFactura.ANULA_COMPRA_INTERNACIONAL);
-    movimientoTecnocom10.setIndNorCor(IndicadorNormalCorrector.CORRECTORA.getValue());
-    movimientoTecnocom10.setTipoReg(TecnocomReconciliationRegisterType.OP);
-    NewAmountAndCurrency10 impDiv = new NewAmountAndCurrency10();
-    impDiv.setValue(movimientoTecnocom10.getImpFac().getValue());
-    impDiv.setCurrencyCode(CodigoMoneda.USA_USD);
-    movimientoTecnocom10.setImpDiv(impDiv);
-    movimientoTecnocom10 = getTecnocomReconciliationEJBBean10().insertaMovimientoTecnocom(movimientoTecnocom10);
+    MovimientoTecnocom10 movimientoTecnocom10 = prepareMovimientoTecnocom(TipoFactura.ANULA_COMPRA_INTERNACIONAL, TecnocomReconciliationRegisterType.OP, CodigoMoneda.USA_USD);
 
     // Inserta el movimiento que vino en el archivo IPM (para hacer un match, y reescribir su valor)
-    IpmMovement10 ipmMovement10 = buildIpmMovement10();
-    ipmMovement10.setCardholderBillingAmount(movimientoTecnocom10.getImpFac().getValue().multiply(new BigDecimal(0.995))); // Alterar levemente el valor para que se reescriba
-    ipmMovement10.setPan(prepaidCard.getPan());
-    ipmMovement10.setMerchantCode(movimientoTecnocom10.getCodCom());
-    ipmMovement10.setApprovalCode(movimientoTecnocom10.getNumAut());
-    ipmMovement10 = createIpmMovement(ipmMovement10);
+    IpmMovement10 ipmMovement10 = prepareIpmMovement(movimientoTecnocom10);
 
     // Insertar el movimiento en la BD
     PrepaidMovement10 insertedMovement = buildPrepaidMovementFromTecnocomMovement(movimientoTecnocom10);
@@ -792,13 +759,7 @@ public class Test_TecnocomReconciliationEJBBean10_insertAutorization extends Tes
     insertedMovement = createPrepaidMovement11(insertedMovement);
 
     // Insertar los fees del movimiento
-    List<PrepaidMovementFee10> prepaidMovementFee10List = new ArrayList<>();
-    PrepaidMovementFee10 prepaidFee = new PrepaidMovementFee10();
-    prepaidFee.setMovementId(insertedMovement.getId());
-    prepaidFee.setFeeType(PrepaidMovementFeeType.PURCHASE_INT_FEE);
-    prepaidFee.setAmount(movimientoTecnocom10.getImpFac().getValue().multiply(new BigDecimal(0.02)).setScale(2, RoundingMode.HALF_UP));
-    prepaidMovementFee10List.add(prepaidFee);
-    getPrepaidMovementEJBBean11().addPrepaidMovementFeeList(prepaidMovementFee10List);
+    List<PrepaidMovementFee10> prepaidMovementFee10List = prepareFees(insertedMovement, PrepaidMovementFeeType.PURCHASE_INT_FEE, false);
 
     getTecnocomReconciliationEJBBean10().processTecnocomTableData(tecnocomReconciliationFile10.getId());
 
@@ -851,23 +812,10 @@ public class Test_TecnocomReconciliationEJBBean10_insertAutorization extends Tes
   @Test
   public void processTecnocomTableData_whenMovInDBNotified_IsReversedInternationalPurcharseInPesosOp_movIsInsertedAndLiqAccMustExistInInitialState() throws Exception {
     // Inserta movimiento que vino en archivo OP
-    MovimientoTecnocom10 movimientoTecnocom10 = createMovimientoTecnocom(tecnocomReconciliationFile10.getId());
-    movimientoTecnocom10.setTipoFac(TipoFactura.ANULA_COMPRA_INTERNACIONAL);
-    movimientoTecnocom10.setIndNorCor(IndicadorNormalCorrector.CORRECTORA.getValue());
-    movimientoTecnocom10.setTipoReg(TecnocomReconciliationRegisterType.OP);
-    NewAmountAndCurrency10 impDiv = new NewAmountAndCurrency10();
-    impDiv.setValue(movimientoTecnocom10.getImpFac().getValue());
-    impDiv.setCurrencyCode(CodigoMoneda.CHILE_CLP);
-    movimientoTecnocom10.setImpDiv(impDiv);
-    movimientoTecnocom10 = getTecnocomReconciliationEJBBean10().insertaMovimientoTecnocom(movimientoTecnocom10);
+    MovimientoTecnocom10 movimientoTecnocom10 = prepareMovimientoTecnocom(TipoFactura.ANULA_COMPRA_INTERNACIONAL, TecnocomReconciliationRegisterType.OP, CodigoMoneda.CHILE_CLP);
 
     // Inserta el movimiento que vino en el archivo IPM (para hacer un match, y reescribir su valor)
-    IpmMovement10 ipmMovement10 = buildIpmMovement10();
-    ipmMovement10.setCardholderBillingAmount(movimientoTecnocom10.getImpFac().getValue().multiply(new BigDecimal(0.995))); // Alterar levemente el valor para que se reescriba
-    ipmMovement10.setPan(prepaidCard.getPan());
-    ipmMovement10.setMerchantCode(movimientoTecnocom10.getCodCom());
-    ipmMovement10.setApprovalCode(movimientoTecnocom10.getNumAut());
-    ipmMovement10 = createIpmMovement(ipmMovement10);
+    IpmMovement10 ipmMovement10 = prepareIpmMovement(movimientoTecnocom10);
 
     // Insertar el movimiento en la BD
     PrepaidMovement10 insertedMovement = buildPrepaidMovementFromTecnocomMovement(movimientoTecnocom10);
@@ -875,18 +823,7 @@ public class Test_TecnocomReconciliationEJBBean10_insertAutorization extends Tes
     insertedMovement = createPrepaidMovement11(insertedMovement);
 
     // Insertar los fees del movimiento
-    List<PrepaidMovementFee10> prepaidMovementFee10List = new ArrayList<>();
-    PrepaidMovementFee10 prepaidFee = new PrepaidMovementFee10();
-    prepaidFee.setMovementId(insertedMovement.getId());
-    prepaidFee.setFeeType(PrepaidMovementFeeType.PURCHASE_INT_FEE);
-    prepaidFee.setAmount(movimientoTecnocom10.getImpFac().getValue().multiply(new BigDecimal(0.02)).multiply(new BigDecimal(0.84)).setScale(2, RoundingMode.HALF_UP));
-    prepaidMovementFee10List.add(prepaidFee);
-    PrepaidMovementFee10 ivaFee = new PrepaidMovementFee10();
-    ivaFee.setMovementId(insertedMovement.getId());
-    ivaFee.setFeeType(PrepaidMovementFeeType.IVA);
-    ivaFee.setAmount(movimientoTecnocom10.getImpFac().getValue().multiply(new BigDecimal(0.02)).multiply(new BigDecimal(0.16)).setScale(2, RoundingMode.HALF_UP));
-    prepaidMovementFee10List.add(ivaFee);
-    getPrepaidMovementEJBBean11().addPrepaidMovementFeeList(prepaidMovementFee10List);
+    List<PrepaidMovementFee10> prepaidMovementFee10List = prepareFees(insertedMovement, PrepaidMovementFeeType.PURCHASE_INT_FEE, true);
 
     getTecnocomReconciliationEJBBean10().processTecnocomTableData(tecnocomReconciliationFile10.getId());
 
@@ -944,23 +881,10 @@ public class Test_TecnocomReconciliationEJBBean10_insertAutorization extends Tes
   @Test
   public void processTecnocomTableData_whenMovInDBAuthorized_IsReversedInternationalPurcharseInForeignCoinOP_movIsInsertedAndLiqAccMustExistInFinalState() throws Exception {
     // Inserta movimiento que vino en archivo OP
-    MovimientoTecnocom10 movimientoTecnocom10 = createMovimientoTecnocom(tecnocomReconciliationFile10.getId());
-    movimientoTecnocom10.setTipoFac(TipoFactura.ANULA_COMPRA_INTERNACIONAL);
-    movimientoTecnocom10.setIndNorCor(IndicadorNormalCorrector.CORRECTORA.getValue());
-    movimientoTecnocom10.setTipoReg(TecnocomReconciliationRegisterType.OP);
-    NewAmountAndCurrency10 impDiv = new NewAmountAndCurrency10();
-    impDiv.setValue(movimientoTecnocom10.getImpFac().getValue());
-    impDiv.setCurrencyCode(CodigoMoneda.USA_USD);
-    movimientoTecnocom10.setImpDiv(impDiv);
-    movimientoTecnocom10 = getTecnocomReconciliationEJBBean10().insertaMovimientoTecnocom(movimientoTecnocom10);
+    MovimientoTecnocom10 movimientoTecnocom10 = prepareMovimientoTecnocom(TipoFactura.ANULA_COMPRA_INTERNACIONAL, TecnocomReconciliationRegisterType.OP, CodigoMoneda.USA_USD);
 
     // Inserta el movimiento que vino en el archivo IPM (para hacer un match, y reescribir su valor)
-    IpmMovement10 ipmMovement10 = buildIpmMovement10();
-    ipmMovement10.setCardholderBillingAmount(movimientoTecnocom10.getImpFac().getValue().multiply(new BigDecimal(0.995))); // Alterar levemente el valor para que se reescriba
-    ipmMovement10.setPan(prepaidCard.getPan());
-    ipmMovement10.setMerchantCode(movimientoTecnocom10.getCodCom());
-    ipmMovement10.setApprovalCode(movimientoTecnocom10.getNumAut());
-    ipmMovement10 = createIpmMovement(ipmMovement10);
+    IpmMovement10 ipmMovement10 = prepareIpmMovement(movimientoTecnocom10);
 
     // Insertar el movimiento en la BD
     PrepaidMovement10 insertedMovement = buildPrepaidMovementFromTecnocomMovement(movimientoTecnocom10);
@@ -1003,23 +927,10 @@ public class Test_TecnocomReconciliationEJBBean10_insertAutorization extends Tes
   @Test
   public void processTecnocomTableData_whenMovInDBAuthorized_IsReversedInternationalPurcharseInPesosOP_movIsInsertedAndLiqAccMustExistInFinalState() throws Exception {
     // Inserta movimiento que vino en archivo OP
-    MovimientoTecnocom10 movimientoTecnocom10 = createMovimientoTecnocom(tecnocomReconciliationFile10.getId());
-    movimientoTecnocom10.setTipoFac(TipoFactura.ANULA_COMPRA_INTERNACIONAL);
-    movimientoTecnocom10.setIndNorCor(IndicadorNormalCorrector.CORRECTORA.getValue());
-    movimientoTecnocom10.setTipoReg(TecnocomReconciliationRegisterType.OP);
-    NewAmountAndCurrency10 impDiv = new NewAmountAndCurrency10();
-    impDiv.setValue(movimientoTecnocom10.getImpFac().getValue());
-    impDiv.setCurrencyCode(CodigoMoneda.CHILE_CLP);
-    movimientoTecnocom10.setImpDiv(impDiv);
-    movimientoTecnocom10 = getTecnocomReconciliationEJBBean10().insertaMovimientoTecnocom(movimientoTecnocom10);
+    MovimientoTecnocom10 movimientoTecnocom10 = prepareMovimientoTecnocom(TipoFactura.ANULA_COMPRA_INTERNACIONAL, TecnocomReconciliationRegisterType.OP, CodigoMoneda.CHILE_CLP);
 
     // Inserta el movimiento que vino en el archivo IPM (para hacer un match, y reescribir su valor)
-    IpmMovement10 ipmMovement10 = buildIpmMovement10();
-    ipmMovement10.setCardholderBillingAmount(movimientoTecnocom10.getImpFac().getValue().multiply(new BigDecimal(0.995))); // Alterar levemente el valor para que se reescriba
-    ipmMovement10.setPan(prepaidCard.getPan());
-    ipmMovement10.setMerchantCode(movimientoTecnocom10.getCodCom());
-    ipmMovement10.setApprovalCode(movimientoTecnocom10.getNumAut());
-    ipmMovement10 = createIpmMovement(ipmMovement10);
+    IpmMovement10 ipmMovement10 = prepareIpmMovement(movimientoTecnocom10);
 
     // Insertar el movimiento en la BD
     PrepaidMovement10 insertedMovement = buildPrepaidMovementFromTecnocomMovement(movimientoTecnocom10);
@@ -1058,28 +969,15 @@ public class Test_TecnocomReconciliationEJBBean10_insertAutorization extends Tes
     Assert.assertEquals("Debe tener estado PENDING", AccountingStatusType.PENDING, liq.getStatus());
   }
 
-  // Anulaciones
+  // Suscripciones
   // Anulacion Suscripcion Internacional en moneda extranjera (DB = no, tipo = OP)
   @Test
   public void processTecnocomTableData_whenMovNotInDB_IsReversedInternationalSuscriptionInForeignCoinOp_movIsInsertedAndLiqAccMustExistInFinalState() throws Exception {
     // Inserta movimiento que vino en archivo OP
-    MovimientoTecnocom10 movimientoTecnocom10 = createMovimientoTecnocom(tecnocomReconciliationFile10.getId());
-    movimientoTecnocom10.setTipoFac(TipoFactura.ANULA_SUSCRIPCION_INTERNACIONAL);
-    movimientoTecnocom10.setIndNorCor(IndicadorNormalCorrector.CORRECTORA.getValue());
-    movimientoTecnocom10.setTipoReg(TecnocomReconciliationRegisterType.OP);
-    NewAmountAndCurrency10 impDiv = new NewAmountAndCurrency10();
-    impDiv.setValue(movimientoTecnocom10.getImpFac().getValue());
-    impDiv.setCurrencyCode(CodigoMoneda.USA_USD);
-    movimientoTecnocom10.setImpDiv(impDiv);
-    movimientoTecnocom10 = getTecnocomReconciliationEJBBean10().insertaMovimientoTecnocom(movimientoTecnocom10);
+    MovimientoTecnocom10 movimientoTecnocom10 = prepareMovimientoTecnocom(TipoFactura.ANULA_SUSCRIPCION_INTERNACIONAL, TecnocomReconciliationRegisterType.OP, CodigoMoneda.USA_USD);
 
     // Inserta el movimiento que vino en el archivo IPM (para hacer un match, y reescribir su valor)
-    IpmMovement10 ipmMovement10 = buildIpmMovement10();
-    ipmMovement10.setCardholderBillingAmount(movimientoTecnocom10.getImpFac().getValue().multiply(new BigDecimal(0.995))); // Alterar levemente el valor para que se reescriba
-    ipmMovement10.setPan(prepaidCard.getPan());
-    ipmMovement10.setMerchantCode(movimientoTecnocom10.getCodCom());
-    ipmMovement10.setApprovalCode(movimientoTecnocom10.getNumAut());
-    ipmMovement10 = createIpmMovement(ipmMovement10);
+    IpmMovement10 ipmMovement10 = prepareIpmMovement(movimientoTecnocom10);
 
     // Preparar la respuesta del servicio de fees
     prepareCalculateFeesMock(movimientoTecnocom10.getImpFac().getValue(), false);
@@ -1141,43 +1039,17 @@ public class Test_TecnocomReconciliationEJBBean10_insertAutorization extends Tes
     Assert.assertEquals("Debe tener estado PENDING", AccountingStatusType.PENDING, liq.getStatus());
 
     // Verificar que exista en la cola de eventos transaction_reversed
-    Queue qResp = camelFactory.createJMSQueue(KafkaEventsRoute10.TRANSACTION_REVERSED_TOPIC);
-    ExchangeData<String> event = (ExchangeData<String>) camelFactory.createJMSMessenger(30000, 60000)
-      .getMessage(qResp, prepaidMovement10.getIdTxExterno());
-
-    Assert.assertNotNull("Deberia existir un evento de transaccion autorizada", event);
-    Assert.assertNotNull("Deberia existir un evento de transaccion autorizada", event.getData());
-
-    TransactionEvent transactionEvent = getJsonParser().fromJson(event.getData(), TransactionEvent.class);
-
-    Assert.assertEquals("Debe tener el mismo id", prepaidMovement10.getIdTxExterno(), transactionEvent.getTransaction().getRemoteTransactionId());
-    Assert.assertEquals("Debe tener el mismo accountId", account.getUuid(), transactionEvent.getAccountId());
-    Assert.assertEquals("Debe tener el mismo userId", prepaidUser.getUuid(), transactionEvent.getUserId());
-    Assert.assertEquals("Debe tener el mismo transactiontype", "SUSCRIPTION", transactionEvent.getTransaction().getType());
-    Assert.assertEquals("Debe tener el mismo status", "REVERSED", transactionEvent.getTransaction().getStatus());
+    checkIfTransactionIsInQueue(KafkaEventsRoute10.TRANSACTION_REVERSED_TOPIC, prepaidMovement10.getIdTxExterno(), "SUSCRIPTION", "REVERSED", prepaidMovementFee10List);
   }
 
   // Anulacion Suscripcion Internacional en pesos (DB = no, tipo = OP)
   @Test
   public void processTecnocomTableData_whenMovNotInDB_IsReversedInternationalSuscriptionInPesosOp_movIsInsertedAndLiqAccMustExistInFinalState() throws Exception {
     // Inserta movimiento que vino en archivo OP
-    MovimientoTecnocom10 movimientoTecnocom10 = createMovimientoTecnocom(tecnocomReconciliationFile10.getId());
-    movimientoTecnocom10.setTipoFac(TipoFactura.ANULA_SUSCRIPCION_INTERNACIONAL);
-    movimientoTecnocom10.setIndNorCor(IndicadorNormalCorrector.CORRECTORA.getValue());
-    movimientoTecnocom10.setTipoReg(TecnocomReconciliationRegisterType.OP);
-    NewAmountAndCurrency10 impDiv = new NewAmountAndCurrency10();
-    impDiv.setValue(movimientoTecnocom10.getImpFac().getValue());
-    impDiv.setCurrencyCode(CodigoMoneda.CHILE_CLP);
-    movimientoTecnocom10.setImpDiv(impDiv);
-    movimientoTecnocom10 = getTecnocomReconciliationEJBBean10().insertaMovimientoTecnocom(movimientoTecnocom10);
+    MovimientoTecnocom10 movimientoTecnocom10 = prepareMovimientoTecnocom(TipoFactura.ANULA_SUSCRIPCION_INTERNACIONAL, TecnocomReconciliationRegisterType.OP, CodigoMoneda.CHILE_CLP);
 
     // Inserta el movimiento que vino en el archivo IPM (para hacer un match, y reescribir su valor)
-    IpmMovement10 ipmMovement10 = buildIpmMovement10();
-    ipmMovement10.setCardholderBillingAmount(movimientoTecnocom10.getImpFac().getValue().multiply(new BigDecimal(0.995))); // Alterar levemente el valor para que se reescriba
-    ipmMovement10.setPan(prepaidCard.getPan());
-    ipmMovement10.setMerchantCode(movimientoTecnocom10.getCodCom());
-    ipmMovement10.setApprovalCode(movimientoTecnocom10.getNumAut());
-    ipmMovement10 = createIpmMovement(ipmMovement10);
+    IpmMovement10 ipmMovement10 = prepareIpmMovement(movimientoTecnocom10);
 
     // Preparar la respuesta del servicio de fees
     prepareCalculateFeesMock(movimientoTecnocom10.getImpFac().getValue(), true);
@@ -1249,35 +1121,14 @@ public class Test_TecnocomReconciliationEJBBean10_insertAutorization extends Tes
     Assert.assertEquals("Debe tener estado PENDING", AccountingStatusType.PENDING, liq.getStatus());
 
     // Verificar que exista en la cola de eventos transaction_reversed
-    Queue qResp = camelFactory.createJMSQueue(KafkaEventsRoute10.TRANSACTION_REVERSED_TOPIC);
-    ExchangeData<String> event = (ExchangeData<String>) camelFactory.createJMSMessenger(30000, 60000)
-      .getMessage(qResp, prepaidMovement10.getIdTxExterno());
-
-    Assert.assertNotNull("Deberia existir un evento de transaccion autorizada", event);
-    Assert.assertNotNull("Deberia existir un evento de transaccion autorizada", event.getData());
-
-    TransactionEvent transactionEvent = getJsonParser().fromJson(event.getData(), TransactionEvent.class);
-
-    Assert.assertEquals("Debe tener el mismo id", prepaidMovement10.getIdTxExterno(), transactionEvent.getTransaction().getRemoteTransactionId());
-    Assert.assertEquals("Debe tener el mismo accountId", account.getUuid(), transactionEvent.getAccountId());
-    Assert.assertEquals("Debe tener el mismo userId", prepaidUser.getUuid(), transactionEvent.getUserId());
-    Assert.assertEquals("Debe tener el mismo transactiontype", "SUSCRIPTION", transactionEvent.getTransaction().getType());
-    Assert.assertEquals("Debe tener el mismo status", "REVERSED", transactionEvent.getTransaction().getStatus());
+    checkIfTransactionIsInQueue(KafkaEventsRoute10.TRANSACTION_REVERSED_TOPIC, prepaidMovement10.getIdTxExterno(), "SUSCRIPTION", "REVERSED", prepaidMovementFee10List);
   }
 
   // Anulacion Suscription Internacional en moneda extranjera (DB = no, tipo = AU)
   @Test
   public void processTecnocomTableData_whenMovNotInDB_IsReversedInternationalSuscriptionInForeignCoinAu_movIsInsertedAndLiqAccMustExistInInitialState() throws Exception {
     // Inserta movimiento que vino en archivo OP
-    MovimientoTecnocom10 movimientoTecnocom10 = createMovimientoTecnocom(tecnocomReconciliationFile10.getId());
-    movimientoTecnocom10.setTipoFac(TipoFactura.ANULA_SUSCRIPCION_INTERNACIONAL);
-    movimientoTecnocom10.setIndNorCor(IndicadorNormalCorrector.CORRECTORA.getValue());
-    movimientoTecnocom10.setTipoReg(TecnocomReconciliationRegisterType.AU);
-    NewAmountAndCurrency10 impDiv = new NewAmountAndCurrency10();
-    impDiv.setValue(movimientoTecnocom10.getImpFac().getValue());
-    impDiv.setCurrencyCode(CodigoMoneda.USA_USD);
-    movimientoTecnocom10.setImpDiv(impDiv);
-    movimientoTecnocom10 = getTecnocomReconciliationEJBBean10().insertaMovimientoTecnocom(movimientoTecnocom10);
+    MovimientoTecnocom10 movimientoTecnocom10 = prepareMovimientoTecnocom(TipoFactura.ANULA_SUSCRIPCION_INTERNACIONAL, TecnocomReconciliationRegisterType.AU, CodigoMoneda.USA_USD);
 
     // Preparar la respuesta del servicio de fees
     prepareCalculateFeesMock(movimientoTecnocom10.getImpFac().getValue(), false);
@@ -1339,35 +1190,14 @@ public class Test_TecnocomReconciliationEJBBean10_insertAutorization extends Tes
     Assert.assertEquals("Debe tener estado INITIAL", AccountingStatusType.INITIAL, liq.getStatus());
 
     // Verificar que exista en la cola de eventos transaction_reversed
-    Queue qResp = camelFactory.createJMSQueue(KafkaEventsRoute10.TRANSACTION_REVERSED_TOPIC);
-    ExchangeData<String> event = (ExchangeData<String>) camelFactory.createJMSMessenger(30000, 60000)
-      .getMessage(qResp, prepaidMovement10.getIdTxExterno());
-
-    Assert.assertNotNull("Deberia existir un evento de transaccion autorizada", event);
-    Assert.assertNotNull("Deberia existir un evento de transaccion autorizada", event.getData());
-
-    TransactionEvent transactionEvent = getJsonParser().fromJson(event.getData(), TransactionEvent.class);
-
-    Assert.assertEquals("Debe tener el mismo id", prepaidMovement10.getIdTxExterno(), transactionEvent.getTransaction().getRemoteTransactionId());
-    Assert.assertEquals("Debe tener el mismo accountId", account.getUuid(), transactionEvent.getAccountId());
-    Assert.assertEquals("Debe tener el mismo userId", prepaidUser.getUuid(), transactionEvent.getUserId());
-    Assert.assertEquals("Debe tener el mismo transactiontype", "SUSCRIPTION", transactionEvent.getTransaction().getType());
-    Assert.assertEquals("Debe tener el mismo status", "REVERSED", transactionEvent.getTransaction().getStatus());
+    checkIfTransactionIsInQueue(KafkaEventsRoute10.TRANSACTION_REVERSED_TOPIC, prepaidMovement10.getIdTxExterno(), "SUSCRIPTION", "REVERSED", prepaidMovementFee10List);
   }
 
   // Anulacion Suscription Internacional en pesos (DB = no, tipo = AU)
   @Test
   public void processTecnocomTableData_whenMovNotInDB_IsReversedInternationalSuscriptionInPesosAu_movIsInsertedAndLiqAccMustExistInInitialState() throws Exception {
     // Inserta movimiento que vino en archivo OP
-    MovimientoTecnocom10 movimientoTecnocom10 = createMovimientoTecnocom(tecnocomReconciliationFile10.getId());
-    movimientoTecnocom10.setTipoFac(TipoFactura.ANULA_SUSCRIPCION_INTERNACIONAL);
-    movimientoTecnocom10.setIndNorCor(IndicadorNormalCorrector.CORRECTORA.getValue());
-    movimientoTecnocom10.setTipoReg(TecnocomReconciliationRegisterType.AU);
-    NewAmountAndCurrency10 impDiv = new NewAmountAndCurrency10();
-    impDiv.setValue(movimientoTecnocom10.getImpFac().getValue());
-    impDiv.setCurrencyCode(CodigoMoneda.CHILE_CLP);
-    movimientoTecnocom10.setImpDiv(impDiv);
-    movimientoTecnocom10 = getTecnocomReconciliationEJBBean10().insertaMovimientoTecnocom(movimientoTecnocom10);
+    MovimientoTecnocom10 movimientoTecnocom10 = prepareMovimientoTecnocom(TipoFactura.ANULA_SUSCRIPCION_INTERNACIONAL, TecnocomReconciliationRegisterType.AU, CodigoMoneda.CHILE_CLP);
 
     // Preparar la respuesta del servicio de fees
     prepareCalculateFeesMock(movimientoTecnocom10.getImpFac().getValue(), true);
@@ -1439,35 +1269,14 @@ public class Test_TecnocomReconciliationEJBBean10_insertAutorization extends Tes
     Assert.assertEquals("Debe tener estado INITIAL", AccountingStatusType.INITIAL, liq.getStatus());
 
     // Verificar que exista en la cola de eventos transaction_reversed
-    Queue qResp = camelFactory.createJMSQueue(KafkaEventsRoute10.TRANSACTION_REVERSED_TOPIC);
-    ExchangeData<String> event = (ExchangeData<String>) camelFactory.createJMSMessenger(30000, 60000)
-      .getMessage(qResp, prepaidMovement10.getIdTxExterno());
-
-    Assert.assertNotNull("Deberia existir un evento de transaccion autorizada", event);
-    Assert.assertNotNull("Deberia existir un evento de transaccion autorizada", event.getData());
-
-    TransactionEvent transactionEvent = getJsonParser().fromJson(event.getData(), TransactionEvent.class);
-
-    Assert.assertEquals("Debe tener el mismo id", prepaidMovement10.getIdTxExterno(), transactionEvent.getTransaction().getRemoteTransactionId());
-    Assert.assertEquals("Debe tener el mismo accountId", account.getUuid(), transactionEvent.getAccountId());
-    Assert.assertEquals("Debe tener el mismo userId", prepaidUser.getUuid(), transactionEvent.getUserId());
-    Assert.assertEquals("Debe tener el mismo transactiontype", "SUSCRIPTION", transactionEvent.getTransaction().getType());
-    Assert.assertEquals("Debe tener el mismo status", "REVERSED", transactionEvent.getTransaction().getStatus());
+    checkIfTransactionIsInQueue(KafkaEventsRoute10.TRANSACTION_REVERSED_TOPIC, prepaidMovement10.getIdTxExterno(), "SUSCRIPTION", "REVERSED", prepaidMovementFee10List);
   }
 
   // Anulacion Suscription Internacional en moneda extranjera (DB = si en NOTIFIED, tipo = AU)
   @Test
   public void processTecnocomTableData_whenMovInDBNotified_IsReversedInternationalSuscriptionInForeignCoinAU_movIsInsertedAndLiqAccMustExistInInitialState() throws Exception {
     // Inserta movimiento que vino en archivo OP
-    MovimientoTecnocom10 movimientoTecnocom10 = createMovimientoTecnocom(tecnocomReconciliationFile10.getId());
-    movimientoTecnocom10.setTipoFac(TipoFactura.ANULA_SUSCRIPCION_INTERNACIONAL);
-    movimientoTecnocom10.setIndNorCor(IndicadorNormalCorrector.CORRECTORA.getValue());
-    movimientoTecnocom10.setTipoReg(TecnocomReconciliationRegisterType.AU);
-    NewAmountAndCurrency10 impDiv = new NewAmountAndCurrency10();
-    impDiv.setValue(movimientoTecnocom10.getImpFac().getValue());
-    impDiv.setCurrencyCode(CodigoMoneda.USA_USD);
-    movimientoTecnocom10.setImpDiv(impDiv);
-    movimientoTecnocom10 = getTecnocomReconciliationEJBBean10().insertaMovimientoTecnocom(movimientoTecnocom10);
+    MovimientoTecnocom10 movimientoTecnocom10 = prepareMovimientoTecnocom(TipoFactura.ANULA_SUSCRIPCION_INTERNACIONAL, TecnocomReconciliationRegisterType.AU, CodigoMoneda.USA_USD);
 
     // Insertar el movimiento en la BD
     PrepaidMovement10 insertedMovement = buildPrepaidMovementFromTecnocomMovement(movimientoTecnocom10);
@@ -1475,13 +1284,7 @@ public class Test_TecnocomReconciliationEJBBean10_insertAutorization extends Tes
     insertedMovement = createPrepaidMovement11(insertedMovement);
 
     // Insertar los fees del movimiento
-    List<PrepaidMovementFee10> prepaidMovementFee10List = new ArrayList<>();
-    PrepaidMovementFee10 prepaidFee = new PrepaidMovementFee10();
-    prepaidFee.setMovementId(insertedMovement.getId());
-    prepaidFee.setFeeType(PrepaidMovementFeeType.SUSCRIPTION_INT_FEE);
-    prepaidFee.setAmount(movimientoTecnocom10.getImpFac().getValue().multiply(new BigDecimal(0.02)).setScale(2, RoundingMode.HALF_UP));
-    prepaidMovementFee10List.add(prepaidFee);
-    getPrepaidMovementEJBBean11().addPrepaidMovementFeeList(prepaidMovementFee10List);
+    List<PrepaidMovementFee10> prepaidMovementFee10List = prepareFees(insertedMovement, PrepaidMovementFeeType.SUSCRIPTION_INT_FEE, false);
 
     getTecnocomReconciliationEJBBean10().processTecnocomTableData(tecnocomReconciliationFile10.getId());
 
@@ -1534,15 +1337,7 @@ public class Test_TecnocomReconciliationEJBBean10_insertAutorization extends Tes
   @Test
   public void processTecnocomTableData_whenMovInDBNotified_IsReversedInternationalSuscriptionInPesosAu_movIsInsertedAndLiqAccMustExistInInitialState() throws Exception {
     // Inserta movimiento que vino en archivo OP
-    MovimientoTecnocom10 movimientoTecnocom10 = createMovimientoTecnocom(tecnocomReconciliationFile10.getId());
-    movimientoTecnocom10.setTipoFac(TipoFactura.ANULA_SUSCRIPCION_INTERNACIONAL);
-    movimientoTecnocom10.setIndNorCor(IndicadorNormalCorrector.CORRECTORA.getValue());
-    movimientoTecnocom10.setTipoReg(TecnocomReconciliationRegisterType.AU);
-    NewAmountAndCurrency10 impDiv = new NewAmountAndCurrency10();
-    impDiv.setValue(movimientoTecnocom10.getImpFac().getValue());
-    impDiv.setCurrencyCode(CodigoMoneda.CHILE_CLP);
-    movimientoTecnocom10.setImpDiv(impDiv);
-    movimientoTecnocom10 = getTecnocomReconciliationEJBBean10().insertaMovimientoTecnocom(movimientoTecnocom10);
+    MovimientoTecnocom10 movimientoTecnocom10 = prepareMovimientoTecnocom(TipoFactura.ANULA_SUSCRIPCION_INTERNACIONAL, TecnocomReconciliationRegisterType.AU, CodigoMoneda.CHILE_CLP);
 
     // Insertar el movimiento en la BD
     PrepaidMovement10 insertedMovement = buildPrepaidMovementFromTecnocomMovement(movimientoTecnocom10);
@@ -1550,18 +1345,7 @@ public class Test_TecnocomReconciliationEJBBean10_insertAutorization extends Tes
     insertedMovement = createPrepaidMovement11(insertedMovement);
 
     // Insertar los fees del movimiento
-    List<PrepaidMovementFee10> prepaidMovementFee10List = new ArrayList<>();
-    PrepaidMovementFee10 prepaidFee = new PrepaidMovementFee10();
-    prepaidFee.setMovementId(insertedMovement.getId());
-    prepaidFee.setFeeType(PrepaidMovementFeeType.SUSCRIPTION_INT_FEE);
-    prepaidFee.setAmount(movimientoTecnocom10.getImpFac().getValue().multiply(new BigDecimal(0.02)).multiply(new BigDecimal(0.84)).setScale(2, RoundingMode.HALF_UP));
-    prepaidMovementFee10List.add(prepaidFee);
-    PrepaidMovementFee10 ivaFee = new PrepaidMovementFee10();
-    ivaFee.setMovementId(insertedMovement.getId());
-    ivaFee.setFeeType(PrepaidMovementFeeType.IVA);
-    ivaFee.setAmount(movimientoTecnocom10.getImpFac().getValue().multiply(new BigDecimal(0.02)).multiply(new BigDecimal(0.16)).setScale(2, RoundingMode.HALF_UP));
-    prepaidMovementFee10List.add(ivaFee);
-    getPrepaidMovementEJBBean11().addPrepaidMovementFeeList(prepaidMovementFee10List);
+    List<PrepaidMovementFee10> prepaidMovementFee10List = prepareFees(insertedMovement, PrepaidMovementFeeType.SUSCRIPTION_INT_FEE, true);
 
     getTecnocomReconciliationEJBBean10().processTecnocomTableData(tecnocomReconciliationFile10.getId());
 
@@ -1619,23 +1403,10 @@ public class Test_TecnocomReconciliationEJBBean10_insertAutorization extends Tes
   @Test
   public void processTecnocomTableData_whenMovInDBNotified_IsReversedInternationalSuscriptionInForeignCoinOP_movIsInsertedAndLiqAccMustExistInFinalState() throws Exception {
     // Inserta movimiento que vino en archivo OP
-    MovimientoTecnocom10 movimientoTecnocom10 = createMovimientoTecnocom(tecnocomReconciliationFile10.getId());
-    movimientoTecnocom10.setTipoFac(TipoFactura.ANULA_SUSCRIPCION_INTERNACIONAL);
-    movimientoTecnocom10.setIndNorCor(IndicadorNormalCorrector.CORRECTORA.getValue());
-    movimientoTecnocom10.setTipoReg(TecnocomReconciliationRegisterType.OP);
-    NewAmountAndCurrency10 impDiv = new NewAmountAndCurrency10();
-    impDiv.setValue(movimientoTecnocom10.getImpFac().getValue());
-    impDiv.setCurrencyCode(CodigoMoneda.USA_USD);
-    movimientoTecnocom10.setImpDiv(impDiv);
-    movimientoTecnocom10 = getTecnocomReconciliationEJBBean10().insertaMovimientoTecnocom(movimientoTecnocom10);
+    MovimientoTecnocom10 movimientoTecnocom10 = prepareMovimientoTecnocom(TipoFactura.ANULA_SUSCRIPCION_INTERNACIONAL, TecnocomReconciliationRegisterType.OP, CodigoMoneda.USA_USD);
 
     // Inserta el movimiento que vino en el archivo IPM (para hacer un match, y reescribir su valor)
-    IpmMovement10 ipmMovement10 = buildIpmMovement10();
-    ipmMovement10.setCardholderBillingAmount(movimientoTecnocom10.getImpFac().getValue().multiply(new BigDecimal(0.995))); // Alterar levemente el valor para que se reescriba
-    ipmMovement10.setPan(prepaidCard.getPan());
-    ipmMovement10.setMerchantCode(movimientoTecnocom10.getCodCom());
-    ipmMovement10.setApprovalCode(movimientoTecnocom10.getNumAut());
-    ipmMovement10 = createIpmMovement(ipmMovement10);
+    IpmMovement10 ipmMovement10 = prepareIpmMovement(movimientoTecnocom10);
 
     // Insertar el movimiento en la BD
     PrepaidMovement10 insertedMovement = buildPrepaidMovementFromTecnocomMovement(movimientoTecnocom10);
@@ -1643,13 +1414,7 @@ public class Test_TecnocomReconciliationEJBBean10_insertAutorization extends Tes
     insertedMovement = createPrepaidMovement11(insertedMovement);
 
     // Insertar los fees del movimiento
-    List<PrepaidMovementFee10> prepaidMovementFee10List = new ArrayList<>();
-    PrepaidMovementFee10 prepaidFee = new PrepaidMovementFee10();
-    prepaidFee.setMovementId(insertedMovement.getId());
-    prepaidFee.setFeeType(PrepaidMovementFeeType.SUSCRIPTION_INT_FEE);
-    prepaidFee.setAmount(movimientoTecnocom10.getImpFac().getValue().multiply(new BigDecimal(0.02)).setScale(2, RoundingMode.HALF_UP));
-    prepaidMovementFee10List.add(prepaidFee);
-    getPrepaidMovementEJBBean11().addPrepaidMovementFeeList(prepaidMovementFee10List);
+    List<PrepaidMovementFee10> prepaidMovementFee10List = prepareFees(insertedMovement, PrepaidMovementFeeType.SUSCRIPTION_INT_FEE, false);
 
     getTecnocomReconciliationEJBBean10().processTecnocomTableData(tecnocomReconciliationFile10.getId());
 
@@ -1702,23 +1467,10 @@ public class Test_TecnocomReconciliationEJBBean10_insertAutorization extends Tes
   @Test
   public void processTecnocomTableData_whenMovInDBNotified_IsReversedInternationalSuscriptionInPesosOp_movIsInsertedAndLiqAccMustExistInInitialState() throws Exception {
     // Inserta movimiento que vino en archivo OP
-    MovimientoTecnocom10 movimientoTecnocom10 = createMovimientoTecnocom(tecnocomReconciliationFile10.getId());
-    movimientoTecnocom10.setTipoFac(TipoFactura.ANULA_SUSCRIPCION_INTERNACIONAL);
-    movimientoTecnocom10.setIndNorCor(IndicadorNormalCorrector.CORRECTORA.getValue());
-    movimientoTecnocom10.setTipoReg(TecnocomReconciliationRegisterType.OP);
-    NewAmountAndCurrency10 impDiv = new NewAmountAndCurrency10();
-    impDiv.setValue(movimientoTecnocom10.getImpFac().getValue());
-    impDiv.setCurrencyCode(CodigoMoneda.CHILE_CLP);
-    movimientoTecnocom10.setImpDiv(impDiv);
-    movimientoTecnocom10 = getTecnocomReconciliationEJBBean10().insertaMovimientoTecnocom(movimientoTecnocom10);
+    MovimientoTecnocom10 movimientoTecnocom10 = prepareMovimientoTecnocom(TipoFactura.ANULA_SUSCRIPCION_INTERNACIONAL, TecnocomReconciliationRegisterType.OP, CodigoMoneda.CHILE_CLP);
 
     // Inserta el movimiento que vino en el archivo IPM (para hacer un match, y reescribir su valor)
-    IpmMovement10 ipmMovement10 = buildIpmMovement10();
-    ipmMovement10.setCardholderBillingAmount(movimientoTecnocom10.getImpFac().getValue().multiply(new BigDecimal(0.995))); // Alterar levemente el valor para que se reescriba
-    ipmMovement10.setPan(prepaidCard.getPan());
-    ipmMovement10.setMerchantCode(movimientoTecnocom10.getCodCom());
-    ipmMovement10.setApprovalCode(movimientoTecnocom10.getNumAut());
-    ipmMovement10 = createIpmMovement(ipmMovement10);
+    IpmMovement10 ipmMovement10 = prepareIpmMovement(movimientoTecnocom10);
 
     // Insertar el movimiento en la BD
     PrepaidMovement10 insertedMovement = buildPrepaidMovementFromTecnocomMovement(movimientoTecnocom10);
@@ -1726,18 +1478,7 @@ public class Test_TecnocomReconciliationEJBBean10_insertAutorization extends Tes
     insertedMovement = createPrepaidMovement11(insertedMovement);
 
     // Insertar los fees del movimiento
-    List<PrepaidMovementFee10> prepaidMovementFee10List = new ArrayList<>();
-    PrepaidMovementFee10 prepaidFee = new PrepaidMovementFee10();
-    prepaidFee.setMovementId(insertedMovement.getId());
-    prepaidFee.setFeeType(PrepaidMovementFeeType.SUSCRIPTION_INT_FEE);
-    prepaidFee.setAmount(movimientoTecnocom10.getImpFac().getValue().multiply(new BigDecimal(0.02)).multiply(new BigDecimal(0.84)).setScale(2, RoundingMode.HALF_UP));
-    prepaidMovementFee10List.add(prepaidFee);
-    PrepaidMovementFee10 ivaFee = new PrepaidMovementFee10();
-    ivaFee.setMovementId(insertedMovement.getId());
-    ivaFee.setFeeType(PrepaidMovementFeeType.IVA);
-    ivaFee.setAmount(movimientoTecnocom10.getImpFac().getValue().multiply(new BigDecimal(0.02)).multiply(new BigDecimal(0.16)).setScale(2, RoundingMode.HALF_UP));
-    prepaidMovementFee10List.add(ivaFee);
-    getPrepaidMovementEJBBean11().addPrepaidMovementFeeList(prepaidMovementFee10List);
+    List<PrepaidMovementFee10> prepaidMovementFee10List = prepareFees(insertedMovement, PrepaidMovementFeeType.SUSCRIPTION_INT_FEE, true);
 
     getTecnocomReconciliationEJBBean10().processTecnocomTableData(tecnocomReconciliationFile10.getId());
 
@@ -1795,23 +1536,10 @@ public class Test_TecnocomReconciliationEJBBean10_insertAutorization extends Tes
   @Test
   public void processTecnocomTableData_whenMovInDBAuthorized_IsReversedInternationalSuscriptionInForeignCoinOP_movIsInsertedAndLiqAccMustExistInFinalState() throws Exception {
     // Inserta movimiento que vino en archivo OP
-    MovimientoTecnocom10 movimientoTecnocom10 = createMovimientoTecnocom(tecnocomReconciliationFile10.getId());
-    movimientoTecnocom10.setTipoFac(TipoFactura.ANULA_SUSCRIPCION_INTERNACIONAL);
-    movimientoTecnocom10.setIndNorCor(IndicadorNormalCorrector.CORRECTORA.getValue());
-    movimientoTecnocom10.setTipoReg(TecnocomReconciliationRegisterType.OP);
-    NewAmountAndCurrency10 impDiv = new NewAmountAndCurrency10();
-    impDiv.setValue(movimientoTecnocom10.getImpFac().getValue());
-    impDiv.setCurrencyCode(CodigoMoneda.USA_USD);
-    movimientoTecnocom10.setImpDiv(impDiv);
-    movimientoTecnocom10 = getTecnocomReconciliationEJBBean10().insertaMovimientoTecnocom(movimientoTecnocom10);
+    MovimientoTecnocom10 movimientoTecnocom10 = prepareMovimientoTecnocom(TipoFactura.ANULA_SUSCRIPCION_INTERNACIONAL, TecnocomReconciliationRegisterType.OP, CodigoMoneda.USA_USD);
 
     // Inserta el movimiento que vino en el archivo IPM (para hacer un match, y reescribir su valor)
-    IpmMovement10 ipmMovement10 = buildIpmMovement10();
-    ipmMovement10.setCardholderBillingAmount(movimientoTecnocom10.getImpFac().getValue().multiply(new BigDecimal(0.995))); // Alterar levemente el valor para que se reescriba
-    ipmMovement10.setPan(prepaidCard.getPan());
-    ipmMovement10.setMerchantCode(movimientoTecnocom10.getCodCom());
-    ipmMovement10.setApprovalCode(movimientoTecnocom10.getNumAut());
-    ipmMovement10 = createIpmMovement(ipmMovement10);
+    IpmMovement10 ipmMovement10 = prepareIpmMovement(movimientoTecnocom10);
 
     // Insertar el movimiento en la BD
     PrepaidMovement10 insertedMovement = buildPrepaidMovementFromTecnocomMovement(movimientoTecnocom10);
@@ -1854,23 +1582,10 @@ public class Test_TecnocomReconciliationEJBBean10_insertAutorization extends Tes
   @Test
   public void processTecnocomTableData_whenMovInDBAuthorized_IsReversedInternationalSuscriptionInPesosOP_movIsInsertedAndLiqAccMustExistInFinalState() throws Exception {
     // Inserta movimiento que vino en archivo OP
-    MovimientoTecnocom10 movimientoTecnocom10 = createMovimientoTecnocom(tecnocomReconciliationFile10.getId());
-    movimientoTecnocom10.setTipoFac(TipoFactura.ANULA_SUSCRIPCION_INTERNACIONAL);
-    movimientoTecnocom10.setIndNorCor(IndicadorNormalCorrector.CORRECTORA.getValue());
-    movimientoTecnocom10.setTipoReg(TecnocomReconciliationRegisterType.OP);
-    NewAmountAndCurrency10 impDiv = new NewAmountAndCurrency10();
-    impDiv.setValue(movimientoTecnocom10.getImpFac().getValue());
-    impDiv.setCurrencyCode(CodigoMoneda.CHILE_CLP);
-    movimientoTecnocom10.setImpDiv(impDiv);
-    movimientoTecnocom10 = getTecnocomReconciliationEJBBean10().insertaMovimientoTecnocom(movimientoTecnocom10);
+    MovimientoTecnocom10 movimientoTecnocom10 = prepareMovimientoTecnocom(TipoFactura.ANULA_SUSCRIPCION_INTERNACIONAL, TecnocomReconciliationRegisterType.OP, CodigoMoneda.CHILE_CLP);
 
     // Inserta el movimiento que vino en el archivo IPM (para hacer un match, y reescribir su valor)
-    IpmMovement10 ipmMovement10 = buildIpmMovement10();
-    ipmMovement10.setCardholderBillingAmount(movimientoTecnocom10.getImpFac().getValue().multiply(new BigDecimal(0.995))); // Alterar levemente el valor para que se reescriba
-    ipmMovement10.setPan(prepaidCard.getPan());
-    ipmMovement10.setMerchantCode(movimientoTecnocom10.getCodCom());
-    ipmMovement10.setApprovalCode(movimientoTecnocom10.getNumAut());
-    ipmMovement10 = createIpmMovement(ipmMovement10);
+    IpmMovement10 ipmMovement10 = prepareIpmMovement(movimientoTecnocom10);
 
     // Insertar el movimiento en la BD
     PrepaidMovement10 insertedMovement = buildPrepaidMovementFromTecnocomMovement(movimientoTecnocom10);
@@ -2058,11 +1773,86 @@ public class Test_TecnocomReconciliationEJBBean10_insertAutorization extends Tes
     prepaidMovement10.setClamone(movimientoTecnocom10.getClamone().getValue());
     prepaidMovement10.setTipolin(movimientoTecnocom10.getTipoLin());
     prepaidMovement10.setLinref(movimientoTecnocom10.getLinRef());
-    prepaidMovement10.setNumbencta(0); // Esto no es el valor correcto
-    prepaidMovement10.setNumplastico(0L); // Esto no es el valor correcto
-    prepaidMovement10.setNomcomred(""); // Esto no es el valor correcto
+    prepaidMovement10.setNumbencta(0);
+    prepaidMovement10.setNumplastico(0L);
+    prepaidMovement10.setNomcomred("");
     prepaidMovement10.setCardId(prepaidCard.getId());
 
     return prepaidMovement10;
+  }
+
+  private MovimientoTecnocom10 prepareMovimientoTecnocom(TipoFactura tipofac, TecnocomReconciliationRegisterType registerType, CodigoMoneda currencyCode) throws Exception {
+    MovimientoTecnocom10 movimientoTecnocom10 = createMovimientoTecnocom(tecnocomReconciliationFile10.getId());
+    movimientoTecnocom10.setTipoFac(tipofac);
+    movimientoTecnocom10.setIndNorCor(tipofac.getCorrector());
+    movimientoTecnocom10.setTipoReg(registerType);
+    movimientoTecnocom10.getImpDiv().setCurrencyCode(currencyCode);
+    return getTecnocomReconciliationEJBBean10().insertaMovimientoTecnocom(movimientoTecnocom10);
+  }
+
+  private void checkIfTransactionIsInQueue(String queueName, String idTxExterno, String transactionType, String transactionStatus, List<PrepaidMovementFee10> feeList) {
+    Queue qResp = camelFactory.createJMSQueue(queueName);
+    ExchangeData<String> event = (ExchangeData<String>) camelFactory.createJMSMessenger(30000, 60000)
+      .getMessage(qResp, idTxExterno);
+
+    Assert.assertNotNull("Deberia existir un evento de transaccion", event);
+    Assert.assertNotNull("Deberia existir un evento de transaccion con data", event.getData());
+
+    TransactionEvent transactionEvent = getJsonParser().fromJson(event.getData(), TransactionEvent.class);
+
+    Assert.assertEquals("Debe tener el mismo id", idTxExterno, transactionEvent.getTransaction().getRemoteTransactionId());
+    Assert.assertEquals("Debe tener el mismo accountId", account.getUuid(), transactionEvent.getAccountId());
+    Assert.assertEquals("Debe tener el mismo userId", prepaidUser.getUuid(), transactionEvent.getUserId());
+    Assert.assertEquals("Debe tener el mismo transactiontype", transactionType, transactionEvent.getTransaction().getType());
+    Assert.assertEquals("Debe tener el mismo status", transactionStatus, transactionEvent.getTransaction().getStatus());
+
+    if (feeList != null && !feeList.isEmpty()) {
+      List<cl.multicaja.prepaid.kafka.events.model.Fee> eventFeeList = transactionEvent.getTransaction().getFees();
+      Assert.assertEquals("Debe tener todas las fees", feeList.size(), eventFeeList.size());
+
+      for (PrepaidMovementFee10 storedFee : feeList) {
+        cl.multicaja.prepaid.kafka.events.model.Fee foundFee = eventFeeList.stream().filter(f -> f.getType().equals(storedFee.getFeeType().toString())).findAny().orElse(null);
+        Assert.assertNotNull("Debe existir la misma fee en la lista", foundFee);
+        Assert.assertEquals("Debe tener el mismo monto", storedFee.getAmount().stripTrailingZeros(), foundFee.getAmount().getValue().stripTrailingZeros());
+      }
+    }
+  }
+
+  private IpmMovement10 prepareIpmMovement(MovimientoTecnocom10 movimientoTecnocom10) throws Exception {
+    IpmMovement10 ipmMovement10 = buildIpmMovement10();
+    ipmMovement10.setCardholderBillingAmount(movimientoTecnocom10.getImpFac().getValue().multiply(new BigDecimal(0.995)).setScale(2, RoundingMode.HALF_UP)); // Alterar levemente el valor para que se reescriba
+    ipmMovement10.setPan(prepaidCard.getPan());
+    ipmMovement10.setMerchantCode(movimientoTecnocom10.getCodCom());
+    ipmMovement10.setApprovalCode(movimientoTecnocom10.getNumAut());
+    return createIpmMovement(ipmMovement10);
+  }
+
+  private List<PrepaidMovementFee10> prepareFees(PrepaidMovement10 prepaidMovement10, PrepaidMovementFeeType purchaseIntFee, boolean chargesIva) throws Exception {
+    List<PrepaidMovementFee10> prepaidMovementFee10List = new ArrayList<>();
+
+    if (chargesIva) {
+      BigDecimal totalFee = prepaidMovement10.getImpfac().multiply(new BigDecimal(0.02));
+
+      PrepaidMovementFee10 prepaidFee = new PrepaidMovementFee10();
+      prepaidFee.setMovementId(prepaidMovement10.getId());
+      prepaidFee.setFeeType(purchaseIntFee);
+      prepaidFee.setAmount(totalFee.multiply(new BigDecimal(0.84)).setScale(2, RoundingMode.HALF_UP));
+      prepaidMovementFee10List.add(prepaidFee);
+
+      PrepaidMovementFee10 ivaFee = new PrepaidMovementFee10();
+      ivaFee.setMovementId(prepaidMovement10.getId());
+      ivaFee.setFeeType(PrepaidMovementFeeType.IVA);
+      ivaFee.setAmount(totalFee.subtract(prepaidFee.getAmount()).setScale(2, RoundingMode.HALF_UP));
+      prepaidMovementFee10List.add(ivaFee);
+    } else {
+      PrepaidMovementFee10 prepaidFee = new PrepaidMovementFee10();
+      prepaidFee.setMovementId(prepaidMovement10.getId());
+      prepaidFee.setFeeType(purchaseIntFee);
+      prepaidFee.setAmount(prepaidMovement10.getImpfac().multiply(new BigDecimal(0.02)).setScale(2, RoundingMode.HALF_UP));
+      prepaidMovementFee10List.add(prepaidFee);
+    }
+
+    getPrepaidMovementEJBBean11().addPrepaidMovementFeeList(prepaidMovementFee10List);
+    return prepaidMovementFee10List;
   }
 }

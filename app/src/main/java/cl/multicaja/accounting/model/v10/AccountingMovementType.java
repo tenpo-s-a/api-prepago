@@ -9,15 +9,15 @@ import java.util.stream.Stream;
 
 public enum AccountingMovementType {
 
-  SUSCRIPCION("Cargo por compra su"),
-  COMPRA_PESOS("Cargo por compra cp"),
-  COMPRA_MONEDA("Cargo por compra cm"),
-  CARGA_WEB("Abono por carga TEF"),
-  CARGA_POS("Abono por carga POS"),
-  RETIRO_WEB("Cargo por retiro TEF"),
-  RETIRO_POS("Cargo por retiro POS"),
-  ABONO_ANULACION("Abono por anulacion"),
-  ABONO_DEVOLUCION("Devolucion de compra");
+  SUSCRIPCION("CARGO_COMPRA_SUSCRIP"),
+  COMPRA_PESOS("CARGO_COMPRA_PESOS"),
+  COMPRA_MONEDA("CARGO_COMPRA_MONEDA"),
+  CARGA_WEB("ABONO_CARGA_WEB"),
+  CARGA_POS("ABONO_CARGA_POS"),
+  RETIRO_WEB("CARGO_RETIRO_WEB"),
+  RETIRO_POS("CARGO_RETIRO_POS"),
+  ABONO_ANULACION("ABONO_ANULACION"),
+  ABONO_DEVOLUCION("ABONO_DEVOLUCION");
 
 
   AccountingMovementType(String value) {
