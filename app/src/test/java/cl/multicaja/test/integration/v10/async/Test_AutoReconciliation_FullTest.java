@@ -1807,7 +1807,7 @@ public class Test_AutoReconciliation_FullTest extends TestBaseUnitAsync {
       for (PrepaidMovementFee10 storedFee : feeList) {
         cl.multicaja.prepaid.kafka.events.model.Fee foundFee = eventFeeList.stream().filter(f -> f.getType().equals(storedFee.getFeeType().toString())).findAny().orElse(null);
         Assert.assertNotNull("Debe existir la misma fee en la lista", foundFee);
-        Assert.assertEquals("Debe tener el mismo monto", storedFee.getAmount(), foundFee.getAmount().getValue());
+        Assert.assertEquals("Debe tener el mismo monto", storedFee.getAmount().stripTrailingZeros(), foundFee.getAmount().getValue().stripTrailingZeros());
       }
     }
   }
