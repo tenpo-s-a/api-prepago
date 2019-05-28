@@ -19,7 +19,7 @@ public class Test_PrepaidMovementEJBBean10_getResearchMovementBetweenDates exten
   @Before
   @After
   public void clearData() {
-    getDbUtils().getJdbcTemplate().execute(String.format("DELETE FROM %s.prp_movimiento_investigar", getSchema()));
+    getDbUtils().getJdbcTemplate().execute(String.format("TRUNCATE TABLE %s.prp_movimiento_investigar CASCADE", getSchema()));
   }
 
   @Test

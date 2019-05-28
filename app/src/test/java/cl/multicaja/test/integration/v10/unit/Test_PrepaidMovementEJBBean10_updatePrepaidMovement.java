@@ -2,6 +2,7 @@ package cl.multicaja.test.integration.v10.unit;
 
 import cl.multicaja.core.utils.Utils;
 import cl.multicaja.prepaid.model.v10.*;
+import cl.multicaja.prepaid.model.v11.Account;
 import cl.multicaja.tecnocom.constants.CodigoMoneda;
 import org.junit.Assert;
 import org.junit.Test;
@@ -36,18 +37,24 @@ public class Test_PrepaidMovementEJBBean10_updatePrepaidMovement extends TestBas
     PrepaidUser10 prepaidUser = buildPrepaidUserv2();
     prepaidUser = createPrepaidUserV2(prepaidUser);
 
+    Account account = buildAccountFromTecnocom(prepaidUser);
+    account = createAccount(account.getUserId(),account.getAccountNumber());
+
+    PrepaidCard10 prepaidCard10 = buildPrepaidCardWithTecnocomData(prepaidUser,account);
+    prepaidCard10 = createPrepaidCardV2(prepaidCard10);
+
     PrepaidTopup10 prepaidTopup = buildPrepaidTopup10();
 
-    PrepaidMovement10 prepaidMovement10 = buildPrepaidMovement10(prepaidUser, prepaidTopup);
+    PrepaidMovement10 prepaidMovement10 = buildPrepaidMovement11(prepaidUser, prepaidTopup);
     prepaidMovement10.setNumaut("123456");
-    prepaidMovement10 = createPrepaidMovement10(prepaidMovement10);
+    prepaidMovement10 = createPrepaidMovement11(prepaidMovement10);
 
     String pan = Utils.replacePan(getRandomNumericString(16));
     String centalta = getRandomNumericString(4);
     String cuenta = getRandomNumericString(12);
 
     // ACTUALIZA MOVIMIENTO
-    getPrepaidMovementEJBBean10().updatePrepaidMovement(null, prepaidMovement10.getId(),
+    getPrepaidMovementEJBBean11().updatePrepaidMovement(null, prepaidMovement10.getId(),
       pan,
       centalta,
       cuenta,
@@ -66,7 +73,7 @@ public class Test_PrepaidMovementEJBBean10_updatePrepaidMovement extends TestBas
     prepaidMovement10.setEstadoNegocio(BusinessStatusType.REVERSED);
     prepaidMovement10.setEstado(PrepaidMovementStatus.PROCESS_OK);
 
-    PrepaidMovement10 prepaidMovement1_1 = getPrepaidMovementEJBBean10().getPrepaidMovementById(prepaidMovement10.getId());
+    PrepaidMovement10 prepaidMovement1_1 = getPrepaidMovementEJBBean11().getPrepaidMovementById(prepaidMovement10.getId());
 
     Assert.assertEquals("deben ser iguales", prepaidMovement10, prepaidMovement1_1);
   }

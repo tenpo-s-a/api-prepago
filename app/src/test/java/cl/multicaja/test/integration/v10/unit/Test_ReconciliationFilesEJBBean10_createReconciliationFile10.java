@@ -17,7 +17,7 @@ public class Test_ReconciliationFilesEJBBean10_createReconciliationFile10 extend
   @Before
   @After
   public void clearData() {
-    getDbUtils().getJdbcTemplate().execute(String.format("DELETE FROM %s.prp_archivos_conciliacion", getSchema()));
+    getDbUtils().getJdbcTemplate().execute(String.format("TRUNCATE TABLE %s.prp_archivos_conciliacion CASCADE", getSchema()));
   }
 
   @Test

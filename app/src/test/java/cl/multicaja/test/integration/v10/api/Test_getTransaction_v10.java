@@ -18,7 +18,10 @@ import org.junit.Test;
 import java.math.BigDecimal;
 import java.util.List;
 
-//TODO: Revisar, esto no se utilizara
+/***
+   Por el momento este servicio y test no se utilizaran, se elimina to do para no interferir con los
+   que realmente tienen prioridad. No se eliminara por si llega a ser utilizado.
+ ***/
 @Ignore
 public class Test_getTransaction_v10 extends TestBaseUnitApi {
 
