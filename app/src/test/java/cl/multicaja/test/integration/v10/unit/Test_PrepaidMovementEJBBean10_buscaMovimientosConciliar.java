@@ -13,8 +13,9 @@ public class Test_PrepaidMovementEJBBean10_buscaMovimientosConciliar  extends Te
   @Before
   @After
   public void clearData() {
-    getDbUtils().getJdbcTemplate().execute(String.format("DELETE FROM %s.prp_movimiento_conciliado", getSchema()));
-    getDbUtils().getJdbcTemplate().execute(String.format("DELETE FROM %s.prp_movimiento", getSchema()));
+    getDbUtils().getJdbcTemplate().execute(String.format("TRUNCATE TABLE  %s.prp_movimiento_conciliado", getSchema()));
+    getDbUtils().getJdbcTemplate().execute(String.format("TRUNCATE TABLE  %s.prp_movimiento_comision", getSchema()));
+    getDbUtils().getJdbcTemplate().execute(String.format("TRUNCATE TABLE  %s.prp_movimiento", getSchema()));
   }
 
   @Test
