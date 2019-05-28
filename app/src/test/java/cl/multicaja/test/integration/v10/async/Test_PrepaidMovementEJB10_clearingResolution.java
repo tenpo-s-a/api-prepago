@@ -11,6 +11,8 @@ import org.junit.*;
 import java.math.BigDecimal;
 import java.math.RoundingMode;
 
+//TODO: Los retiros web no seran utilizados para la sbif
+@Ignore
 public class Test_PrepaidMovementEJB10_clearingResolution extends TestBaseUnitAsync {
 
   @BeforeClass
@@ -34,13 +36,13 @@ public class Test_PrepaidMovementEJB10_clearingResolution extends TestBaseUnitAs
     ResolutionPreparedVariables rejectedFormatClearing;
     rejectedFormatClearing = prepareTest(0L, NewPrepaidWithdraw10.WEB_MERCHANT_CODE, ReconciliationStatusType.RECONCILED, PrepaidMovementStatus.PROCESS_OK, AccountingStatusType.REJECTED_FORMAT);
 
-    getPrepaidMovementEJBBean10().clearingResolution();
+    getPrepaidMovementEJBBean11().clearingResolution();
 
     {
       // Check banco rechaza
       PrepaidMovement10 foundMovement = null;
       for(int i = 0; i < 20; i++) {
-        foundMovement = getPrepaidMovementEJBBean10().getPrepaidMovementById(rejectedClearing.prepaidMovement10.getId());
+        foundMovement = getPrepaidMovementEJBBean11().getPrepaidMovementById(rejectedClearing.prepaidMovement10.getId());
         if(foundMovement != null && BusinessStatusType.REVERSED.equals(foundMovement.getEstadoNegocio())) {
           break;
         }
@@ -51,7 +53,7 @@ public class Test_PrepaidMovementEJB10_clearingResolution extends TestBaseUnitAs
       Assert.assertNotNull("Debe encontrarse el movimiento", foundMovement);
       Assert.assertEquals("Debe tener estado reversado", BusinessStatusType.REVERSED, foundMovement.getEstadoNegocio());
 
-      PrepaidMovement10 foundReverse = getPrepaidMovementEJBBean10().getPrepaidMovementByIdTxExterno(rejectedClearing.prepaidMovement10.getIdTxExterno(), rejectedClearing.prepaidMovement10.getTipoMovimiento(), IndicadorNormalCorrector.CORRECTORA);
+      PrepaidMovement10 foundReverse = getPrepaidMovementEJBBean11().getPrepaidMovementByIdTxExterno(rejectedClearing.prepaidMovement10.getIdTxExterno(), rejectedClearing.prepaidMovement10.getTipoMovimiento(), IndicadorNormalCorrector.CORRECTORA);
       Assert.assertNotNull("Debe existir una reversa", foundReverse);
 
       System.out.println("Id mov ref: " + foundReverse.getIdMovimientoRef());
@@ -75,18 +77,18 @@ public class Test_PrepaidMovementEJB10_clearingResolution extends TestBaseUnitAs
       // Check banco rechaza
       PrepaidMovement10 foundMovement = null;
       for(int i = 0; i < 20; i++) {
-        foundMovement = getPrepaidMovementEJBBean10().getPrepaidMovementById(rejectedFormatClearing.prepaidMovement10.getId());
+        foundMovement = getPrepaidMovementEJBBean11().getPrepaidMovementById(rejectedFormatClearing.prepaidMovement10.getId());
         if(foundMovement != null && BusinessStatusType.REVERSED.equals(foundMovement.getEstadoNegocio())) {
           break;
         }
-        Thread.sleep(500); // Esperar que el async ejecute la reversa
+        Thread.sleep(3000); // Esperar que el async ejecute la reversa
         System.out.println("Buscando...");
       }
 
       Assert.assertNotNull("Debe encontrarse el movimiento", foundMovement);
       Assert.assertEquals("Debe tener estado reversado", BusinessStatusType.REVERSED, foundMovement.getEstadoNegocio());
 
-      PrepaidMovement10 foundReverse = getPrepaidMovementEJBBean10().getPrepaidMovementByIdTxExterno(rejectedFormatClearing.prepaidMovement10.getIdTxExterno(), rejectedFormatClearing.prepaidMovement10.getTipoMovimiento(), IndicadorNormalCorrector.CORRECTORA);
+      PrepaidMovement10 foundReverse = getPrepaidMovementEJBBean11().getPrepaidMovementByIdTxExterno(rejectedFormatClearing.prepaidMovement10.getIdTxExterno(), rejectedFormatClearing.prepaidMovement10.getTipoMovimiento(), IndicadorNormalCorrector.CORRECTORA);
       Assert.assertNotNull("Debe existir una reversa", foundReverse);
 
       System.out.println("Id mov ref: " + foundReverse.getIdMovimientoRef());
@@ -111,6 +113,7 @@ public class Test_PrepaidMovementEJB10_clearingResolution extends TestBaseUnitAs
   public ResolutionPreparedVariables prepareTest(Long fileId, String merchantCode, ReconciliationStatusType tecnocomStatus, PrepaidMovementStatus movementStatus, AccountingStatusType clearingStatus) throws Exception {
 
     UserAccount userAccount = randomBankAccount();
+
     PrepaidUser10 prepaidUser = buildPrepaidUserv2(PrepaidUserLevel.LEVEL_2);
     prepaidUser = createPrepaidUserV2(prepaidUser);
 
@@ -132,12 +135,12 @@ public class Test_PrepaidMovementEJB10_clearingResolution extends TestBaseUnitAs
     CdtTransaction10 cdtTransaction = buildCdtTransaction10(prepaidUser, prepaidWithdraw);
     cdtTransaction = createCdtTransaction10(cdtTransaction);
 
-    PrepaidMovement10 prepaidMovement = buildPrepaidMovement10(prepaidUser, prepaidWithdraw, prepaidCard10, cdtTransaction, PrepaidMovementType.WITHDRAW);
+    PrepaidMovement10 prepaidMovement = buildPrepaidMovement11(prepaidUser, prepaidWithdraw, prepaidCard10, cdtTransaction, PrepaidMovementType.WITHDRAW,false);
     prepaidMovement.setConSwitch(ReconciliationStatusType.RECONCILED);
     prepaidMovement.setConTecnocom(tecnocomStatus);
     prepaidMovement.setEstado(movementStatus);
     prepaidMovement.setEstadoNegocio(BusinessStatusType.IN_PROCESS);
-    prepaidMovement = createPrepaidMovement10(prepaidMovement);
+    prepaidMovement = createPrepaidMovement11(prepaidMovement);
 
     NewAmountAndCurrency10 amount = new NewAmountAndCurrency10(new BigDecimal(numberUtils.random(5000, 200000)));
 

@@ -29,8 +29,7 @@ public class Test_PrepaidMovementEJB10_procesReconciliation10 extends TestBaseUn
     getDbUtils().getJdbcTemplate().execute(String.format("TRUNCATE %s.prp_movimiento_conciliado CASCADE", getSchema()));
   }
 
-  // Se hace movimiento contrario al no estar conciliado con el switch (TOPUP)
-  @Ignore
+
   @Test
   public void processReconciliationCase2Topup() throws Exception {
 
@@ -50,20 +49,19 @@ public class Test_PrepaidMovementEJB10_procesReconciliation10 extends TestBaseUn
     CdtTransaction10 cdtTransaction = buildCdtTransaction10(prepaidUser, prepaidTopup);
     cdtTransaction = createCdtTransaction10(cdtTransaction);
 
-    PrepaidMovement10 prepaidMovement10 = buildPrepaidMovement10(prepaidUser, prepaidTopup, prepaidCard, cdtTransaction);
+    PrepaidMovement10 prepaidMovement10 = buildPrepaidMovement11(prepaidUser, prepaidTopup, prepaidCard, cdtTransaction);
     prepaidMovement10.setConSwitch(ReconciliationStatusType.NOT_RECONCILED);
     prepaidMovement10.setConTecnocom(ReconciliationStatusType.RECONCILED);
     prepaidMovement10.setEstado(PrepaidMovementStatus.PROCESS_OK);
     prepaidMovement10.setTipoMovimiento(PrepaidMovementType.TOPUP);
-    prepaidMovement10 = createPrepaidMovement10(prepaidMovement10);
+    prepaidMovement10 = createPrepaidMovement11(prepaidMovement10);
 
-    getPrepaidMovementEJBBean10().processReconciliation(prepaidMovement10);
+    getPrepaidMovementEJBBean11().processReconciliation(prepaidMovement10);
 
     //TODO: no tiene asserts
   }
 
   // Se hace movimiento contrario al no estar conciliado con el switch (WITHDRAW)
-  @Ignore
   @Test
   public void processReconciliationCase2Withdraw() throws Exception {
 
@@ -83,20 +81,19 @@ public class Test_PrepaidMovementEJB10_procesReconciliation10 extends TestBaseUn
     CdtTransaction10 cdtTransaction = buildCdtTransaction10(prepaidUser, prepaidTopup);
     cdtTransaction = createCdtTransaction10(cdtTransaction);
 
-    PrepaidMovement10 prepaidMovement10 = buildPrepaidMovement10(prepaidUser, prepaidTopup, prepaidCard, cdtTransaction);
+    PrepaidMovement10 prepaidMovement10 = buildPrepaidMovement11(prepaidUser, prepaidTopup, prepaidCard, cdtTransaction);
     prepaidMovement10.setConSwitch(ReconciliationStatusType.NOT_RECONCILED);
     prepaidMovement10.setConTecnocom(ReconciliationStatusType.RECONCILED);
     prepaidMovement10.setEstado(PrepaidMovementStatus.PROCESS_OK);
     prepaidMovement10.setTipoMovimiento(PrepaidMovementType.WITHDRAW);
-    prepaidMovement10 = createPrepaidMovement10(prepaidMovement10);
+    prepaidMovement10 = createPrepaidMovement11(prepaidMovement10);
 
-    getPrepaidMovementEJBBean10().processReconciliation(prepaidMovement10);
+    getPrepaidMovementEJBBean11().processReconciliation(prepaidMovement10);
 
     //TODO: no tiene asserts
   }
 
   // Se hace movimiento contrario al no estar conciliado con el switch (TOPUP) STATUS ERROR
-  @Ignore
   @Test
   public void processReconciliationCase6Topup() throws Exception {
 
@@ -116,21 +113,20 @@ public class Test_PrepaidMovementEJB10_procesReconciliation10 extends TestBaseUn
     CdtTransaction10 cdtTransaction = buildCdtTransaction10(prepaidUser, prepaidTopup);
     cdtTransaction = createCdtTransaction10(cdtTransaction);
 
-    PrepaidMovement10 prepaidMovement10 = buildPrepaidMovement10(prepaidUser, prepaidTopup, prepaidCard, cdtTransaction);
+    PrepaidMovement10 prepaidMovement10 = buildPrepaidMovement11(prepaidUser, prepaidTopup, prepaidCard, cdtTransaction);
     prepaidMovement10.setConSwitch(ReconciliationStatusType.NOT_RECONCILED);
     prepaidMovement10.setConTecnocom(ReconciliationStatusType.RECONCILED);
     prepaidMovement10.setEstado(PrepaidMovementStatus.ERROR_TIMEOUT_RESPONSE);
     prepaidMovement10.setTipoMovimiento(PrepaidMovementType.TOPUP);
-    prepaidMovement10 = createPrepaidMovement10(prepaidMovement10);
+    prepaidMovement10 = createPrepaidMovement11(prepaidMovement10);
 
-    getPrepaidMovementEJBBean10().processReconciliation(prepaidMovement10);
+    getPrepaidMovementEJBBean11().processReconciliation(prepaidMovement10);
 
     //TODO: no tiene asserts
 
   }
 
   // Se hace movimiento contrario al no estar conciliado con el switch (WITHDRAW) STATUS ERROR RESPONSE
-  @Ignore
   @Test
   public void processReconciliationCase7Withdraw() throws Exception {
 
@@ -151,19 +147,18 @@ public class Test_PrepaidMovementEJB10_procesReconciliation10 extends TestBaseUn
     CdtTransaction10 cdtTransaction = buildCdtTransaction10(prepaidUser, prepaidTopup);
     cdtTransaction = createCdtTransaction10(cdtTransaction);
 
-    PrepaidMovement10 prepaidMovement10 = buildPrepaidMovement10(prepaidUser, prepaidTopup, prepaidCard10, cdtTransaction);
+    PrepaidMovement10 prepaidMovement10 = buildPrepaidMovement11(prepaidUser, prepaidTopup, prepaidCard10, cdtTransaction);
     prepaidMovement10.setConSwitch(ReconciliationStatusType.NOT_RECONCILED);
     prepaidMovement10.setConTecnocom(ReconciliationStatusType.RECONCILED);
     prepaidMovement10.setEstado(PrepaidMovementStatus.ERROR_TIMEOUT_RESPONSE);
     prepaidMovement10.setTipoMovimiento(PrepaidMovementType.WITHDRAW);
-    prepaidMovement10 = createPrepaidMovement10(prepaidMovement10);
+    prepaidMovement10 = createPrepaidMovement11(prepaidMovement10);
 
-    getPrepaidMovementEJBBean10().processReconciliation(prepaidMovement10);
+    getPrepaidMovementEJBBean11().processReconciliation(prepaidMovement10);
 
     //TODO: no tiene asserts
   }
 
-  @Ignore
   @Test
   public void processReconciliation_SendTicketDevolucion() throws Exception {
     PrepaidUser10 prepaidUser = buildPrepaidUserv2();
@@ -272,7 +267,7 @@ public class Test_PrepaidMovementEJB10_procesReconciliation10 extends TestBaseUn
     Assert.assertEquals("Debe tener accion refund", ReconciliationActionType.REFUND, reconciliedMovement10.getActionType());
 
     // Debe tener estado de negocio refund
-    PrepaidMovement10 storedMovement = getPrepaidMovementEJBBean10().getPrepaidMovementById(prepaidMovement10.getId());
+    PrepaidMovement10 storedMovement = getPrepaidMovementEJBBean11().getPrepaidMovementById(prepaidMovement10.getId());
     Assert.assertEquals("El estado de negocio debe ser TO_REFUND", BusinessStatusType.TO_REFUND, storedMovement.getEstadoNegocio());
 
     Long movId = prepaidMovement10.getId();
