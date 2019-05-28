@@ -27,8 +27,8 @@ public class Test_PendingStoreWithdrawToAccounting extends TestBaseUnitAsync {
   @Before
   @After
   public void clearData() {
-    getDbUtils().getJdbcTemplate().execute(String.format("DELETE FROM %s.clearing", getSchemaAccounting()));
-    getDbUtils().getJdbcTemplate().execute(String.format("DELETE FROM %s.accounting", getSchemaAccounting()));
+    getDbUtils().getJdbcTemplate().execute(String.format("TRUNCATE TABLE %s.clearing CASCADE", getSchemaAccounting()));
+    getDbUtils().getJdbcTemplate().execute(String.format("TRUNCATE TABLE %s.accounting  CASCADE", getSchemaAccounting()));
   }
 
   @Test

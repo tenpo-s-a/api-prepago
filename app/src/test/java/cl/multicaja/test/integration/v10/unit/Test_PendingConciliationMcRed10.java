@@ -40,9 +40,9 @@ public class Test_PendingConciliationMcRed10 extends TestBaseUnitAsync {
   @Before
   public void prepareDates() {
     final String SCHEMA = ConfigUtils.getInstance().getProperty("schema");
-    DBUtils.getInstance().getJdbcTemplate().execute(String.format("TRUNCATE %s.prp_movimiento CASCADE", SCHEMA));
-    DBUtils.getInstance().getJdbcTemplate().execute(String.format("TRUNCATE %s.prp_movimiento_conciliado CASCADE", SCHEMA));
-    DBUtils.getInstance().getJdbcTemplate().execute(String.format("TRUNCATE %s.prp_movimiento_investigar CASCADE", SCHEMA));
+    DBUtils.getInstance().getJdbcTemplate().execute(String.format("TRUNCATE TABLE %s.prp_movimiento CASCADE", SCHEMA));
+    DBUtils.getInstance().getJdbcTemplate().execute(String.format("TRUNCATE TABLE %s.prp_movimiento_conciliado CASCADE", SCHEMA));
+    DBUtils.getInstance().getJdbcTemplate().execute(String.format("TRUNCATE TABLE %s.prp_movimiento_investigar CASCADE", SCHEMA));
 
   }
 

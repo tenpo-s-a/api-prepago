@@ -9,8 +9,8 @@ public class Test_PrepaidUserEJBBean11_updateUserFromTenpo extends TestBaseUnit 
 
   @Before
   public void clearData(){
-    getDbUtils().getJdbcTemplate().execute(String.format("delete from %s.%s",getSchema(),"prp_movimiento"));
-    getDbUtils().getJdbcTemplate().execute(String.format("delete from %s.%s",getSchema(),"prp_usuario"));
+    getDbUtils().getJdbcTemplate().execute(String.format("TRUNCATE TABLE %s.%s CASCADE",getSchema(),"prp_movimiento"));
+    getDbUtils().getJdbcTemplate().execute(String.format("TRUNCATE TABLE %s.%s CASCADE",getSchema(),"prp_usuario"));
   }
 
   @Test

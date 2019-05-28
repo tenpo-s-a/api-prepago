@@ -13,12 +13,12 @@ public class Test_PendingCurrencyModification10 extends TestBaseUnitAsync {
 
   @AfterClass
   public static void clearData() {
-    getDbUtils().getJdbcTemplate().update(String.format("truncate %s.prp_valor_usd", getSchema()));
+    getDbUtils().getJdbcTemplate().update(String.format("TRUNCATE TABLE %s.prp_valor_usd CASCADE", getSchema()));
   }
 
   @Before
   public void clearData2() {
-    getDbUtils().getJdbcTemplate().update(String.format("truncate %s.prp_valor_usd", getSchema()));
+    getDbUtils().getJdbcTemplate().update(String.format("TRUNCATE TABLE %s.prp_valor_usd CASCADE", getSchema()));
   }
 
   @Test

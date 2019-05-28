@@ -17,7 +17,7 @@ public class Test_AccountEJBBean10_findByUserIdAndAccountNumber extends TestBase
   @BeforeClass
   @AfterClass
   public static void clearData(){
-    getDbUtils().getJdbcTemplate().execute(String.format("truncate %s.prp_cuenta cascade", getSchema()));
+    getDbUtils().getJdbcTemplate().execute(String.format("TRUNCATE TABLE %s.prp_cuenta CASCADE", getSchema()));
   }
 
   @Test(expected = BadRequestException.class)
