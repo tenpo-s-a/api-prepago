@@ -20,8 +20,8 @@ public class Test_TecnocomReconciliationEJBBean10_buscaMovimientos extends TestB
   @AfterClass
   public static void beforeClass() {
     getDbUtils().getJdbcTemplate().execute(String.format("TRUNCATE TABLE %s.prp_movimientos_tecnocom CASCADE", getSchema()));
-    getDbUtils().getJdbcTemplate().execute(String.format("TRUNCATE TABLE from %s.prp_movimientos_tecnocom_hist CASCADE", getSchema()));
-    getDbUtils().getJdbcTemplate().execute(String.format("TRUNCATE TABLE from %s.prp_archivos_conciliacion CASCADE", getSchema()));
+    getDbUtils().getJdbcTemplate().execute(String.format("TRUNCATE TABLE %s.prp_movimientos_tecnocom_hist CASCADE", getSchema()));
+    getDbUtils().getJdbcTemplate().execute(String.format("TRUNCATE TABLE %s.prp_archivos_conciliacion CASCADE", getSchema()));
   }
 
   @Test

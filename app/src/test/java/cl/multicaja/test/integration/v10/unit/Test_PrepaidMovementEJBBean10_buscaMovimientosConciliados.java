@@ -14,7 +14,7 @@ public class Test_PrepaidMovementEJBBean10_buscaMovimientosConciliados extends T
   @After
   public void clearData() {
     getDbUtils().getJdbcTemplate().execute(String.format("TRUNCATE TABLE %s.prp_movimiento_conciliado CASCADE", getSchema()));
-    getDbUtils().getJdbcTemplate().execute(String.format("TRUNCATE TABLE %s.prp_movimiento", getSchema()));
+    getDbUtils().getJdbcTemplate().execute(String.format("TRUNCATE TABLE %s.prp_movimiento CASCADE", getSchema()));
   }
 
   @Test
