@@ -4,6 +4,7 @@ import cl.multicaja.prepaid.ejb.v10.PrepaidEJBBean10;
 import cl.multicaja.prepaid.ejb.v10.PrepaidUserEJBBean10;
 import cl.multicaja.prepaid.helpers.tenpo.TenpoApiCall;
 import cl.multicaja.prepaid.helpers.tenpo.model.Level;
+import cl.multicaja.prepaid.helpers.tenpo.model.Plan;
 import cl.multicaja.prepaid.helpers.tenpo.model.State;
 import cl.multicaja.prepaid.helpers.tenpo.model.TenpoUser;
 import cl.multicaja.prepaid.model.v10.PrepaidUser10;
@@ -73,7 +74,7 @@ public class Test_PrepaidEJBBean10_validateTempoUser {
     tenpoUser.setState(State.ACTIVE);
     tenpoUser.setId(UUID.randomUUID());
     tenpoUser.setUserId(UUID.randomUUID());
-
+    tenpoUser.setPlan(Plan.FREE);
     return tenpoUser;
   }
 
