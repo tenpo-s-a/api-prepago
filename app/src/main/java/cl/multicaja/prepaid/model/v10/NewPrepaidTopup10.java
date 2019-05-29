@@ -31,25 +31,23 @@ public class NewPrepaidTopup10 extends NewPrepaidBaseTransaction10 {
   @JsonIgnore
   public CdtTransactionType getCdtTransactionType() {
     //Si es N = 1 -> Solicitud primera carga
-    if(this.isFirstTopup()){
-      return CdtTransactionType.PRIMERA_CARGA;
-    }
-    else {
+    //if(this.isFirstTopup()){
+    //  return CdtTransactionType.PRIMERA_CARGA;
+    //} else {
       // es N = 2
       return TransactionOriginType.WEB.equals(this.getTransactionOriginType()) ? CdtTransactionType.CARGA_WEB : CdtTransactionType.CARGA_POS;
-    }
+    //}
   }
 
   @JsonIgnore
   public CdtTransactionType getCdtTransactionTypeConfirm() {
     //Si es N = 1 -> Solicitud primera carga
-    if(this.isFirstTopup()){
-      return CdtTransactionType.PRIMERA_CARGA_CONF;
-    }
-    else {
+    //if(this.isFirstTopup()){
+    //  return CdtTransactionType.PRIMERA_CARGA_CONF;
+    //} else {
       // es N = 2
       return TransactionOriginType.WEB.equals(this.getTransactionOriginType()) ? CdtTransactionType.CARGA_WEB_CONF : CdtTransactionType.CARGA_POS_CONF;
-    }
+    //}
   }
 
 }
