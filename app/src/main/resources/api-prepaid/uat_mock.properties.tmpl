@@ -1,5 +1,5 @@
 {{ $freshdesk_host := key "apps/prepaid/uat/output/freshdesk/host" }}
-{{ $freshdesk_username := key "apps/prepaid/uat/output/freshdesk/tenpoUser" }}
+{{ $freshdesk_username := key "apps/prepaid/uat/output/freshdesk/user" }}
 {{ $freshdesk_password := key "apps/prepaid/uat/output/freshdesk/password" }}
 
 {{ $activemq_username := key "apps/prepaid/uat/output/activemq/username" }}
@@ -64,7 +64,7 @@ sftp.mastercard.reconnectDelay=&reconnectDelay=30000
 #El valor debe estar en true, ya que sino deja pendiente el proceso de deploy en caso de un fallo
 sftp.mastercard.throwExceptionOnConnectFailed=&throwExceptionOnConnectFailed=true
 
-apis.tenpoUser.url=http://{{ $tenpo_users_host }}:8080/v1/tenpoUser-management/users
+apis.user.url=http://{{ $tenpo_users_host }}:8080/v1/user-management/users
 
 apis.fees.url=http://prepaid-fee-service/prepaid/processor/calculate_fee/transaction_type/%s/currency_code/%s/amount/%s
 
@@ -111,5 +111,5 @@ crypt.password=00multicajaPrepago2019X#
 #FreshDesk
 freshdesk.enabled=true
 freshdesk.endpoint=https://{{ $freshdesk_host }}
-freshdesk.tenpoUser={{ $freshdesk_username }}
+freshdesk.user={{ $freshdesk_username }}
 freshdesk.password={{ $freshdesk_password }}
