@@ -23,7 +23,6 @@ import java.util.Map;
 
 import static cl.multicaja.prepaid.async.v10.routes.ProductChangeRoute10.ERROR_PRODUCT_CHANGE_REQ;
 import static cl.multicaja.prepaid.async.v10.routes.ProductChangeRoute10.PENDING_PRODUCT_CHANGE_REQ;
-import static cl.multicaja.prepaid.model.v10.MailTemplates.*;
 
 /**
  * @author abarazarte
@@ -132,7 +131,7 @@ public class PendingProductChange10 extends BaseProcessor10 {
     getRoute().getPrepaidCardEJBBean11().publishCardEvent(user.getUserIdMc().toString(), accountUuid, prepaidCard.getId(), KafkaEventsRoute10.SEDA_CARD_CREATED_EVENT);
   }
   /*
-  private void sendSuccessMail(TenpoUser user, Boolean hasCard) throws Exception {
+  private void sendSuccessMail(User user, Boolean hasCard) throws Exception {
 
     Map<String, Object> templateData = new HashMap<>();
     templateData.put("user_name", user.getName());

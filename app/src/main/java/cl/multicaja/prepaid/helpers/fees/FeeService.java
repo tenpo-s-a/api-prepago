@@ -19,7 +19,7 @@ import java.util.concurrent.TimeoutException;
 
 public class FeeService {
 
-  private static final Log LOG = LogFactory.getLog(TenpoApiCall.class);
+  private static final Log LOG = LogFactory.getLog(FeeService.class);
 
   private static FeeService instance;
   private HttpUtils httpUtils;

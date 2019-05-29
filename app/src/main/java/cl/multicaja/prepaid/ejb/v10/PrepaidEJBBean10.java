@@ -1210,7 +1210,7 @@ public class PrepaidEJBBean10 extends PrepaidBaseEJBBean10 implements PrepaidEJB
     }
 
     // Obtener usuario Multicaja
-   //TenpoUser user = this.getUserMcById(headers, userIdMc);
+   //User user = this.getUserMcById(headers, userIdMc);
 
     // Obtener usuario prepago
     PrepaidUser10 prepaidUser = this.getPrepaidUserByUserIdMc(headers, userIdMc);
@@ -1823,7 +1823,7 @@ public class PrepaidEJBBean10 extends PrepaidBaseEJBBean10 implements PrepaidEJB
     }
 
     // Busco el usuario MC
-    //TenpoUser user = getUserClient().getUserById(headers, userIdMc);
+    //User user = getUserClient().getUserById(headers, userIdMc);
 
     /*if(user == null) {
       throw new NotFoundException(CLIENTE_NO_EXISTE);
@@ -1898,7 +1898,7 @@ public class PrepaidEJBBean10 extends PrepaidBaseEJBBean10 implements PrepaidEJB
     }
 
     // Obtener usuario Multicaja
-    //TenpoUser user = getUserMcById(headers, userIdMc);
+    //User user = getUserMcById(headers, userIdMc);
 
     // Obtener usuario prepago
     PrepaidUser10 prepaidUser = getPrepaidUserByUserIdMc(headers, userIdMc);
