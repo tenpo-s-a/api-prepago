@@ -13,20 +13,9 @@ spec:
   http:
   - match:
     - uri:
-        prefix: /prepaid/1.0/prepaid/dee63b13-d3cc-44cf-a86b-f6ec37330a11
+        prefix: /prepaid/1.0/prepaid/b63dc04a-d836-472e-9215-830eebea73b0
     rewrite:
-      uri: /api-prepaid-1.0/1.0/prepaid/dee63b13-d3cc-44cf-a86b-f6ec37330a11
-    route:
-      - destination:
-          host: api-prepaid
-          subset: v2
-          port:
-            number: 80
-  - match:
-    - uri:
-        prefix: /prepaid/1.0/prepaid/e6295417-91fd-4c6f-8774-48c2c53cd52a
-    rewrite:
-      uri: /api-prepaid-1.0/1.0/prepaid/e6295417-91fd-4c6f-8774-48c2c53cd52a
+      uri: /api-prepaid-1.0/1.0/prepaid/b63dc04a-d836-472e-9215-830eebea73b0
     route:
       - destination:
           host: api-prepaid
