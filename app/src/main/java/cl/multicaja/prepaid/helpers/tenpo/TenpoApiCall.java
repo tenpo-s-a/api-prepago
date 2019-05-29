@@ -1,9 +1,15 @@
 package cl.multicaja.prepaid.helpers.tenpo;
 
 
+import java.io.IOException;
+import java.util.Map;
 import java.util.UUID;
 import java.util.concurrent.TimeoutException;
 
+import cl.multicaja.prepaid.helpers.tenpo.model.TenpoUser;
+import com.fasterxml.jackson.databind.JsonNode;
+import com.fasterxml.jackson.databind.ObjectMapper;
+import com.fasterxml.jackson.databind.PropertyNamingStrategy;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 
@@ -16,19 +22,18 @@ import cl.multicaja.core.utils.http.HttpHeader;
 import cl.multicaja.core.utils.http.HttpResponse;
 import cl.multicaja.core.utils.http.HttpUtils;
 import cl.multicaja.core.utils.json.JsonMapper;
-import cl.multicaja.prepaid.helpers.tenpo.model.User;
 import cl.multicaja.prepaid.utils.EnvironmentUtil;
 
-public class ApiCall {
+public class TenpoApiCall {
 
-  private static final Log LOG = LogFactory.getLog(ApiCall.class);
+  private static final Log LOG = LogFactory.getLog(TenpoApiCall.class);
   private static final String TENPO_USER_API_URL = "TENPO_USER_API_URL";
   private static final int TIMEOUT = 15000;
   private static final HttpHeader[] DEFAULT_HTTP_HEADERS = {
     new HttpHeader("Content-Type", "application/json"),
   };
 
-  private static ApiCall instance;
+  private static TenpoApiCall instance;
   private static JsonMapper jsonMapper;
   private static ConfigUtils configUtils;
   
@@ -36,24 +41,25 @@ public class ApiCall {
   private String apiUrl = EnvironmentUtil.getVariable(TENPO_USER_API_URL, () -> 
     this.getConfigUtils().getProperty("apis.user.url"));
 
-  private ApiCall() {}
+  private TenpoApiCall() {}
 
   private JsonMapper getJsonMapper() {
     if(jsonMapper == null) {
-      synchronized(ApiCall.class) {
+      synchronized(TenpoApiCall.class) {
         if(jsonMapper == null) {
           jsonMapper = new JsonMapper();
+          jsonMapper.getMapper().setPropertyNamingStrategy(PropertyNamingStrategy.LOWER_CAMEL_CASE);
         }
       }
     }
     return jsonMapper;
   }
 
-  public static ApiCall getInstance() {
+  public static TenpoApiCall getInstance() {
     if(instance == null) {
-      synchronized(ApiCall.class) {
+      synchronized(TenpoApiCall.class) {
         if(instance == null) {
-          instance = new ApiCall();
+          instance = new TenpoApiCall();
         }
       }
     }
@@ -62,7 +68,7 @@ public class ApiCall {
 
   private ConfigUtils getConfigUtils() {
     if(configUtils == null) {
-      synchronized(ApiCall.class) {
+      synchronized(TenpoApiCall.class) {
         if(configUtils == null) {
           configUtils = new ConfigUtils("api-prepaid");
         }
@@ -82,13 +88,14 @@ public class ApiCall {
 
 
 
-  public User getUserById(UUID userId) throws TimeoutException, BaseException {
-    final String URL = String.format("%s/%s", getApiUrl(), userId);
+  public TenpoUser getUserById(UUID userId) throws TimeoutException, BaseException, IOException {
+    final String URL = String.format("%s/users/%s", getApiUrl(), userId);
     LOG.info("request route: " + URL);
     LOG.info("******** getUserById IN ********");
     HttpResponse httpResponse = httpUtils.execute(HttpUtils.ACTIONS.GET, null, TIMEOUT, TIMEOUT, URL, null, DEFAULT_HTTP_HEADERS);
     httpResponse.setJsonParser(getJsonMapper());
     LOG.info("response: " + httpResponse.getResp());
+
     if(HttpError.TIMEOUT_CONNECTION.equals(httpResponse.getHttpError()) || HttpError.TIMEOUT_RESPONSE.equals(httpResponse.getHttpError())) {
       throw new TimeoutException();
     }
@@ -98,7 +105,11 @@ public class ApiCall {
       case 200:
       case 201:
         LOG.info(String.format("******** %s OUT ********", "getUserById"));
-        return httpResponse.toObject(User.class);
+        Map<String , Object> data = httpResponse.toMap();
+        LOG.info(String.format("TenpoUser data: %s",data.get("user")));
+        ObjectMapper mapper = new ObjectMapper();
+        JsonNode userJson = mapper.readTree(httpResponse.getResp());
+        return  getJsonMapper().fromJson(userJson.get("user").toString(), TenpoUser.class);
       case 400:
         BadRequestException brex = httpResponse.toObject(BadRequestException.class);
         brex.setStatus(httpResponse.getStatus());

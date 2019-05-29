@@ -882,7 +882,7 @@ public class Test_withdrawUserBalance_v10 extends TestBaseUnitApi {
   @Test
   public void shouldReturn201_OnWithdraw_Reversed_DifferentAmount_POS() throws Exception {
    /* String password = RandomStringUtils.randomNumeric(4);
-    User user = registerUser();
+    TenpoUser user = registerUser();
     user = updateUserPassword(user, password);
 
     PrepaidUser10 prepaidUser = buildPrepaidUser10(user);
@@ -950,7 +950,7 @@ public class Test_withdrawUserBalance_v10 extends TestBaseUnitApi {
   @Test
   public void shouldReturn201_OnWithdraw_Reversed_DifferentAmount_WEB() throws Exception {
     /* String password = RandomStringUtils.randomNumeric(4);
-    User user = registerUser();
+    TenpoUser user = registerUser();
     user = updateUserPassword(user, password);
 
     PrepaidUser10 prepaidUser = buildPrepaidUser10(user);

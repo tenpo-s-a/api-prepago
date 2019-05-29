@@ -171,7 +171,7 @@ public class UserEvent extends BaseProcessor10 {
                 log.info(String.format("[processUserCreatedEvent]Account CLOSED SUCCESS with this values: %s ",data));
               }
           }else {
-            log.info(String.format("[processUserUpdatedEvent] User not exist %s",userResponse.getId()));
+            log.info(String.format("[processUserUpdatedEvent] TenpoUser not exist %s",userResponse.getId()));
           }
         }catch(Exception ex){
           ex.printStackTrace();

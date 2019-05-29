@@ -132,7 +132,7 @@ public class PendingProductChange10 extends BaseProcessor10 {
     getRoute().getPrepaidCardEJBBean11().publishCardEvent(user.getUserIdMc().toString(), accountUuid, prepaidCard.getId(), KafkaEventsRoute10.SEDA_CARD_CREATED_EVENT);
   }
   /*
-  private void sendSuccessMail(User user, Boolean hasCard) throws Exception {
+  private void sendSuccessMail(TenpoUser user, Boolean hasCard) throws Exception {
 
     Map<String, Object> templateData = new HashMap<>();
     templateData.put("user_name", user.getName());

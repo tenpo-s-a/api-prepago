@@ -11,7 +11,7 @@
     <properties>
       <property name="javax.persistence.jdbc.driver" value="org.postgresql.Driver" /> <!-- DB Driver -->
       <property name="javax.persistence.jdbc.url" value="jdbc:postgresql://localhost:5432/prepago_api_test" /> <!-- BD Mane -->
-      <property name="javax.persistence.jdbc.user" value="postgres" /> <!-- DB User -->
+      <property name="javax.persistence.jdbc.tenpoUser" value="postgres" /> <!-- DB TenpoUser -->
       <property name="javax.persistence.jdbc.password" value="postgres" /> <!-- DB Password -->
       <property name="hibernate.dialect" value="org.hibernate.dialect.PostgreSQL95Dialect"/> <!-- DB Dialect -->
       <property name="hibernate.hbm2ddl.auto" value="none" /> <!-- create / create-drop / update -->
@@ -27,7 +27,7 @@
     <properties>
       <property name="javax.persistence.jdbc.driver" value="org.postgresql.Driver" /> <!-- DB Driver -->
       <property name="javax.persistence.jdbc.url" value="jdbc:postgresql://localhost:5432/prepago_api_dev" /> <!-- BD Mane -->
-      <property name="javax.persistence.jdbc.user" value="postgres" /> <!-- DB User -->
+      <property name="javax.persistence.jdbc.tenpoUser" value="postgres" /> <!-- DB TenpoUser -->
       <property name="javax.persistence.jdbc.password" value="postgres" /> <!-- DB Password -->
       <property name="hibernate.dialect" value="org.hibernate.dialect.PostgreSQL95Dialect"/> <!-- DB Dialect -->
       <property name="hibernate.hbm2ddl.auto" value="none" /> <!-- create / create-drop / update -->
@@ -43,7 +43,7 @@
     <properties>
       <property name="javax.persistence.jdbc.driver" value="org.postgresql.Driver" /> <!-- DB Driver -->
       <property name="javax.persistence.jdbc.url" value="jdbc:postgresql://database:5432/prepago_ci" /> <!-- BD Mane -->
-      <property name="javax.persistence.jdbc.user" value="postgres" /> <!-- DB User -->
+      <property name="javax.persistence.jdbc.tenpoUser" value="postgres" /> <!-- DB TenpoUser -->
       <property name="javax.persistence.jdbc.password" value="postgres" /> <!-- DB Password -->
       <property name="hibernate.dialect" value="org.hibernate.dialect.PostgreSQL95Dialect"/> <!-- DB Dialect -->
       <property name="hibernate.hbm2ddl.auto" value="none" /> <!-- create / create-drop / update -->

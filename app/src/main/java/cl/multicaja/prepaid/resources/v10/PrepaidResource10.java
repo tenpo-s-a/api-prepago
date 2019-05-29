@@ -135,7 +135,7 @@ public final class PrepaidResource10 extends BaseResource {
   }
 
   /*
-    Prepaid User
+    Prepaid TenpoUser
    */
   @GET
   @Path("/{userId}")

@@ -10,6 +10,7 @@ import cl.multicaja.core.utils.http.HttpResponse;
 import cl.multicaja.core.utils.http.HttpUtils;
 import cl.multicaja.core.utils.json.JsonMapper;
 import cl.multicaja.prepaid.helpers.fees.model.Fee;
+import cl.multicaja.prepaid.helpers.tenpo.TenpoApiCall;
 import cl.multicaja.prepaid.model.v10.PrepaidMovementType;
 import cl.multicaja.tecnocom.constants.CodigoMoneda;
 import org.apache.commons.logging.Log;
@@ -18,7 +19,7 @@ import java.util.concurrent.TimeoutException;
 
 public class FeeService {
 
-  private static final Log LOG = LogFactory.getLog(cl.multicaja.prepaid.helpers.tenpo.ApiCall.class);
+  private static final Log LOG = LogFactory.getLog(TenpoApiCall.class);
 
   private static FeeService instance;
   private HttpUtils httpUtils;
