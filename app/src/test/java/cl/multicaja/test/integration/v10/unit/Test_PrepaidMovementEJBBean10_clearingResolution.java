@@ -5,15 +5,13 @@ import cl.multicaja.cdt.model.v10.CdtTransaction10;
 import cl.multicaja.core.utils.db.DBUtils;
 import cl.multicaja.prepaid.model.v10.*;
 import cl.multicaja.prepaid.model.v11.Account;
-import cl.multicaja.prepaid.model.v11.User;
 import cl.multicaja.test.integration.v10.async.Test_PrepaidMovementEJB10_clearingResolution;
+import cl.multicaja.test.integration.v10.async.Test_PrepaidMovementEJB10_clearingResolution.ResolutionPreparedVariables;
 import org.junit.AfterClass;
 import org.junit.Assert;
 import org.junit.BeforeClass;
 import org.junit.Test;
 import org.springframework.jdbc.core.RowMapper;
-import cl.multicaja.test.integration.v10.async.Test_PrepaidMovementEJB10_clearingResolution.ResolutionPreparedVariables;
-
 
 import java.math.BigDecimal;
 import java.util.List;

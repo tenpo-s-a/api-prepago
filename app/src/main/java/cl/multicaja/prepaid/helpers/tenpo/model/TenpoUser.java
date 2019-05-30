@@ -2,48 +2,44 @@ package cl.multicaja.prepaid.helpers.tenpo.model;
 
 import java.util.UUID;
 
+import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
+import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.annotation.JsonProperty;
 
 import cl.multicaja.core.model.BaseModel;
 
-
-public class User extends BaseModel {
+@JsonIgnoreProperties(ignoreUnknown = true)
+@JsonInclude(JsonInclude.Include.NON_NULL)
+public class TenpoUser extends BaseModel {
 
   private static final long serialVersionUID = 8399887731426206305L;
   private String address;
   private String apartment;
-  @JsonProperty("countryCode")
   private String countryCode;
   private String document;
-  @JsonProperty("documentNumber")
   private String documentNumber;
-  @JsonProperty("documentType")
   private String documentType;
   private String email;
-  @JsonProperty("firstName")
   private String firstName;
   private UUID id;
-  @JsonProperty("idIdentityProvider")
   private UUID idIdentityProvider;
-  @JsonProperty("lastName")
   private String lastName;
   private String phone;
-  @JsonProperty("qrKey")
   private String qrKey;
   private String street;
-  @JsonProperty("streetNumber")
   private String streetNumber;
-  @JsonProperty("userId")
   private UUID userId;
   private State state;
   private Level level;
   private Plan plan;
-  @JsonProperty("regionCode")
   private String regionCode;
   private String nationality;
   private String profession;
-  @JsonProperty("documentSeries")
-  private String documentSeries;
+  @JsonInclude(JsonInclude.Include.NON_NULL)
+  private Boolean agreeTermsConditions;
+  private String tributaryIdentifier;
+
+
 
   public String getNationality() {
     return nationality;
@@ -62,17 +58,6 @@ public class User extends BaseModel {
   public void setProfession(String profession) {
     this.profession = profession;
   }
-
-
-
-  public String getDocumentSeries() {
-    return documentSeries;
-  }
-
-  public void setDocumentSeries(String documentSeries) {
-    this.documentSeries = documentSeries;
-  }
-
 
 
   public String getRegionCode() {
@@ -245,4 +230,19 @@ public class User extends BaseModel {
     this.address = address;
   }
 
+  public String getTributaryIdentifier() {
+    return tributaryIdentifier;
+  }
+
+  public void setTributaryIdentifier(String tributaryIdentifier) {
+    this.tributaryIdentifier = tributaryIdentifier;
+  }
+
+  public Boolean getAgreeTermsConditions() {
+    return agreeTermsConditions;
+  }
+
+  public void setAgreeTermsConditions(Boolean agreeTermsConditions) {
+    this.agreeTermsConditions = agreeTermsConditions;
+  }
 }
