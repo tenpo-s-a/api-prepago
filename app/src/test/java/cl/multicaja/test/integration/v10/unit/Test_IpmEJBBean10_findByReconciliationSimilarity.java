@@ -2,13 +2,21 @@ package cl.multicaja.test.integration.v10.unit;
 
 import cl.multicaja.prepaid.ejb.v10.IpmEJBBean10;
 import cl.multicaja.prepaid.model.v10.IpmMovement10;
+import cl.multicaja.prepaid.model.v10.PrepaidCard10;
+import cl.multicaja.prepaid.model.v10.PrepaidUser10;
+import cl.multicaja.prepaid.model.v11.Account;
 import org.junit.After;
 import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;
 
+import java.io.File;
+import java.io.FileInputStream;
+import java.io.FileNotFoundException;
+import java.io.InputStream;
 import java.math.BigDecimal;
 import java.util.List;
+import java.util.Scanner;
 
 public class Test_IpmEJBBean10_findByReconciliationSimilarity extends TestBaseUnit {
 
@@ -16,6 +24,12 @@ public class Test_IpmEJBBean10_findByReconciliationSimilarity extends TestBaseUn
   @After
   public void clearData() {
     getDbUtils().getJdbcTemplate().execute(String.format("TRUNCATE %s.ipm_file_data CASCADE", getSchemaAccounting()));
+    getDbUtils().getJdbcTemplate().execute(String.format("TRUNCATE %s.prp_movimientos_tecnocom CASCADE", getSchema()));
+    getDbUtils().getJdbcTemplate().execute(String.format("TRUNCATE %s.prp_archivos_conciliacion CASCADE", getSchema()));
+    getDbUtils().getJdbcTemplate().execute(String.format("TRUNCATE %s.prp_tarjeta CASCADE", getSchema()));
+    getDbUtils().getJdbcTemplate().execute(String.format("TRUNCATE %s.prp_cuenta CASCADE", getSchema()));
+    getDbUtils().getJdbcTemplate().execute(String.format("TRUNCATE %s.prp_usuario CASCADE", getSchema()));
+    // todo: limpiar lista de cont liq y fees
   }
 
   @Test
@@ -71,6 +85,44 @@ public class Test_IpmEJBBean10_findByReconciliationSimilarity extends TestBaseUn
     // Debe encontrar el lowMovement (99.0%) como mas cercano y no conciliado
     compareIpmMovements(lowMovement, ipmMovement10);
   }
+
+  @Test
+  public void findWithRealData() throws Exception {
+    getDbUtils().getJdbcTemplate().execute("INSERT INTO prepago.prp_archivos_conciliacion " +
+      "(nombre_de_archivo, proceso, tipo, status, created_at, updated_at) " +
+      "VALUES('test.txt', 'TEST', 'TECNOCOM_FILE', 'OK', timezone('utc', now()), timezone('utc', now()));");
+
+    getDbUtils().getJdbcTemplate().execute("UPDATE prepago.prp_archivos_conciliacion SET id = 3 WHERE nombre_de_archivo = 'test.txt'");
+
+    // Insertar movimientos ipm
+    String resource = "src/test/resources/mastercard/files/ipm/ipm.toMakeMatch.SQL_INSERT";
+    String content = new Scanner(new File(resource)).useDelimiter("\\Z").next();
+    getDbUtils().getJdbcTemplate().execute(content);
+
+    // Insertar movimientos tecnocom
+    resource = "src/test/resources/tecnocom/files/PLJ61110.toMakeMatch.SQL_INSERT";
+    content = new Scanner(new File(resource)).useDelimiter("\\Z").next();
+    getDbUtils().getJdbcTemplate().execute(content);
+
+    // Crear user
+    PrepaidUser10 prepaidUser10= buildPrepaidUserv2();
+    prepaidUser10 = createPrepaidUserV2(prepaidUser10);
+
+    Account account = buildAccountFromTecnocom(prepaidUser10);
+    account = createAccount(account.getUserId(),account.getAccountNumber());
+
+    PrepaidCard10 card = buildPrepaidCardWithTecnocomData(prepaidUser10,account);
+    card = createPrepaidCardV2(card);
+
+    getDbUtils().getJdbcTemplate().execute(String.format("UPDATE %s.prp_movimientos_tecnocom SET pan = '%s', contrato = '%s'", getSchema(), card.getHashedPan(), account.getAccountNumber()));
+    getDbUtils().getJdbcTemplate().execute(String.format("UPDATE %s.ipm_file_data SET pan = '%s'", getSchemaAccounting(), card.getPan()));
+
+
+    getTecnocomReconciliationEJBBean10().processTecnocomTableData(3L);
+
+    System.out.println("el");
+  }
+
 
   public void compareIpmMovements(IpmMovement10 expected, IpmMovement10 found) {
     Assert.assertNotNull("Debe existir", found);
