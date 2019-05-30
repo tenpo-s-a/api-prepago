@@ -1339,7 +1339,7 @@ public class PrepaidEJBBean10 extends PrepaidBaseEJBBean10 implements PrepaidEJB
       throw new BadRequestException(PARAMETRO_FALTANTE_$VALUE).setData(new KeyValue("value", "feeList"));
     }
 
-    CodigoMoneda currencyCodeClp = CodigoMoneda.CHILE_CLP;
+    CodigoMoneda currencyCodeClp = CodigoMoneda.CLP;
 
     NewAmountAndCurrency10 total = new NewAmountAndCurrency10();
     total.setCurrencyCode(currencyCodeClp);
@@ -1385,7 +1385,7 @@ public class PrepaidEJBBean10 extends PrepaidBaseEJBBean10 implements PrepaidEJB
       throw new BadRequestException(PARAMETRO_FALTANTE_$VALUE).setData(new KeyValue("value", "merchant_code"));
     }
 
-    CodigoMoneda currencyCodeClp = CodigoMoneda.CHILE_CLP;
+    CodigoMoneda currencyCodeClp = CodigoMoneda.CLP;
 
     NewAmountAndCurrency10 total = new NewAmountAndCurrency10();
     total.setCurrencyCode(currencyCodeClp);
@@ -1516,7 +1516,7 @@ public class PrepaidEJBBean10 extends PrepaidBaseEJBBean10 implements PrepaidEJB
     prepaidMovement.setCodent(codent);
     prepaidMovement.setCentalta(""); //contrato (Numeros del 5 al 8) - se debe actualizar despues
     prepaidMovement.setCuenta(""); ////contrato (Numeros del 9 al 20) - se debe actualizar despues
-    prepaidMovement.setClamon(CodigoMoneda.CHILE_CLP);
+    prepaidMovement.setClamon(CodigoMoneda.CLP);
     prepaidMovement.setIndnorcor(IndicadorNormalCorrector.fromValue(tipoFactura.getCorrector())); //0-Normal
     prepaidMovement.setTipofac(tipoFactura);
     prepaidMovement.setFecfac(new Date(System.currentTimeMillis()));
@@ -1614,8 +1614,8 @@ public class PrepaidEJBBean10 extends PrepaidBaseEJBBean10 implements PrepaidEJB
     BigDecimal amountValue = simulationNew.getAmount().getValue();
 
     // Si el codigo de moneda es dolar estadounidense se calcula el el monto inicial en pesos
-    if(CodigoMoneda.USA_USD.equals(simulationNew.getAmount().getCurrencyCode())) {
-      simulationTopup.setEed(new NewAmountAndCurrency10(amountValue, CodigoMoneda.USA_USD));
+    if(CodigoMoneda.USD.equals(simulationNew.getAmount().getCurrencyCode())) {
+      simulationTopup.setEed(new NewAmountAndCurrency10(amountValue, CodigoMoneda.USD));
       amountValue = getCalculationsHelper().calculateAmountFromEed(amountValue);
       simulationTopup.setInitialAmount(new NewAmountAndCurrency10(amountValue));
     } else {
@@ -1660,7 +1660,7 @@ public class PrepaidEJBBean10 extends PrepaidBaseEJBBean10 implements PrepaidEJB
       NewAmountAndCurrency10 zero = new NewAmountAndCurrency10(BigDecimal.valueOf(0));
       simulationTopup.setFee(zero);
       simulationTopup.setPca(zero);
-      simulationTopup.setEed(new NewAmountAndCurrency10(BigDecimal.valueOf(0), CodigoMoneda.USA_USD));
+      simulationTopup.setEed(new NewAmountAndCurrency10(BigDecimal.valueOf(0), CodigoMoneda.USD));
       simulationTopup.setAmountToPay(zero);
       simulationTopup.setOpeningFee(zero);
       simulationTopup.setInitialAmount(zero);
@@ -1718,7 +1718,7 @@ public class PrepaidEJBBean10 extends PrepaidBaseEJBBean10 implements PrepaidEJB
     simulationTopup.setFee(new NewAmountAndCurrency10(fee));
     simulationTopup.setPca(new NewAmountAndCurrency10(getCalculationsHelper().calculatePca(amountValue)));
     if(simulationTopup.getEed() == null) {
-      simulationTopup.setEed(new NewAmountAndCurrency10(getCalculationsHelper().calculateEed(amountValue), CodigoMoneda.USA_USD));
+      simulationTopup.setEed(new NewAmountAndCurrency10(getCalculationsHelper().calculateEed(amountValue), CodigoMoneda.USD));
     }
     simulationTopup.setAmountToPay(new NewAmountAndCurrency10(calculatedAmount));
 
@@ -2111,52 +2111,52 @@ public class PrepaidEJBBean10 extends PrepaidBaseEJBBean10 implements PrepaidEJB
           transaction10.setGloss(transaction10.getInvoiceType().getDescription());
           transaction10.setType(transaction10.getInvoiceType().getType());
 
-          transaction10.setAmountPrimary(new NewAmountAndCurrency10(movimientosDTO.getImporte(),CodigoMoneda.CHILE_CLP));
+          transaction10.setAmountPrimary(new NewAmountAndCurrency10(movimientosDTO.getImporte(),CodigoMoneda.CLP));
           BigDecimal fee =  getNumberUtils().sumBigDecimal(movimientosDTO.getImpbrueco1(),movimientosDTO.getImpbrueco2(),
             movimientosDTO.getImpbrueco3(),movimientosDTO.getImpbrueco4());
           BigDecimal montoDescontar = getNumberUtils().sumBigDecimal(movimientosDTO.getImporte(),fee);
 
-          transaction10.setFinalAmount(new NewAmountAndCurrency10(montoDescontar,CodigoMoneda.CHILE_CLP));
-          transaction10.setFee(new NewAmountAndCurrency10(fee,CodigoMoneda.CHILE_CLP));
+          transaction10.setFinalAmount(new NewAmountAndCurrency10(montoDescontar,CodigoMoneda.CLP));
+          transaction10.setFee(new NewAmountAndCurrency10(fee,CodigoMoneda.CLP));
           break;
         }
         case ANULA_RETIRO_TRANSFERENCIA:{
           transaction10.setGloss(transaction10.getInvoiceType().getDescription());
           transaction10.setType(transaction10.getInvoiceType().getType());
 
-          transaction10.setAmountPrimary(new NewAmountAndCurrency10(movimientosDTO.getImporte(),CodigoMoneda.CHILE_CLP));
+          transaction10.setAmountPrimary(new NewAmountAndCurrency10(movimientosDTO.getImporte(),CodigoMoneda.CLP));
           BigDecimal fee =  getNumberUtils().sumBigDecimal(movimientosDTO.getImpbrueco1(),movimientosDTO.getImpbrueco2(),
             movimientosDTO.getImpbrueco3(),movimientosDTO.getImpbrueco4());
           BigDecimal montoDescontar = getNumberUtils().sumBigDecimal(movimientosDTO.getImporte(),fee);
 
-          transaction10.setFinalAmount(new NewAmountAndCurrency10(montoDescontar,CodigoMoneda.CHILE_CLP));
-          transaction10.setFee(new NewAmountAndCurrency10(fee,CodigoMoneda.CHILE_CLP));
+          transaction10.setFinalAmount(new NewAmountAndCurrency10(montoDescontar,CodigoMoneda.CLP));
+          transaction10.setFee(new NewAmountAndCurrency10(fee,CodigoMoneda.CLP));
           break;
         }
         case RETIRO_EFECTIVO_COMERCIO_MULTICJA:{
           transaction10.setGloss(transaction10.getInvoiceType().getDescription());
           transaction10.setType(transaction10.getInvoiceType().getType());
 
-          transaction10.setAmountPrimary(new NewAmountAndCurrency10(movimientosDTO.getImporte(),CodigoMoneda.CHILE_CLP));
+          transaction10.setAmountPrimary(new NewAmountAndCurrency10(movimientosDTO.getImporte(),CodigoMoneda.CLP));
           BigDecimal fee =  getNumberUtils().sumBigDecimal(movimientosDTO.getImpbrueco1(),movimientosDTO.getImpbrueco2(),
             movimientosDTO.getImpbrueco3(),movimientosDTO.getImpbrueco4());
           BigDecimal montoDescontar = getNumberUtils().sumBigDecimal(movimientosDTO.getImporte(),fee);
 
-          transaction10.setFinalAmount(new NewAmountAndCurrency10(montoDescontar,CodigoMoneda.CHILE_CLP));
-          transaction10.setFee(new NewAmountAndCurrency10(fee,CodigoMoneda.CHILE_CLP));
+          transaction10.setFinalAmount(new NewAmountAndCurrency10(montoDescontar,CodigoMoneda.CLP));
+          transaction10.setFee(new NewAmountAndCurrency10(fee,CodigoMoneda.CLP));
           break;
         }
         case ANULA_RETIRO_EFECTIVO_COMERCIO_MULTICJA:{
           transaction10.setGloss(transaction10.getInvoiceType().getDescription());
           transaction10.setType(transaction10.getInvoiceType().getType());
 
-          transaction10.setAmountPrimary(new NewAmountAndCurrency10(movimientosDTO.getImporte(),CodigoMoneda.CHILE_CLP));
+          transaction10.setAmountPrimary(new NewAmountAndCurrency10(movimientosDTO.getImporte(),CodigoMoneda.CLP));
           BigDecimal fee =  getNumberUtils().sumBigDecimal(movimientosDTO.getImpbrueco1(),movimientosDTO.getImpbrueco2(),
             movimientosDTO.getImpbrueco3(),movimientosDTO.getImpbrueco4());
           BigDecimal montoDescontar = getNumberUtils().sumBigDecimal(movimientosDTO.getImporte(),fee);
 
-          transaction10.setFinalAmount(new NewAmountAndCurrency10(montoDescontar,CodigoMoneda.CHILE_CLP));
-          transaction10.setFee(new NewAmountAndCurrency10(fee,CodigoMoneda.CHILE_CLP));
+          transaction10.setFinalAmount(new NewAmountAndCurrency10(montoDescontar,CodigoMoneda.CLP));
+          transaction10.setFee(new NewAmountAndCurrency10(fee,CodigoMoneda.CLP));
           break;
         }
         case REEMISION_DE_TARJETA:{
@@ -2186,14 +2186,14 @@ public class PrepaidEJBBean10 extends PrepaidBaseEJBBean10 implements PrepaidEJB
           BigDecimal fee =  getNumberUtils().sumBigDecimal(movimientosDTO.getImpbrueco1(),movimientosDTO.getImpbrueco2(),
             movimientosDTO.getImpbrueco3(),movimientosDTO.getImpbrueco4());
           BigDecimal montoPesos = getNumberUtils().sumBigDecimal(movimientosDTO.getImporte(),fee);
-          transaction10.setAmountPrimary(new NewAmountAndCurrency10(montoPesos,CodigoMoneda.CHILE_CLP));
+          transaction10.setAmountPrimary(new NewAmountAndCurrency10(montoPesos,CodigoMoneda.CLP));
 
           transaction10.setAmountSecondary(new NewAmountAndCurrency10(movimientosDTO.getImpdiv().setScale(2),movimientosDTO.getClamondiv()));
 
           BigDecimal bd = montoPesos.divide(movimientosDTO.getImpdiv(), 2, RoundingMode.HALF_UP);
-          transaction10.setUsdValue(new NewAmountAndCurrency10(bd,CodigoMoneda.USA_USD));
+          transaction10.setUsdValue(new NewAmountAndCurrency10(bd,CodigoMoneda.USD));
           transaction10.setCountry(movimientosDTO.getNompais());
-          transaction10.setFinalAmount(new NewAmountAndCurrency10(montoPesos,CodigoMoneda.CHILE_CLP));
+          transaction10.setFinalAmount(new NewAmountAndCurrency10(montoPesos,CodigoMoneda.CLP));
           break;
         }
         case ANULA_SUSCRIPCION_INTERNACIONAL:{
@@ -2203,12 +2203,12 @@ public class PrepaidEJBBean10 extends PrepaidBaseEJBBean10 implements PrepaidEJB
           BigDecimal fee =  getNumberUtils().sumBigDecimal(movimientosDTO.getImpbrueco1(),movimientosDTO.getImpbrueco2(),
             movimientosDTO.getImpbrueco3(),movimientosDTO.getImpbrueco4());
           BigDecimal montoPesos = getNumberUtils().sumBigDecimal(movimientosDTO.getImporte(),fee);
-          transaction10.setAmountPrimary(new NewAmountAndCurrency10(montoPesos,CodigoMoneda.CHILE_CLP));
+          transaction10.setAmountPrimary(new NewAmountAndCurrency10(montoPesos,CodigoMoneda.CLP));
 
           transaction10.setAmountSecondary(new NewAmountAndCurrency10(movimientosDTO.getImpdiv(),movimientosDTO.getClamondiv()));
           transaction10.setUsdValue(new NewAmountAndCurrency10(montoPesos.divide(movimientosDTO.getImpdiv(), 2, RoundingMode.HALF_DOWN)));
           transaction10.setCountry(movimientosDTO.getNompais());
-          transaction10.setFinalAmount(new NewAmountAndCurrency10(montoPesos,CodigoMoneda.CHILE_CLP));
+          transaction10.setFinalAmount(new NewAmountAndCurrency10(montoPesos,CodigoMoneda.CLP));
           break;
         }
         case COMPRA_INTERNACIONAL:{
@@ -2217,13 +2217,13 @@ public class PrepaidEJBBean10 extends PrepaidBaseEJBBean10 implements PrepaidEJB
           BigDecimal fee =  getNumberUtils().sumBigDecimal(movimientosDTO.getImpbrueco1(),movimientosDTO.getImpbrueco2(),
             movimientosDTO.getImpbrueco3(),movimientosDTO.getImpbrueco4());
           BigDecimal montoPesos = getNumberUtils().sumBigDecimal(movimientosDTO.getImporte(),fee);
-          transaction10.setAmountPrimary(new NewAmountAndCurrency10(montoPesos,CodigoMoneda.CHILE_CLP));
+          transaction10.setAmountPrimary(new NewAmountAndCurrency10(montoPesos,CodigoMoneda.CLP));
 
           transaction10.setAmountSecondary(new NewAmountAndCurrency10(movimientosDTO.getImpdiv().setScale(2,RoundingMode.HALF_DOWN),movimientosDTO.getClamondiv()));
           BigDecimal bd = montoPesos.divide(movimientosDTO.getImpdiv(), 2, RoundingMode.HALF_UP);
-          transaction10.setUsdValue(new NewAmountAndCurrency10(bd,CodigoMoneda.USA_USD));
+          transaction10.setUsdValue(new NewAmountAndCurrency10(bd,CodigoMoneda.USD));
           transaction10.setCountry(movimientosDTO.getNompais());
-          transaction10.setFinalAmount(new NewAmountAndCurrency10(montoPesos,CodigoMoneda.CHILE_CLP));
+          transaction10.setFinalAmount(new NewAmountAndCurrency10(montoPesos,CodigoMoneda.CLP));
           break;
         }
         case ANULA_COMPRA_INTERNACIONAL:{
@@ -2233,12 +2233,12 @@ public class PrepaidEJBBean10 extends PrepaidBaseEJBBean10 implements PrepaidEJB
           BigDecimal fee =  getNumberUtils().sumBigDecimal(movimientosDTO.getImpbrueco1(),movimientosDTO.getImpbrueco2(),
             movimientosDTO.getImpbrueco3(),movimientosDTO.getImpbrueco4());
           BigDecimal montoPesos = getNumberUtils().sumBigDecimal(movimientosDTO.getImporte(),fee);
-          transaction10.setAmountPrimary(new NewAmountAndCurrency10(montoPesos,CodigoMoneda.CHILE_CLP));
+          transaction10.setAmountPrimary(new NewAmountAndCurrency10(montoPesos,CodigoMoneda.CLP));
 
           transaction10.setAmountSecondary(new NewAmountAndCurrency10(movimientosDTO.getImpdiv(),movimientosDTO.getClamondiv()));
           transaction10.setUsdValue(new NewAmountAndCurrency10(montoPesos.divide(movimientosDTO.getImpdiv(), 2, RoundingMode.HALF_UP)));
           transaction10.setCountry(movimientosDTO.getNompais());
-          transaction10.setFinalAmount(new NewAmountAndCurrency10(montoPesos,CodigoMoneda.CHILE_CLP));
+          transaction10.setFinalAmount(new NewAmountAndCurrency10(montoPesos,CodigoMoneda.CLP));
           break;
         }
         case DEVOLUCION_COMPRA_INTERNACIONAL:{
@@ -2247,12 +2247,12 @@ public class PrepaidEJBBean10 extends PrepaidBaseEJBBean10 implements PrepaidEJB
           BigDecimal fee =  getNumberUtils().sumBigDecimal(movimientosDTO.getImpbrueco1(),movimientosDTO.getImpbrueco2(),
             movimientosDTO.getImpbrueco3(),movimientosDTO.getImpbrueco4());
           BigDecimal montoPesos = getNumberUtils().sumBigDecimal(movimientosDTO.getImporte(),fee);
-          transaction10.setAmountPrimary(new NewAmountAndCurrency10(montoPesos,CodigoMoneda.CHILE_CLP));
+          transaction10.setAmountPrimary(new NewAmountAndCurrency10(montoPesos,CodigoMoneda.CLP));
 
           transaction10.setAmountSecondary(new NewAmountAndCurrency10(movimientosDTO.getImpdiv(),movimientosDTO.getClamondiv()));
           transaction10.setUsdValue(new NewAmountAndCurrency10(montoPesos.divide(movimientosDTO.getImpdiv(), 2, RoundingMode.HALF_UP)));
           transaction10.setCountry(movimientosDTO.getNompais());
-          transaction10.setFinalAmount(new NewAmountAndCurrency10(montoPesos,CodigoMoneda.CHILE_CLP));
+          transaction10.setFinalAmount(new NewAmountAndCurrency10(montoPesos,CodigoMoneda.CLP));
           break;
         }
         case ANULA_DEVOLUCION_COMPRA_INTERNACIONAL:{
@@ -2262,12 +2262,12 @@ public class PrepaidEJBBean10 extends PrepaidBaseEJBBean10 implements PrepaidEJB
           BigDecimal fee =  getNumberUtils().sumBigDecimal(movimientosDTO.getImpbrueco1(),movimientosDTO.getImpbrueco2(),
             movimientosDTO.getImpbrueco3(),movimientosDTO.getImpbrueco4());
           BigDecimal montoPesos = getNumberUtils().sumBigDecimal(movimientosDTO.getImporte(),fee);
-          transaction10.setAmountPrimary(new NewAmountAndCurrency10(montoPesos,CodigoMoneda.CHILE_CLP));
+          transaction10.setAmountPrimary(new NewAmountAndCurrency10(montoPesos,CodigoMoneda.CLP));
 
           transaction10.setAmountSecondary(new NewAmountAndCurrency10(movimientosDTO.getImpdiv(),movimientosDTO.getClamondiv()));
           transaction10.setUsdValue(new NewAmountAndCurrency10(montoPesos.divide(movimientosDTO.getImpdiv(), 2, RoundingMode.HALF_UP)));
           transaction10.setCountry(movimientosDTO.getNompais());
-          transaction10.setFinalAmount(new NewAmountAndCurrency10(montoPesos,CodigoMoneda.CHILE_CLP));
+          transaction10.setFinalAmount(new NewAmountAndCurrency10(montoPesos,CodigoMoneda.CLP));
           break;
         }
       }
@@ -2325,15 +2325,15 @@ public class PrepaidEJBBean10 extends PrepaidBaseEJBBean10 implements PrepaidEJB
           transaction10.setType(transaction10.getInvoiceType().getType());
 
           BigDecimal montoPesos = autorizacionesDTO.getImptrn();
-          transaction10.setAmountPrimary(new NewAmountAndCurrency10(montoPesos,CodigoMoneda.CHILE_CLP));
+          transaction10.setAmountPrimary(new NewAmountAndCurrency10(montoPesos,CodigoMoneda.CLP));
 
           transaction10.setAmountSecondary(new NewAmountAndCurrency10(autorizacionesDTO.getImpdiv().setScale(2),
             CodigoMoneda.fromValue(autorizacionesDTO.getClamondiv())));
 
           BigDecimal bd = montoPesos.divide(autorizacionesDTO.getImpdiv(), 2, RoundingMode.HALF_UP);
-          transaction10.setUsdValue(new NewAmountAndCurrency10(bd,CodigoMoneda.USA_USD));
+          transaction10.setUsdValue(new NewAmountAndCurrency10(bd,CodigoMoneda.USD));
           transaction10.setCountry("");
-          transaction10.setFinalAmount(new NewAmountAndCurrency10(montoPesos,CodigoMoneda.CHILE_CLP));
+          transaction10.setFinalAmount(new NewAmountAndCurrency10(montoPesos,CodigoMoneda.CLP));
           break;
         }
         case ANULA_SUSCRIPCION_INTERNACIONAL:{
@@ -2341,15 +2341,15 @@ public class PrepaidEJBBean10 extends PrepaidBaseEJBBean10 implements PrepaidEJB
           transaction10.setType(transaction10.getInvoiceType().getType());
 
           BigDecimal montoPesos = autorizacionesDTO.getImptrn();
-          transaction10.setAmountPrimary(new NewAmountAndCurrency10(montoPesos,CodigoMoneda.CHILE_CLP));
+          transaction10.setAmountPrimary(new NewAmountAndCurrency10(montoPesos,CodigoMoneda.CLP));
 
           transaction10.setAmountSecondary(new NewAmountAndCurrency10(autorizacionesDTO.getImpdiv().setScale(2),
             CodigoMoneda.fromValue(autorizacionesDTO.getClamondiv())));
 
           BigDecimal bd = montoPesos.divide(autorizacionesDTO.getImpdiv(), 2, RoundingMode.HALF_UP);
-          transaction10.setUsdValue(new NewAmountAndCurrency10(bd,CodigoMoneda.USA_USD));
+          transaction10.setUsdValue(new NewAmountAndCurrency10(bd,CodigoMoneda.USD));
           transaction10.setCountry("");
-          transaction10.setFinalAmount(new NewAmountAndCurrency10(montoPesos,CodigoMoneda.CHILE_CLP));
+          transaction10.setFinalAmount(new NewAmountAndCurrency10(montoPesos,CodigoMoneda.CLP));
           break;
         }
         case COMPRA_INTERNACIONAL:{
@@ -2357,16 +2357,16 @@ public class PrepaidEJBBean10 extends PrepaidBaseEJBBean10 implements PrepaidEJB
           transaction10.setType(transaction10.getInvoiceType().getType());
 
           BigDecimal montoPesos = autorizacionesDTO.getImptrn();
-          transaction10.setAmountPrimary(new NewAmountAndCurrency10(montoPesos,CodigoMoneda.CHILE_CLP));
+          transaction10.setAmountPrimary(new NewAmountAndCurrency10(montoPesos,CodigoMoneda.CLP));
 
           transaction10.setAmountSecondary(new NewAmountAndCurrency10(
             autorizacionesDTO.getImpdiv().setScale(2,2),
             CodigoMoneda.fromValue(autorizacionesDTO.getClamondiv())));
 
           BigDecimal bd = montoPesos.divide(autorizacionesDTO.getImpdiv(), 2, RoundingMode.HALF_UP);
-          transaction10.setUsdValue(new NewAmountAndCurrency10(bd,CodigoMoneda.USA_USD));
+          transaction10.setUsdValue(new NewAmountAndCurrency10(bd,CodigoMoneda.USD));
           transaction10.setCountry("");
-          transaction10.setFinalAmount(new NewAmountAndCurrency10(montoPesos,CodigoMoneda.CHILE_CLP));
+          transaction10.setFinalAmount(new NewAmountAndCurrency10(montoPesos,CodigoMoneda.CLP));
           break;
         }
         case ANULA_COMPRA_INTERNACIONAL:{
@@ -2374,16 +2374,16 @@ public class PrepaidEJBBean10 extends PrepaidBaseEJBBean10 implements PrepaidEJB
           transaction10.setType(transaction10.getInvoiceType().getType());
 
           BigDecimal montoPesos = autorizacionesDTO.getImptrn();
-          transaction10.setAmountPrimary(new NewAmountAndCurrency10(montoPesos,CodigoMoneda.CHILE_CLP));
+          transaction10.setAmountPrimary(new NewAmountAndCurrency10(montoPesos,CodigoMoneda.CLP));
 
           transaction10.setAmountSecondary(new NewAmountAndCurrency10(
             autorizacionesDTO.getImpdiv().setScale(2,2),
             CodigoMoneda.fromValue(autorizacionesDTO.getClamondiv())));
 
           BigDecimal bd = montoPesos.divide(autorizacionesDTO.getImpdiv(), 2, RoundingMode.HALF_UP);
-          transaction10.setUsdValue(new NewAmountAndCurrency10(bd,CodigoMoneda.USA_USD));
+          transaction10.setUsdValue(new NewAmountAndCurrency10(bd,CodigoMoneda.USD));
           transaction10.setCountry("");
-          transaction10.setFinalAmount(new NewAmountAndCurrency10(montoPesos,CodigoMoneda.CHILE_CLP));
+          transaction10.setFinalAmount(new NewAmountAndCurrency10(montoPesos,CodigoMoneda.CLP));
           break;
         }
         case DEVOLUCION_COMPRA_INTERNACIONAL:{
@@ -2391,16 +2391,16 @@ public class PrepaidEJBBean10 extends PrepaidBaseEJBBean10 implements PrepaidEJB
           transaction10.setType(transaction10.getInvoiceType().getType());
 
           BigDecimal montoPesos = autorizacionesDTO.getImptrn();
-          transaction10.setAmountPrimary(new NewAmountAndCurrency10(montoPesos,CodigoMoneda.CHILE_CLP));
+          transaction10.setAmountPrimary(new NewAmountAndCurrency10(montoPesos,CodigoMoneda.CLP));
 
           transaction10.setAmountSecondary(new NewAmountAndCurrency10(
             autorizacionesDTO.getImpdiv().setScale(2,2),
             CodigoMoneda.fromValue(autorizacionesDTO.getClamondiv())));
 
           BigDecimal bd = montoPesos.divide(autorizacionesDTO.getImpdiv(), 2, RoundingMode.HALF_UP);
-          transaction10.setUsdValue(new NewAmountAndCurrency10(bd,CodigoMoneda.USA_USD));
+          transaction10.setUsdValue(new NewAmountAndCurrency10(bd,CodigoMoneda.USD));
           transaction10.setCountry("");
-          transaction10.setFinalAmount(new NewAmountAndCurrency10(montoPesos,CodigoMoneda.CHILE_CLP));
+          transaction10.setFinalAmount(new NewAmountAndCurrency10(montoPesos,CodigoMoneda.CLP));
           break;
         }
         case ANULA_DEVOLUCION_COMPRA_INTERNACIONAL:{
@@ -2408,16 +2408,16 @@ public class PrepaidEJBBean10 extends PrepaidBaseEJBBean10 implements PrepaidEJB
           transaction10.setType(transaction10.getInvoiceType().getType());
 
           BigDecimal montoPesos = autorizacionesDTO.getImptrn();
-          transaction10.setAmountPrimary(new NewAmountAndCurrency10(montoPesos,CodigoMoneda.CHILE_CLP));
+          transaction10.setAmountPrimary(new NewAmountAndCurrency10(montoPesos,CodigoMoneda.CLP));
 
           transaction10.setAmountSecondary(new NewAmountAndCurrency10(
             autorizacionesDTO.getImpdiv().setScale(2,2),
             CodigoMoneda.fromValue(autorizacionesDTO.getClamondiv())));
 
           BigDecimal bd = montoPesos.divide(autorizacionesDTO.getImpdiv(), 2, RoundingMode.HALF_UP);
-          transaction10.setUsdValue(new NewAmountAndCurrency10(bd,CodigoMoneda.USA_USD));
+          transaction10.setUsdValue(new NewAmountAndCurrency10(bd,CodigoMoneda.USD));
           transaction10.setCountry("");
-          transaction10.setFinalAmount(new NewAmountAndCurrency10(montoPesos,CodigoMoneda.CHILE_CLP));
+          transaction10.setFinalAmount(new NewAmountAndCurrency10(montoPesos,CodigoMoneda.CLP));
           break;
         }
       }

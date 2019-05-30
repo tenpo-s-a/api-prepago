@@ -215,7 +215,7 @@ public final class TestHelpersResource10 extends BaseResource {
     int selectedNomcomRed = RandomUtils.nextInt(0, nomcomreds.length - 1);
 
     // Agregar compra
-    InclusionMovimientosDTO inclusionMovimientosDTO = tecnocomService.inclusionMovimientos(prepaidCard10.getProcessorUserId(), prepaidCard10.getPan(), CodigoMoneda.CHILE_CLP, IndicadorNormalCorrector.NORMAL, TipoFactura.COMPRA_INTERNACIONAL, numreffac, gastoAleatorio, numaut, nomcomreds[selectedNomcomRed], nomcomreds[selectedNomcomRed], 123, CodigoMoneda.CHILE_CLP, gastoAleatorio);
+    InclusionMovimientosDTO inclusionMovimientosDTO = tecnocomService.inclusionMovimientos(prepaidCard10.getProcessorUserId(), prepaidCard10.getPan(), CodigoMoneda.CLP, IndicadorNormalCorrector.NORMAL, TipoFactura.COMPRA_INTERNACIONAL, numreffac, gastoAleatorio, numaut, nomcomreds[selectedNomcomRed], nomcomreds[selectedNomcomRed], 123, CodigoMoneda.CLP, gastoAleatorio);
     if (!inclusionMovimientosDTO.isRetornoExitoso()) {
       log.error("* Compra rechazada por Tecnocom * Error: " + inclusionMovimientosDTO.getRetorno());
       log.error(inclusionMovimientosDTO.getDescRetorno());
@@ -258,7 +258,7 @@ public final class TestHelpersResource10 extends BaseResource {
     InclusionMovimientosDTO inclusionAutorizacionesDTO = tecnocomService.inclusionAutorizaciones(
       prepaidCard10.getProcessorUserId(),
       prepaidCard10.getPan(),
-      CodigoMoneda.CHILE_CLP,
+      CodigoMoneda.CLP,
       IndicadorNormalCorrector.NORMAL,
       TipoFactura.COMPRA_INTERNACIONAL,
       numreffac,
@@ -267,7 +267,7 @@ public final class TestHelpersResource10 extends BaseResource {
       codcom,
       nomcomred,
       codact,
-      CodigoMoneda.CHILE_CLP,
+      CodigoMoneda.CLP,
       impliq
     );
 
@@ -503,7 +503,7 @@ public final class TestHelpersResource10 extends BaseResource {
 
     NewAmountAndCurrency10 newAmountAndCurrency = new NewAmountAndCurrency10();
     newAmountAndCurrency.setValue(new BigDecimal(3000));
-    newAmountAndCurrency.setCurrencyCode(CodigoMoneda.CHILE_CLP);
+    newAmountAndCurrency.setCurrencyCode(CodigoMoneda.CLP);
     prepaidTopup.setAmount(newAmountAndCurrency);
     prepaidTopup.setTotal(newAmountAndCurrency);
     prepaidTopup.setMerchantCategory(1);
@@ -587,7 +587,7 @@ public final class TestHelpersResource10 extends BaseResource {
     prepaidMovement.setCodent(codent);
     prepaidMovement.setCentalta(centalta); //contrato (Numeros del 5 al 8) - se debe actualizar despues
     prepaidMovement.setCuenta(cuenta); ////contrato (Numeros del 9 al 20) - se debe actualizar despues
-    prepaidMovement.setClamon(CodigoMoneda.CHILE_CLP);
+    prepaidMovement.setClamon(CodigoMoneda.CLP);
     prepaidMovement.setIndnorcor(IndicadorNormalCorrector.NORMAL); //0-Normal
     prepaidMovement.setTipofac(tipoFactura);
     prepaidMovement.setFecfac(new Date(System.currentTimeMillis()));
@@ -763,7 +763,7 @@ public final class TestHelpersResource10 extends BaseResource {
     prepaidMovement.setCodent(codent);
     prepaidMovement.setCentalta(""); //contrato (Numeros del 5 al 8) - se debe actualizar despues
     prepaidMovement.setCuenta(""); ////contrato (Numeros del 9 al 20) - se debe actualizar despues
-    prepaidMovement.setClamon(CodigoMoneda.CHILE_CLP);
+    prepaidMovement.setClamon(CodigoMoneda.CLP);
     prepaidMovement.setIndnorcor(IndicadorNormalCorrector.CORRECTORA); //0-Normal
     prepaidMovement.setTipofac(tipoFactura);
     prepaidMovement.setFecfac(new Date(System.currentTimeMillis()));

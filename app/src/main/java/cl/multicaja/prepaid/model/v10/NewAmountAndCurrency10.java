@@ -25,7 +25,7 @@ public class NewAmountAndCurrency10 extends BaseModel {
    */
   public NewAmountAndCurrency10(BigDecimal value) {
     this.value = value;
-    this.currencyCode = CodigoMoneda.CHILE_CLP;
+    this.currencyCode = CodigoMoneda.CLP;
   }
 
   public NewAmountAndCurrency10(BigDecimal value, CodigoMoneda currencyCode) {
