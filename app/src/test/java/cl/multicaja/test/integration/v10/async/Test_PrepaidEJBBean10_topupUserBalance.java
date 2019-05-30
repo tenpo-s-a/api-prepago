@@ -172,43 +172,19 @@ public class Test_PrepaidEJBBean10_topupUserBalance extends TestBaseUnitAsync {
 
     Assert.assertNotNull("Debe tener id", prepaidTopup.getId());
 
-    String messageId = prepaidTopup.getMessageId();
+    waitForAccountingToExist(prepaidTopup.getId());
 
-    if (CamelFactory.getInstance().isCamelRunning()) {
-      Assert.assertNotNull("Debe tener messageId dado que camel si se encuentra en ejecucion", messageId);
+    // Valida que existan las fees almacenadas en la tabla prp_movimiento_comision
+    List<PrepaidMovementFee10> prepaidMovementFee10List = getPrepaidMovementEJBBean11().getPrepaidMovementFeesByMovementId(prepaidTopup.getId());
+    Assert.assertEquals("Deben haber 2 fees asignadas a este movimiento", 2, prepaidMovementFee10List.size());
 
-      Queue qResp = camelFactory.createJMSQueue(PrepaidTopupRoute10.PENDING_TOPUP_RESP);
-      ExchangeData<PrepaidTopupData10> remoteTopup = (ExchangeData<PrepaidTopupData10>)camelFactory.createJMSMessenger().getMessage(qResp, messageId);
+    PrepaidMovementFee10 baseFee = prepaidMovementFee10List.stream().filter(f -> PrepaidMovementFeeType.TOPUP_POS_FEE.equals(f.getFeeType())).findAny().orElse(null);
+    Assert.assertNotNull("Debe existir una fee base", baseFee);
+    Assert.assertEquals("Debe tener valor 200", posFeeBaseAmount, baseFee.getAmount().setScale(0, RoundingMode.HALF_UP));
 
-      Assert.assertNotNull("Deberia existir un topup", remoteTopup);
-      Assert.assertNotNull("Deberia existir un topup", remoteTopup.getData());
-      Assert.assertEquals("Deberia ser igual al enviado al procesdo por camel", prepaidTopup.getId(), remoteTopup.getData().getPrepaidTopup10().getId());
-      Assert.assertEquals("Deberia ser igual al enviado al procesdo por camel", prepaidUser.getId(), remoteTopup.getData().getPrepaidUser10().getId());
-
-      Assert.assertNotNull("debe tener un objeto de cdt", remoteTopup.getData().getCdtTransaction10());
-      Assert.assertNotNull("debe tener un id de cdt", remoteTopup.getData().getCdtTransaction10().getExternalTransactionId());
-
-
-      Assert.assertNotNull("debe tener un objeto de prepaidMovement", remoteTopup.getData().getPrepaidMovement10());
-      Assert.assertTrue("debe tener un id de prepaidMovement", remoteTopup.getData().getPrepaidMovement10().getId() > 0);
-
-      waitForAccountingToExist(prepaidTopup.getId());
-
-      // Valida que existan las fees almacenadas en la tabla prp_movimiento_comision
-      List<PrepaidMovementFee10> prepaidMovementFee10List = getPrepaidMovementEJBBean11().getPrepaidMovementFeesByMovementId(prepaidTopup.getId());
-      Assert.assertEquals("Deben haber 2 fees asignadas a este movimiento", 2, prepaidMovementFee10List.size());
-
-      PrepaidMovementFee10 baseFee = prepaidMovementFee10List.stream().filter(f -> PrepaidMovementFeeType.TOPUP_POS_FEE.equals(f.getFeeType())).findAny().orElse(null);
-      Assert.assertNotNull("Debe existir una fee base", baseFee);
-      Assert.assertEquals("Debe tener valor 200", posFeeBaseAmount, baseFee.getAmount().setScale(0, RoundingMode.HALF_UP));
-
-      PrepaidMovementFee10 ivaFee = prepaidMovementFee10List.stream().filter(f -> PrepaidMovementFeeType.IVA.equals(f.getFeeType())).findAny().orElse(null);
-      Assert.assertNotNull("Debe existir una fee iva", ivaFee);
-      Assert.assertEquals("Debe tener valor 38", posFeeIvaAmount, ivaFee.getAmount().setScale(0, RoundingMode.HALF_UP));
-
-    } else {
-      Assert.assertNull("No debe tener messageId dado que camel no se encuentra en ejecucion", messageId);
-    }
+    PrepaidMovementFee10 ivaFee = prepaidMovementFee10List.stream().filter(f -> PrepaidMovementFeeType.IVA.equals(f.getFeeType())).findAny().orElse(null);
+    Assert.assertNotNull("Debe existir una fee iva", ivaFee);
+    Assert.assertEquals("Debe tener valor 38", posFeeIvaAmount, ivaFee.getAmount().setScale(0, RoundingMode.HALF_UP));
   }
 
   @Test
@@ -229,39 +205,17 @@ public class Test_PrepaidEJBBean10_topupUserBalance extends TestBaseUnitAsync {
 
     String messageId = prepaidTopup.getMessageId();
 
-    if (CamelFactory.getInstance().isCamelRunning()) {
-      Assert.assertNotNull("Debe tener messageId dado que camel si se encuentra en ejecucion", messageId);
+    // Valida que existan las fees almacenadas en la tabla prp_movimiento_comision
+    List<PrepaidMovementFee10> prepaidMovementFee10List = getPrepaidMovementEJBBean11().getPrepaidMovementFeesByMovementId(prepaidTopup.getId());
+    Assert.assertEquals("Deben haber 2 fees asignadas a este movimiento", 2, prepaidMovementFee10List.size());
 
-      Queue qResp = camelFactory.createJMSQueue(PrepaidTopupRoute10.PENDING_TOPUP_RESP);
-      ExchangeData<PrepaidTopupData10> remoteTopup = (ExchangeData<PrepaidTopupData10>)camelFactory.createJMSMessenger().getMessage(qResp, messageId);
+    PrepaidMovementFee10 baseFee = prepaidMovementFee10List.stream().filter(f -> PrepaidMovementFeeType.TOPUP_WEB_FEE.equals(f.getFeeType())).findAny().orElse(null);
+    Assert.assertNotNull("Debe existir una fee base", baseFee);
+    Assert.assertEquals("Debe tener valor 0", webFeeBaseAmount, baseFee.getAmount().setScale(0, RoundingMode.HALF_UP));
 
-      Assert.assertNotNull("Deberia existir un topup", remoteTopup);
-      Assert.assertNotNull("Deberia existir un topup", remoteTopup.getData());
-      Assert.assertEquals("Deberia ser igual al enviado al procesdo por camel", prepaidTopup.getId(), remoteTopup.getData().getPrepaidTopup10().getId());
-      Assert.assertEquals("Deberia ser igual al enviado al procesdo por camel", prepaidUser.getId(), remoteTopup.getData().getPrepaidUser10().getId());
-
-      Assert.assertNotNull("debe tener un objeto de cdt", remoteTopup.getData().getCdtTransaction10());
-      Assert.assertNotNull("debe tener un id de cdt", remoteTopup.getData().getCdtTransaction10().getExternalTransactionId());
-
-      Assert.assertNotNull("debe tener un objeto de prepaidMovement", remoteTopup.getData().getPrepaidMovement10());
-      Assert.assertTrue("debe tener un id de prepaidMovement", remoteTopup.getData().getPrepaidMovement10().getId() > 0);
-
-
-      // Valida que existan las fees almacenadas en la tabla prp_movimiento_comision
-      List<PrepaidMovementFee10> prepaidMovementFee10List = getPrepaidMovementEJBBean11().getPrepaidMovementFeesByMovementId(prepaidTopup.getId());
-      Assert.assertEquals("Deben haber 2 fees asignadas a este movimiento", 2, prepaidMovementFee10List.size());
-
-      PrepaidMovementFee10 baseFee = prepaidMovementFee10List.stream().filter(f -> PrepaidMovementFeeType.TOPUP_WEB_FEE.equals(f.getFeeType())).findAny().orElse(null);
-      Assert.assertNotNull("Debe existir una fee base", baseFee);
-      Assert.assertEquals("Debe tener valor 0", webFeeBaseAmount, baseFee.getAmount().setScale(0, RoundingMode.HALF_UP));
-
-      PrepaidMovementFee10 ivaFee = prepaidMovementFee10List.stream().filter(f -> PrepaidMovementFeeType.IVA.equals(f.getFeeType())).findAny().orElse(null);
-      Assert.assertNotNull("Debe existir una fee iva", ivaFee);
-      Assert.assertEquals("Debe tener valor 0", webFeeIvaAmount, ivaFee.getAmount().setScale(0, RoundingMode.HALF_UP));
-
-    } else {
-      Assert.assertNull("No debe tener messageId dado que camel no se encuentra en ejecucion", messageId);
-    }
+    PrepaidMovementFee10 ivaFee = prepaidMovementFee10List.stream().filter(f -> PrepaidMovementFeeType.IVA.equals(f.getFeeType())).findAny().orElse(null);
+    Assert.assertNotNull("Debe existir una fee iva", ivaFee);
+    Assert.assertEquals("Debe tener valor 0", webFeeIvaAmount, ivaFee.getAmount().setScale(0, RoundingMode.HALF_UP));
   }
 
   @Test
@@ -475,6 +429,7 @@ public class Test_PrepaidEJBBean10_topupUserBalance extends TestBaseUnitAsync {
     }
   }
 
+  @Ignore
   @Test
   public void topupUserBalance_not_ok_by_topup_max_level_1() throws Exception {
 
@@ -633,19 +588,6 @@ public class Test_PrepaidEJBBean10_topupUserBalance extends TestBaseUnitAsync {
 
     movements.put(topup.getId(), topup);
 
-    Queue qResp = camelFactory.createJMSQueue(PrepaidTopupRoute10.PENDING_TOPUP_RESP);
-    ExchangeData<PrepaidTopupData10> remoteTopup = (ExchangeData<PrepaidTopupData10>) camelFactory.createJMSMessenger().getMessage(qResp, resp.getMessageId());
-
-    Assert.assertNotNull("Deberia existir un topup", remoteTopup);
-    Assert.assertNotNull("Deberia existir un topup", remoteTopup.getData());
-
-    System.out.println("Steps: " + remoteTopup.getProcessorMetadata());
-
-    Assert.assertEquals("Deberia ser igual al enviado al procesdo por camel", resp.getId(), remoteTopup.getData().getPrepaidTopup10().getId());
-    Assert.assertEquals("Deberia ser igual al enviado al procesdo por camel", prepaidUser10.getId(), remoteTopup.getData().getPrepaidUser10().getId());
-
-    Thread.sleep(2000);
-
     // Segunda carga debe ser sincrona
     {
       NewPrepaidTopup10 secondTopup = buildNewPrepaidTopup10();
@@ -734,18 +676,6 @@ public class Test_PrepaidEJBBean10_topupUserBalance extends TestBaseUnitAsync {
     Assert.assertEquals("debe tener status -> PROCESS_OK", PrepaidMovementStatus.PROCESS_OK, topup.getEstado());
     Assert.assertEquals("debe tener estado negocio -> CONFIRMED", BusinessStatusType.CONFIRMED, topup.getEstadoNegocio());
 
-    Queue qResp = camelFactory.createJMSQueue(PrepaidTopupRoute10.PENDING_TOPUP_RESP);
-    ExchangeData<PrepaidTopupData10> remoteTopup = (ExchangeData<PrepaidTopupData10>) camelFactory.createJMSMessenger().getMessage(qResp, resp.getMessageId());
-
-    Assert.assertNotNull("Deberia existir un topup", remoteTopup);
-    Assert.assertNotNull("Deberia existir un topup", remoteTopup.getData());
-
-    System.out.println("Steps: " + remoteTopup.getProcessorMetadata());
-
-    Assert.assertEquals("Deberia ser igual al enviado al procesdo por camel", resp.getId(), remoteTopup.getData().getPrepaidTopup10().getId());
-    Assert.assertEquals("Deberia ser igual al enviado al procesdo por camel", prepaidUser10.getId(), remoteTopup.getData().getPrepaidUser10().getId());
-
-
     // Segunda carga debe ser sincrona
     {
       NewPrepaidTopup10 secondTopup = buildNewPrepaidTopup10();
@@ -833,17 +763,6 @@ public class Test_PrepaidEJBBean10_topupUserBalance extends TestBaseUnitAsync {
     Assert.assertNotNull("debe tener un movimiento", topup);
     Assert.assertEquals("debe tener status -> PROCESS_OK", PrepaidMovementStatus.PROCESS_OK, topup.getEstado());
     Assert.assertEquals("debe tener estado negocio -> CONFIRMED", BusinessStatusType.CONFIRMED, topup.getEstadoNegocio());
-
-    Queue qResp = camelFactory.createJMSQueue(PrepaidTopupRoute10.PENDING_TOPUP_RESP);
-    ExchangeData<PrepaidTopupData10> remoteTopup = (ExchangeData<PrepaidTopupData10>) camelFactory.createJMSMessenger().getMessage(qResp, resp.getMessageId());
-
-    Assert.assertNotNull("Deberia existir un topup", remoteTopup);
-    Assert.assertNotNull("Deberia existir un topup", remoteTopup.getData());
-
-    System.out.println("Steps: " + remoteTopup.getProcessorMetadata());
-
-    Assert.assertEquals("Deberia ser igual al enviado al procesdo por camel", resp.getId(), remoteTopup.getData().getPrepaidTopup10().getId());
-    Assert.assertEquals("Deberia ser igual al enviado al procesdo por camel", prepaidUser10.getId(), remoteTopup.getData().getPrepaidUser10().getId());
 
     tc.getTecnocomService().setAutomaticError(true);
     tc.getTecnocomService().setRetorno(CodigoRetorno._1020);
@@ -958,17 +877,6 @@ public class Test_PrepaidEJBBean10_topupUserBalance extends TestBaseUnitAsync {
     Assert.assertEquals("debe tener status -> PROCESS_OK", PrepaidMovementStatus.PROCESS_OK, topup.getEstado());
     Assert.assertEquals("debe tener estado negocio -> CONFIRMED", BusinessStatusType.CONFIRMED, topup.getEstadoNegocio());
 
-    Queue qResp = camelFactory.createJMSQueue(PrepaidTopupRoute10.PENDING_TOPUP_RESP);
-    ExchangeData<PrepaidTopupData10> remoteTopup = (ExchangeData<PrepaidTopupData10>) camelFactory.createJMSMessenger().getMessage(qResp, resp.getMessageId());
-
-    Assert.assertNotNull("Deberia existir un topup", remoteTopup);
-    Assert.assertNotNull("Deberia existir un topup", remoteTopup.getData());
-
-    System.out.println("Steps: " + remoteTopup.getProcessorMetadata());
-
-    Assert.assertEquals("Deberia ser igual al enviado al procesdo por camel", resp.getId(), remoteTopup.getData().getPrepaidTopup10().getId());
-    Assert.assertEquals("Deberia ser igual al enviado al procesdo por camel", prepaidUser10.getId(), remoteTopup.getData().getPrepaidUser10().getId());
-
     {
       NewPrepaidTopup10 secondTopup = buildNewPrepaidTopup10();
       secondTopup.setMerchantCode(NewPrepaidBaseTransaction10.WEB_MERCHANT_CODE);
@@ -1040,17 +948,6 @@ public class Test_PrepaidEJBBean10_topupUserBalance extends TestBaseUnitAsync {
     Assert.assertEquals("debe tener estado negocio -> CONFIRMED", BusinessStatusType.CONFIRMED, topup.getEstadoNegocio());
 
     movements.put(topup.getId(), topup);
-
-    Queue qResp = camelFactory.createJMSQueue(PrepaidTopupRoute10.PENDING_TOPUP_RESP);
-    ExchangeData<PrepaidTopupData10> remoteTopup = (ExchangeData<PrepaidTopupData10>) camelFactory.createJMSMessenger().getMessage(qResp, resp.getMessageId());
-
-    Assert.assertNotNull("Deberia existir un topup", remoteTopup);
-    Assert.assertNotNull("Deberia existir un topup", remoteTopup.getData());
-
-    System.out.println("Steps: " + remoteTopup.getProcessorMetadata());
-
-    Assert.assertEquals("Deberia ser igual al enviado al procesdo por camel", resp.getId(), remoteTopup.getData().getPrepaidTopup10().getId());
-    Assert.assertEquals("Deberia ser igual al enviado al procesdo por camel", prepaidUser10.getId(), remoteTopup.getData().getPrepaidUser10().getId());
 
     // Porque se espera si ya se sabe que el movimiento fue procesado
     //Thread.sleep(2000);
@@ -1158,18 +1055,6 @@ public class Test_PrepaidEJBBean10_topupUserBalance extends TestBaseUnitAsync {
     Assert.assertEquals("debe tener status -> PROCESS_OK", PrepaidMovementStatus.PROCESS_OK, topup.getEstado());
     Assert.assertEquals("debe tener estado negocio -> CONFIRMED", BusinessStatusType.CONFIRMED, topup.getEstadoNegocio());
 
-    Queue qResp = camelFactory.createJMSQueue(PrepaidTopupRoute10.PENDING_TOPUP_RESP);
-    ExchangeData<PrepaidTopupData10> remoteTopup = (ExchangeData<PrepaidTopupData10>) camelFactory.createJMSMessenger().getMessage(qResp, resp.getMessageId());
-
-    Assert.assertNotNull("Deberia existir un topup", remoteTopup);
-    Assert.assertNotNull("Deberia existir un topup", remoteTopup.getData());
-
-    System.out.println("Steps: " + remoteTopup.getProcessorMetadata());
-
-    Assert.assertEquals("Deberia ser igual al enviado al procesdo por camel", resp.getId(), remoteTopup.getData().getPrepaidTopup10().getId());
-    Assert.assertEquals("Deberia ser igual al enviado al procesdo por camel", prepaidUser10.getId(), remoteTopup.getData().getPrepaidUser10().getId());
-
-
     // Segunda carga debe ser sincrona
     {
       NewPrepaidTopup10 secondTopup = buildNewPrepaidTopup10();
@@ -1272,17 +1157,6 @@ public class Test_PrepaidEJBBean10_topupUserBalance extends TestBaseUnitAsync {
     Assert.assertNotNull("debe tener un movimiento", topup);
     Assert.assertEquals("debe tener status -> PROCESS_OK", PrepaidMovementStatus.PROCESS_OK, topup.getEstado());
     Assert.assertEquals("debe tener estado negocio -> CONFIRMED", BusinessStatusType.CONFIRMED, topup.getEstadoNegocio());
-
-    Queue qResp = camelFactory.createJMSQueue(PrepaidTopupRoute10.PENDING_TOPUP_RESP);
-    ExchangeData<PrepaidTopupData10> remoteTopup = (ExchangeData<PrepaidTopupData10>) camelFactory.createJMSMessenger().getMessage(qResp, resp.getMessageId());
-
-    Assert.assertNotNull("Deberia existir un topup", remoteTopup);
-    Assert.assertNotNull("Deberia existir un topup", remoteTopup.getData());
-
-    System.out.println("Steps: " + remoteTopup.getProcessorMetadata());
-
-    Assert.assertEquals("Deberia ser igual al enviado al procesdo por camel", resp.getId(), remoteTopup.getData().getPrepaidTopup10().getId());
-    Assert.assertEquals("Deberia ser igual al enviado al procesdo por camel", prepaidUser10.getId(), remoteTopup.getData().getPrepaidUser10().getId());
 
     tc.getTecnocomService().setAutomaticError(true);
     tc.getTecnocomService().setRetorno(CodigoRetorno._1020);
@@ -1410,17 +1284,6 @@ public class Test_PrepaidEJBBean10_topupUserBalance extends TestBaseUnitAsync {
     Assert.assertNotNull("debe tener un movimiento", topup);
     Assert.assertEquals("debe tener status -> PROCESS_OK", PrepaidMovementStatus.PROCESS_OK, topup.getEstado());
     Assert.assertEquals("debe tener estado negocio -> CONFIRMED", BusinessStatusType.CONFIRMED, topup.getEstadoNegocio());
-
-    Queue qResp = camelFactory.createJMSQueue(PrepaidTopupRoute10.PENDING_TOPUP_RESP);
-    ExchangeData<PrepaidTopupData10> remoteTopup = (ExchangeData<PrepaidTopupData10>) camelFactory.createJMSMessenger().getMessage(qResp, resp.getMessageId());
-
-    Assert.assertNotNull("Deberia existir un topup", remoteTopup);
-    Assert.assertNotNull("Deberia existir un topup", remoteTopup.getData());
-
-    System.out.println("Steps: " + remoteTopup.getProcessorMetadata());
-
-    Assert.assertEquals("Deberia ser igual al enviado al procesdo por camel", resp.getId(), remoteTopup.getData().getPrepaidTopup10().getId());
-    Assert.assertEquals("Deberia ser igual al enviado al procesdo por camel", prepaidUser10.getId(), remoteTopup.getData().getPrepaidUser10().getId());
 
     {
       NewPrepaidTopup10 secondTopup = buildNewPrepaidTopup10();

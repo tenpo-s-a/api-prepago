@@ -438,7 +438,7 @@ public class PrepaidEJBBean10 extends PrepaidBaseEJBBean10 implements PrepaidEJB
     Account account = getAccountEJBBean10().findByUserId(user.getId());
 
     //TODO: si no hay cuenta, se realiza el alta cliente
-    if(account != null) {
+    if(account == null) {
       try {
         log.info(String.format("[topupUserBalance] Realizando alta de cliente %s", user.getDocumentNumber()));
 
