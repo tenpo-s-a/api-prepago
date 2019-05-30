@@ -238,6 +238,14 @@ public class TecnocomReconciliationEJBBean10 extends PrepaidBaseEJBBean10 implem
       this.insertAutorization(fileId, autoList);
     }
 
+    // Se procesan los conciliados
+    List<MovimientoTecnocom10> reconciledList = this.buscaMovimientosTecnocom(fileId, OriginOpeType.CONC_ORIGIN);
+
+    if(autoList != null){
+      // TRX Insertadas x Servicio.
+      this.insertAutorization(fileId, reconciledList);
+    }
+
     //Elimina Trx de la tabla de Tecnocom.
     this.eliminaMovimientosTecnocom(fileId);
 
@@ -730,12 +738,13 @@ public class TecnocomReconciliationEJBBean10 extends PrepaidBaseEJBBean10 implem
     prepaidMovement.setClamon(batchTrx.getImpFac().getCurrencyCode());
     prepaidMovement.setIndnorcor(IndicadorNormalCorrector.fromValue(batchTrx.getIndNorCor()));
     prepaidMovement.setTipofac(TipoFactura.valueOfEnumByCodeAndCorrector(batchTrx.getTipoFac().getCode(), batchTrx.getIndNorCor()));
-    prepaidMovement.setFecfac(java.util.Date.from(batchTrx.getFecFac().atStartOfDay(ZoneId.of("America/Santiago")).toInstant()));
+    Instant utcInstant = batchTrx.getFecFac().atStartOfDay().atZone(ZoneId.of("America/Santiago")).toInstant();
+    prepaidMovement.setFecfac(java.util.Date.from(utcInstant));
     prepaidMovement.setNumreffac(""); //se debe actualizar despues, es el id de PrepaidMovement10
     prepaidMovement.setPan(pan);
     prepaidMovement.setClamondiv(batchTrx.getImpDiv().getCurrencyCode().getValue());
     prepaidMovement.setImpdiv(batchTrx.getImpDiv().getValue());
-    prepaidMovement.setImpfac(batchTrx.getImpautcon().getValue());
+    prepaidMovement.setImpfac(batchTrx.getImpFac().getValue());
     prepaidMovement.setCmbapli(batchTrx.getCmbApli().intValue());
     prepaidMovement.setNumaut(batchTrx.getNumAut());
     prepaidMovement.setIndproaje(IndicadorPropiaAjena.AJENA);
@@ -939,7 +948,13 @@ public class TecnocomReconciliationEJBBean10 extends PrepaidBaseEJBBean10 implem
       movimientoTecnocom10.setImpLiq(impLiq);
 
       movimientoTecnocom10.setIndNorCor(rs.getInt("indnorcor"));
-      movimientoTecnocom10.setTipoFac(TipoFactura.valueOfEnumByCodeAndCorrector(rs.getInt("tipofac"), movimientoTecnocom10.getIndNorCor()));
+      // Borrame
+      TipoFactura tipofac = TipoFactura.valueOfEnumByCodeAndCorrector(rs.getInt("tipofac"), movimientoTecnocom10.getIndNorCor());
+      if (tipofac == null) {
+        log.error(String.format("No se encontro tipo factura: %s, indnorcor: %s", rs.getInt("tipofac"), movimientoTecnocom10.getIndNorCor()));
+        tipofac = TipoFactura.valueOfEnumByCodeAndCorrector(TipoFactura.COMPRA_INTERNACIONAL.getCode(), movimientoTecnocom10.getIndNorCor());
+      }
+      movimientoTecnocom10.setTipoFac(tipofac);
 
       movimientoTecnocom10.setFecFac(rs.getDate("fecfac").toLocalDate());
       movimientoTecnocom10.setNumRefFac(rs.getString("numreffac"));

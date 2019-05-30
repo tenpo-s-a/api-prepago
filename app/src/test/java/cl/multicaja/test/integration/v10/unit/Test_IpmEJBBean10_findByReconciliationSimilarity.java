@@ -90,7 +90,7 @@ public class Test_IpmEJBBean10_findByReconciliationSimilarity extends TestBaseUn
   public void findWithRealData() throws Exception {
     getDbUtils().getJdbcTemplate().execute("INSERT INTO prepago.prp_archivos_conciliacion " +
       "(nombre_de_archivo, proceso, tipo, status, created_at, updated_at) " +
-      "VALUES('test.txt', 'TEST', 'TECNOCOM_FILE', 'OK', timezone('utc', now()), timezone('utc', now()));");
+      "VALUES('test.txt', 'TECNOCOM', 'TECNOCOM_FILE', 'OK', timezone('utc', now()), timezone('utc', now()));");
 
     getDbUtils().getJdbcTemplate().execute("UPDATE prepago.prp_archivos_conciliacion SET id = 3 WHERE nombre_de_archivo = 'test.txt'");
 
