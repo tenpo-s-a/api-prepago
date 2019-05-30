@@ -329,6 +329,7 @@ public class MovimientoTecnocom10 implements Serializable {
 
   public PrepaidMovementType getMovementType() throws BadRequestException {
     PrepaidMovementType type = null;
+
     switch (this.getTipoFac()) {
       case CARGA_EFECTIVO_COMERCIO_MULTICAJA:
       case ANULA_CARGA_EFECTIVO_COMERCIO_MULTICAJA:

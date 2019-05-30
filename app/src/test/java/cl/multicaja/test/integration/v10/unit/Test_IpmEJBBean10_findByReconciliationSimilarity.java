@@ -1,6 +1,11 @@
 package cl.multicaja.test.integration.v10.unit;
 
+import cl.multicaja.core.exceptions.BaseException;
 import cl.multicaja.prepaid.ejb.v10.IpmEJBBean10;
+import cl.multicaja.prepaid.helpers.fees.FeeService;
+import cl.multicaja.prepaid.helpers.fees.model.Charge;
+import cl.multicaja.prepaid.helpers.fees.model.ChargeType;
+import cl.multicaja.prepaid.helpers.fees.model.Fee;
 import cl.multicaja.prepaid.model.v10.IpmMovement10;
 import cl.multicaja.prepaid.model.v10.PrepaidCard10;
 import cl.multicaja.prepaid.model.v10.PrepaidUser10;
@@ -9,14 +14,18 @@ import org.junit.After;
 import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;
+import org.mockito.Mockito;
 
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileNotFoundException;
 import java.io.InputStream;
 import java.math.BigDecimal;
+import java.math.RoundingMode;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Scanner;
+import java.util.concurrent.TimeoutException;
 
 public class Test_IpmEJBBean10_findByReconciliationSimilarity extends TestBaseUnit {
 
@@ -117,10 +126,32 @@ public class Test_IpmEJBBean10_findByReconciliationSimilarity extends TestBaseUn
     getDbUtils().getJdbcTemplate().execute(String.format("UPDATE %s.prp_movimientos_tecnocom SET pan = '%s', contrato = '%s'", getSchema(), card.getHashedPan(), account.getAccountNumber()));
     getDbUtils().getJdbcTemplate().execute(String.format("UPDATE %s.ipm_file_data SET pan = '%s'", getSchemaAccounting(), card.getPan()));
 
+    // Prepara un mock de fees muy inutil
+    prepareCalculateFeesMock();
 
     getTecnocomReconciliationEJBBean10().processTecnocomTableData(3L);
 
     System.out.println("el");
+  }
+
+  private void prepareCalculateFeesMock() throws TimeoutException, BaseException {
+    // Prepara un mock del servicio de fees
+    Charge prepaidCharge = new Charge();
+    prepaidCharge.setChargeType(ChargeType.COMMISSION);
+    prepaidCharge.setAmount(10L);
+
+    List<Charge> chargesList = new ArrayList<>();
+    chargesList.add(prepaidCharge);
+
+    // Prepara una fee esperada para que devuelva el servicio
+    Fee returnedFee = new Fee();
+    returnedFee.setTotal(10L);
+    returnedFee.setCharges(chargesList);
+
+    // Setea que calculaFees() como mock para que devuelva la fee esperada
+    FeeService mockFeeService = Mockito.mock(FeeService.class);
+    Mockito.doReturn(returnedFee).when(mockFeeService).calculateFees(Mockito.any(), Mockito.any(), Mockito.any());
+    getTecnocomReconciliationEJBBean10().setFeeService(mockFeeService);
   }
 
 
