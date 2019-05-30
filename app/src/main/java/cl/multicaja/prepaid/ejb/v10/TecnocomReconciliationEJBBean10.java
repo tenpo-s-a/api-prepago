@@ -419,7 +419,11 @@ public class TecnocomReconciliationEJBBean10 extends PrepaidBaseEJBBean10 implem
   private void processReconciliation(Long fileId, List<MovimientoTecnocom10> trxs) {
 
     for (MovimientoTecnocom10 trx : trxs) {
-      try{
+      try {
+        // Si el tipo de factura es desconocido, se ignora este registro
+        if (TipoFactura.UNKNOWN.equals(trx.getTipoFac())) {
+          continue;
+        }
 
         //Se obtiene el pan
         String hashedPan = trx.getPan();
@@ -497,6 +501,10 @@ public class TecnocomReconciliationEJBBean10 extends PrepaidBaseEJBBean10 implem
     log.info("INSERT AUT IN");
     for (MovimientoTecnocom10 trx : trxs) {
       try {
+        // Si el tipo de factura es desconocido, se ignora este registro
+        if (TipoFactura.UNKNOWN.equals(trx.getTipoFac())) {
+          continue;
+        }
 
         //Se obtiene el hashed pan
         String hashedPan = trx.getPan();
@@ -948,13 +956,7 @@ public class TecnocomReconciliationEJBBean10 extends PrepaidBaseEJBBean10 implem
       movimientoTecnocom10.setImpLiq(impLiq);
 
       movimientoTecnocom10.setIndNorCor(rs.getInt("indnorcor"));
-      // Borrame
-      TipoFactura tipofac = TipoFactura.valueOfEnumByCodeAndCorrector(rs.getInt("tipofac"), movimientoTecnocom10.getIndNorCor());
-      if (tipofac == null) {
-        log.error(String.format("No se encontro tipo factura: %s, indnorcor: %s", rs.getInt("tipofac"), movimientoTecnocom10.getIndNorCor()));
-        tipofac = TipoFactura.valueOfEnumByCodeAndCorrector(TipoFactura.COMPRA_INTERNACIONAL.getCode(), movimientoTecnocom10.getIndNorCor());
-      }
-      movimientoTecnocom10.setTipoFac(tipofac);
+      movimientoTecnocom10.setTipoFac(TipoFactura.valueOfEnumByCodeAndCorrector(rs.getInt("tipofac"), movimientoTecnocom10.getIndNorCor()));
 
       movimientoTecnocom10.setFecFac(rs.getDate("fecfac").toLocalDate());
       movimientoTecnocom10.setNumRefFac(rs.getString("numreffac"));
