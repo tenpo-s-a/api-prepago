@@ -64,23 +64,6 @@ public class PrepaidEJBBean10 extends PrepaidBaseEJBBean10 implements PrepaidEJB
   private static Log log = LogFactory.getLog(PrepaidEJBBean10.class);
   private static final BigDecimal NEGATIVE = new BigDecimal(-1);
   private static final BigDecimal ONEHUNDRED = new BigDecimal(100);
-  private static String APP_NAME = "prepaid.appname";
-  private static String TERMS_AND_CONDITIONS = "TERMS_AND_CONDITIONS";
-
-  /**
-   * Foto frontal de la CI del usuario
-   */
-  private static final String USER_ID_FRONT = "USER_ID_FRONT";
-
-  /**
-   * Foto posterior de la CI del usuario
-   */
-  private static final String USER_ID_BACK = "USER_ID_BACK";
-
-  /**
-   * Selfie del usuario con CI
-   */
-  private static final String USER_SELFIE= "USER_SELFIE";
 
   @Inject
   private KafkaEventDelegate10 kafkaEventDelegate10;
@@ -336,7 +319,7 @@ public class PrepaidEJBBean10 extends PrepaidBaseEJBBean10 implements PrepaidEJB
     // 1- La API deberá ir a consultar el estado de la tarjeta a cargar. Para esto se deberá ir a la BBDD de prepago a la tabla tarjetas y consultar el estado.
     // 2- Si el estado es fecha expirada o bloqueada dura se deberá responder un mensaje de error al switch o POS Tarjeta inválida
     // 3- Para cualquier otro estado de la tarjeta, se deberá seguir el proceso
-    PrepaidCard10 prepaidCard = getPrepaidCardEJB11().getByUserIdAndStatus(null, user.getId(),PrepaidCardStatus.ACTIVE,PrepaidCardStatus.LOCKED);
+    PrepaidCard10 prepaidCard = getPrepaidCardEJB11().getByUserIdAndStatus(null, user.getId(), PrepaidCardStatus.PENDING, PrepaidCardStatus.ACTIVE, PrepaidCardStatus.LOCKED);
     if (prepaidCard == null) {
       prepaidCard = getPrepaidCardEJB11().getByUserIdAndStatus(null, user.getId(),PrepaidCardStatus.LOCKED_HARD,PrepaidCardStatus.EXPIRED);
       if(prepaidCard != null){
@@ -365,7 +348,7 @@ public class PrepaidEJBBean10 extends PrepaidBaseEJBBean10 implements PrepaidEJB
     cdtTransaction.setAmount(topupRequest.getAmount().getValue().subtract(prepaidTopup.getFee().getValue()));
     cdtTransaction.setTransactionType(topupRequest.getCdtTransactionType());
     cdtTransaction.setAccountId(String.format("PREPAGO_%s",user.getDocumentNumber()));
-    cdtTransaction.setGloss(topupRequest.getCdtTransactionType().getName()+" "+topupRequest.getAmount().getValue());
+    cdtTransaction.setGloss(topupRequest.getCdtTransactionType().getName() + " " + topupRequest.getAmount().getValue());
     cdtTransaction.setTransactionReference(0L);
     cdtTransaction.setExternalTransactionId(topupRequest.getTransactionId());
     cdtTransaction.setIndSimulacion(Boolean.FALSE);
@@ -456,7 +439,7 @@ public class PrepaidEJBBean10 extends PrepaidBaseEJBBean10 implements PrepaidEJB
           prepaidCard.setProcessorUserId(altaClienteDTO.getContrato());
           prepaidCard.setUuid(UUID.randomUUID().toString());
 
-          prepaidCard = getPrepaidCardEJB11().createPrepaidCard(null, prepaidCard);
+          prepaidCard = getPrepaidCardEJB11().insertPrepaidCard(null, prepaidCard);
         } else {
           log.error(String.format("[topupUserBalance] Error realizando alta de cliente [%s] [%s]", altaClienteDTO.getRetorno(), altaClienteDTO.getDescRetorno()));
           throw new RunTimeValidationException(CUENTA_ERROR_GENERICO_$VALUE).setData(new KeyValue("value", "Error realizando alta de cliente"));
@@ -465,22 +448,25 @@ public class PrepaidEJBBean10 extends PrepaidBaseEJBBean10 implements PrepaidEJB
         getPrepaidMovementEJB11().updatePrepaidMovementStatus(null, prepaidMovement.getId(), PrepaidMovementStatus.ERROR_IN_PROCESS_EMISSION_CARD);
         //Confirmar la carga en CDT
         cdtTransaction.setTransactionType(prepaidTopup.getCdtTransactionTypeConfirm());
+        cdtTransaction.setGloss(cdtTransaction.getTransactionType().getName() + " " + topupRequest.getAmount().getValue());
         cdtTransaction = this.getCdtEJB10().addCdtTransaction(null, cdtTransaction);
 
         //Iniciar reversa en CDT
         cdtTransaction.setTransactionType(CdtTransactionType.REVERSA_CARGA);
+        cdtTransaction.setGloss(cdtTransaction.getTransactionType().getName() + " " + topupRequest.getAmount().getValue());
         cdtTransaction.setTransactionReference(0L);
         cdtTransaction = this.getCdtEJB10().addCdtTransaction(null, cdtTransaction);
 
         //Confirmar reversa en CDT
         cdtTransaction.setTransactionType(CdtTransactionType.REVERSA_CARGA_CONF);
+        cdtTransaction.setGloss(cdtTransaction.getTransactionType().getName() + " " + topupRequest.getAmount().getValue());
         cdtTransaction = this.getCdtEJB10().addCdtTransaction(null, cdtTransaction);
         throw new RunTimeValidationException(ERROR_DE_COMUNICACION_CON_SERVICIO_WEB_EXTERNO);
       }
     }
 
     //TODO: si no hay tarjeta o la info esta incompleta, se realiza la consulta de datos
-    if(prepaidCard == null || StringUtils.isAllBlank(prepaidCard.getHashedPan())) {
+    if(PrepaidCardStatus.PENDING.equals(prepaidCard.getStatus())) {
       try {
         log.info(String.format("[topupUserBalance] Obeteniendo datos de tarjeta %s", prepaidCard.getUuid()));
 
@@ -519,18 +505,22 @@ public class PrepaidEJBBean10 extends PrepaidBaseEJBBean10 implements PrepaidEJB
           throw new RunTimeValidationException(TARJETA_ERROR_GENERICO_$VALUE).setData(new KeyValue("value", "Error consultando datos de tarjeta"));
         }
       } catch (Exception ex) {
+        log.error(ex);
         getPrepaidMovementEJB11().updatePrepaidMovementStatus(null, prepaidMovement.getId(), PrepaidMovementStatus.ERROR_IN_PROCESS_CREATE_CARD);
         //Confirmar la carga en CDT
         cdtTransaction.setTransactionType(prepaidTopup.getCdtTransactionTypeConfirm());
+        cdtTransaction.setGloss(cdtTransaction.getTransactionType().getName() + " " + topupRequest.getAmount().getValue());
         cdtTransaction = this.getCdtEJB10().addCdtTransaction(null, cdtTransaction);
 
         //Iniciar reversa en CDT
         cdtTransaction.setTransactionType(CdtTransactionType.REVERSA_CARGA);
+        cdtTransaction.setGloss(cdtTransaction.getTransactionType().getName() + " " + topupRequest.getAmount().getValue());
         cdtTransaction.setTransactionReference(0L);
         cdtTransaction = this.getCdtEJB10().addCdtTransaction(null, cdtTransaction);
 
         //Confirmar reversa en CDT
         cdtTransaction.setTransactionType(CdtTransactionType.REVERSA_CARGA_CONF);
+        cdtTransaction.setGloss(cdtTransaction.getTransactionType().getName() + " " + topupRequest.getAmount().getValue());
         cdtTransaction = this.getCdtEJB10().addCdtTransaction(null, cdtTransaction);
         throw new RunTimeValidationException(ERROR_DE_COMUNICACION_CON_SERVICIO_WEB_EXTERNO);
       }
@@ -554,17 +544,9 @@ public class PrepaidEJBBean10 extends PrepaidBaseEJBBean10 implements PrepaidEJB
         BusinessStatusType.CONFIRMED,
         PrepaidMovementStatus.PROCESS_OK);
 
-      CdtTransaction10 cdtTransactionConfirm = new CdtTransaction10();
-      cdtTransactionConfirm.setAmount(cdtTransaction.getAmount());
-      cdtTransactionConfirm.setTransactionType(prepaidTopup.getCdtTransactionTypeConfirm());
-      cdtTransactionConfirm.setAccountId(cdtTransaction.getAccountId());
-      cdtTransactionConfirm.setTransactionReference(cdtTransaction.getTransactionReference());
-      cdtTransactionConfirm.setIndSimulacion(false);
-      //se debe agregar CONFIRM para evitar el constraint unique de esa columna
-      cdtTransactionConfirm.setExternalTransactionId(cdtTransaction.getExternalTransactionId());
-      cdtTransactionConfirm.setGloss(prepaidTopup.getCdtTransactionTypeConfirm().getName() + " " + cdtTransactionConfirm.getAmount());
-
-      getCdtEJB10().addCdtTransaction(null, cdtTransactionConfirm);
+      cdtTransaction.setTransactionType(prepaidTopup.getCdtTransactionTypeConfirm());
+      cdtTransaction.setGloss(cdtTransaction.getTransactionType().getName() + " " + topupRequest.getAmount().getValue());
+      cdtTransaction = this.getCdtEJB10().addCdtTransaction(null, cdtTransaction);
 
       if (!cdtTransaction.isNumErrorOk()) {
         log.error(String.format("Error en CDT %s", cdtTransaction.getMsjError()));
@@ -618,15 +600,18 @@ public class PrepaidEJBBean10 extends PrepaidBaseEJBBean10 implements PrepaidEJB
 
       //Confirmar la carga en CDT
       cdtTransaction.setTransactionType(prepaidTopup.getCdtTransactionTypeConfirm());
+      cdtTransaction.setGloss(cdtTransaction.getTransactionType().getName() + " " + topupRequest.getAmount().getValue());
       cdtTransaction = this.getCdtEJB10().addCdtTransaction(null, cdtTransaction);
 
       //Iniciar reversa en CDT
       cdtTransaction.setTransactionType(CdtTransactionType.REVERSA_CARGA);
+      cdtTransaction.setGloss(cdtTransaction.getTransactionType().getName() + " " + topupRequest.getAmount().getValue());
       cdtTransaction.setTransactionReference(0L);
       cdtTransaction = this.getCdtEJB10().addCdtTransaction(null, cdtTransaction);
 
       //Confirmar reversa en CDT
       cdtTransaction.setTransactionType(CdtTransactionType.REVERSA_CARGA_CONF);
+      cdtTransaction.setGloss(cdtTransaction.getTransactionType().getName() + " " + topupRequest.getAmount().getValue());
       cdtTransaction = this.getCdtEJB10().addCdtTransaction(null, cdtTransaction);
 
       throw new RunTimeValidationException(TARJETA_ERROR_GENERICO_$VALUE).setData(new KeyValue("value", inclusionMovimientosDTO.getDescRetorno()));
@@ -1031,8 +1016,9 @@ public class PrepaidEJBBean10 extends PrepaidBaseEJBBean10 implements PrepaidEJB
       else {
         // se confirma la transaccion para los retiros no web
         cdtTransaction.setTransactionType(prepaidWithdraw.getCdtTransactionTypeConfirm());
-        cdtTransaction.setGloss(cdtTransaction.getTransactionType().getName() + " " + cdtTransaction.getExternalTransactionId());
+        cdtTransaction.setGloss(cdtTransaction.getTransactionType().getName() + " " + withdrawRequest.getAmount().getValue());
         cdtTransaction = getCdtEJB10().addCdtTransaction(null, cdtTransaction);
+
         getPrepaidMovementEJB10().updatePrepaidBusinessStatus(headers, prepaidMovement.getId(), BusinessStatusType.CONFIRMED);
       }
       // Se envia informacion a accounting/clearing
@@ -1078,18 +1064,18 @@ public class PrepaidEJBBean10 extends PrepaidBaseEJBBean10 implements PrepaidEJB
 
       //Confirmar el retiro en CDT
       cdtTransaction.setTransactionType(prepaidWithdraw.getCdtTransactionTypeConfirm());
-      //cdtTransaction.setGloss(cdtTransaction.getTransactionType().getName() + " " + cdtTransaction.getExternalTransactionId());
+      cdtTransaction.setGloss(cdtTransaction.getTransactionType().getName() + " " + withdrawRequest.getAmount().getValue());
       cdtTransaction = this.getCdtEJB10().addCdtTransaction(null, cdtTransaction);
 
       //Iniciar reversa en CDT
       cdtTransaction.setTransactionType(CdtTransactionType.REVERSA_RETIRO);
-      //cdtTransaction.setGloss(cdtTransaction.getTransactionType().getName() + " " + cdtTransaction.getExternalTransactionId());
+      cdtTransaction.setGloss(cdtTransaction.getTransactionType().getName() + " " + withdrawRequest.getAmount().getValue());
       cdtTransaction.setTransactionReference(0L);
       cdtTransaction = this.getCdtEJB10().addCdtTransaction(null, cdtTransaction);
 
       //Confirmar reversa en CDT
       cdtTransaction.setTransactionType(CdtTransactionType.REVERSA_RETIRO_CONF);
-      //cdtTransaction.setGloss(cdtTransaction.getTransactionType().getName() + " " + cdtTransaction.getExternalTransactionId());
+      cdtTransaction.setGloss(cdtTransaction.getTransactionType().getName() + " " + withdrawRequest.getAmount().getValue());
       cdtTransaction = this.getCdtEJB10().addCdtTransaction(null, cdtTransaction);
 
       throw new RunTimeValidationException(TARJETA_ERROR_GENERICO_$VALUE).setData(new KeyValue("value", inclusionMovimientosDTO.getDescRetorno()));
