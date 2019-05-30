@@ -585,21 +585,21 @@ public class PrepaidEJBBean10 extends PrepaidBaseEJBBean10 implements PrepaidEJB
     try {
 
       //FIXME: Implementar integracion con servicio de usuarios.
-      TenpoUser tenpoUserTenpo = getTenpoApiCall().getUserById(UUID.fromString(userId));
-      if(tenpoUserTenpo != null){
+      TenpoUser tenpoUser = getTenpoApiCall().getUserById(UUID.fromString(userId));
+      if(tenpoUser != null){
         prepaidUser10 = new PrepaidUser10();
-        prepaidUser10.setDocumentNumber(tenpoUserTenpo.getTributaryIdentifier());
+        prepaidUser10.setDocumentNumber(tenpoUser.getTributaryIdentifier());
         prepaidUser10.setDocumentType(DocumentType.DNI_CL); // REVISAR QUE VALORES VENDRAN ACA Y AGREGAR AL ENUM
-        prepaidUser10.setName(tenpoUserTenpo.getFirstName());
-        prepaidUser10.setLastName(tenpoUserTenpo.getLastName());
-        prepaidUser10.setUuid(tenpoUserTenpo.getUserId().toString());
+        prepaidUser10.setName(tenpoUser.getFirstName());
+        prepaidUser10.setLastName(tenpoUser.getLastName());
+        prepaidUser10.setUuid(tenpoUser.getUserId().toString());
         prepaidUser10.setTimestamps(new Timestamps(LocalDateTime.now(ZoneOffset.UTC),LocalDateTime.now(ZoneOffset.UTC)));
-        prepaidUser10.setUserLevel(PrepaidUserLevel.valueOfEnum(tenpoUserTenpo.getLevel().name()));
-        prepaidUser10.setStatus(getUserStatusFromTenpoStatus(tenpoUserTenpo.getState()));
-        prepaidUser10.setRut(Integer.parseInt(tenpoUserTenpo.getTributaryIdentifier().toLowerCase().replace("-","").replace("k","")));//TODO: Eliminar  cuando se deje de depender.
+        prepaidUser10.setUserLevel(PrepaidUserLevel.valueOfEnum(tenpoUser.getLevel().name()));
+        prepaidUser10.setStatus(getUserStatusFromTenpoStatus(tenpoUser.getState()));
+        prepaidUser10.setRut(Integer.parseInt(tenpoUser.getTributaryIdentifier().toLowerCase().replace("-","").replace("k","")));//TODO: Eliminar  cuando se deje de depender.
         prepaidUser10.setBalanceExpiration(0L);
         prepaidUser10.setUserIdMc(prepaidUser10.getRut().longValue());
-        prepaidUser10.setUserPlan(UserPlanType.valueOfEnum(tenpoUserTenpo.getPlan().name()));
+        prepaidUser10.setUserPlan(UserPlanType.valueOfEnum(tenpoUser.getPlan().name()));
         prepaidUser10 = getPrepaidUserEJB10().createUser(null,prepaidUser10);
       }
     } catch (NotFoundException e){
