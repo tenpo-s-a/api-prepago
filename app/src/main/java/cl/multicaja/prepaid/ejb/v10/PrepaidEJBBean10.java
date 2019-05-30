@@ -344,7 +344,7 @@ public class PrepaidEJBBean10 extends PrepaidBaseEJBBean10 implements PrepaidEJB
       }
     }
 
-    // Se verifica si es primera carga TODO: modificar query
+    // Se verifica si es primera carga
     topupRequest.setFirstTopup(getPrepaidMovementEJB11().isFirstTopup(user.getId()));
 
     PrepaidTopup10 prepaidTopup = new PrepaidTopup10(topupRequest);
@@ -956,7 +956,7 @@ public class PrepaidEJBBean10 extends PrepaidBaseEJBBean10 implements PrepaidEJB
       } else {
         String msg = cdtTransaction.getMsjError();
         if(StringUtils.containsIgnoreCase(msg, "duplicate key value violates unique constraint")) {
-          msg = "Transacción duplicada";
+          msg = "Transaccion duplicada";
         }
         throw new ValidationException(TRANSACCION_ERROR_GENERICO_$VALUE).setData(new KeyValue("value", msg));
       }
