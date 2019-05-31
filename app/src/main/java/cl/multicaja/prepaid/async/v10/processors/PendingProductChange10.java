@@ -23,7 +23,6 @@ import java.util.Map;
 
 import static cl.multicaja.prepaid.async.v10.routes.ProductChangeRoute10.ERROR_PRODUCT_CHANGE_REQ;
 import static cl.multicaja.prepaid.async.v10.routes.ProductChangeRoute10.PENDING_PRODUCT_CHANGE_REQ;
-import static cl.multicaja.prepaid.model.v10.MailTemplates.*;
 
 /**
  * @author abarazarte

@@ -11,7 +11,13 @@ import cl.multicaja.prepaid.async.v10.model.PrepaidTopupData10;
 import cl.multicaja.prepaid.async.v10.routes.KafkaEventsRoute10;
 import cl.multicaja.prepaid.async.v10.routes.PrepaidTopupRoute10;
 import cl.multicaja.prepaid.async.v10.routes.TransactionReversalRoute10;
+import cl.multicaja.prepaid.ejb.v10.PrepaidEJBBean10;
 import cl.multicaja.prepaid.helpers.tecnocom.TecnocomServiceHelper;
+import cl.multicaja.prepaid.helpers.tenpo.TenpoApiCall;
+import cl.multicaja.prepaid.helpers.tenpo.model.Level;
+import cl.multicaja.prepaid.helpers.tenpo.model.Plan;
+import cl.multicaja.prepaid.helpers.tenpo.model.State;
+import cl.multicaja.prepaid.helpers.tenpo.model.TenpoUser;
 import cl.multicaja.prepaid.kafka.events.AccountEvent;
 import cl.multicaja.prepaid.kafka.events.CardEvent;
 import cl.multicaja.prepaid.kafka.events.TransactionEvent;
@@ -19,11 +25,17 @@ import cl.multicaja.prepaid.kafka.events.model.Fee;
 import cl.multicaja.prepaid.model.v10.*;
 import cl.multicaja.prepaid.model.v11.Account;
 import cl.multicaja.prepaid.model.v11.AccountStatus;
+import cl.multicaja.prepaid.model.v11.DocumentType;
 import cl.multicaja.prepaid.model.v11.PrepaidMovementFeeType;
 import cl.multicaja.tecnocom.constants.CodigoRetorno;
 import cl.multicaja.tecnocom.constants.IndicadorNormalCorrector;
 import org.apache.commons.lang3.StringUtils;
 import org.junit.*;
+import org.junit.runner.RunWith;
+import org.mockito.InjectMocks;
+import org.mockito.Mockito;
+import org.mockito.Spy;
+import org.mockito.junit.MockitoJUnitRunner;
 
 import javax.jms.Queue;
 import java.math.BigDecimal;
@@ -41,6 +53,7 @@ import static cl.multicaja.prepaid.async.v10.routes.TransactionReversalRoute10.P
 /**
  * @autor vutreras
  */
+@RunWith(MockitoJUnitRunner.class)
 public class Test_PrepaidEJBBean10_topupUserBalance extends TestBaseUnitAsync {
 
   private final BigDecimal topupTotalAmount = BigDecimal.valueOf(3238); // Total carga
@@ -55,6 +68,14 @@ public class Test_PrepaidEJBBean10_topupUserBalance extends TestBaseUnitAsync {
 
   private DateTimeFormatter dateTimeFormatter = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss");
   private static TecnocomServiceHelper tc;
+
+  @Spy
+  private TenpoApiCall  apiCall;
+
+
+  @Spy
+  @InjectMocks
+  private PrepaidEJBBean10 prepaidEJBBean10 = getPrepaidEJBBean10();
 
   @BeforeClass
   public static void getTecnocomInstance(){
@@ -1728,6 +1749,47 @@ public class Test_PrepaidEJBBean10_topupUserBalance extends TestBaseUnitAsync {
       Assert.assertNotNull("Debe existir un fee de iva", fee);
       Assert.assertEquals("Debe tener un valor de 0", webFeeIvaAmount, fee.getAmount().getValue());
     }
+  }
+
+  @Test
+  public void topupUserBalance_sync_userNull_getFromTenpo() throws Exception{
+    Map<Long, PrepaidMovement10> movements = new HashMap<>();
+
+    PrepaidUser10 prepaidUser10 = buildPrepaidUserv2(PrepaidUserLevel.LEVEL_2);
+    NewPrepaidTopup10 prepaidTopup10 = buildNewPrepaidTopup10();
+
+    //primera carga
+    prepaidTopup10.getAmount().setValue(topupTotalAmount);
+
+    //Mock de la llamada a tenpo!!
+    Mockito.doReturn(getTempoUser(prepaidUser10)).when(apiCall).getUserById(UUID.fromString(prepaidUser10.getUuid()));
+
+    PrepaidTopup10 resp = prepaidEJBBean10.topupUserBalance(null,prepaidUser10.getUuid(), prepaidTopup10,true);
+    PrepaidUser10 prepaidFull = getPrepaidUserEJBBean10().findByExtId(null,prepaidUser10.getUuid());
+    Assert.assertNotNull("Debe existir respuesta de carga", resp);
+    Assert.assertNotNull("debe tener un id", resp.getId());
+    Assert.assertNotNull("El usuario debe tener un id", prepaidFull.getId());
+
+    PrepaidCard10 prepaidCard10  = waitForLastPrepaidCardInStatusV11(prepaidFull.getId(),PrepaidCardStatus.ACTIVE);
+    Assert.assertNotNull("La tarjeta no debe ser nula", prepaidCard10);
+    Assert.assertEquals("El status debe ser active",PrepaidCardStatus.ACTIVE,prepaidCard10.getStatus());
+
+  }
+
+  private TenpoUser getTempoUser(PrepaidUser10 prepaidUser10){
+
+    TenpoUser tenpoUser = new TenpoUser();
+    tenpoUser.setDocumentNumber(prepaidUser10.getDocumentNumber());
+    tenpoUser.setDocumentType(prepaidUser10.getDocumentType().name());
+    tenpoUser.setFirstName(prepaidUser10.getName());
+    tenpoUser.setLastName(prepaidUser10.getLastName());
+    tenpoUser.setTributaryIdentifier(prepaidUser10.getDocumentNumber());
+    tenpoUser.setLevel(Level.LEVEL_1);
+    tenpoUser.setState(State.ACTIVE);
+    tenpoUser.setId(UUID.fromString(prepaidUser10.getUuid()));
+    tenpoUser.setUserId(UUID.fromString(prepaidUser10.getUuid()));
+    tenpoUser.setPlan(Plan.FREE);
+    return tenpoUser;
   }
 
 }

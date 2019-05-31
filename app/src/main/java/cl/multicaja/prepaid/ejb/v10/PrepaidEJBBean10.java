@@ -21,11 +21,13 @@ import cl.multicaja.prepaid.ejb.v11.PrepaidMovementEJBBean11;
 import cl.multicaja.prepaid.helpers.CalculationsHelper;
 import cl.multicaja.prepaid.helpers.EncryptHelper;
 import cl.multicaja.prepaid.helpers.tecnocom.TecnocomServiceHelper;
-import cl.multicaja.prepaid.helpers.tenpo.ApiCall;
+import cl.multicaja.prepaid.helpers.tenpo.TenpoApiCall;
 import cl.multicaja.prepaid.helpers.tenpo.model.State;
+import cl.multicaja.prepaid.helpers.tenpo.model.TenpoUser;
 import cl.multicaja.prepaid.kafka.events.model.TransactionType;
 import cl.multicaja.prepaid.model.v10.*;
 import cl.multicaja.prepaid.model.v11.Account;
+import cl.multicaja.prepaid.model.v11.DocumentType;
 import cl.multicaja.prepaid.model.v11.IvaType;
 import cl.multicaja.prepaid.model.v11.PrepaidMovementFeeType;
 import cl.multicaja.prepaid.utils.ParametersUtil;
@@ -125,7 +127,7 @@ public class PrepaidEJBBean10 extends PrepaidBaseEJBBean10 implements PrepaidEJB
   @EJB
   private AccountEJBBean10 accountEJBBean10;
 
-  private ApiCall apiCall;
+  private TenpoApiCall tenpoApiCall;
 
   private TecnocomService tecnocomService;
 
@@ -281,8 +283,11 @@ public class PrepaidEJBBean10 extends PrepaidBaseEJBBean10 implements PrepaidEJB
     return calculatorParameter10;
   }
 
-  public ApiCall getApiCall(){
-    return ApiCall.getInstance();
+  public TenpoApiCall getTenpoApiCall(){
+    if(tenpoApiCall == null) {
+      tenpoApiCall = TenpoApiCall.getInstance();
+    }
+    return tenpoApiCall;
   }
 
   public PrepaidTopup10 topupUserBalanceV1(Map<String, Object> headers, NewPrepaidTopup10 topupRequest) throws Exception {
@@ -574,26 +579,27 @@ public class PrepaidEJBBean10 extends PrepaidBaseEJBBean10 implements PrepaidEJB
    * @return
    * @throws Exception
    */
-  private PrepaidUser10 validateTempoUser(String userId) throws Exception {
+  public PrepaidUser10 validateTempoUser(String userId) throws Exception {
 
     PrepaidUser10 prepaidUser10 = null;
     try {
 
       //FIXME: Implementar integracion con servicio de usuarios.
-      cl.multicaja.prepaid.helpers.tenpo.model.User userTenpo = getApiCall().getUserById(UUID.fromString(userId));
-      if(userTenpo != null){
+      TenpoUser tenpoUser = getTenpoApiCall().getUserById(UUID.fromString(userId));
+      if(tenpoUser != null){
         prepaidUser10 = new PrepaidUser10();
-        prepaidUser10.setDocumentNumber(userTenpo.getDocumentNumber());
-        //TODO: prepaidUser10.setDocumentType(DocumentType.valueOfEnum(userTenpo.getDocumentType())); // REVISAR QUE VALORES VENDRAN ACA Y AGREGAR AL ENUM
-        prepaidUser10.setName(userTenpo.getFirstName());
-        prepaidUser10.setLastName(userTenpo.getLastName());
-        prepaidUser10.setUuid(userTenpo.getUserId().toString());
+        prepaidUser10.setDocumentNumber(tenpoUser.getTributaryIdentifier());
+        prepaidUser10.setDocumentType(DocumentType.DNI_CL); // REVISAR QUE VALORES VENDRAN ACA Y AGREGAR AL ENUM
+        prepaidUser10.setName(tenpoUser.getFirstName());
+        prepaidUser10.setLastName(tenpoUser.getLastName());
+        prepaidUser10.setUuid(tenpoUser.getUserId().toString());
         prepaidUser10.setTimestamps(new Timestamps(LocalDateTime.now(ZoneOffset.UTC),LocalDateTime.now(ZoneOffset.UTC)));
-        prepaidUser10.setUserLevel(PrepaidUserLevel.valueOfEnum(userTenpo.getLevel().name()));
-        prepaidUser10.setStatus(getUserStatusFromTenpoStatus(userTenpo.getState()));
-        prepaidUser10.setRut(Integer.parseInt(userTenpo.getDocumentNumber()));//TODO: Eliminar  cuando se deje de depender.
+        prepaidUser10.setUserLevel(PrepaidUserLevel.valueOfEnum(tenpoUser.getLevel().name()));
+        prepaidUser10.setStatus(getUserStatusFromTenpoStatus(tenpoUser.getState()));
+        prepaidUser10.setRut(Integer.parseInt(tenpoUser.getTributaryIdentifier().toLowerCase().replace("-","").replace("k","")));//TODO: Eliminar  cuando se deje de depender.
         prepaidUser10.setBalanceExpiration(0L);
         prepaidUser10.setUserIdMc(prepaidUser10.getRut().longValue());
+        prepaidUser10.setUserPlan(UserPlanType.valueOfEnum(tenpoUser.getPlan().name()));
         prepaidUser10 = getPrepaidUserEJB10().createUser(null,prepaidUser10);
       }
     } catch (NotFoundException e){

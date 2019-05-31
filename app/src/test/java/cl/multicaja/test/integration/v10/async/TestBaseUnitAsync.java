@@ -303,7 +303,7 @@ public class TestBaseUnitAsync extends TestContextHelper {
     //se crea la cola de requerimiento
     Queue qReq = camelFactory.createJMSQueue(TransactionReversalRoute10.PENDING_REVERSAL_TOPUP_REQ);
     prepaidTopup.setMessageId(messageId);
-    //se crea la el objeto con los datos del proceso PrepaidTopup10 , User , PrepaidMovement10 prepaidMovementReverse
+    //se crea la el objeto con los datos del proceso PrepaidTopup10 , TenpoUser , PrepaidMovement10 prepaidMovementReverse
     PrepaidReverseData10 data = new PrepaidReverseData10(prepaidTopup,prepaidCard10,prepaidUser10, prepaidMovement);
     prepaidTopup.setFee(new NewAmountAndCurrency10(new BigDecimal(100), CodigoMoneda.CLP));
 

@@ -811,7 +811,7 @@ public class TestBaseUnit extends TestApiBase {
    */
   public PrepaidUser10 updatePrepaidUser(PrepaidUser10 user) throws Exception{
     if(user == null){
-      throw new BadRequestException(PARAMETRO_FALTANTE_$VALUE).setData(new KeyValue("value", "User"));
+      throw new BadRequestException(PARAMETRO_FALTANTE_$VALUE).setData(new KeyValue("value", "TenpoUser"));
     }
 
     return getPrepaidUserEJBBean10().updatePrepaidUser(null, user);
@@ -1616,6 +1616,7 @@ public class TestBaseUnit extends TestApiBase {
    * @return
    * @throws Exception
    */
+  @Deprecated
   protected PrepaidCard10 waitForLastPrepaidCardInStatus(PrepaidUser10 prepaidUser10, PrepaidCardStatus status) throws Exception {
 
     PrepaidCard10 prepaidCard10 = null;
@@ -1635,6 +1636,19 @@ public class TestBaseUnit extends TestApiBase {
     return prepaidCard10;
   }
 
+  protected PrepaidCard10 waitForLastPrepaidCardInStatusV11(Long userId, PrepaidCardStatus status) throws Exception {
+
+    PrepaidCard10 prepaidCard10 = null;
+    //Espera por que la tarjeta se encuentre activa
+    for(int j = 0; j < 10; j++) {
+      Thread.sleep(2000);
+      prepaidCard10 = getPrepaidCardEJBBean11().getByUserIdAndStatus(null, userId,PrepaidCardStatus.ACTIVE);
+      if(prepaidCard10 != null){
+        break;
+      }
+    }
+    return prepaidCard10;
+  }
   protected UserAccount randomBankAccount(){
     UserAccount userAccount = new UserAccount();
     userAccount.setBankId(getUniqueRutNumber().longValue());
