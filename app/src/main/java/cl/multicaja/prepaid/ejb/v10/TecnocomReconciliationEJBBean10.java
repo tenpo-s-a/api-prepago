@@ -231,7 +231,7 @@ public class TecnocomReconciliationEJBBean10 extends PrepaidBaseEJBBean10 implem
     }
 
     // Se procesan las autorizaciones
-    List<MovimientoTecnocom10> autoList = this.buscaMovimientosTecnocom(fileId, OriginOpeType.AUT_ORIGIN);
+    List<MovimientoTecnocom10> autoList = this.buscaMovimientosTecnocom(fileId, OriginOpeType.AUT_ORIGIN); // Todo: se puede hacer una funcion que busque por ambas (AUT_ORIGIN y CONC_ORIGIN)
 
     if(autoList != null){
       // TRX Insertadas x Servicio.
@@ -286,7 +286,7 @@ public class TecnocomReconciliationEJBBean10 extends PrepaidBaseEJBBean10 implem
     movimientoTecnocom10.setPan(detail.getPan()); // El movimiento tecnocom guarda el pan hasheado, pero para test se usa plano
     movimientoTecnocom10.setCuenta(detail.getCuenta());
     movimientoTecnocom10.setTipoLin(detail.getTipolin());
-    movimientoTecnocom10.setCodPais(getNumberUtils().toInteger(detail.getCodpais()));
+    movimientoTecnocom10.setCodPais(CodigoPais.fromValue(getNumberUtils().toInteger(detail.getCodpais())));
     movimientoTecnocom10.setCodAct(Integer.parseInt(detail.getCodact()));
     movimientoTecnocom10.setIndProaje("");
     movimientoTecnocom10.setCmbApli(getNumberUtils().toBigDecimal(detail.getCmbApli()));
@@ -966,7 +966,7 @@ public class TecnocomReconciliationEJBBean10 extends PrepaidBaseEJBBean10 implem
       movimientoTecnocom10.setIndProaje(rs.getString("indproaje"));
       movimientoTecnocom10.setCodCom(rs.getString("codcom"));
       movimientoTecnocom10.setCodAct(rs.getInt("codact"));
-      movimientoTecnocom10.setCodPais(rs.getInt("codpais"));
+      movimientoTecnocom10.setCodPais(CodigoPais.fromValue(rs.getInt("codpais")));
       movimientoTecnocom10.setNomPob(rs.getString("nompob"));
       movimientoTecnocom10.setNumExtCta(rs.getLong("numextcta"));
       movimientoTecnocom10.setNumMovExt(rs.getLong("nummovext"));
@@ -1076,7 +1076,7 @@ public class TecnocomReconciliationEJBBean10 extends PrepaidBaseEJBBean10 implem
       ps.setInt(18, movTc.getCodAct());
       ps.setBigDecimal(19, movTc.getImpLiq().getValue());
       ps.setInt(20, movTc.getImpLiq().getCurrencyCode().getValue());
-      ps.setInt(21, movTc.getCodPais());
+      ps.setInt(21, movTc.getCodPais().getValue());
       ps.setString(22, movTc.getNomPob());
       ps.setLong(23, movTc.getNumExtCta());
       ps.setLong(24, movTc.getNumMovExt());
