@@ -249,6 +249,11 @@ public final class TestHelpersResource10 extends BaseResource {
       throw new NotFoundException(ERROR_DATA_NOT_FOUND);
     }
 
+    Account account = accountEJBBean10.findByUserId(prepaidUser.getId());
+    if (account == null) {
+      throw new NotFoundException(CUENTA_NO_EXISTE);
+    }
+
     TecnocomService tecnocomService = TecnocomServiceHelper.getInstance().getTecnocomService();
 
     String numreffac = getRandomNumericString(10);
@@ -256,7 +261,7 @@ public final class TestHelpersResource10 extends BaseResource {
 
     //add authorization
     InclusionMovimientosDTO inclusionAutorizacionesDTO = tecnocomService.inclusionAutorizaciones(
-      prepaidCard10.getProcessorUserId(),
+      account.getAccountNumber(),
       prepaidCard10.getPan(),
       CodigoMoneda.CHILE_CLP,
       IndicadorNormalCorrector.NORMAL,
@@ -298,7 +303,12 @@ public final class TestHelpersResource10 extends BaseResource {
       throw new NotFoundException(ERROR_DATA_NOT_FOUND);
     }
 
-    String contrato = prepaidCard10.getProcessorUserId();
+    Account account = accountEJBBean10.findByUserId(prepaidUser.getId());
+    if (account == null) {
+      throw new NotFoundException(CUENTA_NO_EXISTE);
+    }
+
+    String contrato = account.getAccountNumber();
 
     TecnocomService tecnocomService = TecnocomServiceHelper.getInstance().getTecnocomService();
 
