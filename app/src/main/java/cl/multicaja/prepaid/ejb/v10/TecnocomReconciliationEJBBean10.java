@@ -614,22 +614,25 @@ public class TecnocomReconciliationEJBBean10 extends PrepaidBaseEJBBean10 implem
 
         // Si el movimiento viene en estado OP (conciliado), se actualiza su valor de acuerdo al archivo IPM
         if (TecnocomReconciliationRegisterType.OP.equals(trx.getTipoReg())) {
+          BigDecimal newMastercardAmount;
+
           // Se busca el registro "mas parecido" en la tabla IPM
           IpmMovement10 ipmMovement10 = ipmEJBBean10.findByReconciliationSimilarity(prepaidCard10.getPan(), trx.getCodCom(), trx.getImpFac().getValue(), trx.getNumAut());
           if (ipmMovement10 != null) {
-            // Actualizar el valor de mastercard en la tablas de contabilidad
-            AccountingData10 accountingData10 = getPrepaidAccountingEJBBean10().searchAccountingByIdTrx(null, prepaidMovement10.getId());
-            accountingData10.getAmountMastercard().setValue(ipmMovement10.getCardholderBillingAmount());
-            accountingData10.setConciliationDate(Timestamp.valueOf(LocalDateTime.now(ZoneId.of("UTC"))));
-            getPrepaidAccountingEJBBean10().updateAccountingDataFull(null, accountingData10);
+            newMastercardAmount = ipmMovement10.getCardholderBillingAmount();
 
             // Marcar movimiento tomado en la tabla IPM como conciliado
             getIpmEJBBean10().updateIpmMovementReconciledStatus(ipmMovement10.getId(), true);
           } else {
-            String msg = String.format("Error while searching for similar to IPM movement similar to movement [id:%s][truncatedPan: %s][codcom:%s][impFac:%s][numaut:%s], not found", prepaidMovement10.getId(), prepaidCard10.getPan(), trx.getCodCom(), trx.getImpFac().getValue().setScale(2, RoundingMode.HALF_UP).toString(), trx.getNumAut());
-            log.error(msg);
-            throw new ValidationException(ERROR_DATA_NOT_FOUND.getValue(), msg);
+            // No se encontro en el archivo IPM, dejar el valor del archivo de Operaciones Diarias
+            newMastercardAmount = trx.getImpFac().getValue();
           }
+
+          // Actualizar el valor de mastercard en la tabla de contabilidad
+          AccountingData10 accountingData10 = getPrepaidAccountingEJBBean10().searchAccountingByIdTrx(null, prepaidMovement10.getId());
+          accountingData10.getAmountMastercard().setValue(newMastercardAmount);
+          accountingData10.setConciliationDate(Timestamp.valueOf(LocalDateTime.now(ZoneId.of("UTC"))));
+          getPrepaidAccountingEJBBean10().updateAccountingDataFull(null, accountingData10);
         }
       } catch (Exception ex) {
         ex.printStackTrace();

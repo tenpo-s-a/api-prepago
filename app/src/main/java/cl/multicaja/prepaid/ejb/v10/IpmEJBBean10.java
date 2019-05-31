@@ -72,8 +72,8 @@ public class IpmEJBBean10 extends PrepaidBaseEJBBean10 {
       throw new BadRequestException(PARAMETRO_FALTANTE_$VALUE).setData(new KeyValue("value", "numaut"));
     }
 
-    BigDecimal lowAmount = amount.multiply(new BigDecimal(0.975)); // 2.5% inferior
-    BigDecimal highAmount = amount.multiply(new BigDecimal(1.025)); // 2.5% inferior
+    BigDecimal lowAmount = amount.multiply(new BigDecimal(0.965)); // 3.5% inferior
+    BigDecimal highAmount = amount.multiply(new BigDecimal(1.035)); // 3.5% inferior
 
     log.info(String.format("[findByReconciliationSimilarity] Buscando ipmMovement no conciliado por truncatedPan [%s] codcom [%s] amount [%s] numaut [%s]", truncatedPan, codcom, amount.toString(), numaut));
     try {
