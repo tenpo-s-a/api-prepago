@@ -1786,6 +1786,12 @@ public class Test_TecnocomReconciliationEJBBean10_insertAutorization extends Tes
     movimientoTecnocom10.setTipoFac(tipofac);
     movimientoTecnocom10.setIndNorCor(tipofac.getCorrector());
     movimientoTecnocom10.setTipoReg(registerType);
+    // Por regla: OP es siempre CONC, AU es siempre AUTO
+    if (TecnocomReconciliationRegisterType.OP.equals(registerType)) {
+      movimientoTecnocom10.setOriginOpe(OriginOpeType.CONC_ORIGIN.getValue());
+    } else if (TecnocomReconciliationRegisterType.AU.equals(registerType)) {
+      movimientoTecnocom10.setOriginOpe(OriginOpeType.AUT_ORIGIN.getValue());
+    }
     movimientoTecnocom10.getImpDiv().setCurrencyCode(currencyCode);
     return getTecnocomReconciliationEJBBean10().insertaMovimientoTecnocom(movimientoTecnocom10);
   }

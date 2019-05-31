@@ -1785,7 +1785,7 @@ public class Test_AutoReconciliation_FullTest extends TestBaseUnitAsync {
   }
 
   private void checkIfTransactionIsInQueue(String queueName, String idTxExterno, String transactionType, String transactionStatus, List<PrepaidMovementFee10> feeList) {
-    Queue qResp = camelFactory.createJMSQueue(queueName);
+      Queue qResp = camelFactory.createJMSQueue(queueName);
     ExchangeData<String> event = (ExchangeData<String>) camelFactory.createJMSMessenger(30000, 60000)
       .getMessage(qResp, idTxExterno);
 
@@ -1817,6 +1817,12 @@ public class Test_AutoReconciliation_FullTest extends TestBaseUnitAsync {
     movimientoTecnocom10.setTipoFac(tipofac);
     movimientoTecnocom10.setIndNorCor(tipofac.getCorrector());
     movimientoTecnocom10.setTipoReg(registerType);
+    // Por regla: OP es siempre CONC, AU es siempre AUTO
+    if (TecnocomReconciliationRegisterType.OP.equals(registerType)) {
+      movimientoTecnocom10.setOriginOpe(OriginOpeType.CONC_ORIGIN.getValue());
+    } else if (TecnocomReconciliationRegisterType.AU.equals(registerType)) {
+      movimientoTecnocom10.setOriginOpe(OriginOpeType.AUT_ORIGIN.getValue());
+    }
     movimientoTecnocom10.getImpDiv().setCurrencyCode(currencyCode);
     return getTecnocomReconciliationEJBBean10().insertaMovimientoTecnocom(movimientoTecnocom10);
   }

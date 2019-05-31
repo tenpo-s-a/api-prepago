@@ -241,7 +241,7 @@ public class TecnocomReconciliationEJBBean10 extends PrepaidBaseEJBBean10 implem
     // Se procesan los conciliados
     List<MovimientoTecnocom10> reconciledList = this.buscaMovimientosTecnocom(fileId, OriginOpeType.CONC_ORIGIN);
 
-    if(autoList != null){
+    if(reconciledList != null){
       // TRX Insertadas x Servicio.
       this.insertAutorization(fileId, reconciledList);
     }
