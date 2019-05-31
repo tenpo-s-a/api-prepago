@@ -22,14 +22,14 @@ public class Test_PrepaidAccountingEJBBean10_getTransactionType extends TestBase
   @Test(expected = Exception.class)
   public void getTransactionType_merchantName_null() throws Exception {
     IpmMessage ipmMessage = new IpmMessage();
-    ipmMessage.setTransactionCurrencyCode(CodigoMoneda.CHILE_CLP.getValue());
+    ipmMessage.setTransactionCurrencyCode(CodigoMoneda.CLP.getValue());
     getPrepaidAccountingEJBBean10().getTransactionType(ipmMessage);
   }
 
   @Test(expected = Exception.class)
   public void getTransactionType_merchantName_empty() throws Exception {
     IpmMessage ipmMessage = new IpmMessage();
-    ipmMessage.setTransactionCurrencyCode(CodigoMoneda.CHILE_CLP.getValue());
+    ipmMessage.setTransactionCurrencyCode(CodigoMoneda.CLP.getValue());
     ipmMessage.setMerchantName("");
     getPrepaidAccountingEJBBean10().getTransactionType(ipmMessage);
   }
@@ -37,7 +37,7 @@ public class Test_PrepaidAccountingEJBBean10_getTransactionType extends TestBase
   @Test
   public void getTransactionType_subscription() throws Exception {
     IpmMessage ipmMessage = new IpmMessage();
-    ipmMessage.setTransactionCurrencyCode(CodigoMoneda.CHILE_CLP.getValue());
+    ipmMessage.setTransactionCurrencyCode(CodigoMoneda.CLP.getValue());
     ipmMessage.setMerchantName("NetFlix.CoM!2314123");
     AccountingTxType type = getPrepaidAccountingEJBBean10().getTransactionType(ipmMessage);
     Assert.assertEquals("Debe ser suscripcion", AccountingTxType.COMPRA_SUSCRIPCION, type);
@@ -46,7 +46,7 @@ public class Test_PrepaidAccountingEJBBean10_getTransactionType extends TestBase
   @Test
   public void getTransactionType_clpPurchase() throws Exception {
     IpmMessage ipmMessage = new IpmMessage();
-    ipmMessage.setTransactionCurrencyCode(CodigoMoneda.CHILE_CLP.getValue());
+    ipmMessage.setTransactionCurrencyCode(CodigoMoneda.CLP.getValue());
     ipmMessage.setMerchantName("Ebay");
     AccountingTxType type = getPrepaidAccountingEJBBean10().getTransactionType(ipmMessage);
     Assert.assertEquals("Debe ser compra en pesos", AccountingTxType.COMPRA_PESOS, type);
@@ -55,7 +55,7 @@ public class Test_PrepaidAccountingEJBBean10_getTransactionType extends TestBase
   @Test
   public void getTransactionType_otherCurrencyPurchase() throws Exception {
     IpmMessage ipmMessage = new IpmMessage();
-    ipmMessage.setTransactionCurrencyCode(CodigoMoneda.USA_USD.getValue());
+    ipmMessage.setTransactionCurrencyCode(CodigoMoneda.USD.getValue());
     ipmMessage.setMerchantName("NetFlix.CoM!2314123");
     AccountingTxType type = getPrepaidAccountingEJBBean10().getTransactionType(ipmMessage);
     Assert.assertEquals("Debe ser compra en otra moneda", AccountingTxType.COMPRA_MONEDA, type);

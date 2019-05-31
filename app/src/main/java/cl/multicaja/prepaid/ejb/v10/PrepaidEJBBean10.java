@@ -1961,7 +1961,7 @@ public class PrepaidEJBBean10 extends PrepaidBaseEJBBean10 implements PrepaidEJB
 
     try{
       prepaidTransactionExtend10 = createConsultaAutorizacionesToList(prepaidCard.getProcessorUserId(),
-        CodigoMoneda.CHILE_CLP,_startDate,_endDate);
+        CodigoMoneda.CLP,_startDate,_endDate);
 
       prepaidTransactionExtend10.setErrorCode(0);
       prepaidTransactionExtend10.setSuccess(true);

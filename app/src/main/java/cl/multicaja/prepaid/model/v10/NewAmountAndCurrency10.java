@@ -19,7 +19,7 @@ public class NewAmountAndCurrency10 extends BaseModel {
   }
 
   /**
-   * Crea una intancia con currencyCode por defecto en CodigoMoneda.CHILE_CLP
+   * Crea una intancia con currencyCode por defecto en CodigoMoneda.CLP
    *
    * @param value
    */

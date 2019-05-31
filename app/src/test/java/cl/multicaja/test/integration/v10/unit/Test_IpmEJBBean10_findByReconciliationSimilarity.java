@@ -24,6 +24,7 @@ import java.math.BigDecimal;
 import java.math.RoundingMode;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Map;
 import java.util.Scanner;
 import java.util.concurrent.TimeoutException;
 
@@ -33,6 +34,10 @@ public class Test_IpmEJBBean10_findByReconciliationSimilarity extends TestBaseUn
   @After
   public void clearData() {
     getDbUtils().getJdbcTemplate().execute(String.format("TRUNCATE %s.ipm_file_data CASCADE", getSchemaAccounting()));
+    getDbUtils().getJdbcTemplate().execute(String.format("TRUNCATE %s.clearing CASCADE", getSchemaAccounting()));
+    getDbUtils().getJdbcTemplate().execute(String.format("TRUNCATE %s.accounting CASCADE", getSchemaAccounting()));
+    getDbUtils().getJdbcTemplate().execute(String.format("TRUNCATE %s.prp_movimiento_comision CASCADE", getSchema()));
+    getDbUtils().getJdbcTemplate().execute(String.format("TRUNCATE %s.prp_movimiento_investigar CASCADE", getSchema()));
     getDbUtils().getJdbcTemplate().execute(String.format("TRUNCATE %s.prp_movimientos_tecnocom CASCADE", getSchema()));
     getDbUtils().getJdbcTemplate().execute(String.format("TRUNCATE %s.prp_archivos_conciliacion CASCADE", getSchema()));
     getDbUtils().getJdbcTemplate().execute(String.format("TRUNCATE %s.prp_tarjeta CASCADE", getSchema()));
@@ -97,41 +102,43 @@ public class Test_IpmEJBBean10_findByReconciliationSimilarity extends TestBaseUn
 
   @Test
   public void findWithRealData() throws Exception {
-    getDbUtils().getJdbcTemplate().execute("INSERT INTO prepago.prp_archivos_conciliacion " +
+    // Preparar archivo
+    getDbUtils().getJdbcTemplate().execute(String.format("INSERT INTO %s.prp_archivos_conciliacion " +
       "(nombre_de_archivo, proceso, tipo, status, created_at, updated_at) " +
-      "VALUES('test.txt', 'TECNOCOM', 'TECNOCOM_FILE', 'OK', timezone('utc', now()), timezone('utc', now()));");
-
-    getDbUtils().getJdbcTemplate().execute("UPDATE prepago.prp_archivos_conciliacion SET id = 3 WHERE nombre_de_archivo = 'test.txt'");
+      "VALUES('test.txt', 'TECNOCOM', 'TECNOCOM_FILE', 'OK', timezone('utc', now()), timezone('utc', now()));", getSchema()));
+    getDbUtils().getJdbcTemplate().execute(String.format("UPDATE %s.prp_archivos_conciliacion SET id = 3 WHERE nombre_de_archivo = 'test.txt'", getSchema()));
 
     // Insertar movimientos ipm
     String resource = "src/test/resources/mastercard/files/ipm/ipm.toMakeMatch.SQL_INSERT";
-    String content = new Scanner(new File(resource)).useDelimiter("\\Z").next();
+    String content = String.format(new Scanner(new File(resource)).useDelimiter("\\Z").next(), getSchemaAccounting());
     getDbUtils().getJdbcTemplate().execute(content);
 
     // Insertar movimientos tecnocom
     resource = "src/test/resources/tecnocom/files/PLJ61110.toMakeMatch.SQL_INSERT";
-    content = new Scanner(new File(resource)).useDelimiter("\\Z").next();
+    content = new Scanner(new File(resource)).useDelimiter("\\Z").next().replaceAll("%s", getSchema());
     getDbUtils().getJdbcTemplate().execute(content);
 
     // Crear user
     PrepaidUser10 prepaidUser10= buildPrepaidUserv2();
     prepaidUser10 = createPrepaidUserV2(prepaidUser10);
-
     Account account = buildAccountFromTecnocom(prepaidUser10);
     account = createAccount(account.getUserId(),account.getAccountNumber());
-
     PrepaidCard10 card = buildPrepaidCardWithTecnocomData(prepaidUser10,account);
     card = createPrepaidCardV2(card);
 
+    // Setear que todos los movimientos pertenezcan a esta tarjeta
     getDbUtils().getJdbcTemplate().execute(String.format("UPDATE %s.prp_movimientos_tecnocom SET pan = '%s', contrato = '%s'", getSchema(), card.getHashedPan(), account.getAccountNumber()));
     getDbUtils().getJdbcTemplate().execute(String.format("UPDATE %s.ipm_file_data SET pan = '%s'", getSchemaAccounting(), card.getPan()));
 
     // Prepara un mock de fees muy inutil
     prepareCalculateFeesMock();
 
+    // Ejecutar proceso
     getTecnocomReconciliationEJBBean10().processTecnocomTableData(3L);
 
-    System.out.println("el");
+    // Debe haber 2 movimientos IPM conciliados porque hicieron match, (los otros 2 son de tipo factura desconocido asi que se ignoran)
+    List<Map<String, Object>> foundList = getDbUtils().getJdbcTemplate().queryForList(String.format("SELECT * FROM %s.ipm_file_data WHERE reconciled = true", getSchemaAccounting()));
+    Assert.assertEquals("Debe haber 2 movimientos ipm conciliados", 2, foundList.size());
   }
 
   private void prepareCalculateFeesMock() throws TimeoutException, BaseException {

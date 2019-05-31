@@ -341,7 +341,7 @@ public class Test_AutoReconciliation_FullTest extends TestBaseUnitAsync {
   // Compra en dolares, BD = NO, file = AU
   @Test
   public void processTecnocomTableData_whenMovPurchaseInForeignCoin_NotInDBAndFileStateIsAU_movIsInsertedAndLiqAccMustExistInInitialState() throws Exception {
-    MovimientoTecnocom10 movimientoTecnocom10 = prepareMovimientoTecnocom(TipoFactura.COMPRA_INTERNACIONAL, TecnocomReconciliationRegisterType.AU, CodigoMoneda.USA_USD);
+    MovimientoTecnocom10 movimientoTecnocom10 = prepareMovimientoTecnocom(TipoFactura.COMPRA_INTERNACIONAL, TecnocomReconciliationRegisterType.AU, CodigoMoneda.USD);
 
     // Prepara un mock del servicio de fees, para que retorne las fees esperadas
     prepareCalculateFeesMock(movimientoTecnocom10.getImpFac().getValue(), false);
@@ -409,7 +409,7 @@ public class Test_AutoReconciliation_FullTest extends TestBaseUnitAsync {
   // Compra en pesos, BD = NO, file = AU
   @Test
   public void processTecnocomTableData_whenMovPurchaseInPesos_NotInDBAndFileStateIsAU_movIsInsertedAndLiqAccMustExistInInitialState() throws Exception {
-    MovimientoTecnocom10 movimientoTecnocom10 = prepareMovimientoTecnocom(TipoFactura.COMPRA_INTERNACIONAL, TecnocomReconciliationRegisterType.AU, CodigoMoneda.CHILE_CLP);
+    MovimientoTecnocom10 movimientoTecnocom10 = prepareMovimientoTecnocom(TipoFactura.COMPRA_INTERNACIONAL, TecnocomReconciliationRegisterType.AU, CodigoMoneda.CLP);
 
     // Prepara un mock del servicio de fees, para que retorne las fees esperadas
     prepareCalculateFeesMock(movimientoTecnocom10.getImpFac().getValue(), true);
@@ -487,7 +487,7 @@ public class Test_AutoReconciliation_FullTest extends TestBaseUnitAsync {
   // Compra en dolares, BD = NO, file = OP
   @Test
   public void processTecnocomTableData_whenMovPurchaseInForeignCoin_NotInDBAndFileStateIsOp_movIsInsertedAndLiqAccMustExistInInitialState() throws Exception {
-    MovimientoTecnocom10 movimientoTecnocom10 = prepareMovimientoTecnocom(TipoFactura.COMPRA_INTERNACIONAL, TecnocomReconciliationRegisterType.OP, CodigoMoneda.USA_USD);
+    MovimientoTecnocom10 movimientoTecnocom10 = prepareMovimientoTecnocom(TipoFactura.COMPRA_INTERNACIONAL, TecnocomReconciliationRegisterType.OP, CodigoMoneda.USD);
 
     // Inserta el movimiento que vino en el archivo IPM (para hacer un match, y reescribir su valor)
     IpmMovement10 ipmMovement10 = prepareIpmMovement(movimientoTecnocom10);
@@ -558,7 +558,7 @@ public class Test_AutoReconciliation_FullTest extends TestBaseUnitAsync {
   // Compra en pesos, BD = NO, file = OP
   @Test
   public void processTecnocomTableData_whenMovPurchaseInPesos_NotInDBAndFileStateIsOP_movIsInsertedAndLiqAccMustExistInInitialState() throws Exception {
-    MovimientoTecnocom10 movimientoTecnocom10 = prepareMovimientoTecnocom(TipoFactura.COMPRA_INTERNACIONAL, TecnocomReconciliationRegisterType.OP, CodigoMoneda.CHILE_CLP);
+    MovimientoTecnocom10 movimientoTecnocom10 = prepareMovimientoTecnocom(TipoFactura.COMPRA_INTERNACIONAL, TecnocomReconciliationRegisterType.OP, CodigoMoneda.CLP);
 
     // Inserta el movimiento que vino en el archivo IPM (para hacer un match, y reescribir su valor)
     IpmMovement10 ipmMovement10 = prepareIpmMovement(movimientoTecnocom10);
@@ -639,7 +639,7 @@ public class Test_AutoReconciliation_FullTest extends TestBaseUnitAsync {
   // Compra en dolares, BD = NOTIFIED, file = AU
   @Test
   public void processTecnocomTableData_whenMovPurchaseInForeignCoin_InDBNotifiedAndFileStateIsAU_movIsInsertedAndLiqAccMustExistInInitialState() throws Exception {
-    MovimientoTecnocom10 movimientoTecnocom10 = prepareMovimientoTecnocom(TipoFactura.COMPRA_INTERNACIONAL, TecnocomReconciliationRegisterType.AU, CodigoMoneda.USA_USD);
+    MovimientoTecnocom10 movimientoTecnocom10 = prepareMovimientoTecnocom(TipoFactura.COMPRA_INTERNACIONAL, TecnocomReconciliationRegisterType.AU, CodigoMoneda.USD);
 
     // Insertar el movimiento en la BD
     PrepaidMovement10 insertedMovement = buildPrepaidMovementFromTecnocomMovement(movimientoTecnocom10);
@@ -699,7 +699,7 @@ public class Test_AutoReconciliation_FullTest extends TestBaseUnitAsync {
   // Compra en pesos, BD = NOTIFIED, file = AU
   @Test
   public void processTecnocomTableData_whenMovPurchaseInPesos_InDBNotifiedAndFileStateIsAU_movIsInsertedAndLiqAccMustExistInInitialState() throws Exception {
-    MovimientoTecnocom10 movimientoTecnocom10 = prepareMovimientoTecnocom(TipoFactura.COMPRA_INTERNACIONAL, TecnocomReconciliationRegisterType.AU, CodigoMoneda.CHILE_CLP);
+    MovimientoTecnocom10 movimientoTecnocom10 = prepareMovimientoTecnocom(TipoFactura.COMPRA_INTERNACIONAL, TecnocomReconciliationRegisterType.AU, CodigoMoneda.CLP);
 
     // Insertar el movimiento en la BD
     PrepaidMovement10 insertedMovement = buildPrepaidMovementFromTecnocomMovement(movimientoTecnocom10);
@@ -764,7 +764,7 @@ public class Test_AutoReconciliation_FullTest extends TestBaseUnitAsync {
   // Compra en dolares, BD = NOTIFIED, file = OP
   @Test
   public void processTecnocomTableData_whenMovPurchaseInForeignCoin_InDBNotifiedAndFileStateIsOp_movIsInsertedAndLiqAccMustExistInInitialState() throws Exception {
-    MovimientoTecnocom10 movimientoTecnocom10 = prepareMovimientoTecnocom(TipoFactura.COMPRA_INTERNACIONAL, TecnocomReconciliationRegisterType.OP, CodigoMoneda.USA_USD);
+    MovimientoTecnocom10 movimientoTecnocom10 = prepareMovimientoTecnocom(TipoFactura.COMPRA_INTERNACIONAL, TecnocomReconciliationRegisterType.OP, CodigoMoneda.USD);
 
     // Insertar el movimiento en la BD
     PrepaidMovement10 insertedMovement = buildPrepaidMovementFromTecnocomMovement(movimientoTecnocom10);
@@ -827,7 +827,7 @@ public class Test_AutoReconciliation_FullTest extends TestBaseUnitAsync {
   // Compra en pesos, BD = NOTIFIED, file = OP
   @Test
   public void processTecnocomTableData_whenMovPurchaseInPesos_InDBNotifiedAndFileStateIsOP_movIsInsertedAndLiqAccMustExistInInitialState() throws Exception {
-    MovimientoTecnocom10 movimientoTecnocom10 = prepareMovimientoTecnocom(TipoFactura.COMPRA_INTERNACIONAL, TecnocomReconciliationRegisterType.OP, CodigoMoneda.CHILE_CLP);
+    MovimientoTecnocom10 movimientoTecnocom10 = prepareMovimientoTecnocom(TipoFactura.COMPRA_INTERNACIONAL, TecnocomReconciliationRegisterType.OP, CodigoMoneda.CLP);
 
     // Insertar el movimiento en la BD
     PrepaidMovement10 insertedMovement = buildPrepaidMovementFromTecnocomMovement(movimientoTecnocom10);
@@ -895,7 +895,7 @@ public class Test_AutoReconciliation_FullTest extends TestBaseUnitAsync {
   // Compra en dolares, BD = AUTHORIZED, file = OP
   @Test
   public void processTecnocomTableData_whenMovPurchaseInForeignCoin_InDBAuthorizedAndFileStateIsOp_movIsInsertedAndLiqAccMustExistInInitialState() throws Exception {
-    MovimientoTecnocom10 movimientoTecnocom10 = prepareMovimientoTecnocom(TipoFactura.COMPRA_INTERNACIONAL, TecnocomReconciliationRegisterType.OP, CodigoMoneda.USA_USD);
+    MovimientoTecnocom10 movimientoTecnocom10 = prepareMovimientoTecnocom(TipoFactura.COMPRA_INTERNACIONAL, TecnocomReconciliationRegisterType.OP, CodigoMoneda.USD);
 
     // Insertar el movimiento en la BD
     PrepaidMovement10 insertedMovement = buildPrepaidMovementFromTecnocomMovement(movimientoTecnocom10);
@@ -940,7 +940,7 @@ public class Test_AutoReconciliation_FullTest extends TestBaseUnitAsync {
   // Compra en pesos, BD = AUTHORIZED, file = OP
   @Test
   public void processTecnocomTableData_whenMovPurchaseInPesos_InDBAuthorizedAndFileStateIsOP_movIsInsertedAndLiqAccMustExistInInitialState() throws Exception {
-    MovimientoTecnocom10 movimientoTecnocom10 = prepareMovimientoTecnocom(TipoFactura.COMPRA_INTERNACIONAL, TecnocomReconciliationRegisterType.OP, CodigoMoneda.CHILE_CLP);
+    MovimientoTecnocom10 movimientoTecnocom10 = prepareMovimientoTecnocom(TipoFactura.COMPRA_INTERNACIONAL, TecnocomReconciliationRegisterType.OP, CodigoMoneda.CLP);
 
     // Insertar el movimiento en la BD
     PrepaidMovement10 insertedMovement = buildPrepaidMovementFromTecnocomMovement(movimientoTecnocom10);
@@ -985,7 +985,7 @@ public class Test_AutoReconciliation_FullTest extends TestBaseUnitAsync {
   // Suscripcion en dolares, BD = NO, file = AU
   @Test
   public void processTecnocomTableData_whenMovSuscriptionInForeignCoin_NotInDBAndFileStateIsAU_movIsInsertedAndLiqAccMustExistInInitialState() throws Exception {
-    MovimientoTecnocom10 movimientoTecnocom10 = prepareMovimientoTecnocom(TipoFactura.SUSCRIPCION_INTERNACIONAL, TecnocomReconciliationRegisterType.AU, CodigoMoneda.USA_USD);
+    MovimientoTecnocom10 movimientoTecnocom10 = prepareMovimientoTecnocom(TipoFactura.SUSCRIPCION_INTERNACIONAL, TecnocomReconciliationRegisterType.AU, CodigoMoneda.USD);
 
     // Prepara un mock del servicio de fees, para que retorne las fees esperadas
     prepareCalculateFeesMock(movimientoTecnocom10.getImpFac().getValue(), false);
@@ -1053,7 +1053,7 @@ public class Test_AutoReconciliation_FullTest extends TestBaseUnitAsync {
   // Suscripcion en pesos, BD = NO, file = AU
   @Test
   public void processTecnocomTableData_whenMovSuscriptionInPesos_NotInDBAndFileStateIsAU_movIsInsertedAndLiqAccMustExistInInitialState() throws Exception {
-    MovimientoTecnocom10 movimientoTecnocom10 = prepareMovimientoTecnocom(TipoFactura.SUSCRIPCION_INTERNACIONAL, TecnocomReconciliationRegisterType.AU, CodigoMoneda.CHILE_CLP);
+    MovimientoTecnocom10 movimientoTecnocom10 = prepareMovimientoTecnocom(TipoFactura.SUSCRIPCION_INTERNACIONAL, TecnocomReconciliationRegisterType.AU, CodigoMoneda.CLP);
 
     // Prepara un mock del servicio de fees, para que retorne las fees esperadas
     prepareCalculateFeesMock(movimientoTecnocom10.getImpFac().getValue(), true);
@@ -1131,7 +1131,7 @@ public class Test_AutoReconciliation_FullTest extends TestBaseUnitAsync {
   // Suscription en dolares, BD = NO, file = OP
   @Test
   public void processTecnocomTableData_whenMovSuscriptionInForeignCoin_NotInDBAndFileStateIsOp_movIsInsertedAndLiqAccMustExistInInitialState() throws Exception {
-    MovimientoTecnocom10 movimientoTecnocom10 = prepareMovimientoTecnocom(TipoFactura.SUSCRIPCION_INTERNACIONAL, TecnocomReconciliationRegisterType.OP, CodigoMoneda.USA_USD);
+    MovimientoTecnocom10 movimientoTecnocom10 = prepareMovimientoTecnocom(TipoFactura.SUSCRIPCION_INTERNACIONAL, TecnocomReconciliationRegisterType.OP, CodigoMoneda.USD);
 
     // Inserta el movimiento que vino en el archivo IPM (para hacer un match, y reescribir su valor)
     IpmMovement10 ipmMovement10 = prepareIpmMovement(movimientoTecnocom10);
@@ -1202,7 +1202,7 @@ public class Test_AutoReconciliation_FullTest extends TestBaseUnitAsync {
   // Suscription en pesos, BD = NO, file = OP
   @Test
   public void processTecnocomTableData_whenMovSuscriptionInPesos_NotInDBAndFileStateIsOP_movIsInsertedAndLiqAccMustExistInInitialState() throws Exception {
-    MovimientoTecnocom10 movimientoTecnocom10 = prepareMovimientoTecnocom(TipoFactura.SUSCRIPCION_INTERNACIONAL, TecnocomReconciliationRegisterType.OP, CodigoMoneda.CHILE_CLP);
+    MovimientoTecnocom10 movimientoTecnocom10 = prepareMovimientoTecnocom(TipoFactura.SUSCRIPCION_INTERNACIONAL, TecnocomReconciliationRegisterType.OP, CodigoMoneda.CLP);
 
     // Inserta el movimiento que vino en el archivo IPM (para hacer un match, y reescribir su valor)
     IpmMovement10 ipmMovement10 = prepareIpmMovement(movimientoTecnocom10);
@@ -1283,7 +1283,7 @@ public class Test_AutoReconciliation_FullTest extends TestBaseUnitAsync {
   // Suscription en dolares, BD = NOTIFIED, file = AU
   @Test
   public void processTecnocomTableData_whenMovSuscriptionInForeignCoin_InDBNotifiedAndFileStateIsAU_movIsInsertedAndLiqAccMustExistInInitialState() throws Exception {
-    MovimientoTecnocom10 movimientoTecnocom10 = prepareMovimientoTecnocom(TipoFactura.SUSCRIPCION_INTERNACIONAL, TecnocomReconciliationRegisterType.AU, CodigoMoneda.USA_USD);
+    MovimientoTecnocom10 movimientoTecnocom10 = prepareMovimientoTecnocom(TipoFactura.SUSCRIPCION_INTERNACIONAL, TecnocomReconciliationRegisterType.AU, CodigoMoneda.USD);
 
     // Insertar el movimiento en la BD
     PrepaidMovement10 insertedMovement = buildPrepaidMovementFromTecnocomMovement(movimientoTecnocom10);
@@ -1343,7 +1343,7 @@ public class Test_AutoReconciliation_FullTest extends TestBaseUnitAsync {
   // Suscription en pesos, BD = NOTIFIED, file = AU
   @Test
   public void processTecnocomTableData_whenMovSuscriptionInPesos_InDBNotifiedAndFileStateIsAU_movIsInsertedAndLiqAccMustExistInInitialState() throws Exception {
-    MovimientoTecnocom10 movimientoTecnocom10 = prepareMovimientoTecnocom(TipoFactura.SUSCRIPCION_INTERNACIONAL, TecnocomReconciliationRegisterType.AU, CodigoMoneda.CHILE_CLP);
+    MovimientoTecnocom10 movimientoTecnocom10 = prepareMovimientoTecnocom(TipoFactura.SUSCRIPCION_INTERNACIONAL, TecnocomReconciliationRegisterType.AU, CodigoMoneda.CLP);
 
     // Insertar el movimiento en la BD
     PrepaidMovement10 insertedMovement = buildPrepaidMovementFromTecnocomMovement(movimientoTecnocom10);
@@ -1408,7 +1408,7 @@ public class Test_AutoReconciliation_FullTest extends TestBaseUnitAsync {
   // Suscription en dolares, BD = NOTIFIED, file = OP
   @Test
   public void processTecnocomTableData_whenMovSuscriptionInForeignCoin_InDBNotifiedAndFileStateIsOp_movIsInsertedAndLiqAccMustExistInInitialState() throws Exception {
-    MovimientoTecnocom10 movimientoTecnocom10 = prepareMovimientoTecnocom(TipoFactura.SUSCRIPCION_INTERNACIONAL, TecnocomReconciliationRegisterType.OP, CodigoMoneda.USA_USD);
+    MovimientoTecnocom10 movimientoTecnocom10 = prepareMovimientoTecnocom(TipoFactura.SUSCRIPCION_INTERNACIONAL, TecnocomReconciliationRegisterType.OP, CodigoMoneda.USD);
 
     // Insertar el movimiento en la BD
     PrepaidMovement10 insertedMovement = buildPrepaidMovementFromTecnocomMovement(movimientoTecnocom10);
@@ -1471,7 +1471,7 @@ public class Test_AutoReconciliation_FullTest extends TestBaseUnitAsync {
   // Suscription en pesos, BD = NOTIFIED, file = OP
   @Test
   public void processTecnocomTableData_whenMovSuscriptionInPesos_InDBNotifiedAndFileStateIsOP_movIsInsertedAndLiqAccMustExistInInitialState() throws Exception {
-    MovimientoTecnocom10 movimientoTecnocom10 = prepareMovimientoTecnocom(TipoFactura.SUSCRIPCION_INTERNACIONAL, TecnocomReconciliationRegisterType.OP, CodigoMoneda.CHILE_CLP);
+    MovimientoTecnocom10 movimientoTecnocom10 = prepareMovimientoTecnocom(TipoFactura.SUSCRIPCION_INTERNACIONAL, TecnocomReconciliationRegisterType.OP, CodigoMoneda.CLP);
 
     // Insertar el movimiento en la BD
     PrepaidMovement10 insertedMovement = buildPrepaidMovementFromTecnocomMovement(movimientoTecnocom10);
@@ -1539,7 +1539,7 @@ public class Test_AutoReconciliation_FullTest extends TestBaseUnitAsync {
   // Suscription en dolares, BD = AUTHORIZED, file = OP
   @Test
   public void processTecnocomTableData_whenMovSuscriptionInForeignCoin_InDBAuthorizedAndFileStateIsOp_movIsInsertedAndLiqAccMustExistInInitialState() throws Exception {
-    MovimientoTecnocom10 movimientoTecnocom10 = prepareMovimientoTecnocom(TipoFactura.SUSCRIPCION_INTERNACIONAL, TecnocomReconciliationRegisterType.OP, CodigoMoneda.USA_USD);
+    MovimientoTecnocom10 movimientoTecnocom10 = prepareMovimientoTecnocom(TipoFactura.SUSCRIPCION_INTERNACIONAL, TecnocomReconciliationRegisterType.OP, CodigoMoneda.USD);
 
     // Insertar el movimiento en la BD
     PrepaidMovement10 insertedMovement = buildPrepaidMovementFromTecnocomMovement(movimientoTecnocom10);
@@ -1584,7 +1584,7 @@ public class Test_AutoReconciliation_FullTest extends TestBaseUnitAsync {
   // Suscription en pesos, BD = AUTHORIZED, file = OP
   @Test
   public void processTecnocomTableData_whenMovSuscriptionInPesos_InDBAuthorizedAndFileStateIsOP_movIsInsertedAndLiqAccMustExistInInitialState() throws Exception {
-    MovimientoTecnocom10 movimientoTecnocom10 = prepareMovimientoTecnocom(TipoFactura.SUSCRIPCION_INTERNACIONAL, TecnocomReconciliationRegisterType.OP, CodigoMoneda.CHILE_CLP);
+    MovimientoTecnocom10 movimientoTecnocom10 = prepareMovimientoTecnocom(TipoFactura.SUSCRIPCION_INTERNACIONAL, TecnocomReconciliationRegisterType.OP, CodigoMoneda.CLP);
 
     // Insertar el movimiento en la BD
     PrepaidMovement10 insertedMovement = buildPrepaidMovementFromTecnocomMovement(movimientoTecnocom10);
@@ -1700,12 +1700,12 @@ public class Test_AutoReconciliation_FullTest extends TestBaseUnitAsync {
     registroTecnocom.setIndNorCor(IndicadorNormalCorrector.NORMAL.getValue());
     registroTecnocom.setPan(prepaidCard.getHashedPan());
     registroTecnocom.setCentAlta("fill");
-    registroTecnocom.setClamone(CodigoMoneda.USA_USD);
+    registroTecnocom.setClamone(CodigoMoneda.USD);
     registroTecnocom.setCmbApli(new BigDecimal(1L));
     registroTecnocom.setCodAct(0);
     registroTecnocom.setCodCom(getRandomString(15));
     registroTecnocom.setCodEnt(getRandomString(4));
-    registroTecnocom.setCodPais(CodigoPais.CHILE.getValue());
+    registroTecnocom.setCodPais(CodigoPais.CHILE);
     registroTecnocom.setContrato(account.getAccountNumber());
     registroTecnocom.setCuenta(getRandomNumericString(10));
     registroTecnocom.setFecFac(LocalDate.now(ZoneId.of("UTC")));
@@ -1769,7 +1769,7 @@ public class Test_AutoReconciliation_FullTest extends TestBaseUnitAsync {
     prepaidMovement10.setCodact(movimientoTecnocom10.getCodAct());
     prepaidMovement10.setImpliq(movimientoTecnocom10.getImpLiq().getValue());
     prepaidMovement10.setClamonliq(movimientoTecnocom10.getImpLiq().getCurrencyCode().getValue());
-    prepaidMovement10.setCodpais(CodigoPais.fromValue(movimientoTecnocom10.getCodPais()));
+    prepaidMovement10.setCodpais(movimientoTecnocom10.getCodPais());
     prepaidMovement10.setNompob(movimientoTecnocom10.getNomPob());
     prepaidMovement10.setNumextcta(movimientoTecnocom10.getNumExtCta().intValue());
     prepaidMovement10.setNummovext(movimientoTecnocom10.getNumMovExt().intValue());

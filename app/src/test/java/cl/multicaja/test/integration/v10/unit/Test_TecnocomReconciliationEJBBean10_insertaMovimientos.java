@@ -252,23 +252,23 @@ public class Test_TecnocomReconciliationEJBBean10_insertaMovimientos extends Tes
     movimientoTecnocom10.setCmbApli(new BigDecimal(23));
     movimientoTecnocom10.setIndProaje("");
     movimientoTecnocom10.setCodAct(1);
-    movimientoTecnocom10.setCodPais(CodigoPais.CHILE.getValue());
-    movimientoTecnocom10.setClamone(CodigoMoneda.NONE);
+    movimientoTecnocom10.setCodPais(CodigoPais.CHILE);
+    movimientoTecnocom10.setClamone(CodigoMoneda.UNK);
     movimientoTecnocom10.setTipoLin("");
 
     NewAmountAndCurrency10 impFac = new NewAmountAndCurrency10();
     impFac.setValue(new BigDecimal(getUniqueInteger()));
-    impFac.setCurrencyCode(CodigoMoneda.CHILE_CLP);
+    impFac.setCurrencyCode(CodigoMoneda.CLP);
     movimientoTecnocom10.setImpFac(impFac);
 
     NewAmountAndCurrency10 impDiv = new NewAmountAndCurrency10();
     impDiv.setValue(new BigDecimal(getUniqueInteger()));
-    impDiv.setCurrencyCode(CodigoMoneda.USA_USD);
+    impDiv.setCurrencyCode(CodigoMoneda.USD);
     movimientoTecnocom10.setImpDiv(impDiv);
 
     NewAmountAndCurrency10 imLiq = new NewAmountAndCurrency10();
     imLiq.setValue(new BigDecimal(getUniqueInteger()));
-    imLiq.setCurrencyCode(CodigoMoneda.CHILE_CLP);
+    imLiq.setCurrencyCode(CodigoMoneda.CLP);
     movimientoTecnocom10.setImpLiq(imLiq);
 
     movimientoTecnocom10.setContrato(getRandomNumericString(10));

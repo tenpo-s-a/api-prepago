@@ -355,7 +355,7 @@ public class Test_PrepaidEJBBean10_withdrawUserBalance extends TestBaseUnit {
     prepaidWithdraw.setRut(11111111);
     prepaidWithdraw.setMerchantCode("987654321");
     NewAmountAndCurrency10 amount = new NewAmountAndCurrency10();
-    amount.setCurrencyCode(CodigoMoneda.CHILE_CLP);
+    amount.setCurrencyCode(CodigoMoneda.CLP);
     amount.setValue(new BigDecimal("9999.90"));
     prepaidWithdraw.setAmount(amount);
 
@@ -377,7 +377,7 @@ public class Test_PrepaidEJBBean10_withdrawUserBalance extends TestBaseUnit {
     prepaidWithdraw.setTransactionId("123456789");
     prepaidWithdraw.setRut(11111111);
     NewAmountAndCurrency10 amount = new NewAmountAndCurrency10();
-    amount.setCurrencyCode(CodigoMoneda.CHILE_CLP);
+    amount.setCurrencyCode(CodigoMoneda.CLP);
     amount.setValue(new BigDecimal("9999.90"));
     prepaidWithdraw.setAmount(amount);
 
@@ -438,7 +438,7 @@ public class Test_PrepaidEJBBean10_withdrawUserBalance extends TestBaseUnit {
     prepaidWithdraw.setRut(11111111);
     prepaidWithdraw.setMerchantCode("987654321");
     NewAmountAndCurrency10 amount = new NewAmountAndCurrency10();
-    amount.setCurrencyCode(CodigoMoneda.CHILE_CLP);
+    amount.setCurrencyCode(CodigoMoneda.CLP);
     prepaidWithdraw.setAmount(amount);
 
     try {

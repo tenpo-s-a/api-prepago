@@ -163,7 +163,7 @@ public class TestBaseUnitAsync extends TestContextHelper {
     }
     //se crea la el objeto con los datos del proceso
     PrepaidTopupData10 data = new PrepaidTopupData10(prepaidTopup, prepaidUser, cdtTransaction, prepaidMovement);
-    prepaidTopup.setFee(new NewAmountAndCurrency10(new BigDecimal(100), CodigoMoneda.CHILE_CLP));
+    prepaidTopup.setFee(new NewAmountAndCurrency10(new BigDecimal(100), CodigoMoneda.CLP));
 
     ExchangeData<PrepaidTopupData10> req = new ExchangeData<>(data);
     req.setRetryCount(retryCount < 0 ? 0 : retryCount);
@@ -208,7 +208,7 @@ public class TestBaseUnitAsync extends TestContextHelper {
     }
     //se crea la el objeto con los datos del proceso
     PrepaidTopupData10 data = new PrepaidTopupData10(prepaidTopup, prepaidUser, cdtTransaction, prepaidMovement);
-    prepaidTopup.setFee(new NewAmountAndCurrency10(new BigDecimal(100), CodigoMoneda.CHILE_CLP));
+    prepaidTopup.setFee(new NewAmountAndCurrency10(new BigDecimal(100), CodigoMoneda.CLP));
 
     ExchangeData<PrepaidTopupData10> req = new ExchangeData<>(data);
     req.setRetryCount(retryCount < 0 ? 0 : retryCount);
@@ -305,7 +305,7 @@ public class TestBaseUnitAsync extends TestContextHelper {
     prepaidTopup.setMessageId(messageId);
     //se crea la el objeto con los datos del proceso PrepaidTopup10 , User , PrepaidMovement10 prepaidMovementReverse
     PrepaidReverseData10 data = new PrepaidReverseData10(prepaidTopup,prepaidCard10,prepaidUser10, prepaidMovement);
-    prepaidTopup.setFee(new NewAmountAndCurrency10(new BigDecimal(100), CodigoMoneda.CHILE_CLP));
+    prepaidTopup.setFee(new NewAmountAndCurrency10(new BigDecimal(100), CodigoMoneda.CLP));
 
     //se envia el mensaje a la cola
     ExchangeData<PrepaidReverseData10> req = new ExchangeData<>(data);

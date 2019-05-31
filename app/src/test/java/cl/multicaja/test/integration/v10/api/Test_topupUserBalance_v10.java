@@ -248,7 +248,7 @@ public class Test_topupUserBalance_v10 extends TestBaseUnitApi {
     prepaidTopup.setRut(prepaidUser.getRut());
     prepaidTopup.setMerchantCode("987654321");
     NewAmountAndCurrency10 amount = new NewAmountAndCurrency10();
-    amount.setCurrencyCode(CodigoMoneda.CHILE_CLP);
+    amount.setCurrencyCode(CodigoMoneda.CLP);
     amount.setValue(new BigDecimal("9999.90"));
     prepaidTopup.setAmount(amount);
 
@@ -272,7 +272,7 @@ public class Test_topupUserBalance_v10 extends TestBaseUnitApi {
     prepaidTopup.setTransactionId("123456789");
     prepaidTopup.setRut(prepaidUser.getRut());
     NewAmountAndCurrency10 amount = new NewAmountAndCurrency10();
-    amount.setCurrencyCode(CodigoMoneda.CHILE_CLP);
+    amount.setCurrencyCode(CodigoMoneda.CLP);
     amount.setValue(new BigDecimal("9999.90"));
     prepaidTopup.setAmount(amount);
 
@@ -341,7 +341,7 @@ public class Test_topupUserBalance_v10 extends TestBaseUnitApi {
     prepaidTopup.setRut(prepaidUser.getRut());
     prepaidTopup.setMerchantCode("987654321");
     NewAmountAndCurrency10 amount = new NewAmountAndCurrency10();
-    amount.setCurrencyCode(CodigoMoneda.CHILE_CLP);
+    amount.setCurrencyCode(CodigoMoneda.CLP);
     prepaidTopup.setAmount(amount);
 
     HttpResponse resp = topupUserBalanceLocal(prepaidTopup);
