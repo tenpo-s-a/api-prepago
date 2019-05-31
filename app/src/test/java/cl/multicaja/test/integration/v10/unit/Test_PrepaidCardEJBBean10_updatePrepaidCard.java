@@ -28,9 +28,9 @@ public class Test_PrepaidCardEJBBean10_updatePrepaidCard extends TestBaseUnit {
     card.setProducto(getRandomNumericString(2));
     card.setNumeroUnico(getRandomNumericString(8));
 
-    getPrepaidCardEJBBean10().updatePrepaidCard(null, cardId, userId, status, card);
+    getPrepaidCardEJBBean11().updatePrepaidCard(null, cardId, userId, status, card);
 
-    PrepaidCard10 c1 = getPrepaidCardEJBBean10().getPrepaidCardById(null, card.getId());
+    PrepaidCard10 c1 = getPrepaidCardEJBBean11().getPrepaidCardById(null, card.getId());
 
     Assert.assertNotNull("debe retornar una tarjeta", c1);
     Assert.assertEquals("la tarjeta debe estar actualizada", card, c1);

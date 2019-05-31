@@ -61,7 +61,7 @@ public class Test_PendingCard10 extends TestBaseUnitAsync {
     Assert.assertNotNull("Deberia tener una PrepaidCard ProcessorUserId", remoteTopup.getData().getPrepaidCard10().getProcessorUserId());
 
     // Busca la tarjeta en la BD
-    PrepaidCard10 dbPrepaidCard = getPrepaidCardEJBBean10().getPrepaidCardById(null, remoteTopup.getData().getPrepaidCard10().getId());
+    PrepaidCard10 dbPrepaidCard = getPrepaidCardEJBBean11().getPrepaidCardById(null, remoteTopup.getData().getPrepaidCard10().getId());
     Assert.assertNotNull("Deberia tener una tarjeta", dbPrepaidCard);
     Assert.assertEquals("Deberia tener una tarjeta en status PENDING", PrepaidCardStatus.PENDING, dbPrepaidCard.getStatus());
 
@@ -165,7 +165,7 @@ public class Test_PendingCard10 extends TestBaseUnitAsync {
     Assert.assertNull("Pan Debe ser Nulo",remoteTopup.getData().getPrepaidCard10().getPan());
 
     // Busca la tarjeta en la BD
-    PrepaidCard10 dbPrepaidCard = getPrepaidCardEJBBean10().getPrepaidCardById(null, remoteTopup.getData().getPrepaidCard10().getId());
+    PrepaidCard10 dbPrepaidCard = getPrepaidCardEJBBean11().getPrepaidCardById(null, remoteTopup.getData().getPrepaidCard10().getId());
     Assert.assertNotNull("Deberia tener una tarjeta", dbPrepaidCard);
     Assert.assertEquals("Deberia tener una tarjeta en status PENDING", PrepaidCardStatus.PENDING, dbPrepaidCard.getStatus());
 
@@ -268,7 +268,7 @@ public class Test_PendingCard10 extends TestBaseUnitAsync {
     Assert.assertNull("La tarjeta debe ser Nula", remoteTopup.getData().getPrepaidCard10());
 
     // Busca la tarjeta en la BD
-    PrepaidCard10 dbPrepaidCard = getPrepaidCardEJBBean10().getLastPrepaidCardByUserIdAndStatus(null, prepaidUser.getId(), PrepaidCardStatus.PENDING);
+    PrepaidCard10 dbPrepaidCard = getPrepaidCardEJBBean11().getLastPrepaidCardByAccountIdAndStatus(null, remoteTopup.getData().getAccount().getId(), PrepaidCardStatus.PENDING);
     Assert.assertNull("Deberia tener una tarjeta", dbPrepaidCard);
 
     //verifica que la ultima cola por la cual paso el mensaje sea ERROR_EMISSION_REQ
@@ -328,7 +328,7 @@ public class Test_PendingCard10 extends TestBaseUnitAsync {
     Assert.assertNull("Deberia contener numero unico de cliente",remoteTopup.getData().getPrepaidCard10().getNumeroUnico());
 
     // Busca la tarjeta en la BD
-    PrepaidCard10 dbPrepaidCard = getPrepaidCardEJBBean10().getPrepaidCardById(null, remoteTopup.getData().getPrepaidCard10().getId());
+    PrepaidCard10 dbPrepaidCard = getPrepaidCardEJBBean11().getPrepaidCardById(null, remoteTopup.getData().getPrepaidCard10().getId());
     Assert.assertNotNull("Deberia tener una tarjeta", dbPrepaidCard);
     Assert.assertEquals("Deberia tener una tarjeta en status PENDING", PrepaidCardStatus.PENDING, dbPrepaidCard.getStatus());
 

@@ -22,6 +22,7 @@ import cl.multicaja.prepaid.async.v10.model.PrepaidTopupData10;
 import cl.multicaja.prepaid.async.v10.routes.PrepaidTopupRoute10;
 import cl.multicaja.prepaid.async.v10.routes.TransactionReversalRoute10;
 import cl.multicaja.prepaid.ejb.v10.*;
+import cl.multicaja.prepaid.ejb.v11.PrepaidCardEJBBean11;
 import cl.multicaja.prepaid.external.freshdesk.model.NewTicket;
 import cl.multicaja.prepaid.external.freshdesk.model.Ticket;
 import cl.multicaja.prepaid.helpers.freshdesk.model.v10.*;
@@ -90,7 +91,7 @@ public final class TestHelpersResource10 extends BaseResource {
   private PrepaidUserEJBBean10 prepaidUserEJBBean10;
 
   @EJB
-  private PrepaidCardEJBBean10 prepaidCardEJBBean10;
+  private PrepaidCardEJBBean11 prepaidCardEJBBean11;
 
   @EJB
   private PrepaidEJBBean10 prepaidEJBBean10;
@@ -181,7 +182,7 @@ public final class TestHelpersResource10 extends BaseResource {
     return Response.status(200).build();
   }
 
-
+  /*
   @POST
   @Path("/{userId}/randomPurchase")
 	public Response simulatePurchaseForUser(@PathParam("userId") Long userId, @Context HttpHeaders headers) throws Exception {
@@ -194,7 +195,7 @@ public final class TestHelpersResource10 extends BaseResource {
       throw new NotFoundException(CLIENTE_NO_EXISTE);
     }
 
-    PrepaidCard10 prepaidCard10 = prepaidCardEJBBean10.getLastPrepaidCardByUserId(mapHeaders, prepaidUser.getId());
+    PrepaidCard10 prepaidCard10 = prepaidCardEJBBean11.getLastPrepaidCardByUserId(mapHeaders, prepaidUser.getId());
     if (prepaidCard10 == null) {
       throw new NotFoundException(ERROR_DATA_NOT_FOUND);
     }
@@ -225,6 +226,9 @@ public final class TestHelpersResource10 extends BaseResource {
     return Response.ok(gastoAleatorio).status(201).build();
   }
 
+   */
+
+  /*
   @POST
   @Path("/{userId}/randomAuthorization")
   public Response simulateAuthorizationForUser(@PathParam("userId") Long userId, @Context HttpHeaders headers) throws Exception {
@@ -281,7 +285,10 @@ public final class TestHelpersResource10 extends BaseResource {
     }
 
   }
-    
+
+   */
+
+  /*
   @GET
   @Path("/{userId}/authorizations")
   public Response getAuthorizationByPrepaidUserId(@PathParam("userId") Long userId, @Context HttpHeaders headers) throws Exception {
@@ -315,6 +322,8 @@ public final class TestHelpersResource10 extends BaseResource {
 
     return Response.ok(impTrn).status(200).build();
   }
+
+   */
 
   @POST
   @Path("/simulateTecnocomError")
@@ -928,7 +937,7 @@ public final class TestHelpersResource10 extends BaseResource {
     tc.getTecnocomService().setRetorno(null);
 
 
-    PrepaidUser10 prepaidUser = buildPrepaidUser10();
+    PrepaidUser10 prepaidUser = buildPrepaidUserV2();
     prepaidUser = prepaidUserEJBBean10.createPrepaidUser(null, prepaidUser);
 
     // Crea cuenta
@@ -937,7 +946,7 @@ public final class TestHelpersResource10 extends BaseResource {
 
     PrepaidCard10 prepaidCard = buildPrepaidCard10FromTecnocom(prepaidUser,account.getAccountNumber());
 
-    prepaidCard = prepaidCardEJBBean10.createPrepaidCard(null, prepaidCard);
+    prepaidCard = prepaidCardEJBBean11.createPrepaidCard(null, prepaidCard);
 
     PrepaidTopup10 prepaidTopup = buildPrepaidTopup10();
     prepaidTopup.setFee(new NewAmountAndCurrency10(BigDecimal.ZERO));
@@ -963,7 +972,7 @@ public final class TestHelpersResource10 extends BaseResource {
     tc.getTecnocomService().setAutomaticError(false);
     tc.getTecnocomService().setRetorno(null);
 
-    PrepaidUser10 prepaidUser = buildPrepaidUser10();
+    PrepaidUser10 prepaidUser = buildPrepaidUserV2();
     prepaidUser = prepaidUserEJBBean10.createPrepaidUser(null, prepaidUser);
 
     PrepaidTopup10 prepaidTopup = buildPrepaidTopup10();
@@ -1004,7 +1013,7 @@ public final class TestHelpersResource10 extends BaseResource {
     prepaidCard10.setProcessorUserId(altaClienteDTO.getContrato());
     prepaidCard10.setIdUser(prepaidUser.getId());
     prepaidCard10.setStatus(PrepaidCardStatus.PENDING);
-    prepaidCard10 = prepaidCardEJBBean10.createPrepaidCard(null, prepaidCard10);
+    prepaidCard10 = prepaidCardEJBBean11.createPrepaidCard(null, prepaidCard10);
 
     tc.getTecnocomService().setAutomaticError(true);
     tc.getTecnocomService().setRetorno(CodigoRetorno._1010);
@@ -1118,7 +1127,7 @@ public final class TestHelpersResource10 extends BaseResource {
     prepaidCard.setEncryptedPan(EncryptUtil.getInstance().encrypt(prepaidCard.getPan()));
     prepaidCard.setStatus(PrepaidCardStatus.PENDING);
 
-    prepaidCard = prepaidCardEJBBean10.createPrepaidCard(null, prepaidCard);
+    prepaidCard = prepaidCardEJBBean11.createPrepaidCard(null, prepaidCard);
     log.info("prepaidCard: " + prepaidCard);
 
     PrepaidTopup10 prepaidTopup = buildPrepaidTopup10();
@@ -1167,14 +1176,14 @@ public final class TestHelpersResource10 extends BaseResource {
 
     try{
 
-      PrepaidUser10 prepaidUser = buildPrepaidUser10();
+      PrepaidUser10 prepaidUser = buildPrepaidUserV2();
       prepaidUser = prepaidUserEJBBean10.createPrepaidUser(null, prepaidUser);
 
       Account account = createRandomAccount(prepaidUser);
 
       PrepaidCard10 prepaidCard = buildPrepaidCard10(prepaidUser,account);
 
-      prepaidCard = prepaidCardEJBBean10.createPrepaidCard(null, prepaidCard);
+      prepaidCard = prepaidCardEJBBean11.createPrepaidCard(null, prepaidCard);
 
       PrepaidTopup10 prepaidTopup = buildPrepaidTopup10();
       prepaidTopup.setFee(new NewAmountAndCurrency10(new BigDecimal(500L)));

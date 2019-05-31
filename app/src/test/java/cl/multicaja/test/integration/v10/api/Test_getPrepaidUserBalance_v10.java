@@ -5,6 +5,7 @@ import cl.multicaja.core.exceptions.ValidationException;
 import cl.multicaja.core.utils.http.HttpHeader;
 import cl.multicaja.core.utils.http.HttpResponse;
 import cl.multicaja.prepaid.model.v10.*;
+import cl.multicaja.prepaid.model.v11.Account;
 import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;
@@ -13,6 +14,7 @@ import java.math.BigDecimal;
 
 import static cl.multicaja.core.model.Errors.CLIENTE_NO_TIENE_PREPAGO;
 import static cl.multicaja.core.model.Errors.SALDO_NO_DISPONIBLE_$VALUE;
+import static cl.multicaja.test.integration.v10.async.Test_Reconciliation_FullTest.prepaidUser;
 
 /**
  * @autor vutreras
@@ -37,11 +39,17 @@ public class Test_getPrepaidUserBalance_v10 extends TestBaseUnitApi {
     PrepaidUser10 prepaidUser10 = buildPrepaidUserv2(PrepaidUserLevel.LEVEL_2);
     prepaidUser10 = createPrepaidUserV2(prepaidUser10);
 
+    Account account = buildAccountFromTecnocom(prepaidUser);
+    account = createAccount(account.getUserId(),account.getAccountNumber());
+
+    PrepaidCard10 prepaidCard10 = buildPrepaidCardWithTecnocomData(prepaidUser,account);
+    prepaidCard10 = createPrepaidCardV2(prepaidCard10);
+
     // se hace una carga
     BigDecimal impfac = BigDecimal.valueOf(3000);
     topupUserBalance(prepaidUser10.getUuid(), impfac);
 
-    PrepaidCard10 prepaidCard = waitForLastPrepaidCardInStatus(prepaidUser10, PrepaidCardStatus.ACTIVE);
+    PrepaidCard10 prepaidCard = waitForLastPrepaidCardInStatus(account.getId(), PrepaidCardStatus.ACTIVE);
     Assert.assertNotNull("Deberia tener una tarjeta", prepaidCard);
 
     {

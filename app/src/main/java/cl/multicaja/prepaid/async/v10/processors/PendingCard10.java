@@ -88,7 +88,7 @@ public class PendingCard10 extends BaseProcessor10 {
           prepaidCard.setProcessorUserId(altaClienteDTO.getContrato());
           prepaidCard.setUuid(UUID.randomUUID().toString());
 
-          prepaidCard = getRoute().getPrepaidCardEJBBean10().createPrepaidCard(null,prepaidCard);
+          prepaidCard = getRoute().getPrepaidCardEJBBean11().createPrepaidCard(null,prepaidCard);
           data.setPrepaidCard10(prepaidCard);
 
           req.getData().setAccount(account);

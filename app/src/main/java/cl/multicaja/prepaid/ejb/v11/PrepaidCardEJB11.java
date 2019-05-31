@@ -1,8 +1,8 @@
-package cl.multicaja.prepaid.ejb.v10;
+package cl.multicaja.prepaid.ejb.v11;
 
 import cl.multicaja.prepaid.model.v10.PrepaidCard10;
+import cl.multicaja.prepaid.model.v10.PrepaidCardResponse10;
 import cl.multicaja.prepaid.model.v10.PrepaidCardStatus;
-import cl.multicaja.prepaid.model.v10.*;
 
 import java.util.List;
 import java.util.Map;
@@ -10,7 +10,7 @@ import java.util.Map;
 /**
  * @author vutreras
  */
-public interface PrepaidCardEJB10 {
+public interface PrepaidCardEJB11 {
 
   /**
    * permite crear una tarjeta prepago
@@ -27,14 +27,13 @@ public interface PrepaidCardEJB10 {
    *
    * @param headers
    * @param id
-   * @param userId
+   * @param accountId
    * @param expiration
    * @param status
-   * @param processorUserId
    * @return
    * @throws Exception
    */
-  List<PrepaidCard10> getPrepaidCards(Map<String, Object> headers, Long id, Long userId, Integer expiration, PrepaidCardStatus status, String processorUserId) throws Exception;
+  List<PrepaidCard10> getPrepaidCards(Map<String, Object> headers, Long id, Long accountId, Integer expiration, PrepaidCardStatus status) throws Exception;
 
   /**
    * permite buscar una tarjeta prepago por su id
@@ -50,33 +49,33 @@ public interface PrepaidCardEJB10 {
    * permite buscar la ultima tarjeta prepago por su id de usuario prepago y estado
    *
    * @param headers
-   * @param userId
+   * @param accountId
    * @param status
    * @return
    * @throws Exception
    */
-  PrepaidCard10 getLastPrepaidCardByUserIdAndStatus(Map<String, Object> headers, Long userId, PrepaidCardStatus status) throws Exception;
+  PrepaidCard10 getLastPrepaidCardByAccountIdAndStatus(Map<String, Object> headers, Long accountId, PrepaidCardStatus status) throws Exception;
 
   /**
    * permite buscar la ultima tarjeta prepago por su id de usuario prepago y uno de los estado
    *
    * @param headers
-   * @param userId
+   * @param accountId
    * @param status
    * @return
    * @throws Exception
    */
-  PrepaidCard10 getLastPrepaidCardByUserIdAndOneOfStatus(Map<String, Object> headers, Long userId, PrepaidCardStatus... status) throws Exception;
+  PrepaidCard10 getLastPrepaidCardByAccountIdAndOneOfStatus(Map<String, Object> headers, Long accountId, PrepaidCardStatus... status) throws Exception;
 
   /**
    * permite buscar la ultima tarjeta prepago por su id de usuario prepago
    *
    * @param headers
-   * @param userId
+   * @param accountId
    * @return
    * @throws Exception
    */
-  PrepaidCard10 getLastPrepaidCardByUserId(Map<String, Object> headers, Long userId) throws Exception;
+  PrepaidCard10 getLastPrepaidCardByAccountId(Map<String, Object> headers, Long accountId) throws Exception;
 
   /**
    * actualiza el estado de la tarjeta
@@ -93,12 +92,12 @@ public interface PrepaidCardEJB10 {
    *
    * @param headers
    * @param cardId
-   * @param userId
+   * @param accountId
    * @param oldStatus
    * @param prepaidCard
    * @throws Exception
    */
-  void updatePrepaidCard(Map<String, Object> headers, Long cardId, Long userId, PrepaidCardStatus oldStatus, PrepaidCard10 prepaidCard) throws Exception;
+  void updatePrepaidCard(Map<String, Object> headers, Long cardId, Long accountId, PrepaidCardStatus oldStatus, PrepaidCard10 prepaidCard) throws Exception;
 
   /**
    * Activa la tarjeta mastercard (level 1 a level 2)
@@ -136,4 +135,5 @@ public interface PrepaidCardEJB10 {
    * @throws Exception
    */
   void publishCardEvent(String externalUserId, String accountUuid, Long cardId, String endpoint) throws Exception;
+
 }

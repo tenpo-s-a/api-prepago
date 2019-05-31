@@ -1,6 +1,7 @@
 package cl.multicaja.prepaid.ejb.v10;
 
 import cl.multicaja.prepaid.async.v10.PrepaidTopupDelegate10;
+import cl.multicaja.prepaid.ejb.v11.PrepaidCardEJBBean11;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 
@@ -19,8 +20,9 @@ public class MailPrepaidEJBBean10 extends PrepaidBaseEJBBean10 implements MailPr
 
   @Inject
   private PrepaidTopupDelegate10 prepaidTopupDelegate10;
+
   @EJB
-  private PrepaidCardEJBBean10 prepaidCardEJBBean10;
+  private PrepaidCardEJBBean11 prepaidCardEJBBean11;
 
   @EJB
   private PrepaidUserEJBBean10 prepaidUserEJBBean10;
@@ -29,8 +31,12 @@ public class MailPrepaidEJBBean10 extends PrepaidBaseEJBBean10 implements MailPr
     this.prepaidTopupDelegate10 = prepaidTopupDelegate10;
   }
 
-  public void setPrepaidCardEJBBean10(PrepaidCardEJBBean10 prepaidCardEJBBean10) {
-    this.prepaidCardEJBBean10 = prepaidCardEJBBean10;
+  public PrepaidCardEJBBean11 getPrepaidCardEJBBean11() {
+    return prepaidCardEJBBean11;
+  }
+
+  public void setPrepaidCardEJBBean11(PrepaidCardEJBBean11 prepaidCardEJBBean11) {
+    this.prepaidCardEJBBean11 = prepaidCardEJBBean11;
   }
 
   public PrepaidUserEJBBean10 getPrepaidUserEJBBean10() {

@@ -9,6 +9,7 @@ import cl.multicaja.core.utils.db.OutParam;
 import cl.multicaja.core.utils.db.RowMapper;
 import cl.multicaja.core.utils.db.SqlType;
 import cl.multicaja.core.utils.json.JsonUtils;
+import cl.multicaja.prepaid.ejb.v11.PrepaidCardEJBBean11;
 import cl.multicaja.prepaid.helpers.tecnocom.TecnocomServiceHelper;
 import cl.multicaja.prepaid.model.v10.*;
 import cl.multicaja.prepaid.model.v11.DocumentType;
@@ -46,7 +47,7 @@ public class PrepaidUserEJBBean10 extends PrepaidBaseEJBBean10 implements Prepai
   public static Integer BALANCE_CACHE_EXPIRATION_MILLISECONDS = 60000;
 
   @EJB
-  private PrepaidCardEJBBean10 prepaidCardEJB10;
+  private PrepaidCardEJBBean11 prepaidCardEJB11;
 
   @EJB
   private PrepaidMovementEJBBean10 prepaidMovementEJB10;
@@ -82,12 +83,12 @@ public class PrepaidUserEJBBean10 extends PrepaidBaseEJBBean10 implements Prepai
     "  uuid = ?;", getSchema());
 
 
-  public PrepaidCardEJBBean10 getPrepaidCardEJB10() {
-    return prepaidCardEJB10;
+  public PrepaidCardEJBBean11 getPrepaidCardEJB11() {
+    return prepaidCardEJB11;
   }
 
-  public void setPrepaidCardEJB10(PrepaidCardEJBBean10 prepaidCardEJB10) {
-    this.prepaidCardEJB10 = prepaidCardEJB10;
+  public void setPrepaidCardEJB11(PrepaidCardEJBBean11 prepaidCardEJB11) {
+    this.prepaidCardEJB11 = prepaidCardEJB11;
   }
 
   public PrepaidMovementEJBBean10 getPrepaidMovementEJB10() {

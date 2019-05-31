@@ -145,20 +145,6 @@ public final class PrepaidResource10 extends BaseResource {
   }
 
   @GET
-  @Path("/")
-  public Response findPrepaidUser(@QueryParam("rut") Integer rut, @Context HttpHeaders headers) throws Exception {
-    PrepaidUser10 prepaidUser = this.prepaidEJBBean10.findPrepaidUser(headersToMap(headers), rut);
-    return Response.ok(prepaidUser).build();
-  }
-
-  @GET
-  @Path("/{userId}/card")
-  public Response getPrepaidCard(@PathParam("userId") Long userIdMc, @Context HttpHeaders headers) throws Exception {
-    PrepaidCard10 prepaidCard10 = prepaidEJBBean10.getPrepaidCard(headersToMap(headers), userIdMc);
-    return Response.ok(prepaidCard10).build();
-  }
-
-  @GET
   @Path("/{userId}/balance")
   @Deprecated
   public Response getPrepaidUserBalance(@PathParam("userId") Long userIdMc, @Context HttpHeaders headers) throws Exception {
@@ -200,28 +186,12 @@ public final class PrepaidResource10 extends BaseResource {
     return Response.ok(simulationWithdrawal10).build();
   }
 
-  @GET
-  @Path("/{userId}/transactions")
-  public Response getTransactions(@PathParam("userId") Long userIdMc, @QueryParam("from") String from, @QueryParam("to") String to, @QueryParam("count") Integer count, @Context HttpHeaders headers) throws Exception {
-    PrepaidTransactionExtend10 prepaidTransactionExtend10 = this.prepaidEJBBean10.getTransactions(headersToMap(headers),userIdMc,from,to, count);
-    return Response.ok(prepaidTransactionExtend10).build();
-  }
-
   @PUT
   @Path("/{userId}/account/{accountId}/upgrade_card")
   public Response upgradeCard(@PathParam("userId") String userUuid, @PathParam("accountId") String accountUuid, @Context HttpHeaders headers) throws Exception {
     PrepaidCardResponse10 prepaidCardResponse10 = prepaidCardEJBBean11.upgradePrepaidCard(headersToMap(headers), userUuid, accountUuid);
     return Response.ok(prepaidCardResponse10).build();
   }
-
-  /*
-  @POST
-  @Path("/{user_id}/mail")
-  @Deprecated
-  public Response sendMail(EmailBody emailBody, @PathParam("user_id") Long userId, @Context HttpHeaders headers) throws Exception {
-    this.mailPrepaidEJBBean10.sendMailAsync(headersToMap(headers), userId, emailBody);
-    return Response.ok().status(201).build();
-  }*/
 
   @POST
   @Path("/Queue")

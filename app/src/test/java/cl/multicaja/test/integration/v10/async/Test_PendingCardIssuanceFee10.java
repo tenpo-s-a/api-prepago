@@ -29,15 +29,18 @@ public class Test_PendingCardIssuanceFee10 extends TestBaseUnitAsync {
 
 
     PrepaidUser10 prepaidUser = buildPrepaidUserv2();
-    prepaidUser = createPrepaidUser10(prepaidUser);
+    prepaidUser = createPrepaidUserV2(prepaidUser);
 
-    PrepaidCard10 prepaidCard = new PrepaidCard10();
+    Account account = buildAccountFromTecnocom(prepaidUser);
+    account = createAccount(account.getUserId(),account.getAccountNumber());
+
+    PrepaidCard10 prepaidCard10 = buildPrepaidCardWithTecnocomData(prepaidUser,account);
+    prepaidCard10 = createPrepaidCardV2(prepaidCard10);
+
 
     PrepaidMovement10 prepaidMovement = new PrepaidMovement10();
 
-    Account account = getAccountEJBBean10().insertAccount(prepaidUser.getId(), getRandomString(15));
-
-    String messageId = sendPendingCardIssuanceFee(prepaidUser,null, prepaidMovement, prepaidCard, account, 0);
+    String messageId = sendPendingCardIssuanceFee(prepaidUser,null, prepaidMovement, prepaidCard10, account, 0);
 
     //se verifica que el mensaje haya sido procesado por el proceso asincrono y lo busca en la cola de emisiones pendientes
     Queue qResp = camelFactory.createJMSQueue(PrepaidTopupRoute10.PENDING_CARD_ISSUANCE_FEE_RESP);
@@ -50,22 +53,24 @@ public class Test_PendingCardIssuanceFee10 extends TestBaseUnitAsync {
 
     Assert.assertNull("No debe tener un movimiento de comision", dbMovements);
 
-    Assert.assertNull("Deberia tener una tarjeta", getPrepaidCardEJBBean10().getLastPrepaidCardByUserIdAndStatus(null, prepaidUser.getId(), PrepaidCardStatus.PENDING));
-    Assert.assertNull("Deberia tener una tarjeta", getPrepaidCardEJBBean10().getLastPrepaidCardByUserIdAndStatus(null, prepaidUser.getId(), PrepaidCardStatus.ACTIVE));
+    Assert.assertNull("Deberia tener una tarjeta", getPrepaidCardEJBBean11().getLastPrepaidCardByAccountIdAndStatus(null, account.getId(), PrepaidCardStatus.PENDING));
+    Assert.assertNull("Deberia tener una tarjeta", getPrepaidCardEJBBean11().getLastPrepaidCardByAccountIdAndStatus(null, account.getId(), PrepaidCardStatus.ACTIVE));
   }
 
   @Test
   public void pendingCardIssuanceFee_PrepaidCardNull() throws Exception {
 
-    PrepaidUser10 prepaidUser =  buildPrepaidUserv2();
-    prepaidUser = createPrepaidUser10(prepaidUser);
+    PrepaidUser10 prepaidUser = buildPrepaidUserv2();
+    prepaidUser = createPrepaidUserV2(prepaidUser);
+
+    Account account = buildAccountFromTecnocom(prepaidUser);
+    account = createAccount(account.getUserId(),account.getAccountNumber());
+
 
     PrepaidMovement10 prepaidMovement = new PrepaidMovement10();
 
     PrepaidTopup10 prepaidTopup = new PrepaidTopup10();
     prepaidTopup.setFirstTopup(Boolean.TRUE);
-
-    Account account = getAccountEJBBean10().insertAccount(prepaidUser.getId(), getRandomString(15));
 
     String messageId = sendPendingCardIssuanceFee(prepaidUser, prepaidTopup, prepaidMovement, null, account, 0);
 
@@ -79,8 +84,8 @@ public class Test_PendingCardIssuanceFee10 extends TestBaseUnitAsync {
     List<PrepaidMovement10> dbMovements = getPrepaidMovementEJBBean10().getPrepaidMovementByIdPrepaidUserAndTipoMovimiento( prepaidUser.getId(), PrepaidMovementType.ISSUANCE_FEE);
 
     Assert.assertNull("No debe tener un movimiento de comision", dbMovements);
-    Assert.assertNull("Deberia tener una tarjeta", getPrepaidCardEJBBean10().getLastPrepaidCardByUserIdAndStatus(null, prepaidUser.getId(), PrepaidCardStatus.PENDING));
-    Assert.assertNull("Deberia tener una tarjeta", getPrepaidCardEJBBean10().getLastPrepaidCardByUserIdAndStatus(null, prepaidUser.getId(), PrepaidCardStatus.ACTIVE));
+    Assert.assertNull("Deberia tener una tarjeta", getPrepaidCardEJBBean11().getLastPrepaidCardByAccountIdAndStatus(null, account.getId(), PrepaidCardStatus.PENDING));
+    Assert.assertNull("Deberia tener una tarjeta", getPrepaidCardEJBBean11().getLastPrepaidCardByAccountIdAndStatus(null, account.getId(), PrepaidCardStatus.ACTIVE));
 
   }
 
@@ -88,7 +93,7 @@ public class Test_PendingCardIssuanceFee10 extends TestBaseUnitAsync {
   public void pendingCardIssuanceFee_PrepaidCardStatusActive() throws Exception {
 
     PrepaidUser10 prepaidUser =  buildPrepaidUserv2();
-    prepaidUser = createPrepaidUser10(prepaidUser);
+    prepaidUser = createPrepaidUserV2(prepaidUser);
 
     PrepaidCard10 prepaidCard = new PrepaidCard10();
     prepaidCard.setStatus(PrepaidCardStatus.ACTIVE);
@@ -112,8 +117,8 @@ public class Test_PendingCardIssuanceFee10 extends TestBaseUnitAsync {
     List<PrepaidMovement10> dbMovements = getPrepaidMovementEJBBean10().getPrepaidMovementByIdPrepaidUserAndTipoMovimiento( prepaidUser.getId(), PrepaidMovementType.ISSUANCE_FEE);
 
     Assert.assertNull("No debe tener un movimiento de comision", dbMovements);
-    Assert.assertNull("Deberia tener una tarjeta", getPrepaidCardEJBBean10().getLastPrepaidCardByUserIdAndStatus(null, prepaidUser.getId(), PrepaidCardStatus.PENDING));
-    Assert.assertNull("Deberia tener una tarjeta", getPrepaidCardEJBBean10().getLastPrepaidCardByUserIdAndStatus(null, prepaidUser.getId(), PrepaidCardStatus.ACTIVE));
+    Assert.assertNull("Deberia tener una tarjeta", getPrepaidCardEJBBean11().getLastPrepaidCardByAccountIdAndStatus(null, account.getId(), PrepaidCardStatus.PENDING));
+    Assert.assertNull("Deberia tener una tarjeta", getPrepaidCardEJBBean11().getLastPrepaidCardByAccountIdAndStatus(null, account.getId(), PrepaidCardStatus.ACTIVE));
 
   }
 
@@ -142,8 +147,8 @@ public class Test_PendingCardIssuanceFee10 extends TestBaseUnitAsync {
     List<PrepaidMovement10> dbMovements = getPrepaidMovementEJBBean10().getPrepaidMovementByIdPrepaidUserAndTipoMovimiento( prepaidUser.getId(), PrepaidMovementType.ISSUANCE_FEE);
 
     Assert.assertNull("No debe tener un movimiento de comision", dbMovements);
-    Assert.assertNull("Deberia tener una tarjeta", getPrepaidCardEJBBean10().getLastPrepaidCardByUserIdAndStatus(null, prepaidUser.getId(), PrepaidCardStatus.PENDING));
-    Assert.assertNull("Deberia tener una tarjeta", getPrepaidCardEJBBean10().getLastPrepaidCardByUserIdAndStatus(null, prepaidUser.getId(), PrepaidCardStatus.ACTIVE));
+    Assert.assertNull("Deberia tener una tarjeta", getPrepaidCardEJBBean11().getLastPrepaidCardByAccountIdAndStatus(null, prepaidUser.getId(), PrepaidCardStatus.PENDING));
+    Assert.assertNull("Deberia tener una tarjeta", getPrepaidCardEJBBean11().getLastPrepaidCardByAccountIdAndStatus(null, prepaidUser.getId(), PrepaidCardStatus.ACTIVE));
   }
 
   @Test
@@ -193,8 +198,8 @@ public class Test_PendingCardIssuanceFee10 extends TestBaseUnitAsync {
     List<PrepaidMovement10> dbMovements = getPrepaidMovementEJBBean10().getPrepaidMovementByIdPrepaidUserAndTipoMovimiento( prepaidUser.getId(), PrepaidMovementType.ISSUANCE_FEE);
 
     Assert.assertNull("No debe tener un movimiento de comision", dbMovements);
-    Assert.assertNull("Deberia tener una tarjeta", getPrepaidCardEJBBean10().getLastPrepaidCardByUserIdAndStatus(null, prepaidUser.getId(), PrepaidCardStatus.PENDING));
-    Assert.assertNull("Deberia tener una tarjeta", getPrepaidCardEJBBean10().getLastPrepaidCardByUserIdAndStatus(null, prepaidUser.getId(), PrepaidCardStatus.ACTIVE));
+    Assert.assertNull("Deberia tener una tarjeta", getPrepaidCardEJBBean11().getLastPrepaidCardByAccountIdAndStatus(null, prepaidUser.getId(), PrepaidCardStatus.PENDING));
+    Assert.assertNull("Deberia tener una tarjeta", getPrepaidCardEJBBean11().getLastPrepaidCardByAccountIdAndStatus(null, prepaidUser.getId(), PrepaidCardStatus.ACTIVE));
   }
 
   @Test
@@ -339,7 +344,7 @@ public class Test_PendingCardIssuanceFee10 extends TestBaseUnitAsync {
     Assert.assertEquals("Debe tener un movimiento de comision con estado de negocio -> CONFIRMED", BusinessStatusType.CONFIRMED, dbMovements.get(0).getEstadoNegocio());
 
     // Busca la tarjeta en la BD
-    PrepaidCard10 dbPrepaidCard = getPrepaidCardEJBBean10().getPrepaidCardById(null, prepaidCard.getId());
+    PrepaidCard10 dbPrepaidCard = getPrepaidCardEJBBean11().getPrepaidCardById(null, prepaidCard.getId());
     Assert.assertNotNull("Deberia tener una tarjeta", dbPrepaidCard);
     Assert.assertEquals("Deberia tener una tarjeta en status ACTIVE", PrepaidCardStatus.ACTIVE, dbPrepaidCard.getStatus());
 
@@ -414,7 +419,7 @@ public class Test_PendingCardIssuanceFee10 extends TestBaseUnitAsync {
     Assert.assertEquals("Debe tener un movimiento de comision con estado de negocio -> CONFIRMED", BusinessStatusType.CONFIRMED, dbMovements.get(0).getEstadoNegocio());
 
     // Busca la tarjeta en la BD
-    PrepaidCard10 dbPrepaidCard = getPrepaidCardEJBBean10().getPrepaidCardById(null, prepaidCard.getId());
+    PrepaidCard10 dbPrepaidCard = getPrepaidCardEJBBean11().getPrepaidCardById(null, prepaidCard.getId());
     Assert.assertNotNull("Deberia tener una tarjeta", dbPrepaidCard);
     Assert.assertEquals("Deberia tener una tarjeta en status ACTIVE", PrepaidCardStatus.ACTIVE, dbPrepaidCard.getStatus());
 
@@ -483,7 +488,7 @@ public class Test_PendingCardIssuanceFee10 extends TestBaseUnitAsync {
     Assert.assertEquals("Debe tener un movimiento de comision con estado negocio ->  REJECTED", BusinessStatusType.REJECTED, dbMovements.get(0).getEstadoNegocio());
 
     // Busca la tarjeta en la BD
-    PrepaidCard10 dbPrepaidCard = getPrepaidCardEJBBean10().getPrepaidCardById(null, prepaidCard.getId());
+    PrepaidCard10 dbPrepaidCard = getPrepaidCardEJBBean11().getPrepaidCardById(null, prepaidCard.getId());
     Assert.assertNotNull("Deberia tener una tarjeta", dbPrepaidCard);
     Assert.assertEquals("Deberia tener una tarjeta en status PENDING", PrepaidCardStatus.PENDING, dbPrepaidCard.getStatus());
 
@@ -551,7 +556,7 @@ public class Test_PendingCardIssuanceFee10 extends TestBaseUnitAsync {
     Assert.assertEquals("Debe tener un movimiento de comision con estado negocio ->  IN_PROCESS", BusinessStatusType.IN_PROCESS, dbMovements.get(0).getEstadoNegocio());
 
     // Busca la Tarjeta en la BD
-    PrepaidCard10 dbPrepaidCard = getPrepaidCardEJBBean10().getPrepaidCardById(null, prepaidCard.getId());
+    PrepaidCard10 dbPrepaidCard = getPrepaidCardEJBBean11().getPrepaidCardById(null, prepaidCard.getId());
     Assert.assertNotNull("Deberia tener una tarjeta", dbPrepaidCard);
     Assert.assertEquals("Deberia tener una tarjeta en status PENDING", PrepaidCardStatus.PENDING, dbPrepaidCard.getStatus());
 

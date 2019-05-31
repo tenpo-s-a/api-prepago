@@ -22,7 +22,7 @@ public class Test_createRandomAuthorization_v10 extends TestBaseUnitApi {
     System.out.println("respHttp: " + respHttp);
     return respHttp;
   }
-
+/*
   @Test
   public void shouldCreateRandomAuthorization() throws  Exception {
 
@@ -50,5 +50,6 @@ public class Test_createRandomAuthorization_v10 extends TestBaseUnitApi {
     Assert.assertEquals("El valor de "+randomAmountIn+" coincide ",randomAmountIn,randomAmountOut);
 
   }
+ */
 
 }

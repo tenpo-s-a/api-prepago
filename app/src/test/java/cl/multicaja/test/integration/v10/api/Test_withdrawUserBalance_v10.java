@@ -64,12 +64,16 @@ public class Test_withdrawUserBalance_v10 extends TestBaseUnitApi {
     PrepaidUser10 prepaidUser = buildPrepaidUserv2();
     prepaidUser = createPrepaidUserV2(prepaidUser);
 
+    Account account = buildAccountFromTecnocom(prepaidUser);
+    account = createAccount(account.getUserId(),account.getAccountNumber());
+
+    PrepaidCard10 prepaidCard10 = buildPrepaidCardWithTecnocomData(prepaidUser,account);
+    prepaidCard10 = createPrepaidCardV2(prepaidCard10);
+
     // se hace una carga
     HttpResponse topupResp = topupUserBalance(prepaidUser.getUuid(), BigDecimal.valueOf(10000));
     PrepaidTopup10 topup = topupResp.toObject(PrepaidTopup10.class);
 
-    PrepaidCard10 prepaidCard = waitForLastPrepaidCardInStatus(prepaidUser, PrepaidCardStatus.ACTIVE);
-    Assert.assertNotNull("Deberia tener una tarjeta", prepaidCard);
 
     NewPrepaidWithdraw10 prepaidWithdraw = buildNewPrepaidWithdrawV2(getRandomNumericString(15));
 
@@ -124,13 +128,15 @@ public class Test_withdrawUserBalance_v10 extends TestBaseUnitApi {
     PrepaidUser10 prepaidUser = buildPrepaidUserv2();
     prepaidUser = createPrepaidUserV2(prepaidUser);
 
+    Account account = buildAccountFromTecnocom(prepaidUser);
+    account = createAccount(account.getUserId(),account.getAccountNumber());
+
+    PrepaidCard10 prepaidCard10 = buildPrepaidCardWithTecnocomData(prepaidUser,account);
+    prepaidCard10 = createPrepaidCardV2(prepaidCard10);
+
     // se hace una carga
     HttpResponse topupResp = topupUserBalance(prepaidUser.getUuid(), BigDecimal.valueOf(10000));
     PrepaidTopup10 topup = topupResp.toObject(PrepaidTopup10.class);
-
-    PrepaidCard10 prepaidCard = waitForLastPrepaidCardInStatus(prepaidUser, PrepaidCardStatus.ACTIVE);
-    Assert.assertNotNull("Deberia tener una tarjeta", prepaidCard);
-    PrepaidMovement10 dbTopup = getPrepaidMovementEJBBean10().getLastPrepaidMovementByIdPrepaidUserAndOneStatus(prepaidUser.getId(), PrepaidMovementStatus.PROCESS_OK);
 
     String merchantCode = getRandomNumericString(5);
     NewPrepaidWithdraw10 prepaidWithdraw = buildNewPrepaidWithdrawV2(merchantCode);
@@ -180,13 +186,16 @@ public class Test_withdrawUserBalance_v10 extends TestBaseUnitApi {
     PrepaidUser10 prepaidUser = buildPrepaidUserv2();
     prepaidUser = createPrepaidUserV2(prepaidUser);
 
+    Account account = buildAccountFromTecnocom(prepaidUser);
+    account = createAccount(account.getUserId(),account.getAccountNumber());
+
+    PrepaidCard10 prepaidCard10 = buildPrepaidCardWithTecnocomData(prepaidUser,account);
+    prepaidCard10 = createPrepaidCardV2(prepaidCard10);
+
     // se hace una carga
     HttpResponse topupResp = topupUserBalance(prepaidUser.getUuid(), BigDecimal.valueOf(10000));
     PrepaidTopup10 topup = topupResp.toObject(PrepaidTopup10.class);
 
-    PrepaidCard10 prepaidCard = waitForLastPrepaidCardInStatus(prepaidUser, PrepaidCardStatus.ACTIVE);
-    Assert.assertNotNull("Deberia tener una tarjeta", prepaidCard);
-    PrepaidMovement10 dbTopup = getPrepaidMovementEJBBean10().getLastPrepaidMovementByIdPrepaidUserAndOneStatus(prepaidUser.getId(), PrepaidMovementStatus.PROCESS_OK);
 
     String merchantCode = getRandomNumericString(15);
     NewPrepaidWithdraw10 prepaidWithdraw = buildNewPrepaidWithdrawV2("000" + merchantCode);
@@ -244,13 +253,15 @@ public class Test_withdrawUserBalance_v10 extends TestBaseUnitApi {
     PrepaidUser10 prepaidUser = buildPrepaidUserv2();
     prepaidUser = createPrepaidUserV2(prepaidUser);
 
+    Account account = buildAccountFromTecnocom(prepaidUser);
+    account = createAccount(account.getUserId(),account.getAccountNumber());
+
+    PrepaidCard10 prepaidCard10 = buildPrepaidCardWithTecnocomData(prepaidUser,account);
+    prepaidCard10 = createPrepaidCardV2(prepaidCard10);
+
     // se hace una carga
     HttpResponse topupResp = topupUserBalance(prepaidUser.getUuid(), BigDecimal.valueOf(10000));
     PrepaidTopup10 topup = topupResp.toObject(PrepaidTopup10.class);
-
-    PrepaidCard10 prepaidCard = waitForLastPrepaidCardInStatus(prepaidUser, PrepaidCardStatus.ACTIVE);
-    Assert.assertNotNull("Deberia tener una tarjeta", prepaidCard);
-    PrepaidMovement10 dbTopup = getPrepaidMovementEJBBean10().getLastPrepaidMovementByIdPrepaidUserAndOneStatus(prepaidUser.getId(), PrepaidMovementStatus.PROCESS_OK);
 
     NewPrepaidWithdraw10 prepaidWithdraw = buildNewPrepaidWithdrawV2(NewPrepaidBaseTransaction10.WEB_MERCHANT_CODE);
 
@@ -808,12 +819,15 @@ public class Test_withdrawUserBalance_v10 extends TestBaseUnitApi {
       PrepaidUser10 prepaidUser = buildPrepaidUserv2();
       prepaidUser = createPrepaidUserV2(prepaidUser);
 
+      Account account = buildAccountFromTecnocom(prepaidUser);
+      account = createAccount(account.getUserId(),account.getAccountNumber());
+
+      PrepaidCard10 prepaidCard10 = buildPrepaidCardWithTecnocomData(prepaidUser,account);
+      prepaidCard10 = createPrepaidCardV2(prepaidCard10);
+
       // se hace una carga
       HttpResponse topupResp = topupUserBalance(prepaidUser.getUuid(), BigDecimal.valueOf(10000));
       PrepaidTopup10 topup = topupResp.toObject(PrepaidTopup10.class);
-
-      PrepaidCard10 prepaidCard = waitForLastPrepaidCardInStatus(prepaidUser, PrepaidCardStatus.ACTIVE);
-      Assert.assertNotNull("Deberia tener una tarjeta", prepaidCard);
 
       NewPrepaidWithdraw10 prepaidWithdraw = buildNewPrepaidWithdrawV2(getRandomNumericString(15));
 
@@ -844,12 +858,15 @@ public class Test_withdrawUserBalance_v10 extends TestBaseUnitApi {
       PrepaidUser10 prepaidUser = buildPrepaidUserv2();
       prepaidUser = createPrepaidUserV2(prepaidUser);
 
+      Account account = buildAccountFromTecnocom(prepaidUser);
+      account = createAccount(account.getUserId(),account.getAccountNumber());
+
+      PrepaidCard10 prepaidCard10 = buildPrepaidCardWithTecnocomData(prepaidUser,account);
+      prepaidCard10 = createPrepaidCardV2(prepaidCard10);
+
       // se hace una carga
       HttpResponse topupResp = topupUserBalance(prepaidUser.getUuid(), BigDecimal.valueOf(10000));
       PrepaidTopup10 topup = topupResp.toObject(PrepaidTopup10.class);
-
-      PrepaidCard10 prepaidCard = waitForLastPrepaidCardInStatus(prepaidUser, PrepaidCardStatus.ACTIVE);
-      Assert.assertNotNull("Deberia tener una tarjeta", prepaidCard);
 
       NewPrepaidWithdraw10 prepaidWithdraw = buildNewPrepaidWithdrawV2(NewPrepaidBaseTransaction10.WEB_MERCHANT_CODE);
 
@@ -877,31 +894,30 @@ public class Test_withdrawUserBalance_v10 extends TestBaseUnitApi {
       waitForAccountingToExist(topup.getId());
     }
   }
-  //TODO: Verificarcuando se haga la reversa.
-  @Ignore
+
   @Test
   public void shouldReturn201_OnWithdraw_Reversed_DifferentAmount_POS() throws Exception {
-   /* String password = RandomStringUtils.randomNumeric(4);
-    TenpoUser user = registerUser();
-    user = updateUserPassword(user, password);
 
-    PrepaidUser10 prepaidUser = buildPrepaidUser10(user);
+    PrepaidUser10 prepaidUser = buildPrepaidUserv2();
+    prepaidUser = createPrepaidUserV2(prepaidUser);
 
-    prepaidUser = createPrepaidUser10(prepaidUser);
+    Account account = buildAccountFromTecnocom(prepaidUser);
+    account = createAccount(account.getUserId(),account.getAccountNumber());
+
+    PrepaidCard10 prepaidCard10 = buildPrepaidCardWithTecnocomData(prepaidUser,account);
+    prepaidCard10 = createPrepaidCardV2(prepaidCard10);
+
 
     // se hace una carga
     topupUserBalance(prepaidUser.getUuid(), BigDecimal.valueOf(10000));
 
-    PrepaidCard10 prepaidCard = waitForLastPrepaidCardInStatus(prepaidUser, PrepaidCardStatus.ACTIVE);
-    Assert.assertNotNull("Deberia tener una tarjeta", prepaidCard);
-
-    NewPrepaidWithdraw10 prepaidWithdraw = buildNewPrepaidWithdraw10(user, password, getRandomNumericString(15));
+    NewPrepaidWithdraw10 prepaidWithdraw = buildNewPrepaidWithdrawV2(getRandomNumericString(15));
 
     PrepaidMovement10 prepaidMovement = buildReversePrepaidMovement10(prepaidUser, prepaidWithdraw);
     prepaidMovement.setImpfac(prepaidMovement.getImpfac().add(BigDecimal.TEN));
     prepaidMovement = createPrepaidMovement10(prepaidMovement);
 
-    HttpResponse resp = withdrawUserBalance(prepaidWithdraw);
+    HttpResponse resp = withdrawUserBalance(prepaidUser.getUuid(), prepaidWithdraw);
 
     Assert.assertEquals("status 201", 201, resp.getStatus());
 
@@ -932,44 +948,37 @@ public class Test_withdrawUserBalance_v10 extends TestBaseUnitApi {
 
     Assert.assertTrue("Deberia tener el atributo name", rutData.containsKey("name"));
     Assert.assertNotNull("Deberia tener el atributo", rutData.get("name"));
-    Assert.assertEquals("Deberia tener el atributo name = rut","rut", rutData.get("name"));
-    Assert.assertTrue("Deberia tener el atributo value", rutData.containsKey("value"));
     Assert.assertNotNull("Deberia tener el atributo value", rutData.get("value"));
-    Assert.assertEquals("Deberia tener el atributo value", RutUtils.getInstance().format(prepaidWithdraw.getRut(), null), rutData.get("value"));
 
     PrepaidMovement10 dbPrepaidMovement = getPrepaidMovementEJBBean10().getLastPrepaidMovementByIdPrepaidUserAndOneStatus(prepaidUser.getId(), PrepaidMovementStatus.PROCESS_OK);
     Assert.assertNotNull("Deberia tener un movimiento", dbPrepaidMovement);
     Assert.assertEquals("Deberia estar en status " + PrepaidMovementStatus.PROCESS_OK, PrepaidMovementStatus.PROCESS_OK, dbPrepaidMovement.getEstado());
     Assert.assertEquals("Deberia estar en estado negocio " + BusinessStatusType.CONFIRMED, BusinessStatusType.CONFIRMED, dbPrepaidMovement.getEstadoNegocio());
 
-    */
   }
 
-  //TODO: Verificar esto cuando se trabaje la reversa.
-  @Ignore
   @Test
   public void shouldReturn201_OnWithdraw_Reversed_DifferentAmount_WEB() throws Exception {
-    /* String password = RandomStringUtils.randomNumeric(4);
-    TenpoUser user = registerUser();
-    user = updateUserPassword(user, password);
 
-    PrepaidUser10 prepaidUser = buildPrepaidUser10(user);
+    PrepaidUser10 prepaidUser = buildPrepaidUserv2();
+    prepaidUser = createPrepaidUserV2(prepaidUser);
 
-    prepaidUser = createPrepaidUser10(prepaidUser);
+    Account account = buildAccountFromTecnocom(prepaidUser);
+    account = createAccount(account.getUserId(),account.getAccountNumber());
+
+    PrepaidCard10 prepaidCard10 = buildPrepaidCardWithTecnocomData(prepaidUser,account);
+    prepaidCard10 = createPrepaidCardV2(prepaidCard10);
 
     // se hace una carga
     topupUserBalance(prepaidUser.getUuid(), BigDecimal.valueOf(10000));
 
-    PrepaidCard10 prepaidCard = waitForLastPrepaidCardInStatus(prepaidUser, PrepaidCardStatus.ACTIVE);
-    Assert.assertNotNull("Deberia tener una tarjeta", prepaidCard);
-
-    NewPrepaidWithdraw10 prepaidWithdraw = buildNewPrepaidWithdraw10(user, password, NewPrepaidBaseTransaction10.WEB_MERCHANT_CODE);
+    NewPrepaidWithdraw10 prepaidWithdraw = buildNewPrepaidWithdrawV2(NewPrepaidBaseTransaction10.WEB_MERCHANT_CODE);
 
     PrepaidMovement10 prepaidMovement = buildReversePrepaidMovement10(prepaidUser, prepaidWithdraw);
     prepaidMovement.setImpfac(prepaidMovement.getImpfac().add(BigDecimal.TEN));
     prepaidMovement = createPrepaidMovement10(prepaidMovement);
 
-    HttpResponse resp = withdrawUserBalance(prepaidWithdraw);
+    HttpResponse resp = withdrawUserBalance(prepaidUser.getUuid(), prepaidWithdraw);
 
     Assert.assertEquals("status 201", 201, resp.getStatus());
 
@@ -1000,16 +1009,11 @@ public class Test_withdrawUserBalance_v10 extends TestBaseUnitApi {
 
     Assert.assertTrue("Deberia tener el atributo name", rutData.containsKey("name"));
     Assert.assertNotNull("Deberia tener el atributo", rutData.get("name"));
-    Assert.assertEquals("Deberia tener el atributo name = rut","rut", rutData.get("name"));
-    Assert.assertTrue("Deberia tener el atributo value", rutData.containsKey("value"));
-    Assert.assertNotNull("Deberia tener el atributo value", rutData.get("value"));
-    Assert.assertEquals("Deberia tener el atributo value", RutUtils.getInstance().format(prepaidWithdraw.getRut(), null), rutData.get("value"));
 
     PrepaidMovement10 dbPrepaidMovement = getPrepaidMovementEJBBean10().getLastPrepaidMovementByIdPrepaidUserAndOneStatus(prepaidUser.getId(), PrepaidMovementStatus.PROCESS_OK);
     Assert.assertNotNull("Deberia tener un movimiento", dbPrepaidMovement);
     Assert.assertEquals("Deberia estar en status " + PrepaidMovementStatus.PROCESS_OK, PrepaidMovementStatus.PROCESS_OK, dbPrepaidMovement.getEstado());
     Assert.assertEquals("Deberia estar en estado negocio " + BusinessStatusType.IN_PROCESS, BusinessStatusType.IN_PROCESS, dbPrepaidMovement.getEstadoNegocio());
-    */
 
   }
 
@@ -1020,13 +1024,15 @@ public class Test_withdrawUserBalance_v10 extends TestBaseUnitApi {
     PrepaidUser10 prepaidUser = buildPrepaidUserv2();
     prepaidUser = createPrepaidUserV2(prepaidUser);
 
+    Account account = buildAccountFromTecnocom(prepaidUser);
+    account = createAccount(account.getUserId(),account.getAccountNumber());
+
+    PrepaidCard10 prepaidCard10 = buildPrepaidCardWithTecnocomData(prepaidUser,account);
+    prepaidCard10 = createPrepaidCardV2(prepaidCard10);
+
     // se hace una carga
     HttpResponse topupResp = topupUserBalance(prepaidUser.getUuid(), BigDecimal.valueOf(10000));
     PrepaidTopup10 topup = topupResp.toObject(PrepaidTopup10.class);
-
-    PrepaidCard10 prepaidCard = waitForLastPrepaidCardInStatus(prepaidUser, PrepaidCardStatus.ACTIVE);
-    Assert.assertNotNull("Deberia tener una tarjeta", prepaidCard);
-    PrepaidMovement10 dbTopup = getPrepaidMovementEJBBean10().getLastPrepaidMovementByIdPrepaidUserAndOneStatus(prepaidUser.getId(), PrepaidMovementStatus.PROCESS_OK);
 
     NewPrepaidWithdraw10 prepaidWithdraw = buildNewPrepaidWithdrawV2(getRandomNumericString(15));
     prepaidWithdraw.setRut(Integer.parseInt(prepaidUser.getDocumentNumber()));

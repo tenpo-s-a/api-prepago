@@ -38,7 +38,7 @@ public class TestContextHelper extends TestBaseUnit {
       // ella depende la instancia de tecnocomService
       PrepaidTopupRoute10 prepaidTopupRoute10 = new PrepaidTopupRoute10();
       prepaidTopupRoute10.setPrepaidUserEJBBean10(getPrepaidUserEJBBean10());
-      prepaidTopupRoute10.setPrepaidCardEJBBean10(getPrepaidCardEJBBean10());
+      prepaidTopupRoute10.setPrepaidCardEJBBean11(getPrepaidCardEJBBean11());
       prepaidTopupRoute10.setPrepaidEJBBean10(getPrepaidEJBBean10());
       prepaidTopupRoute10.setPrepaidMovementEJBBean10(getPrepaidMovementEJBBean10());
       prepaidTopupRoute10.setCdtEJBBean10(getCdtEJBBean10());
@@ -51,7 +51,7 @@ public class TestContextHelper extends TestBaseUnit {
 
       TransactionReversalRoute10 transactionReversalRoute10 = new TransactionReversalRoute10();
       transactionReversalRoute10.setPrepaidUserEJBBean10(getPrepaidUserEJBBean10());
-      transactionReversalRoute10.setPrepaidCardEJBBean10(getPrepaidCardEJBBean10());
+      transactionReversalRoute10.setPrepaidCardEJBBean11(getPrepaidCardEJBBean11());
       transactionReversalRoute10.setPrepaidEJBBean10(getPrepaidEJBBean10());
       transactionReversalRoute10.setPrepaidMovementEJBBean10(getPrepaidMovementEJBBean10());
       transactionReversalRoute10.setCdtEJBBean10(getCdtEJBBean10());
@@ -61,11 +61,11 @@ public class TestContextHelper extends TestBaseUnit {
       transactionReversalRoute10.setPrepaidMovementEJBBean11(getPrepaidMovementEJBBean11());
 
       CurrencyConvertionRoute10 currencyConvertionRoute10 = new CurrencyConvertionRoute10();
-      currencyConvertionRoute10.setPrepaidCardEJBBean10(getPrepaidCardEJBBean10());
+      currencyConvertionRoute10.setPrepaidCardEJBBean11(getPrepaidCardEJBBean11());
 
       TecnocomReconciliationRoute10 tecnocomReconciliationRoute10 = new TecnocomReconciliationRoute10();
       tecnocomReconciliationRoute10.setPrepaidMovementEJBBean10(getPrepaidMovementEJBBean10());
-      tecnocomReconciliationRoute10.setPrepaidCardEJBBean10(getPrepaidCardEJBBean10());
+      tecnocomReconciliationRoute10.setPrepaidCardEJBBean11(getPrepaidCardEJBBean11());
       tecnocomReconciliationRoute10.setTecnocomReconciliationEJBBean10(getTecnocomReconciliationEJBBean10());
       tecnocomReconciliationRoute10.setAccountEJBBean10(getAccountEJBBean10());
 

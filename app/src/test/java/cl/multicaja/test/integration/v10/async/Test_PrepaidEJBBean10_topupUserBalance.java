@@ -302,7 +302,7 @@ public class Test_PrepaidEJBBean10_topupUserBalance extends TestBaseUnitAsync {
     Assert.assertNotNull("debe tener un id", resp.getId());
     Assert.assertTrue("debe ser primera carga", resp.isFirstTopup());
 
-    PrepaidCard10 prepaidCard10 = waitForLastPrepaidCardInStatus(prepaidUser10, PrepaidCardStatus.ACTIVE);
+    PrepaidCard10 prepaidCard10 = waitForLastPrepaidCardInStatusV11(prepaidUser10.getId(), PrepaidCardStatus.ACTIVE);
 
     Assert.assertNotNull("debe tener una tarjeta", prepaidCard10);
     Assert.assertEquals("Debe ser tarjeta activa", PrepaidCardStatus.ACTIVE, prepaidCard10.getStatus());
@@ -388,7 +388,7 @@ public class Test_PrepaidEJBBean10_topupUserBalance extends TestBaseUnitAsync {
     Assert.assertNotNull("debe tener un id", resp.getId());
     //Assert.assertFalse("debe ser enesima carga", resp.isFirstTopup());
 
-    PrepaidCard10 prepaidCard10 = waitForLastPrepaidCardInStatus(prepaidUser, PrepaidCardStatus.ACTIVE);
+    PrepaidCard10 prepaidCard10 = waitForLastPrepaidCardInStatusV11(prepaidUser.getId(), PrepaidCardStatus.ACTIVE);
 
     Assert.assertNotNull("debe tener una tarjeta", prepaidCard10);
     Assert.assertEquals("debe ser tarjeta activa", PrepaidCardStatus.ACTIVE, prepaidCard10.getStatus());
@@ -597,7 +597,7 @@ public class Test_PrepaidEJBBean10_topupUserBalance extends TestBaseUnitAsync {
     Assert.assertNotNull("debe tener un id", resp.getId());
     //Assert.assertFalse("debe ser enesima carga", resp.isFirstTopup());
 
-    PrepaidCard10 prepaidCard10 = waitForLastPrepaidCardInStatus(prepaidUser, PrepaidCardStatus.ACTIVE);
+    PrepaidCard10 prepaidCard10 = waitForLastPrepaidCardInStatusV11(prepaidUser.getId(), PrepaidCardStatus.ACTIVE);
 
     Assert.assertNotNull("debe tener una tarjeta", prepaidCard10);
     Assert.assertEquals("debe ser tarjeta activa", PrepaidCardStatus.ACTIVE, prepaidCard10.getStatus());
@@ -627,7 +627,7 @@ public class Test_PrepaidEJBBean10_topupUserBalance extends TestBaseUnitAsync {
     Assert.assertNotNull("debe tener un id", resp.getId());
     //Assert.assertFalse("debe ser enesima carga", resp.isFirstTopup());
 
-    PrepaidCard10 prepaidCard10 = waitForLastPrepaidCardInStatus(prepaidUser10, PrepaidCardStatus.ACTIVE);
+    PrepaidCard10 prepaidCard10 = waitForLastPrepaidCardInStatusV11(prepaidUser10.getId(), PrepaidCardStatus.ACTIVE);
 
     Assert.assertNotNull("debe tener una tarjeta", prepaidCard10);
     Assert.assertEquals("debe ser tarjeta activa", PrepaidCardStatus.ACTIVE, prepaidCard10.getStatus());
@@ -737,7 +737,7 @@ public class Test_PrepaidEJBBean10_topupUserBalance extends TestBaseUnitAsync {
     Assert.assertNotNull("debe tener un id", resp.getId());
     //Assert.assertFalse("debe ser enesima carga", resp.isFirstTopup());
 
-    PrepaidCard10 prepaidCard10 = waitForLastPrepaidCardInStatus(prepaidUser10, PrepaidCardStatus.ACTIVE);
+    PrepaidCard10 prepaidCard10 = waitForLastPrepaidCardInStatusV11(prepaidUser10.getId(), PrepaidCardStatus.ACTIVE);
 
     Assert.assertNotNull("debe tener una tarjeta", prepaidCard10);
     Assert.assertEquals("debe ser tarjeta activa", PrepaidCardStatus.ACTIVE, prepaidCard10.getStatus());
@@ -837,7 +837,7 @@ public class Test_PrepaidEJBBean10_topupUserBalance extends TestBaseUnitAsync {
     Assert.assertNotNull("debe tener un id", resp.getId());
     //Assert.assertFalse("debe ser enesima carga", resp.isFirstTopup());
 
-    PrepaidCard10 prepaidCard10 = waitForLastPrepaidCardInStatus(prepaidUser10, PrepaidCardStatus.ACTIVE);
+    PrepaidCard10 prepaidCard10 = waitForLastPrepaidCardInStatusV11(prepaidUser10.getId(), PrepaidCardStatus.ACTIVE);
 
     Assert.assertNotNull("debe tener una tarjeta", prepaidCard10);
     Assert.assertEquals("debe ser tarjeta activa", PrepaidCardStatus.ACTIVE, prepaidCard10.getStatus());
@@ -961,7 +961,7 @@ public class Test_PrepaidEJBBean10_topupUserBalance extends TestBaseUnitAsync {
     Assert.assertNotNull("debe tener un id", resp.getId());
     //Assert.assertFalse("debe ser enesima carga", resp.isFirstTopup());
 
-    PrepaidCard10 prepaidCard10 = waitForLastPrepaidCardInStatus(prepaidUser10, PrepaidCardStatus.ACTIVE);
+    PrepaidCard10 prepaidCard10 = waitForLastPrepaidCardInStatusV11(prepaidUser10.getId(), PrepaidCardStatus.ACTIVE);
 
     Assert.assertNotNull("debe tener una tarjeta", prepaidCard10);
     Assert.assertEquals("debe ser tarjeta activa", PrepaidCardStatus.ACTIVE, prepaidCard10.getStatus());
@@ -1035,7 +1035,7 @@ public class Test_PrepaidEJBBean10_topupUserBalance extends TestBaseUnitAsync {
     Assert.assertNotNull("debe tener un id", resp.getId());
     //Assert.assertFalse("debe ser enesima carga", resp.isFirstTopup());
 
-    PrepaidCard10 prepaidCard10 = waitForLastPrepaidCardInStatus(prepaidUser10, PrepaidCardStatus.ACTIVE);
+    PrepaidCard10 prepaidCard10 = waitForLastPrepaidCardInStatusV11(prepaidUser10.getId(), PrepaidCardStatus.ACTIVE);
 
     Assert.assertNotNull("debe tener una tarjeta", prepaidCard10);
     Assert.assertEquals("debe ser tarjeta activa", PrepaidCardStatus.ACTIVE, prepaidCard10.getStatus());
@@ -1161,7 +1161,7 @@ public class Test_PrepaidEJBBean10_topupUserBalance extends TestBaseUnitAsync {
     Assert.assertNotNull("debe tener un id", resp.getId());
     //Assert.assertFalse("debe ser enesima carga", resp.isFirstTopup());
 
-    PrepaidCard10 prepaidCard10 = waitForLastPrepaidCardInStatus(prepaidUser10, PrepaidCardStatus.ACTIVE);
+    PrepaidCard10 prepaidCard10 = waitForLastPrepaidCardInStatusV11(prepaidUser10.getId(), PrepaidCardStatus.ACTIVE);
 
     Assert.assertNotNull("debe tener una tarjeta", prepaidCard10);
     Assert.assertEquals("debe ser tarjeta activa", PrepaidCardStatus.ACTIVE, prepaidCard10.getStatus());
@@ -1276,7 +1276,7 @@ public class Test_PrepaidEJBBean10_topupUserBalance extends TestBaseUnitAsync {
     Assert.assertNotNull("debe tener un id", resp.getId());
     //Assert.assertFalse("debe ser enesima carga", resp.isFirstTopup());
 
-    PrepaidCard10 prepaidCard10 = waitForLastPrepaidCardInStatus(prepaidUser10, PrepaidCardStatus.ACTIVE);
+    PrepaidCard10 prepaidCard10 = waitForLastPrepaidCardInStatusV11(prepaidUser10.getId(), PrepaidCardStatus.ACTIVE);
 
     Assert.assertNotNull("debe tener una tarjeta", prepaidCard10);
     Assert.assertEquals("debe ser tarjeta activa", PrepaidCardStatus.ACTIVE, prepaidCard10.getStatus());
@@ -1414,7 +1414,7 @@ public class Test_PrepaidEJBBean10_topupUserBalance extends TestBaseUnitAsync {
     Assert.assertNotNull("debe tener un id", resp.getId());
     //Assert.assertFalse("debe ser enesima carga", resp.isFirstTopup());
 
-    PrepaidCard10 prepaidCard10 = waitForLastPrepaidCardInStatus(prepaidUser10, PrepaidCardStatus.ACTIVE);
+    PrepaidCard10 prepaidCard10 = waitForLastPrepaidCardInStatusV11(prepaidUser10.getId(), PrepaidCardStatus.ACTIVE);
 
     Assert.assertNotNull("debe tener una tarjeta", prepaidCard10);
     Assert.assertEquals("debe ser tarjeta activa", PrepaidCardStatus.ACTIVE, prepaidCard10.getStatus());
@@ -1501,7 +1501,7 @@ public class Test_PrepaidEJBBean10_topupUserBalance extends TestBaseUnitAsync {
     Assert.assertNotNull("debe tener un id", resp.getId());
     //Assert.assertFalse("debe ser enesima carga", resp.isFirstTopup());
 
-    PrepaidCard10 prepaidCard10 = waitForLastPrepaidCardInStatus(prepaidUser10, PrepaidCardStatus.ACTIVE);
+    PrepaidCard10 prepaidCard10 = waitForLastPrepaidCardInStatusV11(prepaidUser10.getId(), PrepaidCardStatus.ACTIVE);
 
     Assert.assertNotNull("debe tener una tarjeta", prepaidCard10);
     Assert.assertEquals("debe ser tarjeta activa", PrepaidCardStatus.ACTIVE, prepaidCard10.getStatus());
@@ -1594,7 +1594,7 @@ public class Test_PrepaidEJBBean10_topupUserBalance extends TestBaseUnitAsync {
     Assert.assertNotNull("debe tener un id", resp.getId());
     //Assert.assertFalse("debe ser enesima carga", resp.isFirstTopup());
 
-    PrepaidCard10 prepaidCard10 = waitForLastPrepaidCardInStatus(prepaidUser10, PrepaidCardStatus.ACTIVE);
+    PrepaidCard10 prepaidCard10 = waitForLastPrepaidCardInStatusV11(prepaidUser10.getId(), PrepaidCardStatus.ACTIVE);
 
     Assert.assertNotNull("debe tener una tarjeta", prepaidCard10);
     Assert.assertEquals("debe ser tarjeta activa", PrepaidCardStatus.ACTIVE, prepaidCard10.getStatus());
@@ -1692,7 +1692,7 @@ public class Test_PrepaidEJBBean10_topupUserBalance extends TestBaseUnitAsync {
     Assert.assertNotNull("debe tener un id", resp.getId());
     //Assert.assertFalse("debe ser enesima carga", resp.isFirstTopup());
 
-    PrepaidCard10 prepaidCard10 = waitForLastPrepaidCardInStatus(prepaidUser10, PrepaidCardStatus.ACTIVE);
+    PrepaidCard10 prepaidCard10 = waitForLastPrepaidCardInStatusV11(prepaidUser10.getId(), PrepaidCardStatus.ACTIVE);
 
     Assert.assertNotNull("debe tener una tarjeta", prepaidCard10);
     Assert.assertEquals("debe ser tarjeta activa", PrepaidCardStatus.ACTIVE, prepaidCard10.getStatus());

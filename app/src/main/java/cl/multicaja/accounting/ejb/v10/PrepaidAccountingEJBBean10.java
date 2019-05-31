@@ -15,7 +15,7 @@ import cl.multicaja.core.utils.db.OutParam;
 import cl.multicaja.core.utils.db.RowMapper;
 import cl.multicaja.prepaid.ejb.v10.MailPrepaidEJBBean10;
 import cl.multicaja.prepaid.ejb.v10.PrepaidBaseEJBBean10;
-import cl.multicaja.prepaid.ejb.v10.PrepaidCardEJBBean10;
+import cl.multicaja.prepaid.ejb.v11.PrepaidCardEJBBean11;
 import cl.multicaja.prepaid.ejb.v11.PrepaidMovementEJBBean11;
 import cl.multicaja.prepaid.helpers.CalculationsHelper;
 import cl.multicaja.prepaid.helpers.EncryptHelper;
@@ -74,7 +74,7 @@ public class PrepaidAccountingEJBBean10 extends PrepaidBaseEJBBean10 implements 
   private PrepaidMovementEJBBean11 prepaidMovementEJBBean11;
 
   @EJB
-  private PrepaidCardEJBBean10 prepaidCardEJBBean10;
+  private PrepaidCardEJBBean11 prepaidCardEJBBean11;
 
   private EncryptHelper encryptHelper;
 
@@ -110,12 +110,12 @@ public class PrepaidAccountingEJBBean10 extends PrepaidBaseEJBBean10 implements 
     this.prepaidMovementEJBBean11 = prepaidMovementEJBBean11;
   }
 
-  public PrepaidCardEJBBean10 getPrepaidCardEJB10() {
-    return prepaidCardEJBBean10;
+  public PrepaidCardEJBBean11 getPrepaidCardEJBBean11() {
+    return prepaidCardEJBBean11;
   }
 
-  public void setPrepaidCardEJB10(PrepaidCardEJBBean10 prepaidCardEJBBean10) {
-    this.prepaidCardEJBBean10 = prepaidCardEJBBean10;
+  public void setPrepaidCardEJBBean11(PrepaidCardEJBBean11 prepaidCardEJBBean11) {
+    this.prepaidCardEJBBean11 = prepaidCardEJBBean11;
   }
 
   public EncryptHelper getEncryptHelper() {
@@ -1079,13 +1079,13 @@ public class PrepaidAccountingEJBBean10 extends PrepaidBaseEJBBean10 implements 
       // Si el movimiento no existe en nuestra BD se agrega  como uno nuevo, si no  se actualiza.
       if(prepaidMovement10 == null) {
         //Se busca la tarjeta correspondiente al movimiento
-        PrepaidCard10 prepaidCard10 = getPrepaidCardEJB10().getPrepaidCardByEncryptedPan(null, getEncryptHelper().encryptPan(trx.getPan()));
+        PrepaidCard10 prepaidCard10 = getPrepaidCardEJBBean11().getPrepaidCardByEncryptedPan(null, getEncryptHelper().encryptPan(trx.getPan()));
         // Se agrega movimiento solo si existe la tarjeta.
         if(prepaidCard10 != null){
           PrepaidMovement10 mov = buildMovementAut(prepaidCard10.getIdUser(), prepaidCard10 ,trx,getTipoMovimientoFromAccTxType(acc.getType()),getTipoFacFromAccTxType(acc.getType()));
           movement10s.add(mov);
         }else{
-
+          //TODO:
         }
         transactions.add(acc);
 
