@@ -580,7 +580,7 @@ public class Test_topupUserBalance_v11 extends TestBaseUnitApi {
       Map<String, Object> errorObj1 = resp1.toMap();
       Assert.assertNotNull("Deberia tener error", errorObj1);
       Assert.assertEquals("Deberia tener error code = 108000", TRANSACCION_ERROR_GENERICO_$VALUE.getValue(), errorObj1.get("code"));
-      Assert.assertTrue("Deberia tener error message = Transacción duplicada", errorObj1.get("message").toString().contains("Transacción duplicada"));
+      Assert.assertTrue("Deberia tener error message = Transaccion duplicada", errorObj1.get("message").toString().contains("Transaccion duplicada"));
 
     }
 
@@ -610,7 +610,7 @@ public class Test_topupUserBalance_v11 extends TestBaseUnitApi {
       Map<String, Object> errorObj1 = resp1.toMap();
       Assert.assertNotNull("Deberia tener error", errorObj1);
       Assert.assertEquals("Deberia tener error code = 108000", TRANSACCION_ERROR_GENERICO_$VALUE.getValue(), errorObj1.get("code"));
-      Assert.assertTrue("Deberia tener error message = Transacción duplicada", errorObj1.get("message").toString().contains("Transacción duplicada"));
+      Assert.assertTrue("Deberia tener error message = Transaccion duplicada", errorObj1.get("message").toString().contains("Transaccion duplicada"));
     }
   }
 
