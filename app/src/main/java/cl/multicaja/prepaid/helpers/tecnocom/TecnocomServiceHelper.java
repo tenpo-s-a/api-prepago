@@ -132,7 +132,7 @@ public final class TecnocomServiceHelper {
     BigDecimal impfac = prepaidMovement.getImpfac();
     String codcom = prepaidMovement.getCodcom();
     Integer codact = prepaidMovement.getCodact();
-    CodigoMoneda clamondiv = CodigoMoneda.NONE;
+    CodigoMoneda clamondiv = CodigoMoneda.UNK;
     String numreffac = prepaidMovement.getId().toString(); // Se hace internamente en Tecnocomç
     String numaut = TecnocomServiceHelper.getNumautFromIdMov(prepaidMovement.getId().toString());
 

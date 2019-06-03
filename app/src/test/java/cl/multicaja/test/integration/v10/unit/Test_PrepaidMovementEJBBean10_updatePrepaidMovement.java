@@ -60,7 +60,7 @@ public class Test_PrepaidMovementEJBBean10_updatePrepaidMovement extends TestBas
       cuenta,
       1,
       2,
-      CodigoMoneda.CHILE_CLP.getValue(),
+      CodigoMoneda.CLP.getValue(),
       BusinessStatusType.REVERSED,
       PrepaidMovementStatus.PROCESS_OK);
 
@@ -69,7 +69,7 @@ public class Test_PrepaidMovementEJBBean10_updatePrepaidMovement extends TestBas
     prepaidMovement10.setCuenta(cuenta);
     prepaidMovement10.setNumextcta(1);
     prepaidMovement10.setNummovext(2);
-    prepaidMovement10.setClamone(CodigoMoneda.CHILE_CLP.getValue());
+    prepaidMovement10.setClamone(CodigoMoneda.CLP.getValue());
     prepaidMovement10.setEstadoNegocio(BusinessStatusType.REVERSED);
     prepaidMovement10.setEstado(PrepaidMovementStatus.PROCESS_OK);
 

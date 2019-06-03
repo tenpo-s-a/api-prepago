@@ -3393,7 +3393,7 @@ public class Test_Reconciliation_FullTest extends TestBaseUnitAsync {
     registroTecnocom.setCodAct(prepaidMovement10.getCodact());
     registroTecnocom.setCodCom(prepaidMovement10.getCodcom());
     registroTecnocom.setCodEnt(prepaidMovement10.getCodent());
-    registroTecnocom.setCodPais(prepaidMovement10.getCodpais().getValue());
+    registroTecnocom.setCodPais(prepaidMovement10.getCodpais());
     registroTecnocom.setContrato(account.getAccountNumber());
     registroTecnocom.setCuenta(prepaidMovement10.getCuenta());
     registroTecnocom.setFecFac(new Date(prepaidMovement10.getFecfac().getTime()).toLocalDate());

@@ -39,7 +39,7 @@ public class Test_PrepaidMovementEJBBean11_getPrepaidMovements extends TestBaseU
     movement.setIdTxExterno("uno");
     movement.setEstado(PrepaidMovementStatus.ERROR_IN_PROCESS_CARD_ISSUANCE_FEE);
     movement.setCuenta("");
-    movement.setClamon(CodigoMoneda.CHILE_CLP);
+    movement.setClamon(CodigoMoneda.CLP);
     movement.setIndnorcor(IndicadorNormalCorrector.NORMAL);
     movement.setTipofac(TipoFactura.COMPRA_COMERCIO_RELACIONADO);
     movement.setNumaut("");
@@ -55,7 +55,7 @@ public class Test_PrepaidMovementEJBBean11_getPrepaidMovements extends TestBaseU
     movement2.setIdTxExterno("dos");
     movement2.setEstado(PrepaidMovementStatus.ERROR_IN_PROCESS_PENDING_TOPUP);
     movement2.setCuenta("");
-    movement2.setClamon(CodigoMoneda.CHILE_CLP);
+    movement2.setClamon(CodigoMoneda.CLP);
     movement2.setIndnorcor(IndicadorNormalCorrector.NORMAL);
     movement2.setTipofac(TipoFactura.RETIRO_TRANSFERENCIA);
     movement2.setNumaut("2");
@@ -71,7 +71,7 @@ public class Test_PrepaidMovementEJBBean11_getPrepaidMovements extends TestBaseU
     movement3.setIdTxExterno("tres");
     movement3.setEstado(PrepaidMovementStatus.ERROR_IN_PROCESS_CARD_ISSUANCE_FEE);
     movement3.setCuenta("123");
-    movement3.setClamon(CodigoMoneda.CHILE_CLP);
+    movement3.setClamon(CodigoMoneda.CLP);
     movement3.setIndnorcor(IndicadorNormalCorrector.NORMAL);
     movement3.setTipofac(TipoFactura.CARGA_TRANSFERENCIA);
     movement3.setNumaut("3");

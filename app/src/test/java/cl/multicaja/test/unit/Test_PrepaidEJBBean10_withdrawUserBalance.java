@@ -125,14 +125,14 @@ public class Test_PrepaidEJBBean10_withdrawUserBalance {
 
     PrepaidMovement10 originalWithdraw = new PrepaidMovement10();
     originalWithdraw.setId(Long.MAX_VALUE);
-    originalWithdraw.setClamon(CodigoMoneda.CHILE_CLP);
+    originalWithdraw.setClamon(CodigoMoneda.CLP);
     originalWithdraw.setMonto(BigDecimal.TEN);
     originalWithdraw.setFechaCreacion(Timestamp.from(ZonedDateTime.now().toInstant()));
 
     // Request
     NewPrepaidWithdraw10 withdrawRequest = new NewPrepaidWithdraw10();
     NewAmountAndCurrency10 amount = new NewAmountAndCurrency10(BigDecimal.TEN);
-    amount.setCurrencyCode(CodigoMoneda.CHILE_CLP);
+    amount.setCurrencyCode(CodigoMoneda.CLP);
     withdrawRequest.setAmount(amount);
     withdrawRequest.setRut(Integer.MAX_VALUE);
     withdrawRequest.setPassword("1234");
@@ -165,7 +165,7 @@ public class Test_PrepaidEJBBean10_withdrawUserBalance {
 
     PrepaidMovement10 withdrawMovement = new PrepaidMovement10();
     withdrawMovement.setId(Long.MAX_VALUE);
-    withdrawMovement.setClamon(CodigoMoneda.CHILE_CLP);
+    withdrawMovement.setClamon(CodigoMoneda.CLP);
     withdrawMovement.setIndnorcor(IndicadorNormalCorrector.NORMAL);
     withdrawMovement.setTipofac(TipoFactura.RETIRO_EFECTIVO_COMERCIO_MULTICJA);
     withdrawMovement.setImpfac(BigDecimal.TEN);
@@ -176,7 +176,7 @@ public class Test_PrepaidEJBBean10_withdrawUserBalance {
 
     PrepaidMovement10 withdrawReverseMovement = new PrepaidMovement10();
     withdrawReverseMovement.setId(Long.MAX_VALUE);
-    withdrawReverseMovement.setClamon(CodigoMoneda.CHILE_CLP);
+    withdrawReverseMovement.setClamon(CodigoMoneda.CLP);
     withdrawReverseMovement.setIndnorcor(IndicadorNormalCorrector.CORRECTORA);
     withdrawReverseMovement.setTipofac(TipoFactura.ANULA_RETIRO_EFECTIVO_COMERCIO_MULTICJA);
     withdrawReverseMovement.setImpfac(BigDecimal.TEN);
