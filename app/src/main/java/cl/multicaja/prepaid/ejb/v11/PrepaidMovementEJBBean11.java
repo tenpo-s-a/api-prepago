@@ -63,6 +63,8 @@ public class PrepaidMovementEJBBean11 extends PrepaidMovementEJBBean10 {
   private static final String INSERT_FEE_SQL = String.format("INSERT INTO %s.prp_movimiento_comision (id_movimiento, tipo_comision, monto, iva, creacion, actualizacion) VALUES(?, ?, ?, ?, timezone('utc', now()), timezone('utc', now()))", getSchema());
   private static final String GET_NUMAUT = String.format("SELECT %s.getnumaut()",getSchema());
 
+  private static final String COUNT_MOVEMENT_BY_TYPE_AND_STATUS = String.format("SELECT COUNT(id) FROM %s.prp_movimiento WHERE id_usuario = ? AND tipo_movimiento = ? AND estado = ?", getSchema());
+
   @Inject
   private KafkaEventDelegate10 kafkaEventDelegate10;
 
@@ -157,6 +159,18 @@ public class PrepaidMovementEJBBean11 extends PrepaidMovementEJBBean10 {
                                                      ReconciliationStatusType estadoConSwitch, ReconciliationStatusType estadoConTecnocom, MovementOriginType origen, String pan, String codcom) throws Exception {
     return getPrepaidMovements( id, idMovimientoRef, idPrepaidUser, idTxExterno, tipoMovimiento,
       estado, cuenta, clamon, indnorcor, tipofac, fecfac, numaut, estadoConSwitch, estadoConTecnocom, origen, pan, codcom,null);
+  }
+
+  @Override
+  public Boolean isFirstTopup(Long idPrepaidUser) throws Exception {
+    if (idPrepaidUser == null) {
+      throw new BadRequestException(PARAMETRO_FALTANTE_$VALUE).setData(new KeyValue("value", "idPrepaidUser"));
+    }
+
+    Integer count = getDbUtils().getJdbcTemplate().queryForObject(
+      COUNT_MOVEMENT_BY_TYPE_AND_STATUS, new Object[] { idPrepaidUser, PrepaidMovementType.TOPUP.toString(), PrepaidMovementStatus.PROCESS_OK.toString() }, Integer.class);
+
+    return !(count != null && count > 0);
   }
 
   public List<PrepaidMovement10> getPrepaidMovements(Long id, Long idMovimientoRef, Long idPrepaidUser, String idTxExterno, PrepaidMovementType tipoMovimiento,

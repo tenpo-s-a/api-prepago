@@ -227,10 +227,10 @@ public class Test_refundMovement_v10 extends TestBaseUnitApi {
       dbMovement.getEstadoNegocio());
 
     CdtTransaction10 cdtMovement = getCdtEJBBean10().buscaMovimientoByIdExternoAndTransactionType(null,
-      prepaidMovement10.getIdTxExterno(),CdtTransactionType.REVERSA_PRIMERA_CARGA_CONF);
+      prepaidMovement10.getIdTxExterno(),CdtTransactionType.REVERSA_CARGA_CONF);
 
-    Assert.assertEquals("Se cumple la condición: "+REVERSA_PRIMERA_CARGA_CONF.getName(),
-      REVERSA_PRIMERA_CARGA_CONF, cdtMovement.getTransactionType());
+    Assert.assertEquals("Se cumple la condición: "+REVERSA_CARGA_CONF.getName(),
+      REVERSA_CARGA_CONF, cdtMovement.getTransactionType());
 
     Assert.assertEquals("Id de Transacción coincide en movimiento y cdt", prepaidMovement10.getIdTxExterno(), cdtMovement.getExternalTransactionId());
 
@@ -297,10 +297,10 @@ public class Test_refundMovement_v10 extends TestBaseUnitApi {
       dbMovement.getEstadoNegocio());
 
     CdtTransaction10 cdtMovement = getCdtEJBBean10().buscaMovimientoByIdExternoAndTransactionType(null,
-      prepaidMovement10.getIdTxExterno(),CdtTransactionType.REVERSA_PRIMERA_CARGA_CONF);
+      prepaidMovement10.getIdTxExterno(), REVERSA_CARGA_CONF);
 
-    Assert.assertEquals("Se cumple la condición: "+REVERSA_PRIMERA_CARGA_CONF.getName(),
-      REVERSA_PRIMERA_CARGA_CONF, cdtMovement.getTransactionType());
+    Assert.assertEquals("Se cumple la condición: "+REVERSA_CARGA_CONF.getName(),
+      REVERSA_CARGA_CONF, cdtMovement.getTransactionType());
 
     Assert.assertEquals("Id de Transacción coincide en movimiento y cdt", prepaidMovement10.getIdTxExterno(), cdtMovement.getExternalTransactionId());
 

@@ -5,6 +5,7 @@ import cl.multicaja.prepaid.model.v10.NewPrepaidTopup10;
 import cl.multicaja.prepaid.model.v10.TransactionOriginType;
 import cl.multicaja.test.integration.v10.unit.TestBaseUnit;
 import org.junit.Assert;
+import org.junit.Ignore;
 import org.junit.Test;
 
 import static org.junit.Assert.assertEquals;
@@ -38,6 +39,7 @@ public class Test_NewPrepaidTopup10 extends TestBaseUnit {
     assertTrue("Deberia ser 1era carga por defecto", topup.isFirstTopup());
   }
 
+  @Ignore
   @Test
   public void shouldBeCdtType_FirstTopup() {
     NewPrepaidTopup10 topup = new NewPrepaidTopup10();
