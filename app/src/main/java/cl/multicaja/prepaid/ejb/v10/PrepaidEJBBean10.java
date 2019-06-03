@@ -447,7 +447,7 @@ public class PrepaidEJBBean10 extends PrepaidBaseEJBBean10 implements PrepaidEJB
           prepaidCard = getPrepaidCardEJB11().insertPrepaidCard(null, prepaidCard);
         } else {
           log.error(String.format("[topupUserBalance] Error realizando alta de cliente [%s] [%s]", altaClienteDTO.getRetorno(), altaClienteDTO.getDescRetorno()));
-          throw new RunTimeValidationException(CUENTA_ERROR_GENERICO_$VALUE).setData(new KeyValue("value", "Error realizando alta de cliente"));
+          throw new RunTimeValidationException(TARJETA_ERROR_GENERICO_$VALUE).setData(new KeyValue("value", "Error realizando alta de cliente"));
         }
       } catch(Exception ex) {
         getPrepaidMovementEJB11().updatePrepaidMovementStatus(null, prepaidMovement.getId(), PrepaidMovementStatus.ERROR_IN_PROCESS_EMISSION_CARD);
@@ -466,7 +466,8 @@ public class PrepaidEJBBean10 extends PrepaidBaseEJBBean10 implements PrepaidEJB
         cdtTransaction.setTransactionType(CdtTransactionType.REVERSA_CARGA_CONF);
         cdtTransaction.setGloss(cdtTransaction.getTransactionType().getName() + " " + topupRequest.getAmount().getValue());
         cdtTransaction = this.getCdtEJB10().addCdtTransaction(null, cdtTransaction);
-        throw new RunTimeValidationException(ERROR_DE_COMUNICACION_CON_SERVICIO_WEB_EXTERNO);
+        log.error(ex);
+        throw new RunTimeValidationException(TARJETA_ERROR_GENERICO_$VALUE).setData(new KeyValue("value", "Error realizando alta de cliente"));
       }
     }
 
@@ -527,7 +528,9 @@ public class PrepaidEJBBean10 extends PrepaidBaseEJBBean10 implements PrepaidEJB
         cdtTransaction.setTransactionType(CdtTransactionType.REVERSA_CARGA_CONF);
         cdtTransaction.setGloss(cdtTransaction.getTransactionType().getName() + " " + topupRequest.getAmount().getValue());
         cdtTransaction = this.getCdtEJB10().addCdtTransaction(null, cdtTransaction);
-        throw new RunTimeValidationException(ERROR_DE_COMUNICACION_CON_SERVICIO_WEB_EXTERNO);
+
+        log.error(ex);
+        throw new RunTimeValidationException(TARJETA_ERROR_GENERICO_$VALUE).setData(new KeyValue("value", "Error consultando datos de tarjeta"));
       }
     }
 
