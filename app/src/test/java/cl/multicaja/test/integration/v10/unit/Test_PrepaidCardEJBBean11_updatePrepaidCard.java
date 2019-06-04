@@ -71,7 +71,7 @@ public class Test_PrepaidCardEJBBean11_updatePrepaidCard extends TestBaseUnit {
 
   }
 
-  @Test(expected = BadRequestException.class)
+  @Test(expected = ValidationException.class)
   public void updatePrepaidCard_cardId_null() throws Exception {
     PrepaidCard10 card = buildPrepaidCard10Pending();
 
@@ -83,7 +83,7 @@ public class Test_PrepaidCardEJBBean11_updatePrepaidCard extends TestBaseUnit {
     }
   }
 
-  @Test(expected = BadRequestException.class)
+  @Test(expected = ValidationException.class)
   public void updatePrepaidCard_accountId_null() throws Exception {
     try {
       getPrepaidCardEJBBean11().updatePrepaidCard(null, Long.MAX_VALUE, null, null);
@@ -93,7 +93,7 @@ public class Test_PrepaidCardEJBBean11_updatePrepaidCard extends TestBaseUnit {
     }
   }
 
-  @Test(expected = BadRequestException.class)
+  @Test(expected = ValidationException.class)
   public void updatePrepaidCard_card_null() throws Exception {
     try {
       getPrepaidCardEJBBean11().updatePrepaidCard(null, Long.MAX_VALUE, Long.MAX_VALUE, null);
@@ -103,11 +103,11 @@ public class Test_PrepaidCardEJBBean11_updatePrepaidCard extends TestBaseUnit {
     }
   }
 
-  @Test(expected = BadRequestException.class)
+  @Test(expected = ValidationException.class)
   public void updatePrepaidCard_card_idNull() throws Exception {
     PrepaidCard10 card = buildPrepaidCard10Pending();
     try {
-      getPrepaidCardEJBBean11().updatePrepaidCard(null, Long.MAX_VALUE, Long.MAX_VALUE, card);
+      getPrepaidCardEJBBean11().updatePrepaidCard(null,null, Long.MAX_VALUE, card);
     } catch(ValidationException vex) {
       Assert.assertEquals(PARAMETRO_FALTANTE_$VALUE.getValue(), vex.getCode());
       throw vex;

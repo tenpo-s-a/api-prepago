@@ -1078,7 +1078,7 @@ public class TestBaseUnit extends TestApiBase {
       cuenta = accountNumber.substring(12);
     }
 
-    if(prepaidCard == null) {
+    if(prepaidCard == null && account != null) {
       System.out.println("llena tarjeta");
       prepaidCard = getPrepaidCardEJBBean11().getPrepaidCardByAccountId(account.getId());
     }

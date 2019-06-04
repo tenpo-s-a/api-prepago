@@ -444,10 +444,6 @@ public class PrepaidCardEJBBean11 extends PrepaidBaseEJBBean10 implements Prepai
       throw new ValidationException(PARAMETRO_FALTANTE_$VALUE).setData(new KeyValue("value", "id"));
     }
 
-    if(accountId == null){
-      throw new ValidationException(PARAMETRO_FALTANTE_$VALUE).setData(new KeyValue("value", "accountId"));
-    }
-
     if(prepaidCard == null){
       throw new ValidationException(PARAMETRO_FALTANTE_$VALUE).setData(new KeyValue("value", "prepaidCard"));
     }
