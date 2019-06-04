@@ -8,6 +8,7 @@ import cl.multicaja.prepaid.kafka.events.model.Fee;
 import cl.multicaja.prepaid.kafka.events.model.TransactionStatus;
 import cl.multicaja.prepaid.kafka.events.model.TransactionType;
 import cl.multicaja.prepaid.model.v10.*;
+import cl.multicaja.prepaid.model.v11.Account;
 import cl.multicaja.prepaid.model.v11.PrepaidMovementFeeType;
 import org.junit.Assert;
 import org.junit.Test;
@@ -115,17 +116,22 @@ public class Test_PrepaidMovementEJBBean11_publishTransactionReversedEvent exten
   @Test
   public void publishTransactionReversedEvent() throws Exception {
 
-    String userUuid = UUID.randomUUID().toString();
-    String accountUuid = UUID.randomUUID().toString();
-    String cardUuid = UUID.randomUUID().toString();
+    PrepaidUser10 prepaidUser = buildPrepaidUserv2();
+    prepaidUser = createPrepaidUserV2(prepaidUser);
 
-    PrepaidUser10 user = buildPrepaidUserv2();
+    Account account = buildAccountFromTecnocom(prepaidUser);
+    account = createAccount(account.getUserId(),account.getAccountNumber());
+
+    PrepaidCard10 prepaidCard10 = buildPrepaidCardWithTecnocomData(prepaidUser,account);
+    prepaidCard10 = createPrepaidCardV2(prepaidCard10);
+
+
     PrepaidTopup10 topup = buildPrepaidTopup10();
 
     topup.setMerchantCode(getRandomNumericString(10));
     topup.setMerchantName(getRandomString(10));
 
-    PrepaidMovement10 movement = buildPrepaidMovement11(user, topup);
+    PrepaidMovement10 movement = buildPrepaidMovement11(prepaidUser, topup);
     movement.setFechaCreacion(Timestamp.from(Instant.now()));
     movement.setFechaActualizacion(Timestamp.from(Instant.now()));
 
@@ -135,7 +141,7 @@ public class Test_PrepaidMovementEJBBean11_publishTransactionReversedEvent exten
     fee.setFeeType(PrepaidMovementFeeType.TOPUP_POS_FEE);
     feeList.add(fee);
 
-    getPrepaidMovementEJBBean11().publishTransactionReversedEvent(userUuid, accountUuid, cardUuid, movement, feeList, TransactionType.CASH_IN_MULTICAJA);
+    getPrepaidMovementEJBBean11().publishTransactionReversedEvent(prepaidUser.getUuid(), account.getUuid(), prepaidCard10.getUuid(), movement, feeList, TransactionType.CASH_IN_MULTICAJA);
 
     Queue qResp = camelFactory.createJMSQueue(KafkaEventsRoute10.TRANSACTION_REVERSED_TOPIC);
     ExchangeData<String> event = (ExchangeData<String>) camelFactory.createJMSMessenger(30000, 60000)
@@ -147,8 +153,8 @@ public class Test_PrepaidMovementEJBBean11_publishTransactionReversedEvent exten
     TransactionEvent transactionEvent = getJsonParser().fromJson(event.getData(), TransactionEvent.class);
 
     Assert.assertEquals("Debe tener el mismo id", movement.getIdTxExterno(), transactionEvent.getTransaction().getRemoteTransactionId());
-    Assert.assertEquals("Debe tener el mismo accountId", accountUuid, transactionEvent.getAccountId());
-    Assert.assertEquals("Debe tener el mismo userId", userUuid, transactionEvent.getUserId());
+    Assert.assertEquals("Debe tener el mismo accountId", account.getUuid(), transactionEvent.getAccountId());
+    Assert.assertEquals("Debe tener el mismo userId", prepaidUser.getUuid(), transactionEvent.getUserId());
 
     Assert.assertEquals("Debe tener el mismo numaut", movement.getNumaut(), transactionEvent.getTransaction().getAuthCode());
     Assert.assertEquals("Debe tener el mismo monto", movement.getMonto(), transactionEvent.getTransaction().getPrimaryAmount().getValue());
@@ -166,24 +172,29 @@ public class Test_PrepaidMovementEJBBean11_publishTransactionReversedEvent exten
   @Test
   public void publishTransactionReversedEvent_fee_null() throws Exception {
 
-    String userUuid = UUID.randomUUID().toString();
-    String accountUuid = UUID.randomUUID().toString();
-    String cardUuid = UUID.randomUUID().toString();
 
-    PrepaidUser10 user = buildPrepaidUserv2();
+    PrepaidUser10 prepaidUser = buildPrepaidUserv2();
+    prepaidUser = createPrepaidUserV2(prepaidUser);
+
+    Account account = buildAccountFromTecnocom(prepaidUser);
+    account = createAccount(account.getUserId(),account.getAccountNumber());
+
+    PrepaidCard10 prepaidCard10 = buildPrepaidCardWithTecnocomData(prepaidUser,account);
+    prepaidCard10 = createPrepaidCardV2(prepaidCard10);
+
     PrepaidTopup10 topup = buildPrepaidTopup10();
 
     topup.setMerchantCode(getRandomNumericString(10));
     topup.setMerchantName(getRandomString(10));
 
-    PrepaidMovement10 movement = buildPrepaidMovement11(user, topup);
+    PrepaidMovement10 movement = buildPrepaidMovement11(prepaidUser, topup);
     movement.setFechaCreacion(Timestamp.from(Instant.now()));
     movement.setFechaActualizacion(Timestamp.from(Instant.now()));
 
-    getPrepaidMovementEJBBean11().publishTransactionReversedEvent(userUuid, accountUuid, cardUuid, movement, null, TransactionType.CASH_IN_MULTICAJA);
+    getPrepaidMovementEJBBean11().publishTransactionReversedEvent(prepaidUser.getUuid(), account.getUuid(), prepaidCard10.getUuid(), movement, null, TransactionType.CASH_IN_MULTICAJA);
 
     Queue qResp = camelFactory.createJMSQueue(KafkaEventsRoute10.TRANSACTION_REVERSED_TOPIC);
-    ExchangeData<String> event = (ExchangeData<String>) camelFactory.createJMSMessenger(30000, 60000)
+    ExchangeData<String> event = (ExchangeData<String>) camelFactory.createJMSMessenger(20000, 20000)
       .getMessage(qResp, movement.getIdTxExterno());
 
     Assert.assertNotNull("Deberia existir un evento de transaccion autorizada", event);
@@ -192,8 +203,8 @@ public class Test_PrepaidMovementEJBBean11_publishTransactionReversedEvent exten
     TransactionEvent transactionEvent = getJsonParser().fromJson(event.getData(), TransactionEvent.class);
 
     Assert.assertEquals("Debe tener el mismo id", movement.getIdTxExterno(), transactionEvent.getTransaction().getRemoteTransactionId());
-    Assert.assertEquals("Debe tener el mismo accountId", accountUuid, transactionEvent.getAccountId());
-    Assert.assertEquals("Debe tener el mismo userId", userUuid, transactionEvent.getUserId());
+    Assert.assertEquals("Debe tener el mismo accountId", account.getUuid(), transactionEvent.getAccountId());
+    Assert.assertEquals("Debe tener el mismo userId", prepaidUser.getUuid(), transactionEvent.getUserId());
 
     Assert.assertEquals("Debe tener el mismo numaut", movement.getNumaut(), transactionEvent.getTransaction().getAuthCode());
     Assert.assertEquals("Debe tener el mismo monto", movement.getMonto(), transactionEvent.getTransaction().getPrimaryAmount().getValue());

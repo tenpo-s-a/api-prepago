@@ -60,8 +60,7 @@ public class PendingCard10 extends BaseProcessor10 {
           getRoute().getPrepaidMovementEJBBean10().updatePrepaidMovementStatus(null, data.getPrepaidMovement10().getId(), status);
           data.getPrepaidMovement10().setEstado(status);
 
-          Endpoint endpoint = createJMSEndpoint(ERROR_EMISSION_REQ);
-          return redirectRequest(endpoint, exchange, req, false);
+          return redirectRequest(createJMSEndpoint(ERROR_EMISSION_REQ), exchange, req, false);
         }
 
         PrepaidUser10 user = data.getPrepaidUser10();
@@ -153,8 +152,7 @@ public class PendingCard10 extends BaseProcessor10 {
           getRoute().getPrepaidMovementEJBBean10().updatePrepaidMovementStatus(null, data.getPrepaidMovement10().getId(), status);
           data.getPrepaidMovement10().setEstado(status);
 
-          Endpoint endpoint = createJMSEndpoint(ERROR_CREATE_CARD_REQ);
-          return redirectRequest(endpoint, exchange, req, false);
+          return redirectRequest(createJMSEndpoint(ERROR_CREATE_CARD_REQ), exchange, req, false);
         }
 
         log.info(String.format("Obeteniendo datos de tarjeta %s", data.getPrepaidCard10().getProcessorUserId()));

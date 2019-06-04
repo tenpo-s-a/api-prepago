@@ -255,7 +255,6 @@ public class Test_PendingCard10 extends TestBaseUnitAsync {
     prepaidMovement = createPrepaidMovement11(prepaidMovement);
 
     String messageId = sendPendingEmissionCard(prepaidTopup, prepaidUser, cdtTransaction, prepaidMovement,4);
-    Thread.sleep(3000);
 
     Queue qResp = camelFactory.createJMSQueue(PrepaidTopupRoute10.ERROR_EMISSION_RESP);
     ExchangeData<PrepaidTopupData10> remoteTopup = (ExchangeData<PrepaidTopupData10>) camelFactory.createJMSMessenger().getMessage(qResp, messageId);

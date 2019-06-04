@@ -35,6 +35,7 @@ import javax.jms.Queue;
 import java.math.BigDecimal;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.UUID;
 
 import static cl.multicaja.prepaid.async.v10.routes.KafkaEventsRoute10.SEDA_ACCOUNT_CREATED_EVENT;
 import static cl.multicaja.prepaid.async.v10.routes.MailRoute10.PENDING_SEND_MAIL_WITHDRAW_REQ;
@@ -154,7 +155,7 @@ public class TestBaseUnitAsync extends TestContextHelper {
     }
 
     //se crea un messageId unico
-    String messageId = getRandomString(20);
+    String messageId = UUID.randomUUID().toString();
 
     //se crea la cola de requerimiento
     Queue qReq = camelFactory.createJMSQueue(PrepaidTopupRoute10.PENDING_EMISSION_REQ);

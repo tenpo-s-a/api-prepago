@@ -41,7 +41,7 @@ public class Test_PendingCardIssuanceFee10 extends TestBaseUnitAsync {
     PrepaidMovement10 prepaidMovement = new PrepaidMovement10();
 
     String messageId = sendPendingCardIssuanceFee(prepaidUser,null, prepaidMovement, prepaidCard10, account, 0);
-
+    Thread.sleep(2000);
     //se verifica que el mensaje haya sido procesado por el proceso asincrono y lo busca en la cola de emisiones pendientes
     Queue qResp = camelFactory.createJMSQueue(PrepaidTopupRoute10.PENDING_CARD_ISSUANCE_FEE_RESP);
 
@@ -156,7 +156,7 @@ public class Test_PendingCardIssuanceFee10 extends TestBaseUnitAsync {
   public void pendingCardIssuanceFee_AccountNull() throws Exception {
 
     PrepaidUser10 prepaidUser = buildPrepaidUserv2();
-    prepaidUser = createPrepaidUser10(prepaidUser);
+    prepaidUser = createPrepaidUserV2(prepaidUser);
 
     Account account = createRandomAccount(prepaidUser);
 
@@ -177,8 +177,8 @@ public class Test_PendingCardIssuanceFee10 extends TestBaseUnitAsync {
   @Test
   public void pendingCardIssuanceFee_AccountUuidNull() throws Exception {
 
-    PrepaidUser10 prepaidUser =  buildPrepaidUserv2();
-    prepaidUser = createPrepaidUser10(prepaidUser);
+    PrepaidUser10 prepaidUser = buildPrepaidUserv2();
+    prepaidUser = createPrepaidUserV2(prepaidUser);
 
     PrepaidCard10 prepaidCard = new PrepaidCard10();
     prepaidCard.setStatus(PrepaidCardStatus.PENDING);
@@ -207,7 +207,7 @@ public class Test_PendingCardIssuanceFee10 extends TestBaseUnitAsync {
   public void pendingCardIssuanceFee_AccountUuidEmpty() throws Exception {
 
     PrepaidUser10 prepaidUser = buildPrepaidUserv2();
-    prepaidUser = createPrepaidUser10(prepaidUser);
+    prepaidUser = createPrepaidUserV2(prepaidUser);
 
     PrepaidCard10 prepaidCard = new PrepaidCard10();
     prepaidCard.setStatus(PrepaidCardStatus.PENDING);
@@ -230,7 +230,7 @@ public class Test_PendingCardIssuanceFee10 extends TestBaseUnitAsync {
   public void pendingCardIssuanceFee_UserNull() throws Exception {
 
     PrepaidUser10 prepaidUser = buildPrepaidUserv2();
-    prepaidUser = createPrepaidUser10(prepaidUser);
+    prepaidUser = createPrepaidUserV2(prepaidUser);
 
     Account account = createRandomAccount(prepaidUser);
 
@@ -251,6 +251,7 @@ public class Test_PendingCardIssuanceFee10 extends TestBaseUnitAsync {
   
   @Test
   public void pendingCardIssuanceFee_UserId0() throws Exception {
+
     PrepaidUser10 prepaidUser = buildPrepaidUserv2();
     prepaidUser = createPrepaidUserV2(prepaidUser);
 
@@ -286,6 +287,7 @@ public class Test_PendingCardIssuanceFee10 extends TestBaseUnitAsync {
     account = createAccount(account.getUserId(),account.getAccountNumber());
 
     PrepaidCard10 prepaidCard = buildPrepaidCardWithTecnocomData(prepaidUser,account);
+    prepaidCard.setStatus(PrepaidCardStatus.PENDING);
     prepaidCard = createPrepaidCardV2(prepaidCard);
 
     PrepaidTopup10 prepaidTopup = buildPrepaidTopup10();
@@ -304,7 +306,7 @@ public class Test_PendingCardIssuanceFee10 extends TestBaseUnitAsync {
       PrepaidMovementStatus.PROCESS_OK);
 
     String messageId = sendPendingCardIssuanceFee(prepaidUser, prepaidTopup, prepaidMovement, prepaidCard, account, 0);
-
+    Thread.sleep(2000);
     //se verifica que el mensaje haya sido procesado por el proceso asincrono y lo busca en la cola de emisiones pendientes
     Queue qResp = camelFactory.createJMSQueue(PrepaidTopupRoute10.PENDING_CARD_ISSUANCE_FEE_RESP);
 
@@ -351,13 +353,14 @@ public class Test_PendingCardIssuanceFee10 extends TestBaseUnitAsync {
     account = createAccount(account.getUserId(),account.getAccountNumber());
     
     PrepaidCard10 prepaidCard = buildPrepaidCardWithTecnocomData(prepaidUser,account);
+    prepaidCard.setStatus(PrepaidCardStatus.PENDING);
     prepaidCard = createPrepaidCardV2(prepaidCard);
 
     PrepaidTopup10 prepaidTopup = buildPrepaidTopup10();
     PrepaidMovement10 prepaidMovement = buildPrepaidMovement11(prepaidUser, prepaidTopup);
     prepaidMovement = createPrepaidMovement11(prepaidMovement);
 
-    getPrepaidMovementEJBBean10().updatePrepaidMovement(null,
+    getPrepaidMovementEJBBean11().updatePrepaidMovement(null,
       prepaidMovement.getId(),
       prepaidCard.getPan(),
       account.getAccountNumber().substring(4, 8),
