@@ -27,9 +27,6 @@ public abstract class BaseRoute10 extends CamelRouteBuilder {
   private PrepaidUserEJBBean10 prepaidUserEJBBean10;
 
   @EJB
-  private PrepaidCardEJBBean10 prepaidCardEJBBean10;
-
-  @EJB
   private PrepaidCardEJBBean11 prepaidCardEJBBean11;
 
   @EJB
@@ -134,14 +131,6 @@ public abstract class BaseRoute10 extends CamelRouteBuilder {
 
   public void setPrepaidUserEJBBean10(PrepaidUserEJBBean10 prepaidUserEJBBean10) {
     this.prepaidUserEJBBean10 = prepaidUserEJBBean10;
-  }
-
-  public PrepaidCardEJBBean10 getPrepaidCardEJBBean10() {
-    return prepaidCardEJBBean10;
-  }
-
-  public void setPrepaidCardEJBBean10(PrepaidCardEJBBean10 prepaidCardEJBBean10) {
-    this.prepaidCardEJBBean10 = prepaidCardEJBBean10;
   }
 
   public PrepaidCardEJBBean11 getPrepaidCardEJBBean11() {

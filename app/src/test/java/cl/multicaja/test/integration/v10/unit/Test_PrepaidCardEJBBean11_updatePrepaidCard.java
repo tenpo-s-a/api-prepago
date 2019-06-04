@@ -4,6 +4,8 @@ import cl.multicaja.core.exceptions.BadRequestException;
 import cl.multicaja.core.exceptions.ValidationException;
 import cl.multicaja.prepaid.model.v10.PrepaidCard10;
 import cl.multicaja.prepaid.model.v10.PrepaidCardStatus;
+import cl.multicaja.prepaid.model.v10.PrepaidUser10;
+import cl.multicaja.prepaid.model.v11.Account;
 import org.junit.AfterClass;
 import org.junit.Assert;
 import org.junit.BeforeClass;
@@ -23,10 +25,16 @@ public class Test_PrepaidCardEJBBean11_updatePrepaidCard extends TestBaseUnit {
   @Test
   public void updatePrepaidCard_ok() throws Exception {
 
-    PrepaidCard10 card = buildPrepaidCard10Pending();
-    card = createPrepaidCard10(card);
+    PrepaidUser10 prepaidUser = buildPrepaidUserv2();
+    prepaidUser = createPrepaidUserV2(prepaidUser);
 
-    Long cardId = card.getId();
+    Account account = buildAccountFromTecnocom(prepaidUser);
+    account = createAccount(account.getUserId(),account.getAccountNumber());
+
+    PrepaidCard10 prepaidCard10 = buildPrepaidCardWithTecnocomData(prepaidUser,account);
+    prepaidCard10 = createPrepaidCardV2(prepaidCard10);
+
+
 
     String pan = getRandomNumericString(16);
     String encryptedPan = getRandomString(20);
@@ -37,19 +45,19 @@ public class Test_PrepaidCardEJBBean11_updatePrepaidCard extends TestBaseUnit {
     String producto = getRandomNumericString(2);
     String numeroUnico = getRandomNumericString(8);
 
-    card.setIdUser(Long.MAX_VALUE);
-    card.setStatus(cardStatus);
-    card.setExpiration(cardExpiration);
-    card.setNameOnCard(nameOnCard);
-    card.setPan(pan);
-    card.setEncryptedPan(encryptedPan);
-    card.setHashedPan(hashedPan);
-    card.setProducto(producto);
-    card.setNumeroUnico(numeroUnico);
+    prepaidCard10.setIdUser(Long.MAX_VALUE);
+    prepaidCard10.setStatus(cardStatus);
+    prepaidCard10.setExpiration(cardExpiration);
+    prepaidCard10.setNameOnCard(nameOnCard);
+    prepaidCard10.setPan(pan);
+    prepaidCard10.setEncryptedPan(encryptedPan);
+    prepaidCard10.setHashedPan(hashedPan);
+    prepaidCard10.setProducto(producto);
+    prepaidCard10.setNumeroUnico(numeroUnico);
 
-    getPrepaidCardEJBBean11().updatePrepaidCard(null, cardId, Long.MAX_VALUE, card);
+    getPrepaidCardEJBBean11().updatePrepaidCard(null, prepaidCard10.getId(), Long.MAX_VALUE, prepaidCard10);
 
-    PrepaidCard10 c1 = getPrepaidCardEJBBean11().getPrepaidCardById(null, card.getId());
+    PrepaidCard10 c1 = getPrepaidCardEJBBean11().getPrepaidCardById(null, prepaidCard10.getId());
 
     Assert.assertNotNull("debe retornar una tarjeta", c1);
     Assert.assertEquals("la tarjeta debe estar actualizada", pan, c1.getPan());
@@ -60,9 +68,10 @@ public class Test_PrepaidCardEJBBean11_updatePrepaidCard extends TestBaseUnit {
     Assert.assertEquals("la tarjeta debe estar actualizada", producto, c1.getProducto());
     Assert.assertEquals("la tarjeta debe estar actualizada", numeroUnico, c1.getNumeroUnico());
     Assert.assertNotNull("la tarjeta debe estar actualizada", c1.getUuid());
+
   }
 
-  @Test(expected = BadRequestException.class)
+  @Test(expected = ValidationException.class)
   public void updatePrepaidCard_cardId_null() throws Exception {
     PrepaidCard10 card = buildPrepaidCard10Pending();
 
@@ -74,7 +83,7 @@ public class Test_PrepaidCardEJBBean11_updatePrepaidCard extends TestBaseUnit {
     }
   }
 
-  @Test(expected = BadRequestException.class)
+  @Test(expected = ValidationException.class)
   public void updatePrepaidCard_accountId_null() throws Exception {
     try {
       getPrepaidCardEJBBean11().updatePrepaidCard(null, Long.MAX_VALUE, null, null);
@@ -84,7 +93,7 @@ public class Test_PrepaidCardEJBBean11_updatePrepaidCard extends TestBaseUnit {
     }
   }
 
-  @Test(expected = BadRequestException.class)
+  @Test(expected = ValidationException.class)
   public void updatePrepaidCard_card_null() throws Exception {
     try {
       getPrepaidCardEJBBean11().updatePrepaidCard(null, Long.MAX_VALUE, Long.MAX_VALUE, null);
@@ -94,11 +103,11 @@ public class Test_PrepaidCardEJBBean11_updatePrepaidCard extends TestBaseUnit {
     }
   }
 
-  @Test(expected = BadRequestException.class)
+  @Test(expected = ValidationException.class)
   public void updatePrepaidCard_card_idNull() throws Exception {
     PrepaidCard10 card = buildPrepaidCard10Pending();
     try {
-      getPrepaidCardEJBBean11().updatePrepaidCard(null, Long.MAX_VALUE, Long.MAX_VALUE, card);
+      getPrepaidCardEJBBean11().updatePrepaidCard(null,null, Long.MAX_VALUE, card);
     } catch(ValidationException vex) {
       Assert.assertEquals(PARAMETRO_FALTANTE_$VALUE.getValue(), vex.getCode());
       throw vex;

@@ -872,7 +872,7 @@ public class PrepaidMovementEJBBean10 extends PrepaidBaseEJBBean10 implements Pr
     }
 
     if (insertTecnocomFile) {
-      PrepaidCard10 prepaidCard10 = getPrepaidCardEJB11().getPrepaidCardByPanAndUserId(prepaidMovement.getPan(), prepaidMovement.getIdPrepaidUser());
+      PrepaidCard10 prepaidCard10 = getPrepaidCardEJB11().getPrepaidCardById( null, prepaidMovement.getCardId());
       List<MovimientoTecnocom10> movimientoTecnocom10List = getTecnocomReconciliationEJBBean().buscaMovimientosTecnocomHist(null, null, prepaidCard10.getEncryptedPan(), prepaidMovement.getIndnorcor(), prepaidMovement.getTipofac(), new java.sql.Date(prepaidMovement.getFecfac().getTime()), prepaidMovement.getNumaut());
 
       ResearchMovementInformationFiles researchMovementInformationFiles = new ResearchMovementInformationFiles();
@@ -1364,7 +1364,7 @@ public class PrepaidMovementEJBBean10 extends PrepaidBaseEJBBean10 implements Pr
           prepaidTopup10.setTransactionId(movFull.getIdTxExterno());
           prepaidTopup10.setAmount(new NewAmountAndCurrency10(movFull.getMonto(), movFull.getClamon()));
 
-          PrepaidCard10 card = getPrepaidCardEJB11().getLastPrepaidCardByUserIdAndOneOfStatus(null, prepaidUser10.getId(), PrepaidCardStatus.ACTIVE, PrepaidCardStatus.LOCKED);
+          PrepaidCard10 card = getPrepaidCardEJB11().getPrepaidCardById(null, movFull.getCardId());
           getPrepaidEJBBean10().getDelegate().sendPendingTopupReverse(prepaidTopup10, card, prepaidUser10, movFull);
         } else {
           PrepaidWithdraw10 prepaidWithdraw10 = new PrepaidWithdraw10();

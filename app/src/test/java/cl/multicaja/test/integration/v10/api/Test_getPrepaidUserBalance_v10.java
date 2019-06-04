@@ -5,14 +5,19 @@ import cl.multicaja.core.exceptions.ValidationException;
 import cl.multicaja.core.utils.http.HttpHeader;
 import cl.multicaja.core.utils.http.HttpResponse;
 import cl.multicaja.prepaid.model.v10.*;
+import cl.multicaja.prepaid.model.v11.Account;
+import org.apache.commons.lang3.RandomStringUtils;
+import org.apache.commons.lang3.StringUtils;
 import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;
 
 import java.math.BigDecimal;
+import java.util.UUID;
 
 import static cl.multicaja.core.model.Errors.CLIENTE_NO_TIENE_PREPAGO;
 import static cl.multicaja.core.model.Errors.SALDO_NO_DISPONIBLE_$VALUE;
+import static cl.multicaja.test.integration.v10.async.Test_Reconciliation_FullTest.prepaidUser;
 
 /**
  * @autor vutreras
@@ -25,8 +30,8 @@ public class Test_getPrepaidUserBalance_v10 extends TestBaseUnitApi {
     getTecnocomService().setRetorno(null);
   }
 
-  private HttpResponse getPrepaidUserBalance(Long userIdMc, boolean forceRefreshBalance) {
-    HttpResponse respHttp = apiGET(String.format("/1.0/prepaid/%s/balance", userIdMc), new HttpHeader("forceRefreshBalance", String.valueOf(forceRefreshBalance)));
+  private HttpResponse getPrepaidUserBalance(String userUuid,String accountUuid, boolean forceRefreshBalance) {
+    HttpResponse respHttp = apiGET(String.format("/1.0/prepaid/%s/account/%s/balance", userUuid,accountUuid), new HttpHeader("forceRefreshBalance", String.valueOf(forceRefreshBalance)));
     System.out.println("respHttp: " + respHttp);
     return respHttp;
   }
@@ -34,22 +39,26 @@ public class Test_getPrepaidUserBalance_v10 extends TestBaseUnitApi {
   @Test
   public void getPrepaidUserBalance_ok() throws Exception {
 
-    PrepaidUser10 prepaidUser10 = buildPrepaidUserv2(PrepaidUserLevel.LEVEL_2);
-    prepaidUser10 = createPrepaidUserV2(prepaidUser10);
+    PrepaidUser10 prepaidUser = buildPrepaidUserv2(PrepaidUserLevel.LEVEL_2);
+    prepaidUser = createPrepaidUserV2(prepaidUser);
+
+    Account account = buildAccountFromTecnocom(prepaidUser);
+    account = createAccount(account.getUserId(),account.getAccountNumber());
+
+    PrepaidCard10 prepaidCard10 = buildPrepaidCardWithTecnocomData(prepaidUser,account);
+    prepaidCard10 = createPrepaidCardV2(prepaidCard10);
 
     // se hace una carga
     BigDecimal impfac = BigDecimal.valueOf(3000);
-    topupUserBalance(prepaidUser10.getUuid(), impfac);
+    topupUserBalance(prepaidUser.getUuid(), impfac);
 
-    PrepaidCard10 prepaidCard = waitForLastPrepaidCardInStatus(prepaidUser10, PrepaidCardStatus.ACTIVE);
-    Assert.assertNotNull("Deberia tener una tarjeta", prepaidCard);
 
     {
       NewAmountAndCurrency10 balance = new NewAmountAndCurrency10(BigDecimal.valueOf(3000));
       NewAmountAndCurrency10 pcaMain = getCalculationsHelper().calculatePcaMain(balance);
       NewAmountAndCurrency10 pcaSecondary = getCalculationsHelper().calculatePcaSecondary(balance, pcaMain);
 
-      HttpResponse respHttp = getPrepaidUserBalance(prepaidUser10.getUserIdMc(), true);
+      HttpResponse respHttp = getPrepaidUserBalance(prepaidUser.getUuid(),account.getUuid(), true);
 
       Assert.assertEquals("status 200", 200, respHttp.getStatus());
 
@@ -68,7 +77,7 @@ public class Test_getPrepaidUserBalance_v10 extends TestBaseUnitApi {
     {
       try {
 
-        HttpResponse respHttp = getPrepaidUserBalance(getUniqueLong(), false);
+        HttpResponse respHttp = getPrepaidUserBalance(UUID.randomUUID().toString(),UUID.randomUUID().toString() , false);
         Assert.assertEquals("status 404", 404, respHttp.getStatus());
         NotFoundException nex = respHttp.toObject(NotFoundException.class);
 
@@ -89,7 +98,7 @@ public class Test_getPrepaidUserBalance_v10 extends TestBaseUnitApi {
     //dado que no se dio de alta el cliente, al intentar buscar el saldo en tecnocom debe dar error
     try {
 
-      HttpResponse respHttp = getPrepaidUserBalance(prepaidUser10.getUserIdMc(), false);
+      HttpResponse respHttp = getPrepaidUserBalance(prepaidUser10.getUuid(), UUID.randomUUID().toString(), false);
 
       Assert.assertEquals("status 422", 422, respHttp.getStatus());
 

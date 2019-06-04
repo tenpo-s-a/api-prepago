@@ -7,10 +7,7 @@ import cl.multicaja.prepaid.kafka.events.AccountEvent;
 import cl.multicaja.prepaid.model.v10.PrepaidUser10;
 import cl.multicaja.prepaid.model.v11.Account;
 import cl.multicaja.prepaid.model.v11.AccountStatus;
-import org.junit.AfterClass;
-import org.junit.BeforeClass;
-import org.junit.Assert;
-import org.junit.Test;
+import org.junit.*;
 
 import javax.jms.Queue;
 
@@ -20,10 +17,12 @@ import static cl.multicaja.core.model.Errors.PARAMETRO_FALTANTE_$VALUE;
 
 public class Test_AccountEJBBean10_publishAccountCreatedEvent extends TestBaseUnitAsync {
 
-  @BeforeClass
-  @AfterClass
-  public static void clearData(){
-    getDbUtils().getJdbcTemplate().execute(String.format("truncate %s.%s cascade", getSchema(), "prp_cuenta"));
+  @Before
+  @After
+  public  void clearData() {
+    getDbUtils().getJdbcTemplate().execute(String.format("TRUNCATE %s.prp_tarjeta cascade", getSchema()));
+    getDbUtils().getJdbcTemplate().execute(String.format("TRUNCATE %s.prp_cuenta cascade", getSchema()));
+    getDbUtils().getJdbcTemplate().execute(String.format("TRUNCATE %s.prp_usuario cascade", getSchema()));
   }
 
   @Test

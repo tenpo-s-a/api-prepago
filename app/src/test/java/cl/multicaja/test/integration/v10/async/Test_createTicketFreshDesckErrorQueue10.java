@@ -118,14 +118,15 @@ public class Test_createTicketFreshDesckErrorQueue10 extends TestBaseUnitAsync {
     prepaidMovement = createPrepaidMovement10(prepaidMovement);
 
     TipoAlta tipoAlta = prepaidUser.getUserLevel() == PrepaidUserLevel.LEVEL_2 ? TipoAlta.NIVEL2 : TipoAlta.NIVEL1;
+    Account account = getAccountEJBBean10().insertAccount(prepaidUser.getId(), getRandomString(15));
     AltaClienteDTO altaClienteDTO = getTecnocomService().altaClientes(prepaidUser.getName(), prepaidUser.getLastName(), "",prepaidUser.getDocumentNumber(), TipoDocumento.RUT, tipoAlta);
-    PrepaidCard10 prepaidCard10 = new PrepaidCard10();
+
+    PrepaidCard10 prepaidCard10 = buildPrepaidCard11(prepaidUser,account.getId());
     prepaidCard10.setProcessorUserId(altaClienteDTO.getContrato());
     prepaidCard10.setIdUser(prepaidUser.getId());
     prepaidCard10.setStatus(PrepaidCardStatus.PENDING);
-    prepaidCard10 = createPrepaidCard10(prepaidCard10);
+    prepaidCard10 = createPrepaidCardV2(prepaidCard10);
 
-    Account account = getAccountEJBBean10().insertAccount(prepaidUser.getId(), getRandomString(15));
 
     tc.getTecnocomService().setAutomaticError(true);
     tc.getTecnocomService().setRetorno(CodigoRetorno._1010);

@@ -4,6 +4,8 @@ package cl.multicaja.test.integration.v10.unit;
 import cl.multicaja.core.exceptions.BadRequestException;
 import cl.multicaja.prepaid.model.v10.PrepaidCard10;
 import cl.multicaja.prepaid.model.v10.PrepaidCardStatus;
+import cl.multicaja.prepaid.model.v10.PrepaidUser10;
+import cl.multicaja.prepaid.model.v11.Account;
 import org.junit.Assert;
 import org.junit.Test;
 
@@ -17,12 +19,18 @@ public class Test_PrepaidCardEJBBean10_updatePrepaidCardStatus extends TestBaseU
   @Test
   public void updatePrepaidCardStatus_ok() throws Exception {
 
-    PrepaidCard10 card = buildPrepaidCard10();
-    card = createPrepaidCard10(card);
+    PrepaidUser10 prepaidUser = buildPrepaidUserv2();
+    prepaidUser = createPrepaidUserV2(prepaidUser);
 
-    getPrepaidCardEJBBean10().updatePrepaidCardStatus(null, card.getId(), PrepaidCardStatus.EXPIRED);
+    Account account = buildAccountFromTecnocom(prepaidUser);
+    account = createAccount(account.getUserId(),account.getAccountNumber());
 
-    PrepaidCard10 c1 = getPrepaidCardEJBBean10().getPrepaidCardById(null, card.getId());
+    PrepaidCard10 prepaidCard10 = buildPrepaidCardWithTecnocomData(prepaidUser,account);
+    prepaidCard10 = createPrepaidCardV2(prepaidCard10);
+
+    getPrepaidCardEJBBean11().updatePrepaidCardStatus(null, prepaidCard10.getId(), PrepaidCardStatus.EXPIRED);
+
+    PrepaidCard10 c1 = getPrepaidCardEJBBean11().getPrepaidCardById(null, prepaidCard10.getId());
 
     Assert.assertNotNull("debe retornar un usuario", c1);
     Assert.assertEquals("el estado debe estar actualizado", PrepaidCardStatus.EXPIRED, c1.getStatus());
@@ -31,12 +39,18 @@ public class Test_PrepaidCardEJBBean10_updatePrepaidCardStatus extends TestBaseU
   @Test
   public void updatePrepaidCardStatus_not_ok() throws Exception {
 
-    PrepaidCard10 card = buildPrepaidCard10();
-    card = createPrepaidCard10(card);
+    PrepaidUser10 prepaidUser = buildPrepaidUserv2();
+    prepaidUser = createPrepaidUserV2(prepaidUser);
+
+    Account account = buildAccountFromTecnocom(prepaidUser);
+    account = createAccount(account.getUserId(),account.getAccountNumber());
+
+    PrepaidCard10 prepaidCard10 = buildPrepaidCardWithTecnocomData(prepaidUser,account);
+    prepaidCard10 = createPrepaidCardV2(prepaidCard10);
 
     try {
 
-      getPrepaidCardEJBBean10().updatePrepaidCardStatus(null, card.getId(), null);
+      getPrepaidCardEJBBean11().updatePrepaidCardStatus(null, prepaidCard10.getId(), null);
 
       Assert.fail("No debe pasar por acá, debe lanzar excepcion de validacion");
 
@@ -44,7 +58,7 @@ public class Test_PrepaidCardEJBBean10_updatePrepaidCardStatus extends TestBaseU
       Assert.assertEquals("debe se error 101004", PARAMETRO_FALTANTE_$VALUE.getValue(), vex.getCode());
     }
 
-    PrepaidCard10 c1 = getPrepaidCardEJBBean10().getPrepaidCardById(null, card.getId());
+    PrepaidCard10 c1 = getPrepaidCardEJBBean11().getPrepaidCardById(null, prepaidCard10.getId());
 
     Assert.assertNotNull("debe retornar un usuario", c1);
     Assert.assertEquals("el estado debe estar actualizado", PrepaidCardStatus.ACTIVE, c1.getStatus());

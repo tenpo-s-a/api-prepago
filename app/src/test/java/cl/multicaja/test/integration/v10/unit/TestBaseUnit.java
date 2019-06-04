@@ -10,8 +10,8 @@ import cl.multicaja.core.exceptions.BadRequestException;
 import cl.multicaja.core.exceptions.BaseException;
 import cl.multicaja.core.exceptions.ValidationException;
 import cl.multicaja.core.test.TestApiBase;
-import cl.multicaja.core.utils.*;
 import cl.multicaja.core.utils.Constants;
+import cl.multicaja.core.utils.*;
 import cl.multicaja.core.utils.db.DBUtils;
 import cl.multicaja.core.utils.http.HttpHeader;
 import cl.multicaja.prepaid.async.v10.*;
@@ -43,10 +43,14 @@ import java.math.BigDecimal;
 import java.sql.PreparedStatement;
 import java.sql.SQLException;
 import java.sql.Timestamp;
-import java.time.*;
+import java.time.Instant;
+import java.time.LocalDateTime;
+import java.time.ZoneId;
+import java.time.ZonedDateTime;
 import java.util.*;
 
-import static cl.multicaja.core.model.Errors.*;
+import static cl.multicaja.core.model.Errors.LIMITES_ERROR_GENERICO_$VALUE;
+import static cl.multicaja.core.model.Errors.PARAMETRO_FALTANTE_$VALUE;
 
 /**
  * @autor vutreras
@@ -65,7 +69,6 @@ public class TestBaseUnit extends TestApiBase {
   private static PrepaidTopupDelegate10 prepaidTopupDelegate10;
   private static CdtEJBBean10 cdtEJBBean10;
   private static PrepaidUserEJBBean10 prepaidUserEJBBean10;
-  private static PrepaidCardEJBBean10 prepaidCardEJBBean10;
   private static PrepaidEJBBean10 prepaidEJBBean10;
   private static PrepaidMovementEJBBean10 prepaidMovementEJBBean10;
   private static PrepaidMovementEJBBean11 prepaidMovementEJBBean11;
@@ -119,11 +122,11 @@ public class TestBaseUnit extends TestApiBase {
    * @return
    */
   public static String getSchema() {
-    return getPrepaidCardEJBBean10().getSchema();
+    return getPrepaidCardEJBBean11().getSchema();
   }
 
   public static String getSchemaAccounting() {
-    return getPrepaidCardEJBBean10().getSchemaAccounting();
+    return getPrepaidCardEJBBean11().getSchemaAccounting();
   }
 
   /**
@@ -131,7 +134,7 @@ public class TestBaseUnit extends TestApiBase {
    * @return
    */
   public static DBUtils getDbUtils() {
-    return getPrepaidCardEJBBean10().getDbUtils();
+    return getPrepaidCardEJBBean11().getDbUtils();
   }
   public CalculatorParameter10 getPercentage(){
    return getCalculationsHelper().getCalculatorParameter10();
@@ -253,23 +256,11 @@ public class TestBaseUnit extends TestApiBase {
   public static PrepaidUserEJBBean10 getPrepaidUserEJBBean10() {
     if (prepaidUserEJBBean10 == null) {
       prepaidUserEJBBean10 = new PrepaidUserEJBBean10();
-      prepaidUserEJBBean10.setPrepaidCardEJB10(getPrepaidCardEJBBean10());
+      prepaidUserEJBBean10.setPrepaidCardEJB11(getPrepaidCardEJBBean11());
       prepaidUserEJBBean10.setPrepaidMovementEJB10(getPrepaidMovementEJBBean10());
       prepaidUserEJBBean10.setAccountEJBBean10(getAccountEJBBean10());
     }
     return prepaidUserEJBBean10;
-  }
-
-  /**
-   *
-   * @return
-   */
-  public static PrepaidCardEJBBean10 getPrepaidCardEJBBean10() {
-    if (prepaidCardEJBBean10 == null) {
-      prepaidCardEJBBean10 = new PrepaidCardEJBBean10();
-      prepaidCardEJBBean10.setKafkaEventDelegate10(getKafkaEventDelegate10());
-    }
-    return prepaidCardEJBBean10;
   }
 
   public static PrepaidCardEJBBean11 getPrepaidCardEJBBean11() {
@@ -285,7 +276,7 @@ public class TestBaseUnit extends TestApiBase {
 
     if (mailPrepaidEJBBean10 == null) {
       mailPrepaidEJBBean10 = new MailPrepaidEJBBean10();
-      mailPrepaidEJBBean10.setPrepaidCardEJBBean10(getPrepaidCardEJBBean10());
+      mailPrepaidEJBBean10.setPrepaidCardEJBBean11(getPrepaidCardEJBBean11());
       mailPrepaidEJBBean10.setPrepaidUserEJBBean10(getPrepaidUserEJBBean10());
       mailPrepaidEJBBean10.setPrepaidTopupDelegate10(getPrepaidTopupDelegate10());
     }
@@ -350,8 +341,7 @@ public class TestBaseUnit extends TestApiBase {
       prepaidAccountingEJBBean10.setMailPrepaidEJBBean10(getMailPrepaidEJBBean10());
       prepaidAccountingEJBBean10.setPrepaidClearingEJBBean10(getPrepaidClearingEJBBean10());
       prepaidAccountingEJBBean10.setPrepaidAccountingFileEJBBean10(getPrepaidAccountingFileEJBBean10());
-
-      prepaidAccountingEJBBean10.setPrepaidCardEJB10(getPrepaidCardEJBBean10());
+      prepaidAccountingEJBBean10.setPrepaidCardEJBBean11(getPrepaidCardEJBBean11());
       prepaidAccountingEJBBean10.setPrepaidMovementEJBBean11(getPrepaidMovementEJBBean11());
     }
     return prepaidAccountingEJBBean10;
@@ -490,6 +480,7 @@ public class TestBaseUnit extends TestApiBase {
    * @return
    * @throws Exception
    */
+   @Deprecated
   public PrepaidCard10 buildPrepaidCard10(PrepaidUser10 prepaidUser) throws Exception {
     int expiryYear = numberUtils.random(1000, 9999);
     int expiryMonth = numberUtils.random(1, 99);
@@ -510,7 +501,7 @@ public class TestBaseUnit extends TestApiBase {
   }
 
 
-
+  @Deprecated
   public PrepaidCard10 buildPrepaidCard10(PrepaidUser10 prepaidUser,Long accountId) throws Exception {
     int expiryYear = numberUtils.random(1000, 9999);
     int expiryMonth = numberUtils.random(1, 99);
@@ -528,6 +519,28 @@ public class TestBaseUnit extends TestApiBase {
     prepaidCard.setProducto(getRandomNumericString(2));
     prepaidCard.setNumeroUnico(getRandomNumericString(8));
     prepaidCard.setAccountId(accountId);
+    return prepaidCard;
+  }
+
+  public PrepaidCard10 buildPrepaidCard11(PrepaidUser10 prepaidUser,Long accountId) throws Exception {
+    int expiryYear = numberUtils.random(1000, 9999);
+    int expiryMonth = numberUtils.random(1, 99);
+    int expiryDate = numberUtils.toInt(expiryYear + "" + StringUtils.leftPad(String.valueOf(expiryMonth), 2, "0"));
+    String pan = getRandomNumericString(16);
+
+    PrepaidCard10 prepaidCard = new PrepaidCard10();
+    prepaidCard.setIdUser(prepaidUser != null ? prepaidUser.getId() : null);
+    prepaidCard.setPan(Utils.replacePan(pan));
+    prepaidCard.setEncryptedPan(EncryptUtil.getInstance().encrypt(pan));
+    prepaidCard.setExpiration(expiryDate);
+    prepaidCard.setStatus(PrepaidCardStatus.ACTIVE);
+    prepaidCard.setProcessorUserId(getRandomNumericString(20));
+    prepaidCard.setNameOnCard("Tarjeta de: " + getRandomString(5));
+    prepaidCard.setProducto(getRandomNumericString(2));
+    prepaidCard.setNumeroUnico(getRandomNumericString(8));
+    prepaidCard.setAccountId(accountId);
+    prepaidCard.setUuid(UUID.randomUUID().toString());
+    prepaidCard.setHashedPan("");
     return prepaidCard;
   }
   /**
@@ -584,6 +597,7 @@ public class TestBaseUnit extends TestApiBase {
    * @return
    * @throws Exception
    */
+  @Deprecated
   public PrepaidCard10 buildPrepaidCard10() throws Exception {
     PrepaidUser10 prepaidUser = buildPrepaidUser10();
     prepaidUser = getPrepaidUserEJBBean10().createPrepaidUser(null, prepaidUser);
@@ -862,9 +876,10 @@ public class TestBaseUnit extends TestApiBase {
      * @return
      * @throws Exception
      */
+    @Deprecated
   public PrepaidCard10 createPrepaidCard10(PrepaidCard10 prepaidCard) throws Exception {
 
-    prepaidCard = getPrepaidCardEJBBean10().createPrepaidCard(null, prepaidCard);
+    prepaidCard = getPrepaidCardEJBBean11().createPrepaidCard(null, prepaidCard);
 
     Assert.assertNotNull("debe retornar un usuario", prepaidCard);
     Assert.assertEquals("debe tener id", true, prepaidCard.getId() > 0);
@@ -877,7 +892,7 @@ public class TestBaseUnit extends TestApiBase {
 
   public PrepaidCard10 createPrepaidCardV2(PrepaidCard10 prepaidCard) throws Exception {
 
-    prepaidCard = getPrepaidCardEJBBean11().insertPrepaidCard(null, prepaidCard);
+    prepaidCard = getPrepaidCardEJBBean11().createPrepaidCard(null, prepaidCard);
 
     Assert.assertNotNull("debe retornar una tarjeta", prepaidCard);
     Assert.assertEquals("debe tener id", true, prepaidCard.getId() > 0);
@@ -1063,7 +1078,7 @@ public class TestBaseUnit extends TestApiBase {
       cuenta = accountNumber.substring(12);
     }
 
-    if(prepaidCard == null) {
+    if(prepaidCard == null && account != null) {
       System.out.println("llena tarjeta");
       prepaidCard = getPrepaidCardEJBBean11().getPrepaidCardByAccountId(account.getId());
     }
@@ -1611,13 +1626,12 @@ public class TestBaseUnit extends TestApiBase {
   /**
    * Espera por 10 intentos cada 1 segundo la existencia de una tarjeta del cliente prepago
    *
-   * @param prepaidUser10
+   * @param accountId
    * @param status
    * @return
    * @throws Exception
    */
-  @Deprecated
-  protected PrepaidCard10 waitForLastPrepaidCardInStatus(PrepaidUser10 prepaidUser10, PrepaidCardStatus status) throws Exception {
+  protected PrepaidCard10 waitForLastPrepaidCardInStatus(Long accountId, PrepaidCardStatus status) throws Exception {
 
     PrepaidCard10 prepaidCard10 = null;
 
@@ -1626,7 +1640,7 @@ public class TestBaseUnit extends TestApiBase {
 
       Thread.sleep(1000);
 
-      prepaidCard10 = getPrepaidCardEJBBean10().getLastPrepaidCardByUserId(null, prepaidUser10.getId());
+      prepaidCard10 = getPrepaidCardEJBBean11().getLastPrepaidCardByAccountId(null, accountId);
 
       if (prepaidCard10 != null && status.equals(prepaidCard10.getStatus())) {
         break;

@@ -35,33 +35,31 @@ public class Test_getAccountBalance extends TestBaseUnitApi {
     PrepaidUser10 prepaidUser10 = buildPrepaidUserv2(PrepaidUserLevel.LEVEL_2);
     prepaidUser10 = createPrepaidUserV2(prepaidUser10);
 
+    Account account = buildAccountFromTecnocom(prepaidUser10);
+    account = createAccount(account.getUserId(),account.getAccountNumber());
+
+    PrepaidCard10 prepaidCard10 = buildPrepaidCardWithTecnocomData(prepaidUser10,account);
+    prepaidCard10 = createPrepaidCardV2(prepaidCard10);
+
     // se hace una carga
     BigDecimal impfac = BigDecimal.valueOf(3000);
     topupUserBalance(prepaidUser10.getUuid(), impfac);
 
-    PrepaidCard10 prepaidCard = waitForLastPrepaidCardInStatus(prepaidUser10, PrepaidCardStatus.ACTIVE);
-    Assert.assertNotNull("Deberia tener una tarjeta", prepaidCard);
+    NewAmountAndCurrency10 balance = new NewAmountAndCurrency10(BigDecimal.valueOf(3000));
+    NewAmountAndCurrency10 pcaMain = getCalculationsHelper().calculatePcaMain(balance);
+    NewAmountAndCurrency10 pcaSecondary = getCalculationsHelper().calculatePcaSecondary(balance, pcaMain);
 
-    Account account = getAccountEJBBean10().findByUserId(prepaidUser10.getId());
+    HttpResponse respHttp = getPrepaidUserBalance(prepaidUser10.getUuid(), account.getUuid(), true);
 
-    Assert.assertNotNull(account);
+    Assert.assertEquals("status 200", 200, respHttp.getStatus());
 
-    {
-      NewAmountAndCurrency10 balance = new NewAmountAndCurrency10(BigDecimal.valueOf(3000));
-      NewAmountAndCurrency10 pcaMain = getCalculationsHelper().calculatePcaMain(balance);
-      NewAmountAndCurrency10 pcaSecondary = getCalculationsHelper().calculatePcaSecondary(balance, pcaMain);
+    PrepaidBalance10 prepaidBalance10 = respHttp.toObject(PrepaidBalance10.class);
 
-      HttpResponse respHttp = getPrepaidUserBalance(prepaidUser10.getUuid(), account.getUuid(), true);
+    Assert.assertEquals("Debe ser igual", balance, prepaidBalance10.getBalance());
+    Assert.assertEquals("Debe ser igual", pcaMain, prepaidBalance10.getPcaMain());
+    Assert.assertEquals("Debe ser igual", pcaSecondary, prepaidBalance10.getPcaSecondary());
+    Assert.assertTrue("Debe ser actualizado desde tecnocom", prepaidBalance10.isUpdated());
 
-      Assert.assertEquals("status 200", 200, respHttp.getStatus());
-
-      PrepaidBalance10 prepaidBalance10 = respHttp.toObject(PrepaidBalance10.class);
-
-      Assert.assertEquals("Debe ser igual", balance, prepaidBalance10.getBalance());
-      Assert.assertEquals("Debe ser igual", pcaMain, prepaidBalance10.getPcaMain());
-      Assert.assertEquals("Debe ser igual", pcaSecondary, prepaidBalance10.getPcaSecondary());
-      Assert.assertTrue("Debe ser actualizado desde tecnocom", prepaidBalance10.isUpdated());
-    }
   }
 
   @Test

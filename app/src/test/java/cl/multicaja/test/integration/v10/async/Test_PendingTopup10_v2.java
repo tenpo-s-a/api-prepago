@@ -70,8 +70,8 @@ public class Test_PendingTopup10_v2 extends TestBaseUnitAsync {
     CdtTransaction10 cdtTransaction = buildCdtTransaction10(prepaidUser10, prepaidTopup);
     cdtTransaction = createCdtTransaction10(cdtTransaction);
 
-    PrepaidMovement10 prepaidMovement = buildPrepaidMovement10(prepaidUser10, prepaidTopup, prepaidCard, cdtTransaction);
-    prepaidMovement = createPrepaidMovement10(prepaidMovement);
+    PrepaidMovement10 prepaidMovement = buildPrepaidMovement11(prepaidUser10, prepaidTopup, prepaidCard, cdtTransaction);
+    prepaidMovement = createPrepaidMovement11(prepaidMovement);
 
     String messageId = sendPendingTopup(prepaidTopup, prepaidUser10, cdtTransaction, prepaidMovement, account,0);
 
@@ -96,16 +96,14 @@ public class Test_PendingTopup10_v2 extends TestBaseUnitAsync {
   public void pendingTopup_with_card_expired() throws Exception {
 
     PrepaidUser10 prepaidUser10 = buildPrepaidUserv2();
-    prepaidUser10 = createPrepaidUser10(prepaidUser10);
+    prepaidUser10 = createPrepaidUserV2(prepaidUser10);
 
     Account account = buildAccountFromTecnocom(prepaidUser10);
     account = createAccount(prepaidUser10.getId(),account.getAccountNumber());
 
     PrepaidCard10 prepaidCard = buildPrepaidCardWithTecnocomData(prepaidUser10, account);
-
     prepaidCard.setStatus(PrepaidCardStatus.EXPIRED);
-
-    prepaidCard = createPrepaidCard10(prepaidCard);
+    prepaidCard = createPrepaidCardV2(prepaidCard);
 
     PrepaidTopup10 prepaidTopup = buildPrepaidTopup10();
 
@@ -113,9 +111,9 @@ public class Test_PendingTopup10_v2 extends TestBaseUnitAsync {
 
     cdtTransaction = createCdtTransaction10(cdtTransaction);
 
-    PrepaidMovement10 prepaidMovement = buildPrepaidMovement10(prepaidUser10, prepaidTopup, prepaidCard, cdtTransaction);
+    PrepaidMovement10 prepaidMovement = buildPrepaidMovement11(prepaidUser10, prepaidTopup, prepaidCard, cdtTransaction);
 
-    prepaidMovement = createPrepaidMovement10(prepaidMovement);
+    prepaidMovement = createPrepaidMovement11(prepaidMovement);
 
     String messageId = sendPendingTopup(prepaidTopup, prepaidUser10, cdtTransaction, prepaidMovement, account,0);
 

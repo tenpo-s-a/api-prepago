@@ -60,8 +60,7 @@ public class PendingCard10 extends BaseProcessor10 {
           getRoute().getPrepaidMovementEJBBean10().updatePrepaidMovementStatus(null, data.getPrepaidMovement10().getId(), status);
           data.getPrepaidMovement10().setEstado(status);
 
-          Endpoint endpoint = createJMSEndpoint(ERROR_EMISSION_REQ);
-          return redirectRequest(endpoint, exchange, req, false);
+          return redirectRequest(createJMSEndpoint(ERROR_EMISSION_REQ), exchange, req, false);
         }
 
         PrepaidUser10 user = data.getPrepaidUser10();
@@ -88,7 +87,7 @@ public class PendingCard10 extends BaseProcessor10 {
           prepaidCard.setProcessorUserId(altaClienteDTO.getContrato());
           prepaidCard.setUuid(UUID.randomUUID().toString());
 
-          prepaidCard = getRoute().getPrepaidCardEJBBean10().createPrepaidCard(null,prepaidCard);
+          prepaidCard = getRoute().getPrepaidCardEJBBean11().createPrepaidCard(null,prepaidCard);
           data.setPrepaidCard10(prepaidCard);
 
           req.getData().setAccount(account);
@@ -153,8 +152,7 @@ public class PendingCard10 extends BaseProcessor10 {
           getRoute().getPrepaidMovementEJBBean10().updatePrepaidMovementStatus(null, data.getPrepaidMovement10().getId(), status);
           data.getPrepaidMovement10().setEstado(status);
 
-          Endpoint endpoint = createJMSEndpoint(ERROR_CREATE_CARD_REQ);
-          return redirectRequest(endpoint, exchange, req, false);
+          return redirectRequest(createJMSEndpoint(ERROR_CREATE_CARD_REQ), exchange, req, false);
         }
 
         log.info(String.format("Obeteniendo datos de tarjeta %s", data.getPrepaidCard10().getProcessorUserId()));
@@ -180,7 +178,7 @@ public class PendingCard10 extends BaseProcessor10 {
           // se trunca el pan
           prepaidCard10.setPan(Utils.replacePan(datosTarjetaDTO.getPan()));
 
-          // se encripta el Pan FIXME: Encriptar el pan con el keyvault de azure "cuando este desplegado en los clusters", en test se debe usar el AES.
+          // se encripta el Pan
           prepaidCard10.setEncryptedPan(getRoute().getEncryptHelper().encryptPan(datosTarjetaDTO.getPan()));
 
           // se guarda un hash del pan utilizando como secret el accountNumber (contrato)

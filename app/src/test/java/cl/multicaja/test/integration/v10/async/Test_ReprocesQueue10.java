@@ -177,7 +177,7 @@ public class Test_ReprocesQueue10 extends TestBaseUnitAsync {
     Assert.assertNotNull("Debe contener una tarjeta",remoteTopup.getData().getPrepaidCard10());
 
     // Busca la tarjeta en la BD
-    PrepaidCard10 dbPrepaidCard = getPrepaidCardEJBBean10().getPrepaidCardById(null, remoteTopup.getData().getPrepaidCard10().getId());
+    PrepaidCard10 dbPrepaidCard = getPrepaidCardEJBBean11().getPrepaidCardById(null, remoteTopup.getData().getPrepaidCard10().getId());
     Assert.assertNotNull("Deberia tener una tarjeta", dbPrepaidCard);
     Assert.assertEquals("Deberia tener una tarjeta en status ACTIVE", PrepaidCardStatus.ACTIVE, dbPrepaidCard.getStatus());
 
@@ -240,7 +240,7 @@ public class Test_ReprocesQueue10 extends TestBaseUnitAsync {
     Assert.assertNotNull("Deberia contener numero unico de cliente",remoteTopup.getData().getPrepaidCard10().getNumeroUnico());
 
     // Busca la tarjeta en la BD
-    PrepaidCard10 dbPrepaidCard = getPrepaidCardEJBBean10().getPrepaidCardById(null, remoteTopup.getData().getPrepaidCard10().getId());
+    PrepaidCard10 dbPrepaidCard = getPrepaidCardEJBBean11().getPrepaidCardById(null, remoteTopup.getData().getPrepaidCard10().getId());
     Assert.assertNotNull("Deberia tener una tarjeta", dbPrepaidCard);
     Assert.assertEquals("Deberia tener una tarjeta en status PENDING", PrepaidCardStatus.ACTIVE, dbPrepaidCard.getStatus());
 
@@ -467,7 +467,7 @@ public class Test_ReprocesQueue10 extends TestBaseUnitAsync {
     Assert.assertEquals("Debe tener un movimiento de comision con status PROCESS_OK", PrepaidMovementStatus.PROCESS_OK, dbMovements.get(0).getEstado());
 
     // Busca la tarjeta en la BD
-    PrepaidCard10 dbPrepaidCard = getPrepaidCardEJBBean10().getPrepaidCardById(null, prepaidCard2.getId());
+    PrepaidCard10 dbPrepaidCard = getPrepaidCardEJBBean11().getPrepaidCardById(null, prepaidCard2.getId());
     Assert.assertNotNull("Deberia tener una tarjeta", dbPrepaidCard);
     Assert.assertEquals("Deberia tener una tarjeta en status ACTIVE", PrepaidCardStatus.ACTIVE, dbPrepaidCard.getStatus());
 

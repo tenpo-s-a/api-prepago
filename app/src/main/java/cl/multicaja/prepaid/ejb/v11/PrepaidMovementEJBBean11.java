@@ -1270,7 +1270,7 @@ public class PrepaidMovementEJBBean11 extends PrepaidMovementEJBBean10 {
           prepaidTopup10.setTransactionId(movFull.getIdTxExterno());
           prepaidTopup10.setAmount(new NewAmountAndCurrency10(movFull.getMonto(), movFull.getClamon()));
 
-          PrepaidCard10 card = getPrepaidCardEJB11().getLastPrepaidCardByUserIdAndOneOfStatus(null, prepaidUser10.getId(), PrepaidCardStatus.ACTIVE, PrepaidCardStatus.LOCKED);
+          PrepaidCard10 card = getPrepaidCardEJB11().getLastPrepaidCardByAccountIdAndOneOfStatus(null, account.getId(), PrepaidCardStatus.ACTIVE, PrepaidCardStatus.LOCKED);
           getPrepaidEJBBean10().getDelegate().sendPendingTopupReverse(prepaidTopup10, card, prepaidUser10, movFull);
         } else {
           PrepaidWithdraw10 prepaidWithdraw10 = new PrepaidWithdraw10();

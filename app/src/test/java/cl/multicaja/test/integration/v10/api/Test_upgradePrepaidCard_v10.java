@@ -130,8 +130,10 @@ public class Test_upgradePrepaidCard_v10 extends TestBaseUnitApi {
     PrepaidUser10 prepaidUser10 = buildPrepaidUserv2();
     prepaidUser10 = createPrepaidUserV2(prepaidUser10);
 
-    PrepaidCard10 prepaidCard10 = buildPrepaidCard10(prepaidUser10);
-    prepaidCard10 = createPrepaidCard10(prepaidCard10);
+    Account account = createRandomAccount(prepaidUser10);
+
+    PrepaidCard10 prepaidCard10 = buildPrepaidCard11(prepaidUser10,account.getId());
+    prepaidCard10 = createPrepaidCardV2(prepaidCard10);
 
     HttpResponse resp = upgradePrepaidCard(prepaidUser10.getUuid(), getRandomNumericString(10));
 

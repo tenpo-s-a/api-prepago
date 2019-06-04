@@ -35,7 +35,7 @@ public class Test_createRandomPurchase_v10 extends TestBaseUnitApi  {
     System.out.println("respHttp: " + respHttp);
     return respHttp;
   }
-
+  /*
   @Test
   public void shouldCreateRandomPurchase() throws Exception {
 
@@ -86,4 +86,5 @@ public class Test_createRandomPurchase_v10 extends TestBaseUnitApi  {
     }
     Assert.assertEquals("Debe haber 1 compra internacional", 1, internationalPurchaseCounter);
   }
+   */
 }
