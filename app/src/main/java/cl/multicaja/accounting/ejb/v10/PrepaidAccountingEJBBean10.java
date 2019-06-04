@@ -964,7 +964,7 @@ public class PrepaidAccountingEJBBean10 extends PrepaidBaseEJBBean10 implements 
     return ipmFile;
   }
 
-  //FIXME: Ya no procesamos las transacciones del ipm de esta forma. ACTION: Borrar este mÃ©todo.
+  //FIXME: Ya no procesamos las transacciones del ipm de esta forma. ACTION: Borrar este método.
   @Override
   @Deprecated
   public void processIpmFileTransactions(Map<String, Object> headers, IpmFile ipmFile) throws Exception {
@@ -1085,7 +1085,7 @@ public class PrepaidAccountingEJBBean10 extends PrepaidBaseEJBBean10 implements 
           PrepaidMovement10 mov = buildMovementAut(prepaidCard10.getIdUser(), prepaidCard10 ,trx,getTipoMovimientoFromAccTxType(acc.getType()),getTipoFacFromAccTxType(acc.getType()));
           movement10s.add(mov);
         }else{
-          //TODO:
+          //TODO: Que se hace cuando cae en este caso ?
         }
         transactions.add(acc);
 
@@ -1103,7 +1103,7 @@ public class PrepaidAccountingEJBBean10 extends PrepaidBaseEJBBean10 implements 
         getPrepaidMovementEJBBean11().updatePrepaidMovementStatus(headers,prepaidMovement10.getId(),PrepaidMovementStatus.PROCESS_OK);
       }
     }
-    // Se aÃ±aden los movimientos que no llegaron desde un Archivo de operaciones diarias.
+    // Se añaden los movimientos que no llegaron desde un Archivo de operaciones diarias.
     this.getPrepaidMovementEJBBean11().addPrepaidMovement(headers,movement10s);
     // Se guarda data en Accounting
     this.saveAccountingData(null, transactions);
