@@ -5,10 +5,12 @@ import cl.multicaja.prepaid.model.v10.PrepaidCard10;
 import cl.multicaja.prepaid.model.v10.PrepaidCardStatus;
 import cl.multicaja.prepaid.model.v10.PrepaidUser10;
 import org.junit.Assert;
+import org.junit.Ignore;
 import org.junit.Test;
 
 import java.math.BigDecimal;
 
+@Ignore
 public class Test_createRandomAuthorization_v10 extends TestBaseUnitApi {
 
   private HttpResponse createRandomAuthorization(Long userIdMc) {

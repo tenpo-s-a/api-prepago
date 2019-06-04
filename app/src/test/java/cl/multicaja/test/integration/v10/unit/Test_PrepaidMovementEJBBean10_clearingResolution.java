@@ -57,7 +57,7 @@ public class Test_PrepaidMovementEJBBean10_clearingResolution extends TestBaseUn
       CdtTransaction10 cdtTransaction = buildCdtTransaction10(prepaidUser, prepaidTopup);
       cdtTransaction = createCdtTransaction10(cdtTransaction);
 
-      PrepaidMovement10 prepaidMovement = buildPrepaidMovement10(prepaidUser, prepaidTopup, prepaidCard, cdtTransaction, PrepaidMovementType.TOPUP);
+      PrepaidMovement10 prepaidMovement = buildPrepaidMovement11(prepaidUser, prepaidTopup, prepaidCard, cdtTransaction, PrepaidMovementType.TOPUP,false);
       prepaidMovement.setConSwitch(ReconciliationStatusType.RECONCILED);
       prepaidMovement.setConTecnocom(ReconciliationStatusType.RECONCILED);
       prepaidMovement.setEstado(PrepaidMovementStatus.PROCESS_OK);

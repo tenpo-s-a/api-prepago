@@ -33,18 +33,19 @@ public class Test_ProductChangeRoute10 extends TestBaseUnitAsync {
 
   @Test
   public void productChangeRetryCount4() throws Exception {
+
     PrepaidUser10 prepaidUser = buildPrepaidUserv2();
-    prepaidUser = createPrepaidUser10(prepaidUser);
+    prepaidUser = createPrepaidUserV2(prepaidUser);
+
+    Account account = buildAccountFromTecnocom(prepaidUser);
+    account = createAccount(account.getUserId(),account.getAccountNumber());
+
+    PrepaidCard10 prepaidCard10 = buildPrepaidCardWithTecnocomData(prepaidUser,account);
+    prepaidCard10 = createPrepaidCardV2(prepaidCard10);
+
     TipoAlta tipoAlta = prepaidUser.getUserLevel() == PrepaidUserLevel.LEVEL_2 ? TipoAlta.NIVEL2 : TipoAlta.NIVEL1;
 
-    // Crea cuenta/contrato
-    Account account = buildAccountFromTecnocom(prepaidUser);
-    account = getAccountEJBBean10().insertAccount(prepaidUser.getId(), account.getAccountNumber());
-
-    PrepaidCard10 prepaidCard = buildPrepaidCardWithTecnocomData(prepaidUser, account);
-    prepaidCard = createPrepaidCard10(prepaidCard);
-
-    String messageId = sendPendingProductChange(prepaidUser, account, prepaidCard, tipoAlta,4);
+    String messageId = sendPendingProductChange(prepaidUser, account, prepaidCard10, tipoAlta,4);
 
     //se verifica que el mensaje haya sido procesado
     Queue qResp = camelFactory.createJMSQueue(ProductChangeRoute10.ERROR_PRODUCT_CHANGE_RESP);
@@ -63,18 +64,18 @@ public class Test_ProductChangeRoute10 extends TestBaseUnitAsync {
 
   @Test
   public void productChange_AlreadyChanged() throws Exception {
+
     PrepaidUser10 prepaidUser = buildPrepaidUserv2(PrepaidUserLevel.LEVEL_2);
-    prepaidUser = getPrepaidUserEJBBean10().createUser(null, prepaidUser);
+    prepaidUser = createPrepaidUserV2(prepaidUser);
 
-    // Crea cuenta/contrato
     Account account = buildAccountFromTecnocom(prepaidUser);
-    account = getAccountEJBBean10().insertAccount(prepaidUser.getId(), account.getAccountNumber());
+    account = createAccount(account.getUserId(),account.getAccountNumber());
 
-    PrepaidCard10 prepaidCard = buildPrepaidCardWithTecnocomData(prepaidUser, account);
-    prepaidCard = createPrepaidCard10(prepaidCard);
+    PrepaidCard10 prepaidCard10 = buildPrepaidCardWithTecnocomData(prepaidUser,account);
+    prepaidCard10 = createPrepaidCardV2(prepaidCard10);
 
-    String messageId = sendPendingProductChange(prepaidUser, account, prepaidCard, TipoAlta.NIVEL2,0);
-
+    String messageId = sendPendingProductChange(prepaidUser, account, prepaidCard10, TipoAlta.NIVEL2,0);
+    Thread.sleep(2000);
     //se verifica que el mensaje haya sido procesado
     Queue qResp = camelFactory.createJMSQueue(ProductChangeRoute10.PENDING_PRODUCT_CHANGE_RESP);
     ExchangeData<PrepaidProductChangeData10> data = (ExchangeData<PrepaidProductChangeData10>) camelFactory.createJMSMessenger().getMessage(qResp, messageId);

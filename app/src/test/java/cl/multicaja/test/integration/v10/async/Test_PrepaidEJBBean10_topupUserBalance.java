@@ -276,7 +276,7 @@ public class Test_PrepaidEJBBean10_topupUserBalance extends TestBaseUnitAsync {
         break;
     }
 
-    PrepaidMovement10 topup = getPrepaidMovementEJBBean10().getPrepaidMovementById(resp.getId());
+    PrepaidMovement10 topup = getPrepaidMovementEJBBean11().getPrepaidMovementById(resp.getId());
     Assert.assertNotNull("debe tener un movimiento", topup);
     Assert.assertEquals("debe tener status -> PROCESS_OK", PrepaidMovementStatus.PROCESS_OK, topup.getEstado());
     Assert.assertEquals("debe tener estado negocio -> CONFIRMED", BusinessStatusType.CONFIRMED, topup.getEstadoNegocio());
@@ -362,7 +362,7 @@ public class Test_PrepaidEJBBean10_topupUserBalance extends TestBaseUnitAsync {
         break;
     }
 
-    PrepaidMovement10 topup = getPrepaidMovementEJBBean10().getPrepaidMovementById(resp.getId());
+    PrepaidMovement10 topup = getPrepaidMovementEJBBean11().getPrepaidMovementById(resp.getId());
     Assert.assertNotNull("debe tener un movimiento", topup);
     Assert.assertEquals("debe tener status -> PROCESS_OK", PrepaidMovementStatus.PROCESS_OK, topup.getEstado());
     Assert.assertEquals("debe tener estado negocio -> CONFIRMED", BusinessStatusType.CONFIRMED, topup.getEstadoNegocio());
@@ -602,7 +602,7 @@ public class Test_PrepaidEJBBean10_topupUserBalance extends TestBaseUnitAsync {
         break;
     }
 
-    PrepaidMovement10 topup = getPrepaidMovementEJBBean10().getPrepaidMovementById(resp.getId());
+    PrepaidMovement10 topup = getPrepaidMovementEJBBean11().getPrepaidMovementById(resp.getId());
     Assert.assertNotNull("debe tener un movimiento", topup);
     Assert.assertEquals("debe tener status -> PROCESS_OK", PrepaidMovementStatus.PROCESS_OK, topup.getEstado());
     Assert.assertEquals("debe tener estado negocio -> CONFIRMED", BusinessStatusType.CONFIRMED, topup.getEstadoNegocio());
@@ -626,7 +626,7 @@ public class Test_PrepaidEJBBean10_topupUserBalance extends TestBaseUnitAsync {
 
       Assert.assertTrue("El saldo del usuario debe ser mayor", prepaidBalance2.getBalance().getValue().longValue() > prepaidBalance10.getBalance().getValue().longValue()  );
 
-      PrepaidMovement10 topup2 = getPrepaidMovementEJBBean10().getPrepaidMovementById(resp2.getId());
+      PrepaidMovement10 topup2 = getPrepaidMovementEJBBean11().getPrepaidMovementById(resp2.getId());
       Assert.assertNotNull("debe tener un movimiento", topup);
       Assert.assertEquals("debe tener status -> PROCESS_OK", PrepaidMovementStatus.PROCESS_OK, topup2.getEstado());
       Assert.assertEquals("debe tener estado negocio -> CONFIRMED", BusinessStatusType.CONFIRMED, topup2.getEstadoNegocio());
@@ -692,7 +692,7 @@ public class Test_PrepaidEJBBean10_topupUserBalance extends TestBaseUnitAsync {
 
     Assert.assertTrue("El saldo del usuario debe ser mayor",  prepaidBalance10.getBalance().getValue().longValue() > 0  );
 
-    PrepaidMovement10 topup = getPrepaidMovementEJBBean10().getPrepaidMovementById(resp.getId());
+    PrepaidMovement10 topup = getPrepaidMovementEJBBean11().getPrepaidMovementById(resp.getId());
     Assert.assertNotNull("debe tener un movimiento", topup);
     Assert.assertEquals("debe tener status -> PROCESS_OK", PrepaidMovementStatus.PROCESS_OK, topup.getEstado());
     Assert.assertEquals("debe tener estado negocio -> CONFIRMED", BusinessStatusType.CONFIRMED, topup.getEstadoNegocio());
@@ -715,7 +715,7 @@ public class Test_PrepaidEJBBean10_topupUserBalance extends TestBaseUnitAsync {
 
       Assert.assertTrue("El saldo del usuario debe ser mayor", prepaidBalance2.getBalance().getValue().longValue() > prepaidBalance10.getBalance().getValue().longValue()  );
 
-      PrepaidMovement10 topup2 = getPrepaidMovementEJBBean10().getPrepaidMovementById(resp.getId());
+      PrepaidMovement10 topup2 = getPrepaidMovementEJBBean11().getPrepaidMovementById(resp.getId());
       Assert.assertNotNull("debe tener un movimiento", topup);
       Assert.assertEquals("debe tener status -> PROCESS_OK", PrepaidMovementStatus.PROCESS_OK, topup2.getEstado());
       Assert.assertEquals("debe tener estado negocio -> CONFIRMED", BusinessStatusType.CONFIRMED, topup2.getEstadoNegocio());
@@ -738,7 +738,7 @@ public class Test_PrepaidEJBBean10_topupUserBalance extends TestBaseUnitAsync {
       } catch (RunTimeValidationException rvex) {
         Assert.assertEquals("Debe ser error de tecnocom", TARJETA_ERROR_GENERICO_$VALUE.getValue(), rvex.getCode());
 
-        PrepaidMovement10 topup2 = getPrepaidMovementEJBBean10().getLastPrepaidMovementByIdPrepaidUserAndOneStatus(prepaidUser10.getId(), PrepaidMovementStatus.REJECTED);
+        PrepaidMovement10 topup2 = getPrepaidMovementEJBBean11().getLastPrepaidMovementByIdPrepaidUserAndOneStatus(prepaidUser10.getId(), PrepaidMovementStatus.REJECTED);
         Assert.assertNotNull("debe tener un movimiento", topup2);
         Assert.assertEquals("debe ser del mismo monto", secondTopup.getAmount().getValue(), topup2.getImpfac());
         Assert.assertEquals("debe ser del id tx externa", secondTopup.getTransactionId(), topup2.getIdTxExterno());
@@ -780,7 +780,7 @@ public class Test_PrepaidEJBBean10_topupUserBalance extends TestBaseUnitAsync {
 
     Assert.assertTrue("El saldo del usuario debe ser mayor", prepaidBalance10.getBalance().getValue().longValue() > 0);
 
-    PrepaidMovement10 topup = getPrepaidMovementEJBBean10().getPrepaidMovementById(resp.getId());
+    PrepaidMovement10 topup = getPrepaidMovementEJBBean11().getPrepaidMovementById(resp.getId());
     Assert.assertNotNull("debe tener un movimiento", topup);
     Assert.assertEquals("debe tener status -> PROCESS_OK", PrepaidMovementStatus.PROCESS_OK, topup.getEstado());
     Assert.assertEquals("debe tener estado negocio -> CONFIRMED", BusinessStatusType.CONFIRMED, topup.getEstadoNegocio());
@@ -842,7 +842,7 @@ public class Test_PrepaidEJBBean10_topupUserBalance extends TestBaseUnitAsync {
 
         }
 
-        PrepaidMovement10 topup2 = getPrepaidMovementEJBBean10().getPrepaidMovementByIdTxExterno(secondTopup.getTransactionId(), PrepaidMovementType.TOPUP, IndicadorNormalCorrector.NORMAL);
+        PrepaidMovement10 topup2 = getPrepaidMovementEJBBean11().getPrepaidMovementByIdTxExterno(secondTopup.getTransactionId(), PrepaidMovementType.TOPUP, IndicadorNormalCorrector.NORMAL);
 
         Assert.assertNotNull("debe tener un movimiento", topup2);
         Assert.assertEquals("debe ser del mismo monto", secondTopup.getAmount().getValue(), topup2.getImpfac());
@@ -851,7 +851,7 @@ public class Test_PrepaidEJBBean10_topupUserBalance extends TestBaseUnitAsync {
         Assert.assertEquals("debe tener estado negocio -> IN_PROCESS", BusinessStatusType.REVERSED, topup2.getEstadoNegocio());
 
 
-        PrepaidMovement10 topupReverse = getPrepaidMovementEJBBean10().getPrepaidMovementByIdTxExterno(secondTopup.getTransactionId(), PrepaidMovementType.TOPUP, IndicadorNormalCorrector.CORRECTORA);
+        PrepaidMovement10 topupReverse = getPrepaidMovementEJBBean11().getPrepaidMovementByIdTxExterno(secondTopup.getTransactionId(), PrepaidMovementType.TOPUP, IndicadorNormalCorrector.CORRECTORA);
 
         Assert.assertNotNull("debe tener un movimiento", topupReverse);
         Assert.assertEquals("debe ser del mismo monto", secondTopup.getAmount().getValue(), topupReverse.getImpfac());
@@ -893,7 +893,7 @@ public class Test_PrepaidEJBBean10_topupUserBalance extends TestBaseUnitAsync {
 
     Assert.assertTrue("El saldo del usuario debe ser mayor",  prepaidBalance10.getBalance().getValue().longValue() > 0  );
 
-    PrepaidMovement10 topup = getPrepaidMovementEJBBean10().getPrepaidMovementById(resp.getId());
+    PrepaidMovement10 topup = getPrepaidMovementEJBBean11().getPrepaidMovementById(resp.getId());
     Assert.assertNotNull("debe tener un movimiento", topup);
     Assert.assertEquals("debe tener status -> PROCESS_OK", PrepaidMovementStatus.PROCESS_OK, topup.getEstado());
     Assert.assertEquals("debe tener estado negocio -> CONFIRMED", BusinessStatusType.CONFIRMED, topup.getEstadoNegocio());
@@ -913,7 +913,7 @@ public class Test_PrepaidEJBBean10_topupUserBalance extends TestBaseUnitAsync {
         tc.getTecnocomService().setRetorno(null);
         Assert.assertEquals("Debe ser error de tecnocom", TARJETA_ERROR_GENERICO_$VALUE.getValue(), rvex.getCode());
 
-        PrepaidMovement10 topup2 = getPrepaidMovementEJBBean10().getLastPrepaidMovementByIdPrepaidUserAndOneStatus(prepaidUser10.getId(), PrepaidMovementStatus.REJECTED);
+        PrepaidMovement10 topup2 = getPrepaidMovementEJBBean11().getLastPrepaidMovementByIdPrepaidUserAndOneStatus(prepaidUser10.getId(), PrepaidMovementStatus.REJECTED);
         Assert.assertNotNull("debe tener un movimiento", topup2);
         Assert.assertEquals("debe ser del mismo monto", secondTopup.getAmount().getValue(), topup2.getImpfac());
         Assert.assertEquals("debe ser del id tx externa", secondTopup.getTransactionId(), topup2.getIdTxExterno());
@@ -963,7 +963,7 @@ public class Test_PrepaidEJBBean10_topupUserBalance extends TestBaseUnitAsync {
         break;
     }
 
-    PrepaidMovement10 topup = getPrepaidMovementEJBBean10().getPrepaidMovementById(resp.getId());
+    PrepaidMovement10 topup = getPrepaidMovementEJBBean11().getPrepaidMovementById(resp.getId());
     Assert.assertNotNull("debe tener un movimiento", topup);
     Assert.assertEquals("debe tener status -> PROCESS_OK", PrepaidMovementStatus.PROCESS_OK, topup.getEstado());
     Assert.assertEquals("debe tener estado negocio -> CONFIRMED", BusinessStatusType.CONFIRMED, topup.getEstadoNegocio());
@@ -990,7 +990,7 @@ public class Test_PrepaidEJBBean10_topupUserBalance extends TestBaseUnitAsync {
 
       Assert.assertTrue("El saldo del usuario debe ser mayor", prepaidBalance2.getBalance().getValue().longValue() > prepaidBalance10.getBalance().getValue().longValue()  );
 
-      PrepaidMovement10 topup2 = getPrepaidMovementEJBBean10().getPrepaidMovementById(resp2.getId());
+      PrepaidMovement10 topup2 = getPrepaidMovementEJBBean11().getPrepaidMovementById(resp2.getId());
       Assert.assertNotNull("debe tener un movimiento", topup);
       Assert.assertEquals("debe tener status -> PROCESS_OK", PrepaidMovementStatus.PROCESS_OK, topup2.getEstado());
       Assert.assertEquals("debe tener estado negocio -> CONFIRMED", BusinessStatusType.CONFIRMED, topup2.getEstadoNegocio());
@@ -1071,7 +1071,7 @@ public class Test_PrepaidEJBBean10_topupUserBalance extends TestBaseUnitAsync {
 
     Assert.assertTrue("El saldo del usuario debe ser mayor",  prepaidBalance10.getBalance().getValue().longValue() > 0  );
 
-    PrepaidMovement10 topup = getPrepaidMovementEJBBean10().getPrepaidMovementById(resp.getId());
+    PrepaidMovement10 topup = getPrepaidMovementEJBBean11().getPrepaidMovementById(resp.getId());
     Assert.assertNotNull("debe tener un movimiento", topup);
     Assert.assertEquals("debe tener status -> PROCESS_OK", PrepaidMovementStatus.PROCESS_OK, topup.getEstado());
     Assert.assertEquals("debe tener estado negocio -> CONFIRMED", BusinessStatusType.CONFIRMED, topup.getEstadoNegocio());
@@ -1094,7 +1094,7 @@ public class Test_PrepaidEJBBean10_topupUserBalance extends TestBaseUnitAsync {
 
       Assert.assertTrue("El saldo del usuario debe ser mayor", prepaidBalance2.getBalance().getValue().longValue() > prepaidBalance10.getBalance().getValue().longValue()  );
 
-      PrepaidMovement10 topup2 = getPrepaidMovementEJBBean10().getPrepaidMovementById(resp.getId());
+      PrepaidMovement10 topup2 = getPrepaidMovementEJBBean11().getPrepaidMovementById(resp.getId());
       Assert.assertNotNull("debe tener un movimiento", topup);
       Assert.assertEquals("debe tener status -> PROCESS_OK", PrepaidMovementStatus.PROCESS_OK, topup2.getEstado());
       Assert.assertEquals("debe tener estado negocio -> CONFIRMED", BusinessStatusType.CONFIRMED, topup2.getEstadoNegocio());
@@ -1117,7 +1117,7 @@ public class Test_PrepaidEJBBean10_topupUserBalance extends TestBaseUnitAsync {
       } catch (RunTimeValidationException rvex) {
         Assert.assertEquals("Debe ser error de tecnocom", TARJETA_ERROR_GENERICO_$VALUE.getValue(), rvex.getCode());
 
-        PrepaidMovement10 topup2 = getPrepaidMovementEJBBean10().getLastPrepaidMovementByIdPrepaidUserAndOneStatus(prepaidUser10.getId(), PrepaidMovementStatus.REJECTED);
+        PrepaidMovement10 topup2 = getPrepaidMovementEJBBean11().getLastPrepaidMovementByIdPrepaidUserAndOneStatus(prepaidUser10.getId(), PrepaidMovementStatus.REJECTED);
         Assert.assertNotNull("debe tener un movimiento", topup2);
         Assert.assertEquals("debe ser del mismo monto", secondTopup.getAmount().getValue(), topup2.getImpfac());
         Assert.assertEquals("debe ser del id tx externa", secondTopup.getTransactionId(), topup2.getIdTxExterno());
@@ -1174,7 +1174,7 @@ public class Test_PrepaidEJBBean10_topupUserBalance extends TestBaseUnitAsync {
 
     Assert.assertTrue("El saldo del usuario debe ser mayor", prepaidBalance10.getBalance().getValue().longValue() > 0);
 
-    PrepaidMovement10 topup = getPrepaidMovementEJBBean10().getPrepaidMovementById(resp.getId());
+    PrepaidMovement10 topup = getPrepaidMovementEJBBean11().getPrepaidMovementById(resp.getId());
     Assert.assertNotNull("debe tener un movimiento", topup);
     Assert.assertEquals("debe tener status -> PROCESS_OK", PrepaidMovementStatus.PROCESS_OK, topup.getEstado());
     Assert.assertEquals("debe tener estado negocio -> CONFIRMED", BusinessStatusType.CONFIRMED, topup.getEstadoNegocio());
@@ -1236,7 +1236,7 @@ public class Test_PrepaidEJBBean10_topupUserBalance extends TestBaseUnitAsync {
 
         }
 
-        PrepaidMovement10 topup2 = getPrepaidMovementEJBBean10().getPrepaidMovementByIdTxExterno(secondTopup.getTransactionId(), PrepaidMovementType.TOPUP, IndicadorNormalCorrector.NORMAL);
+        PrepaidMovement10 topup2 = getPrepaidMovementEJBBean11().getPrepaidMovementByIdTxExterno(secondTopup.getTransactionId(), PrepaidMovementType.TOPUP, IndicadorNormalCorrector.NORMAL);
 
         Assert.assertNotNull("debe tener un movimiento", topup2);
         Assert.assertEquals("debe ser del mismo monto", secondTopup.getAmount().getValue(), topup2.getImpfac());
@@ -1259,7 +1259,7 @@ public class Test_PrepaidEJBBean10_topupUserBalance extends TestBaseUnitAsync {
 
         assertFees(transactionEvent.getTransaction().getFees(), secondTopup.getTransactionOriginType());
 
-        PrepaidMovement10 topupReverse = getPrepaidMovementEJBBean10().getPrepaidMovementByIdTxExterno(secondTopup.getTransactionId(), PrepaidMovementType.TOPUP, IndicadorNormalCorrector.CORRECTORA);
+        PrepaidMovement10 topupReverse = getPrepaidMovementEJBBean11().getPrepaidMovementByIdTxExterno(secondTopup.getTransactionId(), PrepaidMovementType.TOPUP, IndicadorNormalCorrector.CORRECTORA);
 
         Assert.assertNotNull("debe tener un movimiento", topupReverse);
         Assert.assertEquals("debe ser del mismo monto", secondTopup.getAmount().getValue(), topupReverse.getImpfac());
@@ -1301,7 +1301,7 @@ public class Test_PrepaidEJBBean10_topupUserBalance extends TestBaseUnitAsync {
 
     Assert.assertTrue("El saldo del usuario debe ser mayor",  prepaidBalance10.getBalance().getValue().longValue() > 0  );
 
-    PrepaidMovement10 topup = getPrepaidMovementEJBBean10().getPrepaidMovementById(resp.getId());
+    PrepaidMovement10 topup = getPrepaidMovementEJBBean11().getPrepaidMovementById(resp.getId());
     Assert.assertNotNull("debe tener un movimiento", topup);
     Assert.assertEquals("debe tener status -> PROCESS_OK", PrepaidMovementStatus.PROCESS_OK, topup.getEstado());
     Assert.assertEquals("debe tener estado negocio -> CONFIRMED", BusinessStatusType.CONFIRMED, topup.getEstadoNegocio());
@@ -1321,7 +1321,7 @@ public class Test_PrepaidEJBBean10_topupUserBalance extends TestBaseUnitAsync {
         tc.getTecnocomService().setRetorno(null);
         Assert.assertEquals("Debe ser error de tecnocom", TARJETA_ERROR_GENERICO_$VALUE.getValue(), rvex.getCode());
 
-        PrepaidMovement10 topup2 = getPrepaidMovementEJBBean10().getLastPrepaidMovementByIdPrepaidUserAndOneStatus(prepaidUser10.getId(), PrepaidMovementStatus.REJECTED);
+        PrepaidMovement10 topup2 = getPrepaidMovementEJBBean11().getLastPrepaidMovementByIdPrepaidUserAndOneStatus(prepaidUser10.getId(), PrepaidMovementStatus.REJECTED);
         Assert.assertNotNull("debe tener un movimiento", topup2);
         Assert.assertEquals("debe ser del mismo monto", secondTopup.getAmount().getValue(), topup2.getImpfac());
         Assert.assertEquals("debe ser del id tx externa", secondTopup.getTransactionId(), topup2.getIdTxExterno());
@@ -1386,7 +1386,7 @@ public class Test_PrepaidEJBBean10_topupUserBalance extends TestBaseUnitAsync {
         break;
     }
 
-    PrepaidMovement10 topup = getPrepaidMovementEJBBean10().getPrepaidMovementById(resp.getId());
+    PrepaidMovement10 topup = getPrepaidMovementEJBBean11().getPrepaidMovementById(resp.getId());
     Assert.assertNotNull("debe tener un movimiento", topup);
     Assert.assertEquals("debe tener status -> PROCESS_OK", PrepaidMovementStatus.PROCESS_OK, topup.getEstado());
     Assert.assertEquals("debe tener estado negocio -> CONFIRMED", BusinessStatusType.CONFIRMED, topup.getEstadoNegocio());
@@ -1477,7 +1477,7 @@ public class Test_PrepaidEJBBean10_topupUserBalance extends TestBaseUnitAsync {
         break;
     }
 
-    PrepaidMovement10 topup = getPrepaidMovementEJBBean10().getPrepaidMovementById(resp.getId());
+    PrepaidMovement10 topup = getPrepaidMovementEJBBean11().getPrepaidMovementById(resp.getId());
     Assert.assertNotNull("debe tener un movimiento", topup);
     Assert.assertEquals("debe tener status -> PROCESS_OK", PrepaidMovementStatus.PROCESS_OK, topup.getEstado());
     Assert.assertEquals("debe tener estado negocio -> CONFIRMED", BusinessStatusType.CONFIRMED, topup.getEstadoNegocio());

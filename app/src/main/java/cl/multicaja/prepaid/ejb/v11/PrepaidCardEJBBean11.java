@@ -439,6 +439,19 @@ public class PrepaidCardEJBBean11 extends PrepaidBaseEJBBean10 implements Prepai
   }
 
   public void updatePrepaidCard(Map<String, Object> headers, Long cardId, Long accountId, PrepaidCard10 prepaidCard) throws Exception {
+
+    if(cardId == null){
+      throw new ValidationException(PARAMETRO_FALTANTE_$VALUE).setData(new KeyValue("value", "id"));
+    }
+
+    if(accountId == null){
+      throw new ValidationException(PARAMETRO_FALTANTE_$VALUE).setData(new KeyValue("value", "accountId"));
+    }
+
+    if(prepaidCard == null){
+      throw new ValidationException(PARAMETRO_FALTANTE_$VALUE).setData(new KeyValue("value", "prepaidCard"));
+    }
+
     this.updatePrepaidCard(headers, cardId, accountId, null,  prepaidCard);
   }
 
@@ -447,11 +460,11 @@ public class PrepaidCardEJBBean11 extends PrepaidBaseEJBBean10 implements Prepai
 
 
     if(cardId == null){
-      throw new BadRequestException(PARAMETRO_FALTANTE_$VALUE).setData(new KeyValue("value", "id"));
+      throw new ValidationException(PARAMETRO_FALTANTE_$VALUE).setData(new KeyValue("value", "id"));
     }
 
     if(prepaidCard == null){
-      throw new BadRequestException(PARAMETRO_FALTANTE_$VALUE).setData(new KeyValue("value", "prepaidCard"));
+      throw new ValidationException(PARAMETRO_FALTANTE_$VALUE).setData(new KeyValue("value", "prepaidCard"));
     }
 
     log.info(String.format("[updatePrepaidCard] Actualizando tarjeta [id: %d]", cardId));

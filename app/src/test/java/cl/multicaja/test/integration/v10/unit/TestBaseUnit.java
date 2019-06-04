@@ -1631,7 +1631,6 @@ public class TestBaseUnit extends TestApiBase {
    * @return
    * @throws Exception
    */
-  @Deprecated
   protected PrepaidCard10 waitForLastPrepaidCardInStatus(Long accountId, PrepaidCardStatus status) throws Exception {
 
     PrepaidCard10 prepaidCard10 = null;

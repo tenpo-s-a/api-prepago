@@ -974,9 +974,9 @@ public class Test_withdrawUserBalance_v10 extends TestBaseUnitApi {
 
     NewPrepaidWithdraw10 prepaidWithdraw = buildNewPrepaidWithdrawV2(NewPrepaidBaseTransaction10.WEB_MERCHANT_CODE);
 
-    PrepaidMovement10 prepaidMovement = buildReversePrepaidMovement10(prepaidUser, prepaidWithdraw);
+    PrepaidMovement10 prepaidMovement = buildReversePrepaidMovement11(prepaidUser, prepaidWithdraw);
     prepaidMovement.setImpfac(prepaidMovement.getImpfac().add(BigDecimal.TEN));
-    prepaidMovement = createPrepaidMovement10(prepaidMovement);
+    prepaidMovement = createPrepaidMovement11(prepaidMovement);
 
     HttpResponse resp = withdrawUserBalance(prepaidUser.getUuid(), prepaidWithdraw);
 

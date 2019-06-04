@@ -54,9 +54,9 @@ public class Test_PendingReverseWithdraw10 extends TestBaseUnitAsync {
 
     PrepaidWithdraw10 withdraw10 = new PrepaidWithdraw10(prepaidWithdraw);
 
-    PrepaidMovement10 prepaidMovement = buildReversePrepaidMovement10(prepaidUser, prepaidWithdraw);
+    PrepaidMovement10 prepaidMovement = buildReversePrepaidMovement11(prepaidUser, prepaidWithdraw);
     prepaidMovement.setEstadoNegocio(BusinessStatusType.IN_PROCESS);
-    prepaidMovement = createPrepaidMovement10(prepaidMovement);
+    prepaidMovement = createPrepaidMovement11(prepaidMovement);
 
     String messageId = sendPendingWithdrawReversal(withdraw10, prepaidUser, prepaidMovement, 4);
 
