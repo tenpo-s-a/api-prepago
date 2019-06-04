@@ -18,6 +18,9 @@ import javax.ws.rs.core.HttpHeaders;
 import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
 
+import java.util.HashMap;
+import java.util.Map;
+
 import static cl.multicaja.core.model.Errors.CLIENTE_NO_TIENE_PREPAGO;
 import static cl.multicaja.core.model.Errors.SALDO_NO_DISPONIBLE_$VALUE;
 
@@ -232,6 +235,26 @@ public final class PrepaidResource10 extends BaseResource {
 
     return returnResponse;
 
+  }
+
+  //TODO: eliminar luego
+  @POST
+  @Path("/fake_call")
+  public Response fakeCall() {
+    Map<String, Object> response = new HashMap<>();
+    try {
+      String resp = this.prepaidEJBBean10.fakeCall();
+
+      response.put("success", Boolean.TRUE);
+      response.put("message", resp);
+
+      return Response.ok(response).build();
+    } catch (Exception e) {
+      response.put("success", Boolean.FALSE);
+      response.put("message", e.getMessage());
+      log.error("[fakeCall] error executing fakeCall", e);
+      return Response.ok(response).status(500).build();
+    }
   }
 
 }

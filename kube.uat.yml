@@ -50,6 +50,10 @@ spec:
         app: api-prepaid
         version: v1
     spec:
+      hostAliases:
+        - ip: "${TECNOCOM_HOST_IP}"
+          hostnames:
+            - "procemisorqachile"
       containers:
       - name: api-prepaid
         image: ${IMAGE}
@@ -67,18 +71,6 @@ spec:
             value: ${DB_HOST_FQDN}
           - name: API_ENVIRONMENT
             value: ${API_ENVIRONMENT}
-          - name: TECNOCOM_MOCK_IMPL
-            value: "false"
-          - name: TECNOCOM_APIKEY
-            value: ${TECNOCOM_API_KEY}
-          - name: TECNOCOM_APIURL
-            value: ${TECNOCOM_API_URL}
-          - name: TECNOCOM_CHANNEL
-            value: ${TECNOCOM_CHANNEL}
-          - name: TECNOCOM_CODENTITY
-            value: "${TECNOCOM_CODENT}"
-          - name: TECNOCOM_ORDER
-            value: ${TECNOCOM_ORDER}
       imagePullSecrets:
         - name: container-reg-credentials
 ---
@@ -97,6 +89,23 @@ spec:
   - number: 9080
     name: http-api-prepaid-tecnocom
     protocol: HTTP
+  resolution: NONE
+---
+apiVersion: networking.istio.io/v1alpha3
+kind: ServiceEntry
+metadata:
+  name: api-prepaid-se-tecnocom-vpn
+  namespace: prepaid
+spec:
+  hosts:
+    - "tecnocom.uat.tenpolabs"
+  addresses:
+    - "${TECNOCOM_HOST_IP}"
+  location: MESH_EXTERNAL
+  ports:
+    - number: 443
+      name: tcp-api-prepaid-se-tecnocom-vpn
+      protocol: TCP
   resolution: NONE
 ---
 apiVersion: networking.istio.io/v1alpha3

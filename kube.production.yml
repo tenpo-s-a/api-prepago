@@ -47,6 +47,10 @@ spec:
       labels:
         app: api-prepaid
     spec:
+      hostAliases:
+        - ip: "${TECNOCOM_HOST_IP}"
+          hostnames:
+            - "procemisorchile"
       containers:
       - name: api-prepaid
         image: ${IMAGE}
@@ -64,20 +68,6 @@ spec:
             value: ${DB_HOST_FQDN}
           - name: API_ENVIRONMENT
             value: ${API_ENVIRONMENT}
-          - name: TENPO_USER_API_URL
-            value: "http://${TENPO_USER_API_HOST_IP}:8080/v1/user-management/users"
-          - name: TECNOCOM_MOCK_IMPL
-            value: "false"
-          - name: TECNOCOM_APIKEY
-            value: ${TECNOCOM_API_KEY}
-          - name: TECNOCOM_APIURL
-            value: ${TECNOCOM_API_URL}
-          - name: TECNOCOM_CHANNEL
-            value: ${TECNOCOM_CHANNEL}
-          - name: TECNOCOM_CODENTITY
-            value: "${TECNOCOM_CODENT}"
-          - name: TECNOCOM_ORDER
-            value: ${TECNOCOM_ORDER}
       imagePullSecrets:
         - name: container-reg-credentials
 ---
@@ -88,14 +78,14 @@ metadata:
   namespace: prepaid
 spec:
   hosts:
-  - "tc.uat.multicajadigital"
+    - "tecnocom.production.tenpolabs"
   addresses:
-  - "200.111.44.187"
+    - "${TECNOCOM_HOST_IP}"
   location: MESH_EXTERNAL
   ports:
-  - number: 9080
-    name: http-api-prepaid-tecnocom
-    protocol: HTTP
+    - number: 443
+      name: tcp-api-prepaid-se-tecnocom
+      protocol: TCP
   resolution: NONE
 ---
 apiVersion: networking.istio.io/v1alpha3
@@ -164,6 +154,16 @@ spec:
         exact: /prepaid/1.0/prepaid/ping
     rewrite:
       uri: /api-prepaid-1.0/1.0/prepaid/ping
+    route:
+    - destination:
+        host: api-prepaid
+        port:
+          number: 80
+  - match:
+    - uri:
+        exact: /prepaid/1.0/prepaid/fake_call
+    rewrite:
+      uri: /api-prepaid-1.0/1.0/prepaid/fake_call
     route:
     - destination:
         host: api-prepaid
