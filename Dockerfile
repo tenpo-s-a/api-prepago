@@ -9,8 +9,6 @@ RUN cat ./cert | base64 -d > ${TECNOCOM_CERT_NAME}.crt && \
 
 FROM payara/server-full:5.181
 
-ARG TECNOCOM_CERT_NAME
-
 COPY --from=build-env /etc/ssl/certs /etc/ssl/certs
 
 # Setup Configuration

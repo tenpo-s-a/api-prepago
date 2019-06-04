@@ -87,7 +87,7 @@ pipeline:
     image: hashicorp/consul-template:alpine
     commands:
       - /bin/consul-template -template "./app/src/main/resources/api-prepaid/production.properties.tmpl:./app/src/main/resources/api-prepaid/production.properties" -once
-      - /bin/consul-template -template "./consul_template/cert_prod.tmpl:./cert" -once
+      - /bin/consul-template -template "./consul_template/cert_production.tmpl:./cert" -once
     secrets:
       - consul_http_addr
       - consul_http_token
