@@ -23,13 +23,19 @@ public class Test_PrepaidCardEJBBean10_getPrepaidCards extends TestBaseUnit {
      * Caso en que se registra una nueva tarjet y luego se busca por su id y idUser
      */
 
-    PrepaidCard10 card = buildPrepaidCard10();
-    createPrepaidCard10(card);
+    PrepaidUser10 prepaidUser = buildPrepaidUserv2();
+    prepaidUser = createPrepaidUserV2(prepaidUser);
 
-    PrepaidCard10 c1 = getPrepaidCardEJBBean11().getPrepaidCardById(null, card.getId());
+    Account account = buildAccountFromTecnocom(prepaidUser);
+    account = createAccount(account.getUserId(),account.getAccountNumber());
+
+    PrepaidCard10 prepaidCard10 = buildPrepaidCardWithTecnocomData(prepaidUser,account);
+    prepaidCard10 = createPrepaidCardV2(prepaidCard10);
+
+    PrepaidCard10 c1 = getPrepaidCardEJBBean11().getPrepaidCardById(null, prepaidCard10.getId());
 
     Assert.assertNotNull("debe retornar una tarjeta", c1);
-    Assert.assertEquals("debe ser igual al registrado anteriormemte", card, c1);
+    Assert.assertEquals("debe ser igual al registrado anteriormemte", prepaidCard10, c1);
   }
 
   @Test
@@ -42,15 +48,13 @@ public class Test_PrepaidCardEJBBean10_getPrepaidCards extends TestBaseUnit {
     account = createAccount(account.getUserId(),account.getAccountNumber());
 
     {
-      PrepaidCard10 card1 = buildPrepaidCard10(prepaidUser);
+      PrepaidCard10 card1 = buildPrepaidCardWithTecnocomData(prepaidUser,account);
       card1.setStatus(PrepaidCardStatus.EXPIRED);
-      card1.setAccountId(account.getId());
-      createPrepaidCardV2(card1);
+      card1 = createPrepaidCardV2(card1);
 
-      PrepaidCard10 card2 = buildPrepaidCard10(prepaidUser);
+      PrepaidCard10 card2 =buildPrepaidCardWithTecnocomData(prepaidUser,account);
       card2.setStatus(PrepaidCardStatus.EXPIRED);
-      card2.setAccountId(account.getId());
-      createPrepaidCardV2(card2);
+      card2 = createPrepaidCardV2(card2);
 
       List<Long> lstFind = new ArrayList<>();
       List<PrepaidCard10> lst = getPrepaidCardEJBBean11().getPrepaidCards(null,null,account.getId(),null,PrepaidCardStatus.EXPIRED);
@@ -65,10 +69,10 @@ public class Test_PrepaidCardEJBBean10_getPrepaidCards extends TestBaseUnit {
     }
 
     {
-      PrepaidCard10 card1 = buildPrepaidCard10(prepaidUser);
+      PrepaidCard10 card1 = buildPrepaidCardWithTecnocomData(prepaidUser,account);
       card1.setStatus(PrepaidCardStatus.PENDING);
       card1.setAccountId(account.getId());
-      createPrepaidCard10(card1);
+      card1 = createPrepaidCardV2(card1);
 
       PrepaidCard10 prepaidCard = getPrepaidCardEJBBean11().getLastPrepaidCardByAccountIdAndStatus(null, account.getId(), PrepaidCardStatus.PENDING);
 
@@ -77,18 +81,17 @@ public class Test_PrepaidCardEJBBean10_getPrepaidCards extends TestBaseUnit {
     }
 
     {
-      PrepaidCard10 card1 = buildPrepaidCard10(prepaidUser);
+      PrepaidCard10 card1 =buildPrepaidCardWithTecnocomData(prepaidUser,account);
       card1.setStatus(PrepaidCardStatus.PENDING);
       card1.setAccountId(account.getId());
-      createPrepaidCard10(card1);
+      card1 = createPrepaidCardV2(card1);
 
-      PrepaidCard10 card2 = buildPrepaidCard10(prepaidUser);
+      PrepaidCard10 card2 = buildPrepaidCardWithTecnocomData(prepaidUser,account);
       card2.setStatus(PrepaidCardStatus.ACTIVE);
       card2.setAccountId(account.getId());
-      createPrepaidCard10(card2);
+      card2 = createPrepaidCardV2(card2);
 
       PrepaidCard10 prepaidCard = getPrepaidCardEJBBean11().getLastPrepaidCardByAccountIdAndStatus(null, account.getId(), PrepaidCardStatus.PENDING);
-
       Assert.assertNull("no debe existir", prepaidCard);
     }
   }
@@ -103,7 +106,7 @@ public class Test_PrepaidCardEJBBean10_getPrepaidCards extends TestBaseUnit {
     account = createAccount(account.getUserId(),account.getAccountNumber());
 
     for (int j = 0; j < 10; j++) {
-      PrepaidCard10 card = buildPrepaidCard10(prepaidUser);
+      PrepaidCard10 card = buildPrepaidCardWithTecnocomData(prepaidUser,account);
       card.setAccountId(account.getId());
       createPrepaidCardV2(card);
     }
@@ -120,20 +123,22 @@ public class Test_PrepaidCardEJBBean10_getPrepaidCards extends TestBaseUnit {
   @Test
   public void getPrepaidCards_ok_by_pan_and_processor_user_id () throws Exception {
     {
-      PrepaidCard10 originalCard = buildPrepaidCard10();
-      createPrepaidCard10(originalCard);
+      PrepaidUser10 prepaidUser = buildPrepaidUserv2();
+      prepaidUser = createPrepaidUserV2(prepaidUser);
 
-      PrepaidCard10 card = getPrepaidCardEJBBean11().getPrepaidCardByPanAndProcessorUserId(null, originalCard.getPan(), originalCard.getProcessorUserId());
+      Account account = buildAccountFromTecnocom(prepaidUser);
+      account = createAccount(account.getUserId(),account.getAccountNumber());
+
+      PrepaidCard10 prepaidCard10 = buildPrepaidCardWithTecnocomData(prepaidUser,account);
+      prepaidCard10 = createPrepaidCardV2(prepaidCard10);
+
+      PrepaidCard10 card = getPrepaidCardEJBBean11().getPrepaidCardByPanAndProcessorUserId(null, prepaidCard10.getPan(), account.getAccountNumber());
 
       Assert.assertNotNull("debe retornar una tarjeta", card);
-      Assert.assertEquals("debe ser igual al registrado anteriormemte", originalCard, card);
+      Assert.assertEquals("debe ser igual al registrado anteriormemte", prepaidCard10, card);
     }
     {
-      PrepaidCard10 originalCard = buildPrepaidCard10();
-      createPrepaidCard10(originalCard);
-
       PrepaidCard10 card = getPrepaidCardEJBBean11().getPrepaidCardByPanAndProcessorUserId(null, getRandomString(100), getRandomString(20));
-
       Assert.assertNull("no debe retornar una tarjeta", card);
     }
   }
@@ -141,13 +146,19 @@ public class Test_PrepaidCardEJBBean10_getPrepaidCards extends TestBaseUnit {
   @Test
   public void getPrepaidCardsByPanEncriptado() throws Exception{
     {
-      PrepaidCard10 originalCard = buildPrepaidCard10();
-      createPrepaidCard10(originalCard);
+      PrepaidUser10 prepaidUser = buildPrepaidUserv2();
+      prepaidUser = createPrepaidUserV2(prepaidUser);
 
-      PrepaidCard10 card = getPrepaidCardEJBBean11().getPrepaidCardByEncryptedPan(null, originalCard.getEncryptedPan());
+      Account account = buildAccountFromTecnocom(prepaidUser);
+      account = createAccount(account.getUserId(),account.getAccountNumber());
+
+      PrepaidCard10 prepaidCard10 = buildPrepaidCardWithTecnocomData(prepaidUser,account);
+      prepaidCard10 = createPrepaidCardV2(prepaidCard10);
+
+      PrepaidCard10 card = getPrepaidCardEJBBean11().getPrepaidCardByEncryptedPan(null, prepaidCard10.getEncryptedPan());
 
       Assert.assertNotNull("debe retornar una tarjeta", card);
-      Assert.assertEquals("debe ser igual al registrado anteriormemte", originalCard, card);
+      Assert.assertEquals("debe ser igual al registrado anteriormemte", prepaidCard10, card);
     }
   }
 

@@ -50,8 +50,8 @@ public class PrepaidCardEJBBean11 extends PrepaidBaseEJBBean10 implements Prepai
   @Inject
   private KafkaEventDelegate10 kafkaEventDelegate10;
 
-  private static final String FIND_CARD = "SELECT * FROM %s.prp_tarjeta WHERE %s";
-  private static final String FIND_LAST_CARD = "SELECT * FROM %s.prp_tarjeta WHERE %s ORDER BY fecha_creacion desc LIMIT 1";
+  private static final String FIND_CARD = "SELECT * FROM %s.prp_tarjeta WHERE %s ORDER BY fecha_creacion DESC";
+  private static final String FIND_LAST_CARD = "SELECT * FROM %s.prp_tarjeta WHERE %s ORDER BY fecha_creacion DESC LIMIT 1";
   private static final String FIND_CARD_BY_ID_SQL = String.format("SELECT * FROM %s.prp_tarjeta WHERE id = ?", getSchema());
   private static final String UPDATE_CARD_BY_ID_SQL = "UPDATE %s.prp_tarjeta SET %s WHERE id = ? %s";
   private static final String FIND_CARD_BY_USERID_STATUS = "SELECT \n" +
@@ -66,7 +66,8 @@ public class PrepaidCardEJBBean11 extends PrepaidBaseEJBBean10 implements Prepai
     "  t.fecha_actualizacion as fecha_actualizacion,\n" +
     "  t.uuid as uuid,\n" +
     "  t.pan_hash as pan_hash,\n" +
-    "  t.id_cuenta as id_cuenta\n" +
+    "  t.id_cuenta as id_cuenta,\n" +
+    "  t.expiracion as expiracion\n"+
     "FROM \n" +
     "  %s.prp_tarjeta t\n" +
     "INNER JOIN %s.prp_cuenta c ON t.id_cuenta = c.id\n" +
@@ -88,7 +89,8 @@ public class PrepaidCardEJBBean11 extends PrepaidBaseEJBBean10 implements Prepai
     "  t.fecha_actualizacion as fecha_actualizacion,\n" +
     "  t.uuid as uuid,\n" +
     "  t.pan_hash as pan_hash,\n" +
-    "  t.id_cuenta as id_cuenta\n" +
+    "  t.id_cuenta as id_cuenta,\n" +
+    "  t.expiracion as expiracion\n"+
     "FROM \n" +
     "  %s.prp_tarjeta t\n" +
     "INNER JOIN %s.prp_cuenta c ON t.id_cuenta = c.id\n" +
@@ -111,7 +113,8 @@ public class PrepaidCardEJBBean11 extends PrepaidBaseEJBBean10 implements Prepai
     "  t.fecha_actualizacion as fecha_actualizacion,\n" +
     "  t.uuid as uuid,\n" +
     "  t.pan_hash as pan_hash,\n" +
-    "  t.id_cuenta as id_cuenta\n" +
+    "  t.id_cuenta as id_cuenta,\n" +
+    "  t.expiracion as expiracion\n"+
     "FROM \n" +
     "  %s.prp_tarjeta t\n" +
     "  INNER JOIN %s.prp_cuenta c ON t.id_cuenta = c.id\n" +
@@ -121,43 +124,45 @@ public class PrepaidCardEJBBean11 extends PrepaidBaseEJBBean10 implements Prepai
     "  t.pan = ?", getSchema(), getSchema(), getSchema());
 
   private static final String FIND_BY_PAN_ACCOUNTNUMBER = String.format("SELECT \n" +
-    "t.id  as id,\n" +
-    "t.pan as pan,\n" +
-    "t.pan_encriptado as pan_encriptado,\n" +
-    "t.estado as estado,\n" +
-    "t.nombre_tarjeta as nombre_tarjeta,\n" +
-    "t.producto as producto,\n" +
-    "t.numero_unico as numero_unico,\n" +
-    "t.fecha_creacion as fecha_creacion,\n" +
-    "t.fecha_actualizacion as fecha_actualizacion,\n" +
-    "t.uuid as uuid,\n" +
-    "t.pan_hash as pan_hash,\n" +
-    "t.id_cuenta as id_cuenta\n" +
-    "FROM %s.prp_tarjeta t\n"+
-    "INNER JOIN %s.prp_cuenta c ON t.id_cuenta = c.id\n" +
-    "INNER JOIN %s.prp_usuario u on c.id_usuario = u.id\n" +
-    "WHERE\n" +
-    " t.pan = ? AND\n" +
-    " c.cuenta = ?",getSchema(),getSchema(),getSchema());
+    "  t.id  as id,\n" +
+    "  t.pan as pan,\n" +
+    "  t.pan_encriptado as pan_encriptado,\n" +
+    "  t.estado as estado,\n" +
+    "  t.nombre_tarjeta as nombre_tarjeta,\n" +
+    "  t.producto as producto,\n" +
+    "  t.numero_unico as numero_unico,\n" +
+    "  t.fecha_creacion as fecha_creacion,\n" +
+    "  t.fecha_actualizacion as fecha_actualizacion,\n" +
+    "  t.uuid as uuid,\n" +
+    "  t.pan_hash as pan_hash,\n" +
+    "  t.id_cuenta as id_cuenta,\n" +
+    "  t.expiracion as expiracion\n"+
+    " FROM %s.prp_tarjeta t\n"+
+    "   INNER JOIN %s.prp_cuenta c ON t.id_cuenta = c.id\n" +
+    "   INNER JOIN %s.prp_usuario u on c.id_usuario = u.id\n" +
+    " WHERE\n" +
+    "  t.pan = ? AND\n" +
+    "  c.cuenta = ?",getSchema(),getSchema(),getSchema());
 
   private static final String FIND_BY_PAN_HASH_AND_ACCOUNTNUMBER = String.format("SELECT \n" +
-    "t.id  as id,\n" +
-    "t.pan as pan,\n" +
-    "t.pan_encriptado as pan_encriptado,\n" +
-    "t.estado as estado,\n" +
-    "t.nombre_tarjeta as nombre_tarjeta,\n" +
-    "t.producto as producto,\n" +
-    "t.numero_unico as numero_unico,\n" +
-    "t.fecha_creacion as fecha_creacion,\n" +
-    "t.fecha_actualizacion as fecha_actualizacion,\n" +
-    "t.uuid as uuid,\n" +
-    "t.pan_hash as pan_hash,\n" +
-    "t.id_cuenta as id_cuenta\n" +
+    " t.id  as id,\n" +
+    " t.pan as pan,\n" +
+    " t.pan_encriptado as pan_encriptado,\n" +
+    " t.estado as estado,\n" +
+    " t.nombre_tarjeta as nombre_tarjeta,\n" +
+    " t.producto as producto,\n" +
+    " t.numero_unico as numero_unico,\n" +
+    " t.fecha_creacion as fecha_creacion,\n" +
+    " t.fecha_actualizacion as fecha_actualizacion,\n" +
+    " t.uuid as uuid,\n" +
+    " t.pan_hash as pan_hash,\n" +
+    " t.id_cuenta as id_cuenta,\n" +
+    " t.expiracion as expiracion\n"+
     "FROM %s.prp_tarjeta t\n"+
     "INNER JOIN %s.prp_cuenta c ON t.id_cuenta = c.id\n" +
     "WHERE\n" +
-    " t.pan_hash = ? AND\n" +
-    " c.cuenta = ?",getSchema(),getSchema(),getSchema());
+    "  t.pan_hash = ? AND\n" +
+    "  c.cuenta = ?",getSchema(),getSchema(),getSchema());
 
   private static String UPDATE_PREPAID_CARD_STATUS = String.format("UPDATE %s.prp_tarjeta SET estado = ? where id = ?",getSchema());
 
@@ -246,7 +251,7 @@ public class PrepaidCardEJBBean11 extends PrepaidBaseEJBBean10 implements Prepai
       ps.setString(6, !StringUtils.isAllBlank(prepaidCard10.getNumeroUnico()) ? prepaidCard10.getNumeroUnico() : ""); //numero_unico
       ps.setTimestamp(7,Timestamp.valueOf(LocalDateTime.ofInstant(Instant.now(), ZoneId.of("UTC")))); //fecha_creacion
       ps.setTimestamp(8, Timestamp.valueOf(LocalDateTime.ofInstant(Instant.now(), ZoneId.of("UTC")))); //fecha_actualizacion
-      ps.setString(9, prepaidCard10.getUuid()); //uuid
+      ps.setString(9, !StringUtils.isAllBlank(prepaidCard10.getUuid()) ? prepaidCard10.getUuid() : ""); //uuid
       ps.setString(10, !StringUtils.isAllBlank(prepaidCard10.getHashedPan()) ? prepaidCard10.getHashedPan() : ""); //pan_hash
       ps.setLong(11, prepaidCard10.getAccountId()); //id_cuenta
       ps.setString(12,"");//contrato TODO: hay que borrarlo
@@ -275,21 +280,24 @@ public class PrepaidCardEJBBean11 extends PrepaidBaseEJBBean10 implements Prepai
       where.append(String.format(" expiracion = %d AND", expiration));
     }
     if(panHash != null){
-      where.append(String.format(" pan_hash = %s AND", panHash));
+      where.append(String.format(" pan_hash = '%s' AND", panHash));
     }
     if(status != null){
-      where.append(String.format(" estado = %s AND", status.name()));
+      where.append(String.format(" estado = '%s' AND", status.name()));
     }
-    if(status != null){
-      where.append(String.format(" pan_encriptado = %s AND", encryptedPan));
+    if(encryptedPan != null){
+      where.append(String.format(" pan_encriptado = '%s' AND", encryptedPan));
     }
     where.append(" 1 = 1");
-
+    log.debug(String.format(FIND_CARD,getSchema(), where.toString()));
     try {
-      return getDbUtils().getJdbcTemplate().query(String.format(FIND_CARD,where.toString()), getCardMapper(), id);
+      return getDbUtils().getJdbcTemplate().query(String.format(FIND_CARD,getSchema(), where.toString()), getCardMapper());
     } catch (EmptyResultDataAccessException ex) {
       log.error(String.format("[getPrepaidCards] Tarjeta [id: %d] no existe", id));
       throw new ValidationException(TARJETA_NO_EXISTE);
+    }catch (Exception e){
+      e.printStackTrace();
+      return null;
     }
 
   }
@@ -329,14 +337,18 @@ public class PrepaidCardEJBBean11 extends PrepaidBaseEJBBean10 implements Prepai
     log.info(String.format("[getLastPrepaidCardByAccountIdAndStatus] Buscando tarjeta [accountId: %d]", accountId));
 
     StringBuilder where = new StringBuilder();
-    where.append(String.format("id_cuenta = %s AND",accountId));
-    where.append(String.format("estado = %s ",status.name()));
+    where.append(String.format(" id_cuenta = %d ",accountId));
 
     try {
-      return getDbUtils().getJdbcTemplate().queryForObject(String.format(FIND_LAST_CARD,where), getCardMapper());
+      PrepaidCard10 card =  getDbUtils().getJdbcTemplate().queryForObject(String.format(FIND_LAST_CARD, getSchema(), where), getCardMapper());
+      if(card != null && card.getStatus() == status){
+        return card;
+      }else {
+        return null;
+      }
     } catch (EmptyResultDataAccessException ex) {
       log.error(String.format("[getLastPrepaidCardByAccountIdAndStatus] Tarjeta [accountId: %d] no existe", accountId));
-      throw new ValidationException(TARJETA_NO_EXISTE);
+     return null;
     }
   }
 
@@ -351,19 +363,19 @@ public class PrepaidCardEJBBean11 extends PrepaidBaseEJBBean10 implements Prepai
     log.info(String.format("[getLastPrepaidCardByAccountIdAndStatus] Buscando tarjeta [accountId: %d]", accountId));
 
     StringBuilder where = new StringBuilder();
-    where.append(String.format(" id_cuenta = %s AND",accountId));
+    where.append(String.format(" id_cuenta = %d AND",accountId));
     where.append(" ( ");
     for(PrepaidCardStatus state : status){
-      where.append(String.format(" estado = %s OR",state.name()));
+      where.append(String.format(" estado = '%s' OR",state.name()));
     }
     where.append(" 1 = 1 ");
     where.append(" ) ");
 
     try {
-      return getDbUtils().getJdbcTemplate().queryForObject(String.format(FIND_LAST_CARD,where), getCardMapper());
+      return getDbUtils().getJdbcTemplate().queryForObject(String.format(FIND_LAST_CARD,getSchema(),where), getCardMapper());
     } catch (EmptyResultDataAccessException ex) {
       log.error(String.format("[getLastPrepaidCardByAccountIdAndStatus] Tarjeta [accountId: %d] no existe", accountId));
-      throw new ValidationException(TARJETA_NO_EXISTE);
+      return null;
     }
   }
 
@@ -375,13 +387,13 @@ public class PrepaidCardEJBBean11 extends PrepaidBaseEJBBean10 implements Prepai
     log.info(String.format("[getLastPrepaidCardByAccountId] Buscando tarjeta [accountId: %d]", accountId));
 
     StringBuilder where = new StringBuilder();
-    where.append(String.format(" id_cuenta = %s ",accountId));
+    where.append(String.format(" id_cuenta = %d ",accountId));
 
     try {
-      return getDbUtils().getJdbcTemplate().queryForObject(String.format(FIND_LAST_CARD,where), getCardMapper());
+      return getDbUtils().getJdbcTemplate().queryForObject(String.format(FIND_LAST_CARD,getSchema(), where), getCardMapper());
     } catch (EmptyResultDataAccessException ex) {
       log.error(String.format("[getLastPrepaidCardByAccountId] Tarjeta [accountId: %d] no existe", accountId));
-      throw new ValidationException(TARJETA_NO_EXISTE);
+      return null;
     }
   }
 
@@ -433,20 +445,13 @@ public class PrepaidCardEJBBean11 extends PrepaidBaseEJBBean10 implements Prepai
   @Override
   public void updatePrepaidCard(Map<String, Object> headers, Long cardId, Long accountId,PrepaidCardStatus status, PrepaidCard10 prepaidCard) throws Exception {
 
+
     if(cardId == null){
       throw new BadRequestException(PARAMETRO_FALTANTE_$VALUE).setData(new KeyValue("value", "id"));
     }
 
-    if(accountId == null){
-      throw new BadRequestException(PARAMETRO_FALTANTE_$VALUE).setData(new KeyValue("value", "accountId"));
-    }
-
     if(prepaidCard == null){
       throw new BadRequestException(PARAMETRO_FALTANTE_$VALUE).setData(new KeyValue("value", "prepaidCard"));
-    }
-
-    if(prepaidCard.getId() == null){
-      throw new BadRequestException(PARAMETRO_FALTANTE_$VALUE).setData(new KeyValue("value", "prepaidCard.id"));
     }
 
     log.info(String.format("[updatePrepaidCard] Actualizando tarjeta [id: %d]", cardId));
@@ -498,18 +503,15 @@ public class PrepaidCardEJBBean11 extends PrepaidBaseEJBBean10 implements Prepai
         .append("', ");
     }
 
-    sb.append("id_cuenta = ")
-      .append(accountId)
-      .append(", ");
-
     sb.append("fecha_actualizacion = timezone('utc', now())");
+
     int resp = 0;
     if(status == null){
-      resp = getDbUtils().getJdbcTemplate().update(String.format(UPDATE_CARD_BY_ID_SQL, getSchema(), sb.toString(),""), prepaidCard.getId(),"");
+      resp = getDbUtils().getJdbcTemplate().update(String.format(UPDATE_CARD_BY_ID_SQL, getSchema(), sb.toString(),""), cardId);
     }
     else{
       String where = String.format(" AND estado = '%s'",status.name());
-      resp = getDbUtils().getJdbcTemplate().update(String.format(UPDATE_CARD_BY_ID_SQL, getSchema(), sb.toString(),where), prepaidCard.getId(),"");
+      resp = getDbUtils().getJdbcTemplate().update(String.format(UPDATE_CARD_BY_ID_SQL, getSchema(), sb.toString(),where), cardId);
     }
 
     if(resp == 0) {
@@ -702,6 +704,7 @@ public class PrepaidCardEJBBean11 extends PrepaidBaseEJBBean10 implements Prepai
       c.setStatus(PrepaidCardStatus.valueOfEnum(rs.getString("estado")));
       c.setNameOnCard(rs.getString("nombre_tarjeta"));
       c.setProducto(rs.getString("producto"));
+      c.setExpiration(rs.getInt("expiracion"));
       c.setNumeroUnico(rs.getString("numero_unico"));
       Timestamps timestamps = new Timestamps();
       timestamps.setCreatedAt(rs.getTimestamp("fecha_creacion").toLocalDateTime());

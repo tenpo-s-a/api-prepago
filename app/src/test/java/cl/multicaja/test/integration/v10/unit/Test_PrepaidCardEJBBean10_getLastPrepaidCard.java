@@ -23,20 +23,21 @@ public class Test_PrepaidCardEJBBean10_getLastPrepaidCard extends TestBaseUnit {
       Account account = buildAccountFromTecnocom(prepaidUser);
       account = createAccount(account.getUserId(),account.getAccountNumber());
 
-      PrepaidCard10 card1 = buildPrepaidCard10(prepaidUser);
+      PrepaidCard10 card1 = buildPrepaidCardWithTecnocomData(prepaidUser,account);
       card1.setStatus(PrepaidCardStatus.PENDING);
       card1.setAccountId(account.getId());
-      createPrepaidCardV2(card1);
+      card1 = createPrepaidCardV2(card1);
 
-      PrepaidCard10 card2 = buildPrepaidCard10(prepaidUser);
+
+      PrepaidCard10 card2 = buildPrepaidCardWithTecnocomData(prepaidUser,account);
       card2.setStatus(PrepaidCardStatus.LOCKED);
       card2.setAccountId(account.getId());
-      createPrepaidCardV2(card2);
+      card2 =createPrepaidCardV2(card2);
 
-      PrepaidCard10 card3 = buildPrepaidCard10(prepaidUser);
+      PrepaidCard10 card3 = buildPrepaidCardWithTecnocomData(prepaidUser,account);
       card3.setStatus(PrepaidCardStatus.ACTIVE);
       card3.setAccountId(account.getId());
-      createPrepaidCardV2(card3);
+      card3 = createPrepaidCardV2(card3);
 
       PrepaidCard10 prepaidCard = getPrepaidCardEJBBean11().getLastPrepaidCardByAccountIdAndOneOfStatus(null, account.getId(),
         PrepaidCardStatus.ACTIVE,
@@ -55,17 +56,17 @@ public class Test_PrepaidCardEJBBean10_getLastPrepaidCard extends TestBaseUnit {
       account = createAccount(account.getUserId(),account.getAccountNumber());
 
 
-      PrepaidCard10 card1 = buildPrepaidCard10(prepaidUser);
+      PrepaidCard10 card1 = buildPrepaidCardWithTecnocomData(prepaidUser,account);
       card1.setStatus(PrepaidCardStatus.ACTIVE);
       card1.setAccountId(account.getId());
       createPrepaidCardV2(card1);
 
-      PrepaidCard10 card2 = buildPrepaidCard10(prepaidUser);
+      PrepaidCard10 card2 = buildPrepaidCardWithTecnocomData(prepaidUser,account);
       card2.setStatus(PrepaidCardStatus.LOCKED);
       card2.setAccountId(account.getId());
       createPrepaidCardV2(card2);
 
-      PrepaidCard10 card3 = buildPrepaidCard10(prepaidUser);
+      PrepaidCard10 card3 = buildPrepaidCardWithTecnocomData(prepaidUser,account);
       card3.setStatus(PrepaidCardStatus.PENDING);
       card3.setAccountId(account.getId());
       createPrepaidCardV2(card3);
@@ -87,17 +88,17 @@ public class Test_PrepaidCardEJBBean10_getLastPrepaidCard extends TestBaseUnit {
       account = createAccount(account.getUserId(),account.getAccountNumber());
 
 
-      PrepaidCard10 card1 = buildPrepaidCard10(prepaidUser);
+      PrepaidCard10 card1 = buildPrepaidCardWithTecnocomData(prepaidUser,account);
       card1.setStatus(PrepaidCardStatus.ACTIVE);
       card1.setAccountId(account.getId());
       createPrepaidCardV2(card1);
 
-      PrepaidCard10 card2 = buildPrepaidCard10(prepaidUser);
+      PrepaidCard10 card2 = buildPrepaidCardWithTecnocomData(prepaidUser,account);
       card2.setStatus(PrepaidCardStatus.PENDING);
       card2.setAccountId(account.getId());
       createPrepaidCardV2(card2);
 
-      PrepaidCard10 card3 = buildPrepaidCard10(prepaidUser);
+      PrepaidCard10 card3 = buildPrepaidCardWithTecnocomData(prepaidUser,account);
       card3.setStatus(PrepaidCardStatus.LOCKED);
       card3.setAccountId(account.getId());
       createPrepaidCardV2(card3);
@@ -123,20 +124,20 @@ public class Test_PrepaidCardEJBBean10_getLastPrepaidCard extends TestBaseUnit {
     account = createAccount(account.getUserId(),account.getAccountNumber());
 
 
-    PrepaidCard10 card1 = buildPrepaidCard10(prepaidUser);
+    PrepaidCard10 card1 = buildPrepaidCardWithTecnocomData(prepaidUser,account);
     card1.setStatus(PrepaidCardStatus.PENDING);
     card1.setAccountId(account.getId());
-    createPrepaidCardV2(card1);
+    card1 = createPrepaidCardV2(card1);
 
-    PrepaidCard10 card2 = buildPrepaidCard10(prepaidUser);
+    PrepaidCard10 card2 = buildPrepaidCardWithTecnocomData(prepaidUser,account);
     card2.setStatus(PrepaidCardStatus.LOCKED);
     card2.setAccountId(account.getId());
-    createPrepaidCardV2(card2);
+    card2 = createPrepaidCardV2(card2);
 
-    PrepaidCard10 card3 = buildPrepaidCard10(prepaidUser);
+    PrepaidCard10 card3 = buildPrepaidCardWithTecnocomData(prepaidUser,account);
     card3.setStatus(PrepaidCardStatus.ACTIVE);
     card3.setAccountId(account.getId());
-    createPrepaidCardV2(card3);
+    card3 =createPrepaidCardV2(card3);
 
     PrepaidCard10 prepaidCard = getPrepaidCardEJBBean11().getLastPrepaidCardByAccountId(null, account.getId());
 
@@ -147,19 +148,25 @@ public class Test_PrepaidCardEJBBean10_getLastPrepaidCard extends TestBaseUnit {
   @Test
   public void checkFormattedExpiration() throws Exception {
 
-    PrepaidUser10 prepaidUser = buildPrepaidUser10();
+    PrepaidUser10 prepaidUser = buildPrepaidUserv2();
+    prepaidUser = createPrepaidUserV2(prepaidUser);
 
-    PrepaidCard10 card1 = buildPrepaidCard10(prepaidUser);
+    Account account = buildAccountFromTecnocom(prepaidUser);
+    account = createAccount(account.getUserId(),account.getAccountNumber());
 
-    card1.setExpiration(201812);
-    Assert.assertEquals("debe tener formato MM/yyyy", "12/2018", card1.getFormattedExpiration());
+    PrepaidCard10 prepaidCard10 = buildPrepaidCardWithTecnocomData(prepaidUser,account);
+    prepaidCard10 = createPrepaidCardV2(prepaidCard10);
+
+
+    prepaidCard10.setExpiration(201812);
+    Assert.assertEquals("debe tener formato MM/yyyy", "12/2018", prepaidCard10.getFormattedExpiration());
 
     //se verifica este caso, pero si ocurre significa que la expiracion es invalida
-    card1.setExpiration(20181);
-    Assert.assertEquals("debe tener formato M/yyyy", "1/2018", card1.getFormattedExpiration());
+    prepaidCard10.setExpiration(20181);
+    Assert.assertEquals("debe tener formato M/yyyy", "1/2018", prepaidCard10.getFormattedExpiration());
 
     //se verifica este caso, pero si ocurre significa que la expiracion es invalida
-    card1.setExpiration(2018);
-    Assert.assertEquals("debe tener formato yyyy", "2018", card1.getFormattedExpiration());
+    prepaidCard10.setExpiration(2018);
+    Assert.assertEquals("debe tener formato yyyy", "2018", prepaidCard10.getFormattedExpiration());
   }
 }

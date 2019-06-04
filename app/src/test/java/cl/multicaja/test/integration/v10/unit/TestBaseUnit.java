@@ -480,6 +480,7 @@ public class TestBaseUnit extends TestApiBase {
    * @return
    * @throws Exception
    */
+   @Deprecated
   public PrepaidCard10 buildPrepaidCard10(PrepaidUser10 prepaidUser) throws Exception {
     int expiryYear = numberUtils.random(1000, 9999);
     int expiryMonth = numberUtils.random(1, 99);
@@ -500,7 +501,7 @@ public class TestBaseUnit extends TestApiBase {
   }
 
 
-
+  @Deprecated
   public PrepaidCard10 buildPrepaidCard10(PrepaidUser10 prepaidUser,Long accountId) throws Exception {
     int expiryYear = numberUtils.random(1000, 9999);
     int expiryMonth = numberUtils.random(1, 99);
@@ -518,6 +519,28 @@ public class TestBaseUnit extends TestApiBase {
     prepaidCard.setProducto(getRandomNumericString(2));
     prepaidCard.setNumeroUnico(getRandomNumericString(8));
     prepaidCard.setAccountId(accountId);
+    return prepaidCard;
+  }
+
+  public PrepaidCard10 buildPrepaidCard11(PrepaidUser10 prepaidUser,Long accountId) throws Exception {
+    int expiryYear = numberUtils.random(1000, 9999);
+    int expiryMonth = numberUtils.random(1, 99);
+    int expiryDate = numberUtils.toInt(expiryYear + "" + StringUtils.leftPad(String.valueOf(expiryMonth), 2, "0"));
+    String pan = getRandomNumericString(16);
+
+    PrepaidCard10 prepaidCard = new PrepaidCard10();
+    prepaidCard.setIdUser(prepaidUser != null ? prepaidUser.getId() : null);
+    prepaidCard.setPan(Utils.replacePan(pan));
+    prepaidCard.setEncryptedPan(EncryptUtil.getInstance().encrypt(pan));
+    prepaidCard.setExpiration(expiryDate);
+    prepaidCard.setStatus(PrepaidCardStatus.ACTIVE);
+    prepaidCard.setProcessorUserId(getRandomNumericString(20));
+    prepaidCard.setNameOnCard("Tarjeta de: " + getRandomString(5));
+    prepaidCard.setProducto(getRandomNumericString(2));
+    prepaidCard.setNumeroUnico(getRandomNumericString(8));
+    prepaidCard.setAccountId(accountId);
+    prepaidCard.setUuid(UUID.randomUUID().toString());
+    prepaidCard.setHashedPan("");
     return prepaidCard;
   }
   /**
@@ -574,6 +597,7 @@ public class TestBaseUnit extends TestApiBase {
    * @return
    * @throws Exception
    */
+  @Deprecated
   public PrepaidCard10 buildPrepaidCard10() throws Exception {
     PrepaidUser10 prepaidUser = buildPrepaidUser10();
     prepaidUser = getPrepaidUserEJBBean10().createPrepaidUser(null, prepaidUser);
@@ -852,6 +876,7 @@ public class TestBaseUnit extends TestApiBase {
      * @return
      * @throws Exception
      */
+    @Deprecated
   public PrepaidCard10 createPrepaidCard10(PrepaidCard10 prepaidCard) throws Exception {
 
     prepaidCard = getPrepaidCardEJBBean11().createPrepaidCard(null, prepaidCard);

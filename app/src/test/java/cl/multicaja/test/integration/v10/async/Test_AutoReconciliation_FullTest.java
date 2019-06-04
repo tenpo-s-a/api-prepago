@@ -1785,6 +1785,7 @@ public class Test_AutoReconciliation_FullTest extends TestBaseUnitAsync {
   }
 
   private void checkIfTransactionIsInQueue(String queueName, String idTxExterno, String transactionType, String transactionStatus, List<PrepaidMovementFee10> feeList) {
+
     Queue qResp = camelFactory.createJMSQueue(queueName);
     ExchangeData<String> event = (ExchangeData<String>) camelFactory.createJMSMessenger(30000, 60000)
       .getMessage(qResp, idTxExterno);
