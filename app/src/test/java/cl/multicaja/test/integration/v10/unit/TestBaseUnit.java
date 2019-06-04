@@ -658,7 +658,7 @@ public class TestBaseUnit extends TestApiBase {
 
     NewAmountAndCurrency10 newAmountAndCurrency = new NewAmountAndCurrency10();
     newAmountAndCurrency.setValue(new BigDecimal(3238));
-    newAmountAndCurrency.setCurrencyCode(CodigoMoneda.CHILE_CLP);
+    newAmountAndCurrency.setCurrencyCode(CodigoMoneda.CLP);
     prepaidTopup.setAmount(newAmountAndCurrency);
     prepaidTopup.setTotal(newAmountAndCurrency);
     prepaidTopup.setMerchantCategory(1);
@@ -680,7 +680,7 @@ public class TestBaseUnit extends TestApiBase {
     NewAmountAndCurrency10 newAmountAndCurrency = new NewAmountAndCurrency10();
     newAmountAndCurrency.setValue(new BigDecimal(3238));
 
-    newAmountAndCurrency.setCurrencyCode(CodigoMoneda.CHILE_CLP);
+    newAmountAndCurrency.setCurrencyCode(CodigoMoneda.CLP);
     prepaidTopup.setAmount(newAmountAndCurrency);
 
     prepaidTopup.setMerchantCategory(1);
@@ -700,7 +700,7 @@ public class TestBaseUnit extends TestApiBase {
     prepaidWithdraw.setTransactionId(getUniqueInteger().toString());
     NewAmountAndCurrency10 newAmountAndCurrency = new NewAmountAndCurrency10();
     newAmountAndCurrency.setValue(new BigDecimal(RandomUtils.nextLong(2000,9000)));
-    newAmountAndCurrency.setCurrencyCode(CodigoMoneda.CHILE_CLP);
+    newAmountAndCurrency.setCurrencyCode(CodigoMoneda.CLP);
     prepaidWithdraw.setAmount(newAmountAndCurrency);
     prepaidWithdraw.setMerchantCategory(1);
     prepaidWithdraw.setMerchantName(getRandomString(6));
@@ -724,7 +724,7 @@ public class TestBaseUnit extends TestApiBase {
 
     NewAmountAndCurrency10 newAmountAndCurrency = new NewAmountAndCurrency10();
     newAmountAndCurrency.setValue(new BigDecimal(3119));
-    newAmountAndCurrency.setCurrencyCode(CodigoMoneda.CHILE_CLP);
+    newAmountAndCurrency.setCurrencyCode(CodigoMoneda.CLP);
     prepaidWithdraw.setAmount(newAmountAndCurrency);
 
     prepaidWithdraw.setMerchantCategory(1);
@@ -732,7 +732,7 @@ public class TestBaseUnit extends TestApiBase {
 
     NewAmountAndCurrency10 fee = new NewAmountAndCurrency10();
     fee.setValue(new BigDecimal(100));
-    fee.setCurrencyCode(CodigoMoneda.CHILE_CLP);
+    fee.setCurrencyCode(CodigoMoneda.CLP);
     prepaidWithdraw.setFee(fee);
 
     prepaidWithdraw.setMcVoucherType("A");
@@ -1095,7 +1095,7 @@ public class TestBaseUnit extends TestApiBase {
     prepaidMovement.setCodent(codent);
     prepaidMovement.setCentalta(centalta); //contrato (Numeros del 5 al 8) - se debe actualizar despues
     prepaidMovement.setCuenta(cuenta); ////contrato (Numeros del 9 al 20) - se debe actualizar despues
-    prepaidMovement.setClamon(CodigoMoneda.CHILE_CLP);
+    prepaidMovement.setClamon(CodigoMoneda.CLP);
     prepaidMovement.setIndnorcor(IndicadorNormalCorrector.fromValue(tipoFactura.getCorrector())); //0-Normal
     prepaidMovement.setTipofac(tipoFactura);
     prepaidMovement.setFecfac(java.util.Date.from(ZonedDateTime.now(ZoneId.of("UTC")).toInstant()));
@@ -1174,7 +1174,7 @@ public class TestBaseUnit extends TestApiBase {
     prepaidMovement.setCodent(codent);
     prepaidMovement.setCentalta(centalta); //contrato (Numeros del 5 al 8) - se debe actualizar despues
     prepaidMovement.setCuenta(cuenta); ////contrato (Numeros del 9 al 20) - se debe actualizar despues
-    prepaidMovement.setClamon(CodigoMoneda.CHILE_CLP);
+    prepaidMovement.setClamon(CodigoMoneda.CLP);
     prepaidMovement.setIndnorcor(IndicadorNormalCorrector.NORMAL); //0-Normal
     prepaidMovement.setTipofac(tipoFactura);
     prepaidMovement.setFecfac(new Date(System.currentTimeMillis()));
@@ -1247,7 +1247,7 @@ public class TestBaseUnit extends TestApiBase {
     prepaidMovement.setCodent(codent);
     prepaidMovement.setCentalta(""); //contrato (Numeros del 5 al 8) - se debe actualizar despues
     prepaidMovement.setCuenta(""); ////contrato (Numeros del 9 al 20) - se debe actualizar despues
-    prepaidMovement.setClamon(CodigoMoneda.CHILE_CLP);
+    prepaidMovement.setClamon(CodigoMoneda.CLP);
     prepaidMovement.setIndnorcor(IndicadorNormalCorrector.NORMAL); //0-Normal
     prepaidMovement.setTipofac(tipoFactura);
     prepaidMovement.setFecfac(new Date(System.currentTimeMillis()));
@@ -1329,7 +1329,7 @@ public class TestBaseUnit extends TestApiBase {
     prepaidMovement.setCodent(codent);
     prepaidMovement.setCentalta(centalta); //contrato (Numeros del 5 al 8) - se debe actualizar despues
     prepaidMovement.setCuenta(cuenta); ////contrato (Numeros del 9 al 20) - se debe actualizar despues
-    prepaidMovement.setClamon(CodigoMoneda.CHILE_CLP);
+    prepaidMovement.setClamon(CodigoMoneda.CLP);
     prepaidMovement.setIndnorcor(IndicadorNormalCorrector.NORMAL); //0-Normal
     prepaidMovement.setTipofac(tipoFactura);
     prepaidMovement.setFecfac(new Date(System.currentTimeMillis()));
@@ -1418,7 +1418,7 @@ public class TestBaseUnit extends TestApiBase {
     prepaidMovement.setCodent(codent);
     prepaidMovement.setCentalta(""); //contrato (Numeros del 5 al 8) - se debe actualizar despues
     prepaidMovement.setCuenta(""); ////contrato (Numeros del 9 al 20) - se debe actualizar despues
-    prepaidMovement.setClamon(CodigoMoneda.CHILE_CLP);
+    prepaidMovement.setClamon(CodigoMoneda.CLP);
     prepaidMovement.setIndnorcor(IndicadorNormalCorrector.CORRECTORA); //0-Normal
     prepaidMovement.setTipofac(tipoFactura);
     prepaidMovement.setFecfac(new Date(System.currentTimeMillis()));
@@ -1526,12 +1526,12 @@ public class TestBaseUnit extends TestApiBase {
 
     String contrato = prepaidCard10.getProcessorUserId();
     String pan = prepaidCard10.getPan();
-    CodigoMoneda clamon = CodigoMoneda.CHILE_CLP;
+    CodigoMoneda clamon = CodigoMoneda.CLP;
     IndicadorNormalCorrector indnorcor = IndicadorNormalCorrector.NORMAL;
     TipoFactura tipofac = TipoFactura.CARGA_TRANSFERENCIA;
     String codcom = "1";
     Integer codact = 1;
-    CodigoMoneda clamondiv = CodigoMoneda.NONE;
+    CodigoMoneda clamondiv = CodigoMoneda.UNK;
     String nomcomred = "prueba";
     String numreffac = getUniqueLong().toString();
     String numaut = TecnocomServiceHelper.getNumautFromIdMov(numreffac);
@@ -1561,12 +1561,12 @@ public class TestBaseUnit extends TestApiBase {
     }
 
     String pan = prepaidCard10.getPan();
-    CodigoMoneda clamon = CodigoMoneda.CHILE_CLP;
+    CodigoMoneda clamon = CodigoMoneda.CLP;
     IndicadorNormalCorrector indnorcor = IndicadorNormalCorrector.NORMAL;
     TipoFactura tipofac = TipoFactura.CARGA_TRANSFERENCIA;
     String codcom = "1";
     Integer codact = 1;
-    CodigoMoneda clamondiv = CodigoMoneda.NONE;
+    CodigoMoneda clamondiv = CodigoMoneda.UNK;
     String nomcomred = "prueba";
     String numreffac = getUniqueLong().toString();
     String numaut = TecnocomServiceHelper.getNumautFromIdMov(numreffac);
@@ -1695,7 +1695,7 @@ public class TestBaseUnit extends TestApiBase {
     accounting10.setCollectorFeeIva(new BigDecimal(getUniqueInteger()));
 
     NewAmountAndCurrency10 amountBalance = new NewAmountAndCurrency10();
-    amountBalance.setCurrencyCode(CodigoMoneda.CHILE_CLP);
+    amountBalance.setCurrencyCode(CodigoMoneda.CLP);
     amountBalance.setValue(new BigDecimal(getUniqueInteger()));
     accounting10.setAmountBalance(amountBalance);
     accounting10.setStatus(AccountingStatusType.OK);
@@ -1703,17 +1703,17 @@ public class TestBaseUnit extends TestApiBase {
     accounting10.setFileId(0L);
 
     NewAmountAndCurrency10 amountMcar = new NewAmountAndCurrency10();
-    amountMcar.setCurrencyCode(CodigoMoneda.CHILE_CLP);
+    amountMcar.setCurrencyCode(CodigoMoneda.CLP);
     amountMcar.setValue(new BigDecimal(getUniqueInteger()));
     accounting10.setAmountMastercard(amountMcar);
 
     NewAmountAndCurrency10 amount = new NewAmountAndCurrency10();
-    amount.setCurrencyCode(CodigoMoneda.CHILE_CLP);
+    amount.setCurrencyCode(CodigoMoneda.CLP);
     amount.setValue(new BigDecimal(getUniqueInteger()));
     accounting10.setAmount(amount);
 
     NewAmountAndCurrency10 amountUsd = new NewAmountAndCurrency10();
-    amountUsd.setCurrencyCode(CodigoMoneda.CHILE_CLP);
+    amountUsd.setCurrencyCode(CodigoMoneda.CLP);
     amountUsd.setValue(new BigDecimal(getUniqueInteger()));
     accounting10.setAmountUsd(amountUsd);
     return accounting10;
@@ -1734,7 +1734,7 @@ public class TestBaseUnit extends TestApiBase {
     accounting10.setCollectorFeeIva(new BigDecimal(getUniqueInteger()));
 
     NewAmountAndCurrency10 amountBalance = new NewAmountAndCurrency10();
-    amountBalance.setCurrencyCode(CodigoMoneda.CHILE_CLP);
+    amountBalance.setCurrencyCode(CodigoMoneda.CLP);
     amountBalance.setValue(new BigDecimal(getUniqueInteger()));
     accounting10.setAmountBalance(amountBalance);
     accounting10.setStatus(AccountingStatusType.OK);
@@ -1742,17 +1742,17 @@ public class TestBaseUnit extends TestApiBase {
     accounting10.setFileId(0L);
 
     NewAmountAndCurrency10 amountMcar = new NewAmountAndCurrency10();
-    amountMcar.setCurrencyCode(CodigoMoneda.CHILE_CLP);
+    amountMcar.setCurrencyCode(CodigoMoneda.CLP);
     amountMcar.setValue(new BigDecimal(getUniqueInteger()));
     accounting10.setAmountMastercard(amountMcar);
 
     NewAmountAndCurrency10 amount = new NewAmountAndCurrency10();
-    amount.setCurrencyCode(CodigoMoneda.CHILE_CLP);
+    amount.setCurrencyCode(CodigoMoneda.CLP);
     amount.setValue(new BigDecimal(getUniqueInteger()));
     accounting10.setAmount(amount);
 
     NewAmountAndCurrency10 amountUsd = new NewAmountAndCurrency10();
-    amountUsd.setCurrencyCode(CodigoMoneda.CHILE_CLP);
+    amountUsd.setCurrencyCode(CodigoMoneda.CLP);
     amountUsd.setValue(new BigDecimal(getUniqueInteger()));
     accounting10.setAmountUsd(amountUsd);
     return accounting10;
@@ -1776,7 +1776,7 @@ public class TestBaseUnit extends TestApiBase {
          accounting10.setCollectorFeeIva(new BigDecimal(getUniqueInteger()));
 
          NewAmountAndCurrency10 amountBalance = new NewAmountAndCurrency10();
-         amountBalance.setCurrencyCode(CodigoMoneda.CHILE_CLP);
+         amountBalance.setCurrencyCode(CodigoMoneda.CLP);
          amountBalance.setValue(new BigDecimal(getUniqueInteger()));
          accounting10.setAmountBalance(amountBalance);
          accounting10.setStatus(AccountingStatusType.OK);
@@ -1784,17 +1784,17 @@ public class TestBaseUnit extends TestApiBase {
          accounting10.setFileId(0L);
 
          NewAmountAndCurrency10 amountMcar = new NewAmountAndCurrency10();
-         amountMcar.setCurrencyCode(CodigoMoneda.CHILE_CLP);
+         amountMcar.setCurrencyCode(CodigoMoneda.CLP);
          amountMcar.setValue(new BigDecimal(getUniqueInteger()));
          accounting10.setAmountMastercard(amountMcar);
 
          NewAmountAndCurrency10 amount = new NewAmountAndCurrency10();
-         amount.setCurrencyCode(CodigoMoneda.CHILE_CLP);
+         amount.setCurrencyCode(CodigoMoneda.CLP);
          amount.setValue(new BigDecimal(getUniqueInteger()));
          accounting10.setAmount(amount);
 
          NewAmountAndCurrency10 amountUsd = new NewAmountAndCurrency10();
-         amountUsd.setCurrencyCode(CodigoMoneda.CHILE_CLP);
+         amountUsd.setCurrencyCode(CodigoMoneda.CLP);
          amountUsd.setValue(new BigDecimal(getUniqueInteger()));
          accounting10.setAmountUsd(amountUsd);
 
@@ -1813,12 +1813,12 @@ public class TestBaseUnit extends TestApiBase {
            accounting10.setExchangeRateDif(new BigDecimal(getUniqueInteger()));
 
            NewAmountAndCurrency10 amount = new NewAmountAndCurrency10();
-           amount.setCurrencyCode(CodigoMoneda.CHILE_CLP);
+           amount.setCurrencyCode(CodigoMoneda.CLP);
            amount.setValue(new BigDecimal(getUniqueInteger()));
            accounting10.setAmount(amount);
 
            NewAmountAndCurrency10 amountUsd = new NewAmountAndCurrency10();
-           amount.setCurrencyCode(CodigoMoneda.CHILE_CLP);
+           amount.setCurrencyCode(CodigoMoneda.CLP);
            amount.setValue(new BigDecimal(getUniqueInteger()));
            accounting10.setAmount(amountUsd);
 
@@ -1828,14 +1828,14 @@ public class TestBaseUnit extends TestApiBase {
            accounting10.setCollectorFeeIva(new BigDecimal(getUniqueInteger()));
 
            NewAmountAndCurrency10 amountBalance = new NewAmountAndCurrency10();
-           amountBalance.setCurrencyCode(CodigoMoneda.CHILE_CLP);
+           amountBalance.setCurrencyCode(CodigoMoneda.CLP);
            amountBalance.setValue(new BigDecimal(getUniqueInteger()));
            accounting10.setAmountBalance(amountBalance);
            accounting10.setStatus(AccountingStatusType.OK);
            accounting10.setFileId(0L);
 
            NewAmountAndCurrency10 amountMcar = new NewAmountAndCurrency10();
-           amountMcar.setCurrencyCode(CodigoMoneda.CHILE_CLP);
+           amountMcar.setCurrencyCode(CodigoMoneda.CLP);
            amountMcar.setValue(new BigDecimal(getUniqueInteger()));
            accounting10.setAmountMastercard(amountMcar);
          }
@@ -1850,12 +1850,12 @@ public class TestBaseUnit extends TestApiBase {
            accounting10.setExchangeRateDif(new BigDecimal(getUniqueInteger()));
 
            NewAmountAndCurrency10 amount = new NewAmountAndCurrency10();
-           amount.setCurrencyCode(CodigoMoneda.CHILE_CLP);
+           amount.setCurrencyCode(CodigoMoneda.CLP);
            amount.setValue(new BigDecimal(getUniqueInteger()));
            accounting10.setAmount(amount);
 
            NewAmountAndCurrency10 amountUsd = new NewAmountAndCurrency10();
-           amount.setCurrencyCode(CodigoMoneda.CHILE_CLP);
+           amount.setCurrencyCode(CodigoMoneda.CLP);
            amount.setValue(new BigDecimal(getUniqueInteger()));
            accounting10.setAmount(amountUsd);
 
@@ -1865,14 +1865,14 @@ public class TestBaseUnit extends TestApiBase {
            accounting10.setCollectorFeeIva(new BigDecimal(getUniqueInteger()));
 
            NewAmountAndCurrency10 amountBalance = new NewAmountAndCurrency10();
-           amountBalance.setCurrencyCode(CodigoMoneda.CHILE_CLP);
+           amountBalance.setCurrencyCode(CodigoMoneda.CLP);
            amountBalance.setValue(new BigDecimal(getUniqueInteger()));
            accounting10.setAmountBalance(amountBalance);
            accounting10.setStatus(AccountingStatusType.OK);
            accounting10.setFileId(0L);
 
            NewAmountAndCurrency10 amountMcar = new NewAmountAndCurrency10();
-           amountMcar.setCurrencyCode(CodigoMoneda.CHILE_CLP);
+           amountMcar.setCurrencyCode(CodigoMoneda.CLP);
            amountMcar.setValue(new BigDecimal(getUniqueInteger()));
            accounting10.setAmountMastercard(amountMcar);
          }
@@ -1887,12 +1887,12 @@ public class TestBaseUnit extends TestApiBase {
            accounting10.setExchangeRateDif(new BigDecimal(getUniqueInteger()));
 
            NewAmountAndCurrency10 amount = new NewAmountAndCurrency10();
-           amount.setCurrencyCode(CodigoMoneda.CHILE_CLP);
+           amount.setCurrencyCode(CodigoMoneda.CLP);
            amount.setValue(new BigDecimal(getUniqueInteger()));
            accounting10.setAmount(amount);
 
            NewAmountAndCurrency10 amountUsd = new NewAmountAndCurrency10();
-           amount.setCurrencyCode(CodigoMoneda.CHILE_CLP);
+           amount.setCurrencyCode(CodigoMoneda.CLP);
            amount.setValue(new BigDecimal(getUniqueInteger()));
            accounting10.setAmount(amountUsd);
 
@@ -1902,14 +1902,14 @@ public class TestBaseUnit extends TestApiBase {
            accounting10.setCollectorFeeIva(new BigDecimal(getUniqueInteger()));
 
            NewAmountAndCurrency10 amountBalance = new NewAmountAndCurrency10();
-           amountBalance.setCurrencyCode(CodigoMoneda.CHILE_CLP);
+           amountBalance.setCurrencyCode(CodigoMoneda.CLP);
            amountBalance.setValue(new BigDecimal(getUniqueInteger()));
            accounting10.setAmountBalance(amountBalance);
            accounting10.setStatus(AccountingStatusType.OK);
            accounting10.setFileId(0L);
 
            NewAmountAndCurrency10 amountMcar = new NewAmountAndCurrency10();
-           amountMcar.setCurrencyCode(CodigoMoneda.CHILE_CLP);
+           amountMcar.setCurrencyCode(CodigoMoneda.CLP);
            amountMcar.setValue(new BigDecimal(getUniqueInteger()));
            accounting10.setAmountMastercard(amountMcar);
          }
@@ -1923,12 +1923,12 @@ public class TestBaseUnit extends TestApiBase {
            accounting10.setExchangeRateDif(new BigDecimal(getUniqueInteger()));
 
            NewAmountAndCurrency10 amount = new NewAmountAndCurrency10();
-           amount.setCurrencyCode(CodigoMoneda.CHILE_CLP);
+           amount.setCurrencyCode(CodigoMoneda.CLP);
            amount.setValue(new BigDecimal(getUniqueInteger()));
            accounting10.setAmount(amount);
 
            NewAmountAndCurrency10 amountUsd = new NewAmountAndCurrency10();
-           amount.setCurrencyCode(CodigoMoneda.CHILE_CLP);
+           amount.setCurrencyCode(CodigoMoneda.CLP);
            amount.setValue(new BigDecimal(getUniqueInteger()));
            accounting10.setAmount(amountUsd);
 
@@ -1938,14 +1938,14 @@ public class TestBaseUnit extends TestApiBase {
            accounting10.setCollectorFeeIva(new BigDecimal(getUniqueInteger()));
 
            NewAmountAndCurrency10 amountBalance = new NewAmountAndCurrency10();
-           amountBalance.setCurrencyCode(CodigoMoneda.CHILE_CLP);
+           amountBalance.setCurrencyCode(CodigoMoneda.CLP);
            amountBalance.setValue(new BigDecimal(getUniqueInteger()));
            accounting10.setAmountBalance(amountBalance);
            accounting10.setStatus(AccountingStatusType.OK);
            accounting10.setFileId(0L);
 
            NewAmountAndCurrency10 amountMcar = new NewAmountAndCurrency10();
-           amountMcar.setCurrencyCode(CodigoMoneda.CHILE_CLP);
+           amountMcar.setCurrencyCode(CodigoMoneda.CLP);
            amountMcar.setValue(new BigDecimal(getUniqueInteger()));
            accounting10.setAmountMastercard(amountMcar);
          }

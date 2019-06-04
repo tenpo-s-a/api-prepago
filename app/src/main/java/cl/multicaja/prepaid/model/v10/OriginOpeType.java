@@ -11,7 +11,8 @@ public enum OriginOpeType {
 
   SAT_ORIGIN("ONLI"),
   API_ORIGIN("MAUT"),
-  AUT_ORIGIN("AUTO");
+  AUT_ORIGIN("AUTO"),
+  CONC_ORIGIN("CONC");
 
   String value;
 

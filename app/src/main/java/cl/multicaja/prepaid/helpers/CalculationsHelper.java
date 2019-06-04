@@ -253,7 +253,7 @@ public class CalculationsHelper {
       return null;
     }
     //por defecto debe ser 0
-    NewAmountAndCurrency10 pcaSecondary = new NewAmountAndCurrency10(BigDecimal.valueOf(0d).setScale(2, RoundingMode.CEILING), CodigoMoneda.USA_USD);
+    NewAmountAndCurrency10 pcaSecondary = new NewAmountAndCurrency10(BigDecimal.valueOf(0d).setScale(2, RoundingMode.CEILING), CodigoMoneda.USD);
     //solamente se debe calcular el pca si el saldo es mayor a 0 y el pcaMain es mayor a 0
     if (balance.getValue().compareTo(BigDecimal.ZERO) > 0 && pcaMain.getValue().compareTo(BigDecimal.ZERO) > 0) {
       pcaSecondary.setValue(calculateEed(balance.getValue()));

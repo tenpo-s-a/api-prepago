@@ -466,7 +466,7 @@ public class Test_withdrawUserBalance_v10 extends TestBaseUnitApi {
     prepaidWithdraw.setRut(11111111);
     prepaidWithdraw.setMerchantCode("987654321");
     NewAmountAndCurrency10 amount = new NewAmountAndCurrency10();
-    amount.setCurrencyCode(CodigoMoneda.CHILE_CLP);
+    amount.setCurrencyCode(CodigoMoneda.CLP);
     amount.setValue(new BigDecimal("9999.90"));
     prepaidWithdraw.setAmount(amount);
 
@@ -486,7 +486,7 @@ public class Test_withdrawUserBalance_v10 extends TestBaseUnitApi {
     prepaidWithdraw.setTransactionId("123456789");
     prepaidWithdraw.setRut(11111111);
     NewAmountAndCurrency10 amount = new NewAmountAndCurrency10();
-    amount.setCurrencyCode(CodigoMoneda.CHILE_CLP);
+    amount.setCurrencyCode(CodigoMoneda.CLP);
     amount.setValue(new BigDecimal("9999.90"));
     prepaidWithdraw.setAmount(amount);
 
@@ -544,7 +544,7 @@ public class Test_withdrawUserBalance_v10 extends TestBaseUnitApi {
     prepaidWithdraw.setRut(11111111);
     prepaidWithdraw.setMerchantCode("987654321");
     NewAmountAndCurrency10 amount = new NewAmountAndCurrency10();
-    amount.setCurrencyCode(CodigoMoneda.CHILE_CLP);
+    amount.setCurrencyCode(CodigoMoneda.CLP);
     prepaidWithdraw.setAmount(amount);
 
     HttpResponse resp = withdrawUserBalance(getRandomNumericString(10), prepaidWithdraw);

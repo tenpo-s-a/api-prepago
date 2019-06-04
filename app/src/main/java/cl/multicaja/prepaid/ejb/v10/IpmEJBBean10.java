@@ -49,7 +49,7 @@ public class IpmEJBBean10 extends PrepaidBaseEJBBean10 {
    *      - Mismo codcom
    *      - Mismo numaut
    *      - No este conciliado
-   *      - Tenga 2.5% de diferencia en el monto (Entre 97.5% y 102.5%)
+   *      - Tenga 3.5% de diferencia en el monto (Entre 96.5% y 103.5%)
    *      - Si hay mas de uno, elige el mas cercano al monto original (100.0%)
    * @param truncatedPan
    * @param codcom
@@ -72,8 +72,9 @@ public class IpmEJBBean10 extends PrepaidBaseEJBBean10 {
       throw new BadRequestException(PARAMETRO_FALTANTE_$VALUE).setData(new KeyValue("value", "numaut"));
     }
 
-    BigDecimal lowAmount = amount.multiply(new BigDecimal(0.975)); // 2.5% inferior
-    BigDecimal highAmount = amount.multiply(new BigDecimal(1.025)); // 2.5% inferior
+    BigDecimal offset = new BigDecimal(0.035); // 3.5%
+    BigDecimal lowAmount = amount.multiply(BigDecimal.ONE.subtract(offset)); // 3.5% inferior
+    BigDecimal highAmount = amount.multiply(BigDecimal.ONE.add(offset)); // 3.5% superior
 
     log.info(String.format("[findByReconciliationSimilarity] Buscando ipmMovement no conciliado por truncatedPan [%s] codcom [%s] amount [%s] numaut [%s]", truncatedPan, codcom, amount.toString(), numaut));
     try {

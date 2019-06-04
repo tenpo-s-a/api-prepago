@@ -143,6 +143,7 @@ pipeline:
       - cd pg
       - ./db-create.sh -Denv=development
       - ./migrate-up.sh -Denv=development
+      - ./migrate-pending.sh -Denv=development
     when:
       event: [ push ]
       branch: master
@@ -182,6 +183,7 @@ pipeline:
       - cd pg
       - ./db-create.sh -Denv=uat
       - ./migrate-up.sh -Denv=uat
+      - ./migrate-pending.sh -Denv=uat
     when:
       event: [ tag ]
       ref: refs/tags/snapshot*
@@ -193,6 +195,7 @@ pipeline:
       - cd pg
       - ./db-create.sh -Denv=uat_mock
       - ./migrate-up.sh -Denv=uat_mock
+      - ./migrate-pending.sh -Denv=uat_mock
     when:
       event: [ tag ]
       ref: refs/tags/snapshot*
@@ -204,6 +207,7 @@ pipeline:
       - cd pg
       - ./db-create.sh -Denv=production
       - ./migrate-up.sh -Denv=production
+      - ./migrate-pending.sh -Denv=production
     when:
       event: [ tag ]
       ref: refs/tags/prod-*

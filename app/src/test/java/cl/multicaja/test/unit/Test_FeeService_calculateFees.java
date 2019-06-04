@@ -37,7 +37,7 @@ public class Test_FeeService_calculateFees {
   public void calculateFees_respondsOk_Mockito() throws TimeoutException, BaseException {
 
     PrepaidMovementType movementType = PrepaidMovementType.PURCHASE;
-    CodigoMoneda currencyCode = CodigoMoneda.CHILE_CLP;
+    CodigoMoneda currencyCode = CodigoMoneda.CLP;
     Long amount = 1000L;
 
     HttpResponse httpResponse = new HttpResponse();

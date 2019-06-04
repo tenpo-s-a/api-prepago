@@ -447,7 +447,7 @@ public class PrepaidEJBBean10 extends PrepaidBaseEJBBean10 implements PrepaidEJB
           prepaidCard = getPrepaidCardEJB11().createPrepaidCard(null, prepaidCard);
         } else {
           log.error(String.format("[topupUserBalance] Error realizando alta de cliente [%s] [%s]", altaClienteDTO.getRetorno(), altaClienteDTO.getDescRetorno()));
-          throw new RunTimeValidationException(CUENTA_ERROR_GENERICO_$VALUE).setData(new KeyValue("value", "Error realizando alta de cliente"));
+          throw new RunTimeValidationException(TARJETA_ERROR_GENERICO_$VALUE).setData(new KeyValue("value", "Error realizando alta de cliente"));
         }
       } catch(Exception ex) {
         getPrepaidMovementEJB11().updatePrepaidMovementStatus(null, prepaidMovement.getId(), PrepaidMovementStatus.ERROR_IN_PROCESS_EMISSION_CARD);
@@ -466,7 +466,8 @@ public class PrepaidEJBBean10 extends PrepaidBaseEJBBean10 implements PrepaidEJB
         cdtTransaction.setTransactionType(CdtTransactionType.REVERSA_CARGA_CONF);
         cdtTransaction.setGloss(cdtTransaction.getTransactionType().getName() + " " + topupRequest.getAmount().getValue());
         cdtTransaction = this.getCdtEJB10().addCdtTransaction(null, cdtTransaction);
-        throw new RunTimeValidationException(ERROR_DE_COMUNICACION_CON_SERVICIO_WEB_EXTERNO);
+        log.error(ex);
+        throw new RunTimeValidationException(TARJETA_ERROR_GENERICO_$VALUE).setData(new KeyValue("value", "Error realizando alta de cliente"));
       }
     }
 
@@ -527,7 +528,9 @@ public class PrepaidEJBBean10 extends PrepaidBaseEJBBean10 implements PrepaidEJB
         cdtTransaction.setTransactionType(CdtTransactionType.REVERSA_CARGA_CONF);
         cdtTransaction.setGloss(cdtTransaction.getTransactionType().getName() + " " + topupRequest.getAmount().getValue());
         cdtTransaction = this.getCdtEJB10().addCdtTransaction(null, cdtTransaction);
-        throw new RunTimeValidationException(ERROR_DE_COMUNICACION_CON_SERVICIO_WEB_EXTERNO);
+
+        log.error(ex);
+        throw new RunTimeValidationException(TARJETA_ERROR_GENERICO_$VALUE).setData(new KeyValue("value", "Error consultando datos de tarjeta"));
       }
     }
 
@@ -1380,7 +1383,7 @@ public class PrepaidEJBBean10 extends PrepaidBaseEJBBean10 implements PrepaidEJB
       throw new BadRequestException(PARAMETRO_FALTANTE_$VALUE).setData(new KeyValue("value", "feeList"));
     }
 
-    CodigoMoneda currencyCodeClp = CodigoMoneda.CHILE_CLP;
+    CodigoMoneda currencyCodeClp = CodigoMoneda.CLP;
 
     NewAmountAndCurrency10 total = new NewAmountAndCurrency10();
     total.setCurrencyCode(currencyCodeClp);
@@ -1426,7 +1429,7 @@ public class PrepaidEJBBean10 extends PrepaidBaseEJBBean10 implements PrepaidEJB
       throw new BadRequestException(PARAMETRO_FALTANTE_$VALUE).setData(new KeyValue("value", "merchant_code"));
     }
 
-    CodigoMoneda currencyCodeClp = CodigoMoneda.CHILE_CLP;
+    CodigoMoneda currencyCodeClp = CodigoMoneda.CLP;
 
     NewAmountAndCurrency10 total = new NewAmountAndCurrency10();
     total.setCurrencyCode(currencyCodeClp);
@@ -1557,7 +1560,7 @@ public class PrepaidEJBBean10 extends PrepaidBaseEJBBean10 implements PrepaidEJB
     prepaidMovement.setCodent(codent);
     prepaidMovement.setCentalta(""); //contrato (Numeros del 5 al 8) - se debe actualizar despues
     prepaidMovement.setCuenta(""); ////contrato (Numeros del 9 al 20) - se debe actualizar despues
-    prepaidMovement.setClamon(CodigoMoneda.CHILE_CLP);
+    prepaidMovement.setClamon(CodigoMoneda.CLP);
     prepaidMovement.setIndnorcor(IndicadorNormalCorrector.fromValue(tipoFactura.getCorrector())); //0-Normal
     prepaidMovement.setTipofac(tipoFactura);
     prepaidMovement.setFecfac(new Date(System.currentTimeMillis()));
@@ -1655,8 +1658,8 @@ public class PrepaidEJBBean10 extends PrepaidBaseEJBBean10 implements PrepaidEJB
     BigDecimal amountValue = simulationNew.getAmount().getValue();
 
     // Si el codigo de moneda es dolar estadounidense se calcula el el monto inicial en pesos
-    if(CodigoMoneda.USA_USD.equals(simulationNew.getAmount().getCurrencyCode())) {
-      simulationTopup.setEed(new NewAmountAndCurrency10(amountValue, CodigoMoneda.USA_USD));
+    if(CodigoMoneda.USD.equals(simulationNew.getAmount().getCurrencyCode())) {
+      simulationTopup.setEed(new NewAmountAndCurrency10(amountValue, CodigoMoneda.USD));
       amountValue = getCalculationsHelper().calculateAmountFromEed(amountValue);
       simulationTopup.setInitialAmount(new NewAmountAndCurrency10(amountValue));
     } else {
@@ -1701,7 +1704,7 @@ public class PrepaidEJBBean10 extends PrepaidBaseEJBBean10 implements PrepaidEJB
       NewAmountAndCurrency10 zero = new NewAmountAndCurrency10(BigDecimal.valueOf(0));
       simulationTopup.setFee(zero);
       simulationTopup.setPca(zero);
-      simulationTopup.setEed(new NewAmountAndCurrency10(BigDecimal.valueOf(0), CodigoMoneda.USA_USD));
+      simulationTopup.setEed(new NewAmountAndCurrency10(BigDecimal.valueOf(0), CodigoMoneda.USD));
       simulationTopup.setAmountToPay(zero);
       simulationTopup.setOpeningFee(zero);
       simulationTopup.setInitialAmount(zero);
@@ -1759,7 +1762,7 @@ public class PrepaidEJBBean10 extends PrepaidBaseEJBBean10 implements PrepaidEJB
     simulationTopup.setFee(new NewAmountAndCurrency10(fee));
     simulationTopup.setPca(new NewAmountAndCurrency10(getCalculationsHelper().calculatePca(amountValue)));
     if(simulationTopup.getEed() == null) {
-      simulationTopup.setEed(new NewAmountAndCurrency10(getCalculationsHelper().calculateEed(amountValue), CodigoMoneda.USA_USD));
+      simulationTopup.setEed(new NewAmountAndCurrency10(getCalculationsHelper().calculateEed(amountValue), CodigoMoneda.USD));
     }
     simulationTopup.setAmountToPay(new NewAmountAndCurrency10(calculatedAmount));
 
@@ -1887,8 +1890,6 @@ public class PrepaidEJBBean10 extends PrepaidBaseEJBBean10 implements PrepaidEJB
 
     return prepaidUser;
   }
-
-
 
 
   private PrepaidUser10 getPrepaidUserByUserIdMc(Map<String, Object> headers, Long userIdMc) throws Exception {

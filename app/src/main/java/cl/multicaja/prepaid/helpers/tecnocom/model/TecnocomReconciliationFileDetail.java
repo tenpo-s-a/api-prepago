@@ -198,7 +198,8 @@ public class TecnocomReconciliationFileDetail {
   public String getCodpais() {
     if(TecnocomReconciliationRegisterType.OP.equals(this.getTiporeg())){
       return this.detail.substring(this.CODPAIS.getStart(), this.CODPAIS.getEnd());
-    } else{
+    } else {
+      // TODO: esto esta correcto? Todo lo que llegue como AU sera guardado como pais Chile (sin ser reescrito cuando pase a OP)
       return CodigoPais.CHILE.getValue().toString();
     }
   }

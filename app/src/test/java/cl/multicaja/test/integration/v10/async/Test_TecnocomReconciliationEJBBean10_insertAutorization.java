@@ -257,7 +257,7 @@ public class Test_TecnocomReconciliationEJBBean10_insertAutorization extends Tes
   @Test
   public void processTecnocomTableData_whenMovNotInDb_IsRefundOp_movIsInsertedAndLiqAccMustExistInFinalState() throws Exception {
     // Inserta devolucion que vino en archivo OP
-    MovimientoTecnocom10 movimientoTecnocom10 = prepareMovimientoTecnocom(TipoFactura.DEVOLUCION_COMPRA_INTERNACIONAL, TecnocomReconciliationRegisterType.OP, CodigoMoneda.USA_USD);
+    MovimientoTecnocom10 movimientoTecnocom10 = prepareMovimientoTecnocom(TipoFactura.DEVOLUCION_COMPRA_INTERNACIONAL, TecnocomReconciliationRegisterType.OP, CodigoMoneda.USD);
 
     // Inserta el movimiento que vino en el archivo IPM (para hacer un match, y reescribir su valor)
     IpmMovement10 ipmMovement10 = prepareIpmMovement(movimientoTecnocom10);
@@ -319,7 +319,7 @@ public class Test_TecnocomReconciliationEJBBean10_insertAutorization extends Tes
   @Test
   public void processTecnocomTableData_whenMovNotInDB_IsReversedInternationalPurcharseInForeignCoinOp_movIsInsertedAndLiqAccMustExistInFinalState() throws Exception {
     // Inserta movimiento que vino en archivo OP
-    MovimientoTecnocom10 movimientoTecnocom10 = prepareMovimientoTecnocom(TipoFactura.ANULA_COMPRA_INTERNACIONAL, TecnocomReconciliationRegisterType.OP, CodigoMoneda.USA_USD);
+    MovimientoTecnocom10 movimientoTecnocom10 = prepareMovimientoTecnocom(TipoFactura.ANULA_COMPRA_INTERNACIONAL, TecnocomReconciliationRegisterType.OP, CodigoMoneda.USD);
 
     // Inserta el movimiento que vino en el archivo IPM (para hacer un match, y reescribir su valor)
     IpmMovement10 ipmMovement10 = prepareIpmMovement(movimientoTecnocom10);
@@ -391,7 +391,7 @@ public class Test_TecnocomReconciliationEJBBean10_insertAutorization extends Tes
   @Test
   public void processTecnocomTableData_whenMovNotInDB_IsReversedInternationalPurcharseInPesosOp_movIsInsertedAndLiqAccMustExistInFinalState() throws Exception {
     // Inserta movimiento que vino en archivo OP
-    MovimientoTecnocom10 movimientoTecnocom10 = prepareMovimientoTecnocom(TipoFactura.ANULA_COMPRA_INTERNACIONAL, TecnocomReconciliationRegisterType.OP, CodigoMoneda.CHILE_CLP);
+    MovimientoTecnocom10 movimientoTecnocom10 = prepareMovimientoTecnocom(TipoFactura.ANULA_COMPRA_INTERNACIONAL, TecnocomReconciliationRegisterType.OP, CodigoMoneda.CLP);
 
     // Inserta el movimiento que vino en el archivo IPM (para hacer un match, y reescribir su valor)
     IpmMovement10 ipmMovement10 = prepareIpmMovement(movimientoTecnocom10);
@@ -473,7 +473,7 @@ public class Test_TecnocomReconciliationEJBBean10_insertAutorization extends Tes
   @Test
   public void processTecnocomTableData_whenMovNotInDB_IsReversedInternationalPurcharseInForeignCoinAu_movIsInsertedAndLiqAccMustExistInInitialState() throws Exception {
     // Inserta movimiento que vino en archivo OP
-    MovimientoTecnocom10 movimientoTecnocom10 = prepareMovimientoTecnocom(TipoFactura.ANULA_COMPRA_INTERNACIONAL, TecnocomReconciliationRegisterType.AU, CodigoMoneda.USA_USD);
+    MovimientoTecnocom10 movimientoTecnocom10 = prepareMovimientoTecnocom(TipoFactura.ANULA_COMPRA_INTERNACIONAL, TecnocomReconciliationRegisterType.AU, CodigoMoneda.USD);
 
     // Preparar la respuesta del servicio de fees
     prepareCalculateFeesMock(movimientoTecnocom10.getImpFac().getValue(), false);
@@ -542,7 +542,7 @@ public class Test_TecnocomReconciliationEJBBean10_insertAutorization extends Tes
   @Test
   public void processTecnocomTableData_whenMovNotInDB_IsReversedInternationalPurcharseInPesosAu_movIsInsertedAndLiqAccMustExistInInitialState() throws Exception {
     // Inserta movimiento que vino en archivo OP
-    MovimientoTecnocom10 movimientoTecnocom10 = prepareMovimientoTecnocom(TipoFactura.ANULA_COMPRA_INTERNACIONAL, TecnocomReconciliationRegisterType.AU, CodigoMoneda.CHILE_CLP);
+    MovimientoTecnocom10 movimientoTecnocom10 = prepareMovimientoTecnocom(TipoFactura.ANULA_COMPRA_INTERNACIONAL, TecnocomReconciliationRegisterType.AU, CodigoMoneda.CLP);
 
     // Preparar la respuesta del servicio de fees
     prepareCalculateFeesMock(movimientoTecnocom10.getImpFac().getValue(), true);
@@ -621,7 +621,7 @@ public class Test_TecnocomReconciliationEJBBean10_insertAutorization extends Tes
   @Test
   public void processTecnocomTableData_whenMovInDBNotified_IsReversedInternationalPurcharseInForeignCoinAU_movIsInsertedAndLiqAccMustExistInInitialState() throws Exception {
     // Inserta movimiento que vino en archivo OP
-    MovimientoTecnocom10 movimientoTecnocom10 = prepareMovimientoTecnocom(TipoFactura.ANULA_COMPRA_INTERNACIONAL, TecnocomReconciliationRegisterType.AU, CodigoMoneda.USA_USD);
+    MovimientoTecnocom10 movimientoTecnocom10 = prepareMovimientoTecnocom(TipoFactura.ANULA_COMPRA_INTERNACIONAL, TecnocomReconciliationRegisterType.AU, CodigoMoneda.USD);
 
     // Insertar el movimiento en la BD
     PrepaidMovement10 insertedMovement = buildPrepaidMovementFromTecnocomMovement(movimientoTecnocom10);
@@ -682,7 +682,7 @@ public class Test_TecnocomReconciliationEJBBean10_insertAutorization extends Tes
   @Test
   public void processTecnocomTableData_whenMovInDBNotified_IsReversedInternationalPurcharseInPesosAu_movIsInsertedAndLiqAccMustExistInInitialState() throws Exception {
     // Inserta movimiento que vino en archivo OP
-    MovimientoTecnocom10 movimientoTecnocom10 = prepareMovimientoTecnocom(TipoFactura.ANULA_COMPRA_INTERNACIONAL, TecnocomReconciliationRegisterType.AU, CodigoMoneda.CHILE_CLP);
+    MovimientoTecnocom10 movimientoTecnocom10 = prepareMovimientoTecnocom(TipoFactura.ANULA_COMPRA_INTERNACIONAL, TecnocomReconciliationRegisterType.AU, CodigoMoneda.CLP);
 
     // Insertar el movimiento en la BD
     PrepaidMovement10 insertedMovement = buildPrepaidMovementFromTecnocomMovement(movimientoTecnocom10);
@@ -748,7 +748,7 @@ public class Test_TecnocomReconciliationEJBBean10_insertAutorization extends Tes
   @Test
   public void processTecnocomTableData_whenMovInDBNotified_IsReversedInternationalPurcharseInForeignCoinOP_movIsInsertedAndLiqAccMustExistInFinalState() throws Exception {
     // Inserta movimiento que vino en archivo OP
-    MovimientoTecnocom10 movimientoTecnocom10 = prepareMovimientoTecnocom(TipoFactura.ANULA_COMPRA_INTERNACIONAL, TecnocomReconciliationRegisterType.OP, CodigoMoneda.USA_USD);
+    MovimientoTecnocom10 movimientoTecnocom10 = prepareMovimientoTecnocom(TipoFactura.ANULA_COMPRA_INTERNACIONAL, TecnocomReconciliationRegisterType.OP, CodigoMoneda.USD);
 
     // Inserta el movimiento que vino en el archivo IPM (para hacer un match, y reescribir su valor)
     IpmMovement10 ipmMovement10 = prepareIpmMovement(movimientoTecnocom10);
@@ -812,7 +812,7 @@ public class Test_TecnocomReconciliationEJBBean10_insertAutorization extends Tes
   @Test
   public void processTecnocomTableData_whenMovInDBNotified_IsReversedInternationalPurcharseInPesosOp_movIsInsertedAndLiqAccMustExistInInitialState() throws Exception {
     // Inserta movimiento que vino en archivo OP
-    MovimientoTecnocom10 movimientoTecnocom10 = prepareMovimientoTecnocom(TipoFactura.ANULA_COMPRA_INTERNACIONAL, TecnocomReconciliationRegisterType.OP, CodigoMoneda.CHILE_CLP);
+    MovimientoTecnocom10 movimientoTecnocom10 = prepareMovimientoTecnocom(TipoFactura.ANULA_COMPRA_INTERNACIONAL, TecnocomReconciliationRegisterType.OP, CodigoMoneda.CLP);
 
     // Inserta el movimiento que vino en el archivo IPM (para hacer un match, y reescribir su valor)
     IpmMovement10 ipmMovement10 = prepareIpmMovement(movimientoTecnocom10);
@@ -881,7 +881,7 @@ public class Test_TecnocomReconciliationEJBBean10_insertAutorization extends Tes
   @Test
   public void processTecnocomTableData_whenMovInDBAuthorized_IsReversedInternationalPurcharseInForeignCoinOP_movIsInsertedAndLiqAccMustExistInFinalState() throws Exception {
     // Inserta movimiento que vino en archivo OP
-    MovimientoTecnocom10 movimientoTecnocom10 = prepareMovimientoTecnocom(TipoFactura.ANULA_COMPRA_INTERNACIONAL, TecnocomReconciliationRegisterType.OP, CodigoMoneda.USA_USD);
+    MovimientoTecnocom10 movimientoTecnocom10 = prepareMovimientoTecnocom(TipoFactura.ANULA_COMPRA_INTERNACIONAL, TecnocomReconciliationRegisterType.OP, CodigoMoneda.USD);
 
     // Inserta el movimiento que vino en el archivo IPM (para hacer un match, y reescribir su valor)
     IpmMovement10 ipmMovement10 = prepareIpmMovement(movimientoTecnocom10);
@@ -927,7 +927,7 @@ public class Test_TecnocomReconciliationEJBBean10_insertAutorization extends Tes
   @Test
   public void processTecnocomTableData_whenMovInDBAuthorized_IsReversedInternationalPurcharseInPesosOP_movIsInsertedAndLiqAccMustExistInFinalState() throws Exception {
     // Inserta movimiento que vino en archivo OP
-    MovimientoTecnocom10 movimientoTecnocom10 = prepareMovimientoTecnocom(TipoFactura.ANULA_COMPRA_INTERNACIONAL, TecnocomReconciliationRegisterType.OP, CodigoMoneda.CHILE_CLP);
+    MovimientoTecnocom10 movimientoTecnocom10 = prepareMovimientoTecnocom(TipoFactura.ANULA_COMPRA_INTERNACIONAL, TecnocomReconciliationRegisterType.OP, CodigoMoneda.CLP);
 
     // Inserta el movimiento que vino en el archivo IPM (para hacer un match, y reescribir su valor)
     IpmMovement10 ipmMovement10 = prepareIpmMovement(movimientoTecnocom10);
@@ -974,7 +974,7 @@ public class Test_TecnocomReconciliationEJBBean10_insertAutorization extends Tes
   @Test
   public void processTecnocomTableData_whenMovNotInDB_IsReversedInternationalSuscriptionInForeignCoinOp_movIsInsertedAndLiqAccMustExistInFinalState() throws Exception {
     // Inserta movimiento que vino en archivo OP
-    MovimientoTecnocom10 movimientoTecnocom10 = prepareMovimientoTecnocom(TipoFactura.ANULA_SUSCRIPCION_INTERNACIONAL, TecnocomReconciliationRegisterType.OP, CodigoMoneda.USA_USD);
+    MovimientoTecnocom10 movimientoTecnocom10 = prepareMovimientoTecnocom(TipoFactura.ANULA_SUSCRIPCION_INTERNACIONAL, TecnocomReconciliationRegisterType.OP, CodigoMoneda.USD);
 
     // Inserta el movimiento que vino en el archivo IPM (para hacer un match, y reescribir su valor)
     IpmMovement10 ipmMovement10 = prepareIpmMovement(movimientoTecnocom10);
@@ -1046,7 +1046,7 @@ public class Test_TecnocomReconciliationEJBBean10_insertAutorization extends Tes
   @Test
   public void processTecnocomTableData_whenMovNotInDB_IsReversedInternationalSuscriptionInPesosOp_movIsInsertedAndLiqAccMustExistInFinalState() throws Exception {
     // Inserta movimiento que vino en archivo OP
-    MovimientoTecnocom10 movimientoTecnocom10 = prepareMovimientoTecnocom(TipoFactura.ANULA_SUSCRIPCION_INTERNACIONAL, TecnocomReconciliationRegisterType.OP, CodigoMoneda.CHILE_CLP);
+    MovimientoTecnocom10 movimientoTecnocom10 = prepareMovimientoTecnocom(TipoFactura.ANULA_SUSCRIPCION_INTERNACIONAL, TecnocomReconciliationRegisterType.OP, CodigoMoneda.CLP);
 
     // Inserta el movimiento que vino en el archivo IPM (para hacer un match, y reescribir su valor)
     IpmMovement10 ipmMovement10 = prepareIpmMovement(movimientoTecnocom10);
@@ -1128,7 +1128,7 @@ public class Test_TecnocomReconciliationEJBBean10_insertAutorization extends Tes
   @Test
   public void processTecnocomTableData_whenMovNotInDB_IsReversedInternationalSuscriptionInForeignCoinAu_movIsInsertedAndLiqAccMustExistInInitialState() throws Exception {
     // Inserta movimiento que vino en archivo OP
-    MovimientoTecnocom10 movimientoTecnocom10 = prepareMovimientoTecnocom(TipoFactura.ANULA_SUSCRIPCION_INTERNACIONAL, TecnocomReconciliationRegisterType.AU, CodigoMoneda.USA_USD);
+    MovimientoTecnocom10 movimientoTecnocom10 = prepareMovimientoTecnocom(TipoFactura.ANULA_SUSCRIPCION_INTERNACIONAL, TecnocomReconciliationRegisterType.AU, CodigoMoneda.USD);
 
     // Preparar la respuesta del servicio de fees
     prepareCalculateFeesMock(movimientoTecnocom10.getImpFac().getValue(), false);
@@ -1197,7 +1197,7 @@ public class Test_TecnocomReconciliationEJBBean10_insertAutorization extends Tes
   @Test
   public void processTecnocomTableData_whenMovNotInDB_IsReversedInternationalSuscriptionInPesosAu_movIsInsertedAndLiqAccMustExistInInitialState() throws Exception {
     // Inserta movimiento que vino en archivo OP
-    MovimientoTecnocom10 movimientoTecnocom10 = prepareMovimientoTecnocom(TipoFactura.ANULA_SUSCRIPCION_INTERNACIONAL, TecnocomReconciliationRegisterType.AU, CodigoMoneda.CHILE_CLP);
+    MovimientoTecnocom10 movimientoTecnocom10 = prepareMovimientoTecnocom(TipoFactura.ANULA_SUSCRIPCION_INTERNACIONAL, TecnocomReconciliationRegisterType.AU, CodigoMoneda.CLP);
 
     // Preparar la respuesta del servicio de fees
     prepareCalculateFeesMock(movimientoTecnocom10.getImpFac().getValue(), true);
@@ -1276,7 +1276,7 @@ public class Test_TecnocomReconciliationEJBBean10_insertAutorization extends Tes
   @Test
   public void processTecnocomTableData_whenMovInDBNotified_IsReversedInternationalSuscriptionInForeignCoinAU_movIsInsertedAndLiqAccMustExistInInitialState() throws Exception {
     // Inserta movimiento que vino en archivo OP
-    MovimientoTecnocom10 movimientoTecnocom10 = prepareMovimientoTecnocom(TipoFactura.ANULA_SUSCRIPCION_INTERNACIONAL, TecnocomReconciliationRegisterType.AU, CodigoMoneda.USA_USD);
+    MovimientoTecnocom10 movimientoTecnocom10 = prepareMovimientoTecnocom(TipoFactura.ANULA_SUSCRIPCION_INTERNACIONAL, TecnocomReconciliationRegisterType.AU, CodigoMoneda.USD);
 
     // Insertar el movimiento en la BD
     PrepaidMovement10 insertedMovement = buildPrepaidMovementFromTecnocomMovement(movimientoTecnocom10);
@@ -1337,7 +1337,7 @@ public class Test_TecnocomReconciliationEJBBean10_insertAutorization extends Tes
   @Test
   public void processTecnocomTableData_whenMovInDBNotified_IsReversedInternationalSuscriptionInPesosAu_movIsInsertedAndLiqAccMustExistInInitialState() throws Exception {
     // Inserta movimiento que vino en archivo OP
-    MovimientoTecnocom10 movimientoTecnocom10 = prepareMovimientoTecnocom(TipoFactura.ANULA_SUSCRIPCION_INTERNACIONAL, TecnocomReconciliationRegisterType.AU, CodigoMoneda.CHILE_CLP);
+    MovimientoTecnocom10 movimientoTecnocom10 = prepareMovimientoTecnocom(TipoFactura.ANULA_SUSCRIPCION_INTERNACIONAL, TecnocomReconciliationRegisterType.AU, CodigoMoneda.CLP);
 
     // Insertar el movimiento en la BD
     PrepaidMovement10 insertedMovement = buildPrepaidMovementFromTecnocomMovement(movimientoTecnocom10);
@@ -1403,7 +1403,7 @@ public class Test_TecnocomReconciliationEJBBean10_insertAutorization extends Tes
   @Test
   public void processTecnocomTableData_whenMovInDBNotified_IsReversedInternationalSuscriptionInForeignCoinOP_movIsInsertedAndLiqAccMustExistInFinalState() throws Exception {
     // Inserta movimiento que vino en archivo OP
-    MovimientoTecnocom10 movimientoTecnocom10 = prepareMovimientoTecnocom(TipoFactura.ANULA_SUSCRIPCION_INTERNACIONAL, TecnocomReconciliationRegisterType.OP, CodigoMoneda.USA_USD);
+    MovimientoTecnocom10 movimientoTecnocom10 = prepareMovimientoTecnocom(TipoFactura.ANULA_SUSCRIPCION_INTERNACIONAL, TecnocomReconciliationRegisterType.OP, CodigoMoneda.USD);
 
     // Inserta el movimiento que vino en el archivo IPM (para hacer un match, y reescribir su valor)
     IpmMovement10 ipmMovement10 = prepareIpmMovement(movimientoTecnocom10);
@@ -1467,7 +1467,7 @@ public class Test_TecnocomReconciliationEJBBean10_insertAutorization extends Tes
   @Test
   public void processTecnocomTableData_whenMovInDBNotified_IsReversedInternationalSuscriptionInPesosOp_movIsInsertedAndLiqAccMustExistInInitialState() throws Exception {
     // Inserta movimiento que vino en archivo OP
-    MovimientoTecnocom10 movimientoTecnocom10 = prepareMovimientoTecnocom(TipoFactura.ANULA_SUSCRIPCION_INTERNACIONAL, TecnocomReconciliationRegisterType.OP, CodigoMoneda.CHILE_CLP);
+    MovimientoTecnocom10 movimientoTecnocom10 = prepareMovimientoTecnocom(TipoFactura.ANULA_SUSCRIPCION_INTERNACIONAL, TecnocomReconciliationRegisterType.OP, CodigoMoneda.CLP);
 
     // Inserta el movimiento que vino en el archivo IPM (para hacer un match, y reescribir su valor)
     IpmMovement10 ipmMovement10 = prepareIpmMovement(movimientoTecnocom10);
@@ -1536,7 +1536,7 @@ public class Test_TecnocomReconciliationEJBBean10_insertAutorization extends Tes
   @Test
   public void processTecnocomTableData_whenMovInDBAuthorized_IsReversedInternationalSuscriptionInForeignCoinOP_movIsInsertedAndLiqAccMustExistInFinalState() throws Exception {
     // Inserta movimiento que vino en archivo OP
-    MovimientoTecnocom10 movimientoTecnocom10 = prepareMovimientoTecnocom(TipoFactura.ANULA_SUSCRIPCION_INTERNACIONAL, TecnocomReconciliationRegisterType.OP, CodigoMoneda.USA_USD);
+    MovimientoTecnocom10 movimientoTecnocom10 = prepareMovimientoTecnocom(TipoFactura.ANULA_SUSCRIPCION_INTERNACIONAL, TecnocomReconciliationRegisterType.OP, CodigoMoneda.USD);
 
     // Inserta el movimiento que vino en el archivo IPM (para hacer un match, y reescribir su valor)
     IpmMovement10 ipmMovement10 = prepareIpmMovement(movimientoTecnocom10);
@@ -1582,7 +1582,7 @@ public class Test_TecnocomReconciliationEJBBean10_insertAutorization extends Tes
   @Test
   public void processTecnocomTableData_whenMovInDBAuthorized_IsReversedInternationalSuscriptionInPesosOP_movIsInsertedAndLiqAccMustExistInFinalState() throws Exception {
     // Inserta movimiento que vino en archivo OP
-    MovimientoTecnocom10 movimientoTecnocom10 = prepareMovimientoTecnocom(TipoFactura.ANULA_SUSCRIPCION_INTERNACIONAL, TecnocomReconciliationRegisterType.OP, CodigoMoneda.CHILE_CLP);
+    MovimientoTecnocom10 movimientoTecnocom10 = prepareMovimientoTecnocom(TipoFactura.ANULA_SUSCRIPCION_INTERNACIONAL, TecnocomReconciliationRegisterType.OP, CodigoMoneda.CLP);
 
     // Inserta el movimiento que vino en el archivo IPM (para hacer un match, y reescribir su valor)
     IpmMovement10 ipmMovement10 = prepareIpmMovement(movimientoTecnocom10);
@@ -1698,12 +1698,12 @@ public class Test_TecnocomReconciliationEJBBean10_insertAutorization extends Tes
     registroTecnocom.setIndNorCor(IndicadorNormalCorrector.NORMAL.getValue());
     registroTecnocom.setPan(prepaidCard.getHashedPan());
     registroTecnocom.setCentAlta("fill");
-    registroTecnocom.setClamone(CodigoMoneda.USA_USD);
+    registroTecnocom.setClamone(CodigoMoneda.USD);
     registroTecnocom.setCmbApli(new BigDecimal(1L));
     registroTecnocom.setCodAct(0);
     registroTecnocom.setCodCom(getRandomString(15));
     registroTecnocom.setCodEnt(getRandomString(4));
-    registroTecnocom.setCodPais(CodigoPais.CHILE.getValue());
+    registroTecnocom.setCodPais(CodigoPais.CHILE);
     registroTecnocom.setContrato(account.getAccountNumber());
     registroTecnocom.setCuenta(getRandomNumericString(10));
     registroTecnocom.setFecFac(LocalDate.now(ZoneId.of("UTC")));
@@ -1766,7 +1766,7 @@ public class Test_TecnocomReconciliationEJBBean10_insertAutorization extends Tes
     prepaidMovement10.setCodact(movimientoTecnocom10.getCodAct());
     prepaidMovement10.setImpliq(movimientoTecnocom10.getImpLiq().getValue());
     prepaidMovement10.setClamonliq(movimientoTecnocom10.getImpLiq().getCurrencyCode().getValue());
-    prepaidMovement10.setCodpais(CodigoPais.fromValue(movimientoTecnocom10.getCodPais()));
+    prepaidMovement10.setCodpais(movimientoTecnocom10.getCodPais());
     prepaidMovement10.setNompob(movimientoTecnocom10.getNomPob());
     prepaidMovement10.setNumextcta(movimientoTecnocom10.getNumExtCta().intValue());
     prepaidMovement10.setNummovext(movimientoTecnocom10.getNumMovExt().intValue());
@@ -1786,6 +1786,12 @@ public class Test_TecnocomReconciliationEJBBean10_insertAutorization extends Tes
     movimientoTecnocom10.setTipoFac(tipofac);
     movimientoTecnocom10.setIndNorCor(tipofac.getCorrector());
     movimientoTecnocom10.setTipoReg(registerType);
+    // Por regla: OP es siempre CONC, AU es siempre AUTO
+    if (TecnocomReconciliationRegisterType.OP.equals(registerType)) {
+      movimientoTecnocom10.setOriginOpe(OriginOpeType.CONC_ORIGIN.getValue());
+    } else if (TecnocomReconciliationRegisterType.AU.equals(registerType)) {
+      movimientoTecnocom10.setOriginOpe(OriginOpeType.AUT_ORIGIN.getValue());
+    }
     movimientoTecnocom10.getImpDiv().setCurrencyCode(currencyCode);
     return getTecnocomReconciliationEJBBean10().insertaMovimientoTecnocom(movimientoTecnocom10);
   }

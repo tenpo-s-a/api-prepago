@@ -1,9 +1,9 @@
 package cl.multicaja.prepaid.model.v10;
 
 import cl.multicaja.core.exceptions.BadRequestException;
-import cl.multicaja.prepaid.ejb.v10.TecnocomReconciliationEJBBean10;
 import cl.multicaja.prepaid.helpers.tecnocom.model.TecnocomReconciliationRegisterType;
 import cl.multicaja.tecnocom.constants.CodigoMoneda;
+import cl.multicaja.tecnocom.constants.CodigoPais;
 import cl.multicaja.tecnocom.constants.TipoFactura;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
@@ -34,7 +34,7 @@ public class MovimientoTecnocom10 implements Serializable {
   private String codCom;
   private Integer codAct;
   private NewAmountAndCurrency10 impLiq;
-  private Integer codPais;
+  private CodigoPais codPais;
   private String nomPob;
   private Long numExtCta;
   private Long numMovExt;
@@ -199,11 +199,11 @@ public class MovimientoTecnocom10 implements Serializable {
     this.impLiq = impLiq;
   }
 
-  public Integer getCodPais() {
+  public CodigoPais getCodPais() {
     return codPais;
   }
 
-  public void setCodPais(Integer codPais) {
+  public void setCodPais(CodigoPais codPais) {
     this.codPais = codPais;
   }
 
@@ -329,6 +329,7 @@ public class MovimientoTecnocom10 implements Serializable {
 
   public PrepaidMovementType getMovementType() throws BadRequestException {
     PrepaidMovementType type = null;
+
     switch (this.getTipoFac()) {
       case CARGA_EFECTIVO_COMERCIO_MULTICAJA:
       case ANULA_CARGA_EFECTIVO_COMERCIO_MULTICAJA:
