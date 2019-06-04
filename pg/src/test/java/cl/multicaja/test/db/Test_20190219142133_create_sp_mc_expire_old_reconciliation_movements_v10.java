@@ -1,24 +1,18 @@
 package cl.multicaja.test.db;
 
-import cl.multicaja.core.exceptions.BadRequestException;
 import cl.multicaja.core.utils.db.InParam;
 import cl.multicaja.core.utils.db.NullParam;
 import cl.multicaja.core.utils.db.OutParam;
 import cl.multicaja.test.TestDbBasePg;
-import org.junit.After;
-import org.junit.Assert;
-import org.junit.Before;
-import org.junit.Test;
+import org.junit.*;
 
 import java.sql.Date;
 import java.sql.SQLException;
-import java.sql.Timestamp;
 import java.sql.Types;
-import java.time.LocalDateTime;
-import java.time.ZoneId;
 import java.util.ArrayList;
 import java.util.Map;
-
+//TODO: Revisar despues
+@Ignore
 public class Test_20190219142133_create_sp_mc_expire_old_reconciliation_movements_v10 extends TestDbBasePg {
 
   @Before
@@ -27,7 +21,7 @@ public class Test_20190219142133_create_sp_mc_expire_old_reconciliation_movement
     dbUtils.getJdbcTemplate().execute(String.format("truncate %s.prp_movimiento cascade", SCHEMA));
     dbUtils.getJdbcTemplate().execute(String.format("truncate %s.prp_archivos_conciliacion cascade", SCHEMA));
   }
-
+  /*
   @Test
   public void expireOldReconciledMovements() throws SQLException, InterruptedException {
 
@@ -898,5 +892,5 @@ public class Test_20190219142133_create_sp_mc_expire_old_reconciliation_movement
         " WHERE " +
         " id = " + id
     ).get(0);
-  }
+  } */
 }
