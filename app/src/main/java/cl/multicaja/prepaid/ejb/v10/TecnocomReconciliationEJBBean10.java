@@ -354,7 +354,7 @@ public class TecnocomReconciliationEJBBean10 extends PrepaidBaseEJBBean10 implem
 
         if(originalMovement == null) {
           // Movimiento original no existe.
-          PrepaidMovement10 movement10 = TecnocomFileHelper.getInstance().buildMovement(prepaidCard10.getIdUser(), prepaidCard10.getPan(), trx);
+          PrepaidMovement10 movement10 = TecnocomFileHelper.getInstance().buildMovement(account.getUserId(), prepaidCard10.getPan(), trx);
           movement10.setConTecnocom(ReconciliationStatusType.RECONCILED);
           movement10.setConSwitch(ReconciliationStatusType.PENDING);
           movement10.setOriginType(MovementOriginType.SAT);
@@ -367,7 +367,7 @@ public class TecnocomReconciliationEJBBean10 extends PrepaidBaseEJBBean10 implem
           //getAccountEJBBean10().expireBalanceCache(account.getId());
 
           String msg = String.format("Error processing transaction - Transaction not found in database with userId = [%s], tipofac= [%s], indnorcor = [%s], numaut = [%s], fecfac = [%s], amount = [%s]",
-            prepaidCard10.getIdUser(), trx.getTipoFac().getCode(), trx.getTipoFac().getCorrector(),  trx.getNumAut(), trx.getFecFac(), trx.getImpFac());
+            account.getUserId(), trx.getTipoFac().getCode(), trx.getTipoFac().getCorrector(),  trx.getNumAut(), trx.getFecFac(), trx.getImpFac());
           log.error(msg);
           trx.setHasError(Boolean.TRUE);
           trx.setErrorDetails(msg);
@@ -447,7 +447,7 @@ public class TecnocomReconciliationEJBBean10 extends PrepaidBaseEJBBean10 implem
 
           if(originalMovement == null) {
             String msg = String.format("Error processing transaction - Transaction not found in database with userId = [%s], tipofac= [%s], indnorcor = [%s], numaut = [%s], fecfac = [%s], amount = [%s]",
-              prepaidCard10.getIdUser(), trx.getTipoFac().getCode(), trx.getIndNorCor(),  trx.getNumAut(), trx.getFecFac(), trx.getImpFac().getValue());
+              account.getUserId(), trx.getTipoFac().getCode(), trx.getIndNorCor(),  trx.getNumAut(), trx.getFecFac(), trx.getImpFac().getValue());
             log.error(msg);
             trx.setHasError(Boolean.TRUE);
             trx.setErrorDetails(msg);

@@ -282,7 +282,6 @@ public class Test_PrepaidEJBBean10_reverseWithdrawalUserBalance {
     PrepaidCard10 prepaidCard10 = new PrepaidCard10();
     prepaidCard10.setId(Long.MAX_VALUE);
     prepaidCard10.setStatus(PrepaidCardStatus.ACTIVE);
-    prepaidCard10.setProcessorUserId("1");
     prepaidCard10.setEncryptedPan("1234567890");
     prepaidCard10.setPan("1234567890");
 
@@ -346,7 +345,6 @@ public class Test_PrepaidEJBBean10_reverseWithdrawalUserBalance {
     PrepaidCard10 prepaidCard10 = new PrepaidCard10();
     prepaidCard10.setId(Long.MAX_VALUE);
     prepaidCard10.setStatus(PrepaidCardStatus.ACTIVE);
-    prepaidCard10.setProcessorUserId("1");
     prepaidCard10.setEncryptedPan("1234567890");
     prepaidCard10.setPan("1234567890");
 
@@ -414,7 +412,6 @@ public class Test_PrepaidEJBBean10_reverseWithdrawalUserBalance {
     PrepaidCard10 prepaidCard10 = new PrepaidCard10();
     prepaidCard10.setId(Long.MAX_VALUE);
     prepaidCard10.setStatus(PrepaidCardStatus.ACTIVE);
-    prepaidCard10.setProcessorUserId("1");
     prepaidCard10.setEncryptedPan("1234567890");
     prepaidCard10.setPan("1234567890");
 
@@ -487,7 +484,6 @@ public class Test_PrepaidEJBBean10_reverseWithdrawalUserBalance {
     PrepaidCard10 prepaidCard10 = new PrepaidCard10();
     prepaidCard10.setId(Long.MAX_VALUE);
     prepaidCard10.setStatus(PrepaidCardStatus.ACTIVE);
-    prepaidCard10.setProcessorUserId("1");
     prepaidCard10.setEncryptedPan("1234567890");
     prepaidCard10.setPan("1234567890");
 
@@ -553,7 +549,6 @@ public class Test_PrepaidEJBBean10_reverseWithdrawalUserBalance {
     PrepaidCard10 prepaidCard10 = new PrepaidCard10();
     prepaidCard10.setId(Long.MAX_VALUE);
     prepaidCard10.setStatus(PrepaidCardStatus.ACTIVE);
-    prepaidCard10.setProcessorUserId("1");
     prepaidCard10.setEncryptedPan("1234567890");
     prepaidCard10.setPan("1234567890");
 

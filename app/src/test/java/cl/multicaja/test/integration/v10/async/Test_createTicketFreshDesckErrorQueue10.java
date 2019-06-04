@@ -122,8 +122,6 @@ public class Test_createTicketFreshDesckErrorQueue10 extends TestBaseUnitAsync {
     AltaClienteDTO altaClienteDTO = getTecnocomService().altaClientes(prepaidUser.getName(), prepaidUser.getLastName(), "",prepaidUser.getDocumentNumber(), TipoDocumento.RUT, tipoAlta);
 
     PrepaidCard10 prepaidCard10 = buildPrepaidCard11(prepaidUser,account.getId());
-    prepaidCard10.setProcessorUserId(altaClienteDTO.getContrato());
-    prepaidCard10.setIdUser(prepaidUser.getId());
     prepaidCard10.setStatus(PrepaidCardStatus.PENDING);
     prepaidCard10 = createPrepaidCardV2(prepaidCard10);
 

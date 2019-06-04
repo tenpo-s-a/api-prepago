@@ -488,12 +488,10 @@ public class TestBaseUnit extends TestApiBase {
     String pan = getRandomNumericString(16);
 
     PrepaidCard10 prepaidCard = new PrepaidCard10();
-    prepaidCard.setIdUser(prepaidUser != null ? prepaidUser.getId() : null);
     prepaidCard.setPan(Utils.replacePan(pan));
     prepaidCard.setEncryptedPan(EncryptUtil.getInstance().encrypt(pan));
     prepaidCard.setExpiration(expiryDate);
     prepaidCard.setStatus(PrepaidCardStatus.ACTIVE);
-    prepaidCard.setProcessorUserId(getRandomNumericString(20));
     prepaidCard.setNameOnCard("Tarjeta de: " + getRandomString(5));
     prepaidCard.setProducto(getRandomNumericString(2));
     prepaidCard.setNumeroUnico(getRandomNumericString(8));
@@ -509,12 +507,10 @@ public class TestBaseUnit extends TestApiBase {
     String pan = getRandomNumericString(16);
 
     PrepaidCard10 prepaidCard = new PrepaidCard10();
-    prepaidCard.setIdUser(prepaidUser != null ? prepaidUser.getId() : null);
     prepaidCard.setPan(Utils.replacePan(pan));
     prepaidCard.setEncryptedPan(EncryptUtil.getInstance().encrypt(pan));
     prepaidCard.setExpiration(expiryDate);
     prepaidCard.setStatus(PrepaidCardStatus.ACTIVE);
-    prepaidCard.setProcessorUserId(getRandomNumericString(20));
     prepaidCard.setNameOnCard("Tarjeta de: " + getRandomString(5));
     prepaidCard.setProducto(getRandomNumericString(2));
     prepaidCard.setNumeroUnico(getRandomNumericString(8));
@@ -529,12 +525,10 @@ public class TestBaseUnit extends TestApiBase {
     String pan = getRandomNumericString(16);
 
     PrepaidCard10 prepaidCard = new PrepaidCard10();
-    prepaidCard.setIdUser(prepaidUser != null ? prepaidUser.getId() : null);
     prepaidCard.setPan(Utils.replacePan(pan));
     prepaidCard.setEncryptedPan(EncryptUtil.getInstance().encrypt(pan));
     prepaidCard.setExpiration(expiryDate);
     prepaidCard.setStatus(PrepaidCardStatus.ACTIVE);
-    prepaidCard.setProcessorUserId(getRandomNumericString(20));
     prepaidCard.setNameOnCard("Tarjeta de: " + getRandomString(5));
     prepaidCard.setProducto(getRandomNumericString(2));
     prepaidCard.setNumeroUnico(getRandomNumericString(8));
@@ -555,12 +549,10 @@ public class TestBaseUnit extends TestApiBase {
     int expiryMonth = numberUtils.random(1, 99);
     int expiryDate = numberUtils.toInt(expiryYear + "" + StringUtils.leftPad(String.valueOf(expiryMonth), 2, "0"));
     PrepaidCard10 prepaidCard = new PrepaidCard10();
-    prepaidCard.setIdUser(prepaidUser != null ? prepaidUser.getId() : null);
     prepaidCard.setPan(getRandomNumericString(16));
     prepaidCard.setEncryptedPan(EncryptUtil.getInstance().encrypt(prepaidCard.getPan()));
     prepaidCard.setExpiration(expiryDate);
     prepaidCard.setStatus(PrepaidCardStatus.ACTIVE);
-    prepaidCard.setProcessorUserId(altaClienteDTO.getContrato());
     prepaidCard.setNameOnCard("Tarjeta de: " + getRandomString(5));
     prepaidCard.setProducto(getRandomNumericString(2));
     prepaidCard.setNumeroUnico(getRandomNumericString(8));
@@ -575,9 +567,7 @@ public class TestBaseUnit extends TestApiBase {
    */
   public PrepaidCard10 buildPrepaidCard10Pending(PrepaidUser10 prepaidUser) throws Exception {
     PrepaidCard10 prepaidCard = new PrepaidCard10();
-    prepaidCard.setIdUser(prepaidUser != null ? prepaidUser.getId() : null);
     prepaidCard.setStatus(PrepaidCardStatus.PENDING);
-    prepaidCard.setProcessorUserId(getRandomNumericString(20));
     return prepaidCard;
   }
 
@@ -633,8 +623,6 @@ public class TestBaseUnit extends TestApiBase {
   public PrepaidCard10 buildPrepaidCardWithTecnocomData(PrepaidUser10 user, Account account) throws Exception {
     DatosTarjetaDTO datosTarjetaDTO = getTecnocomService().datosTarjeta(account.getAccountNumber());
     PrepaidCard10 prepaidCard = new PrepaidCard10();
-    prepaidCard.setIdUser(user.getId());
-    prepaidCard.setProcessorUserId("");
     prepaidCard.setPan(Utils.replacePan(datosTarjetaDTO.getPan()));
     prepaidCard.setEncryptedPan(EncryptHelper.getInstance().encryptPan(datosTarjetaDTO.getPan()));
     prepaidCard.setStatus(PrepaidCardStatus.ACTIVE);
@@ -883,7 +871,6 @@ public class TestBaseUnit extends TestApiBase {
 
     Assert.assertNotNull("debe retornar un usuario", prepaidCard);
     Assert.assertEquals("debe tener id", true, prepaidCard.getId() > 0);
-    Assert.assertEquals("debe tener idUser", true, prepaidCard.getIdUser() > 0);
     Assert.assertNotNull("debe tener status", prepaidCard.getStatus());
 
     return prepaidCard;
@@ -1157,10 +1144,6 @@ public class TestBaseUnit extends TestApiBase {
 
     String centalta = "";
     String cuenta = "";
-    if(prepaidCard != null && !StringUtils.isBlank(prepaidCard.getProcessorUserId())) {
-      centalta = prepaidCard.getProcessorUserId().substring(4, 8);
-      cuenta = prepaidCard.getProcessorUserId().substring(12);
-    }
 
     PrepaidMovement10 prepaidMovement = new PrepaidMovement10();
     prepaidMovement.setIdMovimientoRef(cdtTransaction != null ? cdtTransaction.getTransactionReference() : getUniqueLong());
@@ -1524,7 +1507,6 @@ public class TestBaseUnit extends TestApiBase {
       throw new BadRequestException(PARAMETRO_FALTANTE_$VALUE).setData(new KeyValue("value", "prepaidCard10.pan"));
     }
 
-    String contrato = prepaidCard10.getProcessorUserId();
     String pan = prepaidCard10.getPan();
     CodigoMoneda clamon = CodigoMoneda.CLP;
     IndicadorNormalCorrector indnorcor = IndicadorNormalCorrector.NORMAL;
@@ -1536,7 +1518,7 @@ public class TestBaseUnit extends TestApiBase {
     String numreffac = getUniqueLong().toString();
     String numaut = TecnocomServiceHelper.getNumautFromIdMov(numreffac);
 
-    InclusionMovimientosDTO inclusionMovimientosDTO = getTecnocomService().inclusionMovimientos(contrato, pan, clamon, indnorcor, tipofac,
+    InclusionMovimientosDTO inclusionMovimientosDTO = getTecnocomService().inclusionMovimientos("", pan, clamon, indnorcor, tipofac,
       numreffac, impfac, numaut, codcom,
       nomcomred, codact, clamondiv,impfac);
 
@@ -1595,7 +1577,7 @@ public class TestBaseUnit extends TestApiBase {
 
     String numaut = TecnocomServiceHelper.getNumautFromIdMov(movement10.getId().toString());
 
-    InclusionMovimientosDTO inclusionMovimientosDTO = getTecnocomService().inclusionMovimientos(prepaidCard10.getProcessorUserId(), EncryptUtil.getInstance().decrypt(prepaidCard10.getEncryptedPan()),
+    InclusionMovimientosDTO inclusionMovimientosDTO = getTecnocomService().inclusionMovimientos("", EncryptUtil.getInstance().decrypt(prepaidCard10.getEncryptedPan()),
       movement10.getClamon(),movement10.getIndnorcor(), movement10.getTipofac(), movement10.getNumreffac(), movement10.getImpfac(), numaut, movement10.getCodcom(),
       movement10.getCodcom(), movement10.getCodact(), CodigoMoneda.fromValue(movement10.getClamondiv()),movement10.getImpfac());
     return inclusionMovimientosDTO;
