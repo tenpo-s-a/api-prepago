@@ -108,6 +108,7 @@ public class TestBaseUnitAsync extends TestContextHelper {
   public String sendPendingCardIssuanceFee(PrepaidUser10 user, PrepaidTopup10 prepaidTopup, PrepaidMovement10 prepaidMovement, PrepaidCard10 prepaidCard, Integer retryCount) {
     return this.sendPendingCardIssuanceFee(user, prepaidTopup, prepaidMovement, prepaidCard, null, retryCount);
   }
+
   public String sendPendingCardIssuanceFee(PrepaidUser10 user, PrepaidTopup10 prepaidTopup, PrepaidMovement10 prepaidMovement, PrepaidCard10 prepaidCard, Account account, Integer retryCount) {
 
     if (!camelFactory.isCamelRunning()) {

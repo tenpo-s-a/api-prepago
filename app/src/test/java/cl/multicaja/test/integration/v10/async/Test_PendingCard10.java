@@ -12,6 +12,7 @@ import cl.multicaja.tecnocom.constants.TipoDocumento;
 import cl.multicaja.tecnocom.dto.AltaClienteDTO;
 import org.apache.commons.lang3.StringUtils;
 import org.junit.Assert;
+import org.junit.Ignore;
 import org.junit.Test;
 
 import javax.jms.Queue;
@@ -20,8 +21,12 @@ import javax.jms.Queue;
  * @autor vutreras
  */
 
+// SE IGNORA YA QUE AHORA EL PROCESO ES SINCRONO!!!!!!!!
+@Ignore
 @SuppressWarnings("unchecked")
 public class Test_PendingCard10 extends TestBaseUnitAsync {
+
+
 
   /********************
    * Test flujo alta rapida
@@ -243,18 +248,20 @@ public class Test_PendingCard10 extends TestBaseUnitAsync {
   @Test
   public void pendingEmissionCardUnitTimeOut() throws Exception {
 
+    //CREA USUARIO
     PrepaidUser10 prepaidUser = buildPrepaidUserv2();
     prepaidUser = createPrepaidUserV2(prepaidUser);
 
     PrepaidTopup10 prepaidTopup = buildPrepaidTopup10();
-
     CdtTransaction10 cdtTransaction = buildCdtTransaction10(prepaidUser, prepaidTopup);
+
     cdtTransaction = createCdtTransaction10(cdtTransaction);
 
-    PrepaidMovement10 prepaidMovement = buildPrepaidMovement11(prepaidUser, prepaidTopup, cdtTransaction);
-    prepaidMovement = createPrepaidMovement11(prepaidMovement);
+    PrepaidMovement10 prepaidMovement = buildPrepaidMovement10(prepaidUser, prepaidTopup, cdtTransaction);
 
-    String messageId = sendPendingEmissionCard(prepaidTopup, prepaidUser, cdtTransaction, prepaidMovement,4);
+    prepaidMovement = createPrepaidMovement10(prepaidMovement);
+
+    String messageId = sendPendingTopup(prepaidTopup, prepaidUser, cdtTransaction, prepaidMovement, null, 4);
 
     Queue qResp = camelFactory.createJMSQueue(PrepaidTopupRoute10.ERROR_EMISSION_RESP);
     ExchangeData<PrepaidTopupData10> remoteTopup = (ExchangeData<PrepaidTopupData10>) camelFactory.createJMSMessenger().getMessage(qResp, messageId);
@@ -265,7 +272,7 @@ public class Test_PendingCard10 extends TestBaseUnitAsync {
 
     // Busca la tarjeta en la BD
     PrepaidCard10 dbPrepaidCard = getPrepaidCardEJBBean11().getLastPrepaidCardByAccountIdAndStatus(null, remoteTopup.getData().getAccount().getId(), PrepaidCardStatus.PENDING);
-    Assert.assertNull("Deberia tener una tarjeta", dbPrepaidCard);
+    Assert.assertNull("No deberia tener una tarjeta", dbPrepaidCard);
 
     //verifica que la ultima cola por la cual paso el mensaje sea ERROR_EMISSION_REQ
     ProcessorMetadata lastProcessorMetadata = remoteTopup.getLastProcessorMetadata();
