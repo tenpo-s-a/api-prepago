@@ -11,7 +11,9 @@ import cl.multicaja.tecnocom.constants.TipoAlta;
 import cl.multicaja.tecnocom.constants.TipoDocumento;
 import cl.multicaja.tecnocom.dto.AltaClienteDTO;
 import cl.multicaja.tecnocom.dto.DatosTarjetaDTO;
+import org.junit.After;
 import org.junit.Assert;
+import org.junit.Before;
 import org.junit.Test;
 
 import javax.jms.Queue;
@@ -23,6 +25,14 @@ import java.util.List;
  */
 
 public class Test_PendingCardIssuanceFee10 extends TestBaseUnitAsync {
+
+  @Before
+  @After
+  public  void clearData() {
+    getDbUtils().getJdbcTemplate().execute(String.format("TRUNCATE %s.prp_tarjeta cascade", getSchema()));
+    getDbUtils().getJdbcTemplate().execute(String.format("TRUNCATE %s.prp_cuenta cascade", getSchema()));
+    getDbUtils().getJdbcTemplate().execute(String.format("TRUNCATE %s.prp_usuario cascade", getSchema()));
+  }
 
   @Test
   public void pendingCardIssuanceFee_PrepaidTopupNull() throws Exception {

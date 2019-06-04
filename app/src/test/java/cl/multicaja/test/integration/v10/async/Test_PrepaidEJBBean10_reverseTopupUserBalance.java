@@ -7,7 +7,9 @@ import cl.multicaja.prepaid.kafka.events.model.TransactionStatus;
 import cl.multicaja.prepaid.kafka.events.model.TransactionType;
 import cl.multicaja.prepaid.model.v10.*;
 import cl.multicaja.prepaid.model.v11.Account;
+import org.junit.After;
 import org.junit.Assert;
+import org.junit.Before;
 import org.junit.Test;
 
 import javax.jms.Queue;
@@ -15,6 +17,15 @@ import java.math.BigDecimal;
 import java.util.UUID;
 
 public class Test_PrepaidEJBBean10_reverseTopupUserBalance extends TestBaseUnitAsync{
+
+
+  @Before
+  @After
+  public  void clearData() {
+    getDbUtils().getJdbcTemplate().execute(String.format("TRUNCATE %s.prp_tarjeta cascade", getSchema()));
+    getDbUtils().getJdbcTemplate().execute(String.format("TRUNCATE %s.prp_cuenta cascade", getSchema()));
+    getDbUtils().getJdbcTemplate().execute(String.format("TRUNCATE %s.prp_usuario cascade", getSchema()));
+  }
 
   @Test
   public void reverseTopup_transactionEvent() throws Exception {

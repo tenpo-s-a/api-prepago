@@ -14,9 +14,7 @@ import cl.multicaja.prepaid.model.v11.PrepaidMovementFeeType;
 import cl.multicaja.tecnocom.constants.IndicadorNormalCorrector;
 import cl.multicaja.tecnocom.dto.InclusionMovimientosDTO;
 import org.apache.commons.lang3.StringUtils;
-import org.junit.Assert;
-import org.junit.Ignore;
-import org.junit.Test;
+import org.junit.*;
 
 import javax.jms.Queue;
 import java.math.BigDecimal;
@@ -30,6 +28,13 @@ import static cl.multicaja.core.model.Errors.TARJETA_ERROR_GENERICO_$VALUE;
  **/
 public class Test_PrepaidEJBBean10_withdrawUserBalance extends TestBaseUnitAsync {
 
+  @Before
+  @After
+  public  void clearData() {
+    getDbUtils().getJdbcTemplate().execute(String.format("TRUNCATE %s.prp_tarjeta cascade", getSchema()));
+    getDbUtils().getJdbcTemplate().execute(String.format("TRUNCATE %s.prp_cuenta cascade", getSchema()));
+    getDbUtils().getJdbcTemplate().execute(String.format("TRUNCATE %s.prp_usuario cascade", getSchema()));
+  }
 
   @Test
   public void withdrawFail_timeoutResponse() throws Exception {
