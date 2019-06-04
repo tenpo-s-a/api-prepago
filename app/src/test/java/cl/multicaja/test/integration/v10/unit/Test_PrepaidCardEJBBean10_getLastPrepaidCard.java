@@ -91,17 +91,17 @@ public class Test_PrepaidCardEJBBean10_getLastPrepaidCard extends TestBaseUnit {
       PrepaidCard10 card1 = buildPrepaidCardWithTecnocomData(prepaidUser,account);
       card1.setStatus(PrepaidCardStatus.ACTIVE);
       card1.setAccountId(account.getId());
-      createPrepaidCardV2(card1);
+      card1 = createPrepaidCardV2(card1);
 
       PrepaidCard10 card2 = buildPrepaidCardWithTecnocomData(prepaidUser,account);
       card2.setStatus(PrepaidCardStatus.PENDING);
       card2.setAccountId(account.getId());
-      createPrepaidCardV2(card2);
+      card2 = createPrepaidCardV2(card2);
 
       PrepaidCard10 card3 = buildPrepaidCardWithTecnocomData(prepaidUser,account);
       card3.setStatus(PrepaidCardStatus.LOCKED);
       card3.setAccountId(account.getId());
-      createPrepaidCardV2(card3);
+      card3 = createPrepaidCardV2(card3);
 
       PrepaidCard10 prepaidCard = getPrepaidCardEJBBean11().getLastPrepaidCardByAccountIdAndOneOfStatus(null, account.getId(),
         PrepaidCardStatus.ACTIVE,
