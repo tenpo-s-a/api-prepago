@@ -52,9 +52,6 @@ public class Test_PrepaidEJBBean10_withdrawUserBalance {
   private PrepaidUserEJBBean10 prepaidUserEJBBean10;
 
   @Spy
-  private PrepaidMovementEJBBean10 prepaidMovementEJBBean10;
-
-  @Spy
   private PrepaidMovementEJBBean11 prepaidMovementEJBBean11;
 
   @Spy
@@ -124,10 +121,11 @@ public class Test_PrepaidEJBBean10_withdrawUserBalance {
 
     PrepaidMovement10 originalWithdraw = new PrepaidMovement10();
     originalWithdraw.setId(Long.MAX_VALUE);
+    originalWithdraw.setIdMovimientoRef(Long.MAX_VALUE);
     originalWithdraw.setClamon(CodigoMoneda.CLP);
     originalWithdraw.setMonto(BigDecimal.TEN);
     originalWithdraw.setFechaCreacion(Timestamp.from(ZonedDateTime.now().toInstant()));
-
+    originalWithdraw.setCardId(prepaidCard10.getId());
     // Request
     NewPrepaidWithdraw10 withdrawRequest = new NewPrepaidWithdraw10();
     NewAmountAndCurrency10 amount = new NewAmountAndCurrency10(BigDecimal.TEN);
@@ -164,6 +162,7 @@ public class Test_PrepaidEJBBean10_withdrawUserBalance {
 
     PrepaidMovement10 withdrawMovement = new PrepaidMovement10();
     withdrawMovement.setId(Long.MAX_VALUE);
+    withdrawMovement.setIdMovimientoRef(Long.MAX_VALUE);
     withdrawMovement.setClamon(CodigoMoneda.CLP);
     withdrawMovement.setIndnorcor(IndicadorNormalCorrector.NORMAL);
     withdrawMovement.setTipofac(TipoFactura.RETIRO_EFECTIVO_COMERCIO_MULTICJA);
@@ -175,6 +174,7 @@ public class Test_PrepaidEJBBean10_withdrawUserBalance {
 
     PrepaidMovement10 withdrawReverseMovement = new PrepaidMovement10();
     withdrawReverseMovement.setId(Long.MAX_VALUE);
+    withdrawReverseMovement.setIdMovimientoRef(Long.MAX_VALUE);
     withdrawReverseMovement.setClamon(CodigoMoneda.CLP);
     withdrawReverseMovement.setIndnorcor(IndicadorNormalCorrector.CORRECTORA);
     withdrawReverseMovement.setTipofac(TipoFactura.ANULA_RETIRO_EFECTIVO_COMERCIO_MULTICJA);
@@ -190,7 +190,7 @@ public class Test_PrepaidEJBBean10_withdrawUserBalance {
 
     Mockito.doReturn(withdrawMovement)
       .doReturn(withdrawReverseMovement)
-      .when(prepaidMovementEJBBean10).addPrepaidMovement(Mockito.any(), Mockito.any(PrepaidMovement10.class));
+      .when(prepaidMovementEJBBean11).addPrepaidMovement(Mockito.any(), Mockito.any(PrepaidMovement10.class));
 
     Mockito.doNothing()
       .when(prepaidMovementEJBBean11).addPrepaidMovementFeeList(Mockito.any());
@@ -208,9 +208,9 @@ public class Test_PrepaidEJBBean10_withdrawUserBalance {
       .when(delegate).sendPendingWithdrawReversal(Mockito.any(), Mockito.any(), Mockito.any());
 
     Mockito.doNothing()
-      .when(prepaidMovementEJBBean10).updatePrepaidMovementStatus(Mockito.any(), Mockito.any(), Mockito.any());
+      .when(prepaidMovementEJBBean11).updatePrepaidMovementStatus(Mockito.any(), Mockito.any(), Mockito.any());
 
-    Mockito.doReturn(null).when(prepaidMovementEJBBean10).getPrepaidMovementForReverse(Mockito.anyLong(),
+    Mockito.doReturn(null).when(prepaidMovementEJBBean11).getPrepaidMovementForReverse(Mockito.anyLong(),
       Mockito.anyString(), Mockito.any(PrepaidMovementType.class),
       Mockito.any(TipoFactura.class));
 
@@ -220,9 +220,9 @@ public class Test_PrepaidEJBBean10_withdrawUserBalance {
       prepaidEJBBean10.withdrawUserBalance(headers,prepaidUser.getUuid(), withdrawRequest,true);
     } catch (RunTimeValidationException vex) {
       // Se verifica que se llamaron los metodos
-      Mockito.verify(prepaidMovementEJBBean10, Mockito.times(2)).addPrepaidMovement(Mockito.any(), Mockito.any(PrepaidMovement10.class));
+      Mockito.verify(prepaidMovementEJBBean11, Mockito.times(2)).addPrepaidMovement(Mockito.any(), Mockito.any(PrepaidMovement10.class));
       Mockito.verify(delegate, Mockito.times(1)).sendPendingWithdrawReversal(Mockito.any(), Mockito.any(), Mockito.any());
-      Mockito.verify(prepaidMovementEJBBean10, Mockito.times(1)).updatePrepaidMovementStatus(headers, Long.MAX_VALUE, PrepaidMovementStatus.ERROR_TIMEOUT_RESPONSE);
+      Mockito.verify(prepaidMovementEJBBean11, Mockito.times(1)).updatePrepaidMovementStatus(headers, Long.MAX_VALUE, PrepaidMovementStatus.ERROR_TIMEOUT_RESPONSE);
 
       Assert.assertEquals("Debe ser error de tarjeta generico", TARJETA_ERROR_GENERICO_$VALUE.getValue(), vex.getCode());
     }

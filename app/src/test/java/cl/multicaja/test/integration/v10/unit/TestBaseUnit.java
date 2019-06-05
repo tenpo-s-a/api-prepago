@@ -307,7 +307,6 @@ public class TestBaseUnit extends TestApiBase {
       prepaidEJBBean10 = new PrepaidEJBBean10();
       prepaidEJBBean10.setDelegate(getPrepaidTopupDelegate10());
       prepaidEJBBean10.setCdtEJB10(getCdtEJBBean10());
-      prepaidEJBBean10.setPrepaidMovementEJB10(getPrepaidMovementEJBBean10());
       prepaidEJBBean10.setPrepaidMovementEJB11(getPrepaidMovementEJBBean11());
       prepaidEJBBean10.setPrepaidUserEJB10(getPrepaidUserEJBBean10());
       prepaidEJBBean10.setPrepaidCardEJB11(getPrepaidCardEJBBean11());
@@ -1433,6 +1432,7 @@ public class TestBaseUnit extends TestApiBase {
 
     return prepaidMovement;
   }
+
   public PrepaidMovement10 buildReversePrepaidMovement11(PrepaidUser10 prepaidUser, NewPrepaidBaseTransaction10 reverseRequest, PrepaidCard10 prepaidCard, PrepaidMovementType type) throws Exception {
     return buildPrepaidMovement11(prepaidUser,reverseRequest,prepaidCard,null,type,true);
   }

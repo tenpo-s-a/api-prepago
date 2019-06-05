@@ -497,8 +497,8 @@ public class Test_topupUserBalance_v11 extends TestBaseUnitApi {
       NewPrepaidTopup10 prepaidTopup = buildNewPrepaidTopup10();
       prepaidTopup.setMerchantCode(getRandomNumericString(15));
 
-      PrepaidMovement10 prepaidMovement = buildReversePrepaidMovement10(prepaidUser, prepaidTopup);
-      prepaidMovement = createPrepaidMovement10(prepaidMovement);
+      PrepaidMovement10 prepaidMovement = buildReversePrepaidMovement11(prepaidUser, prepaidTopup);
+      prepaidMovement = createPrepaidMovement11(prepaidMovement);
 
       HttpResponse resp = topupUserBalanceLocal(prepaidUser.getUuid(), prepaidTopup);
 
@@ -508,7 +508,7 @@ public class Test_topupUserBalance_v11 extends TestBaseUnitApi {
       Assert.assertEquals("Deberia tener error code = 130005", REVERSA_MOVIMIENTO_REVERSADO.getValue(), errorObj.get("code"));
 
 
-      List<PrepaidMovement10> movements = getPrepaidMovementEJBBean10().getPrepaidMovements(null, null,
+      List<PrepaidMovement10> movements = getPrepaidMovementEJBBean11().getPrepaidMovements(null, null,
         prepaidUser.getId(), prepaidTopup.getTransactionId(), PrepaidMovementType.TOPUP, null, null, null, IndicadorNormalCorrector.NORMAL, TipoFactura.CARGA_EFECTIVO_COMERCIO_MULTICAJA, null, null);
 
       Assert.assertNotNull("Debe tener 1 movimiento de reversa", movements);
