@@ -29,4 +29,5 @@ public class TestUserById {
     TenpoUser tenpoUser = tenpoApiCall.getUserById(id);
     Assert.assertNull("Objeto tiene que ser null", tenpoUser);
   }
+
 }
