@@ -42,18 +42,11 @@ public class Test_withdrawUserBalance_v10 extends TestBaseUnitApi {
     return respHttp;
   }
 
-  private HttpResponse withdrawUserBalanceOld(NewPrepaidWithdraw10 newPrepaidWithdraw10) {
-    HttpResponse respHttp = apiPOST("/1.0/prepaid/withdrawal", toJson(newPrepaidWithdraw10));
-    System.out.println("respHttp: " + respHttp);
-    return respHttp;
-  }
-
   @Before
-  @After
-  public void clearData() throws InterruptedException {
+  //@After
+  public void clearData() throws Exception {
     getDbUtils().getJdbcTemplate().execute(String.format("TRUNCATE TABLE %s.clearing CASCADE", getSchemaAccounting()));
     getDbUtils().getJdbcTemplate().execute(String.format("TRUNCATE TABLE %s.accounting CASCADE", getSchemaAccounting()));
-
     getDbUtils().getJdbcTemplate().execute(String.format("DELETE FROM %s.prp_movimiento_comision", getSchema()));
     getDbUtils().getJdbcTemplate().execute(String.format("DELETE FROM %s.prp_movimiento", getSchema()));
   }
@@ -750,13 +743,18 @@ public class Test_withdrawUserBalance_v10 extends TestBaseUnitApi {
 
       NewPrepaidWithdraw10 prepaidWithdraw = buildNewPrepaidWithdrawV2(getRandomNumericString(15));
 
-      PrepaidMovement10 prepaidMovement = buildReversePrepaidMovement10(prepaidUser, prepaidWithdraw);
-      prepaidMovement = createPrepaidMovement10(prepaidMovement);
+      InclusionMovimientosDTO mov =  topupInTecnocom(account.getAccountNumber(), prepaidCard10, BigDecimal.valueOf(10000));
+      Assert.assertEquals("Carga OK", "000", mov.getRetorno());
+
+      PrepaidMovement10 prepaidMovement = buildReversePrepaidMovement11(prepaidUser, prepaidWithdraw);
+      prepaidMovement.setCardId(prepaidCard10.getId());
+      prepaidMovement = createPrepaidMovement11(prepaidMovement);
 
       HttpResponse resp = withdrawUserBalance(prepaidUser.getUuid(), prepaidWithdraw);
+      System.out.println(resp.getResp());
 
-      Assert.assertEquals("status 422", 422, resp.getStatus());
       Map<String, Object> errorObj = resp.toMap();
+      Assert.assertEquals("status 422", 422, resp.getStatus());
       Assert.assertNotNull("Deberia tener error", errorObj);
       Assert.assertEquals("Deberia tener error code = 130005", REVERSA_MOVIMIENTO_REVERSADO.getValue(), errorObj.get("code"));
 
@@ -788,6 +786,7 @@ public class Test_withdrawUserBalance_v10 extends TestBaseUnitApi {
       NewPrepaidWithdraw10 prepaidWithdraw = buildNewPrepaidWithdrawV2(NewPrepaidBaseTransaction10.WEB_MERCHANT_CODE);
 
       PrepaidMovement10 prepaidMovement = buildReversePrepaidMovement10(prepaidUser, prepaidWithdraw);
+      prepaidMovement.setCardId(prepaidCard10.getId());
       prepaidMovement = createPrepaidMovement10(prepaidMovement);
 
       HttpResponse resp = withdrawUserBalanceDefered(prepaidUser.getUuid(), prepaidWithdraw);
@@ -1018,60 +1017,6 @@ public class Test_withdrawUserBalance_v10 extends TestBaseUnitApi {
 
   }
 
-
-  @Test
-  public void shouldReturn201_OnPosWithdrawOldVersion() throws Exception {
-
-    PrepaidUser10 prepaidUser = buildPrepaidUserv2();
-    prepaidUser = createPrepaidUserV2(prepaidUser);
-
-    Account account = buildAccountFromTecnocom(prepaidUser);
-    account = createAccount(account.getUserId(),account.getAccountNumber());
-
-    PrepaidCard10 prepaidCard10 = buildPrepaidCardWithTecnocomData(prepaidUser,account);
-    prepaidCard10 = createPrepaidCardV2(prepaidCard10);
-
-    // se hace una carga
-    HttpResponse topupResp = topupUserBalance(prepaidUser.getUuid(), BigDecimal.valueOf(10000));
-    PrepaidTopup10 topup = topupResp.toObject(PrepaidTopup10.class);
-
-    NewPrepaidWithdraw10 prepaidWithdraw = buildNewPrepaidWithdrawV2(getRandomNumericString(15));
-    prepaidWithdraw.setRut(Integer.parseInt(prepaidUser.getDocumentNumber()));
-
-    HttpResponse resp = withdrawUserBalanceOld(prepaidWithdraw);
-
-    Assert.assertEquals("status 201", 201, resp.getStatus());
-
-    PrepaidWithdraw10 withdraw = resp.toObject(PrepaidWithdraw10.class);
-
-    Assert.assertNotNull("Deberia ser un PrepaidWithdraw10",withdraw);
-    Assert.assertNotNull("Deberia tener timestamps", withdraw.getTimestamps());
-    Assert.assertNotNull("Deberia tener id", withdraw.getId());
-    Assert.assertNull("No deberia tener rut", withdraw.getRut());
-    Assert.assertNull("No deberia tener password", withdraw.getPassword());
-
-    Assert.assertNotNull("Deberia tener el tipo de voucher", withdraw.getMcVoucherType());
-    Assert.assertEquals("Deberia tener el tipo de voucher", "A", withdraw.getMcVoucherType());
-    Assert.assertNotNull("Deberia tener el data", withdraw.getMcVoucherData());
-    Assert.assertEquals("Deberia tener el data", 2, withdraw.getMcVoucherData().size());
-
-    Map<String, String> variableData = withdraw.getMcVoucherData().get(0);
-    Assert.assertNotNull("Deberia tener data", variableData);
-
-    Assert.assertTrue("Deberia tener el atributo name", variableData.containsKey("name"));
-    Assert.assertNotNull("Deberia tener el atributo", variableData.get("name"));
-    Assert.assertEquals("Deberia tener el atributo name = amount_paid","amount_paid", variableData.get("name"));
-    Assert.assertTrue("Deberia tener el atributo value", variableData.containsKey("value"));
-    Assert.assertNotNull("Deberia tener el atributo value", variableData.get("value"));
-
-    PrepaidMovement10 dbPrepaidMovement = getPrepaidMovementEJBBean10().getLastPrepaidMovementByIdPrepaidUserAndOneStatus(prepaidUser.getId(), PrepaidMovementStatus.PROCESS_OK);
-    Assert.assertNotNull("Deberia tener un movimiento", dbPrepaidMovement);
-    Assert.assertEquals("Deberia estar en status " + PrepaidMovementStatus.PROCESS_OK, PrepaidMovementStatus.PROCESS_OK, dbPrepaidMovement.getEstado());
-    Assert.assertEquals("Deberia estar en estado negocio " + BusinessStatusType.CONFIRMED, BusinessStatusType.CONFIRMED, dbPrepaidMovement.getEstadoNegocio());
-
-    waitForAccountingToExist(topup.getId());
-    waitForAccountingToExist(dbPrepaidMovement.getId());
-  }
 
   private void verifyFees(Long movementId, String codcom) throws BaseException {
     // Verificar que existan las fees almacenadas en BD

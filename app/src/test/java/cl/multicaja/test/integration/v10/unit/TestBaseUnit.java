@@ -1449,6 +1449,7 @@ public class TestBaseUnit extends TestApiBase {
 
     return prepaidMovement;
   }
+
   public PrepaidMovement10 buildReversePrepaidMovement11(PrepaidUser10 prepaidUser, NewPrepaidBaseTransaction10 reverseRequest, PrepaidCard10 prepaidCard, PrepaidMovementType type) throws Exception {
     return buildPrepaidMovement11(prepaidUser,reverseRequest,prepaidCard,null,type,true);
   }

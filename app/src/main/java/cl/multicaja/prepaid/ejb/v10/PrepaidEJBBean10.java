@@ -355,7 +355,7 @@ public class PrepaidEJBBean10 extends PrepaidBaseEJBBean10 implements PrepaidEJB
     // Si viene internamente no se verifica, puesto que podria ser el movimiento contrario de una reversa
     // Verificar con Negocio o Desarrollo
     if(fromEndPoint) {
-      PrepaidMovement10 previousReverse = this.getPrepaidMovementEJB11().getPrepaidMovementForReverse(user.getId(),
+      PrepaidMovement10 previousReverse = this.getPrepaidMovementEJB11().getPrepaidMovementForReverse(prepaidCard.getId(),
         topupRequest.getTransactionId(), PrepaidMovementType.TOPUP,
         tipoFacReverse);
 
@@ -687,21 +687,6 @@ public class PrepaidEJBBean10 extends PrepaidBaseEJBBean10 implements PrepaidEJB
     }
   }
 
-
-  public void reverseTopupUserBalanceTmp(Map<String, Object> headers, NewPrepaidTopup10 topupRequest,Boolean fromEndPoint) throws Exception{
-    this.validateTopupRequest(topupRequest);
-    if(topupRequest.getRut() != null) {
-      PrepaidUser10 prepaidUser10 = getPrepaidUserEJB10().findByNumDoc(null,topupRequest.getRut().toString());
-      if(prepaidUser10 == null){
-        throw new NotFoundException(CLIENTE_NO_TIENE_PREPAGO);
-      }
-      reverseTopupUserBalance(headers,prepaidUser10.getUuid(),topupRequest,fromEndPoint);
-    }else {
-      throw new NotFoundException(CLIENTE_NO_EXISTE);
-    }
-
-  }
-
   public void reverseTopupUserBalance(Map<String, Object> headers,String userId,  NewPrepaidTopup10 topupRequest,Boolean fromEndPoint) throws Exception {
 
     this.validateTopupRequest(topupRequest);
@@ -911,7 +896,7 @@ public class PrepaidEJBBean10 extends PrepaidBaseEJBBean10 implements PrepaidEJB
     TipoFactura tipoFacReverse = TransactionOriginType.WEB.equals(withdrawRequest.getTransactionOriginType()) ? TipoFactura.ANULA_RETIRO_TRANSFERENCIA : TipoFactura.ANULA_RETIRO_EFECTIVO_COMERCIO_MULTICJA;
 
     // Se verifica si ya se tiene una reversa con los mismos datos
-    PrepaidMovement10 previousReverse = this.getPrepaidMovementEJB11().getPrepaidMovementForReverse(prepaidUser.getId(),
+    PrepaidMovement10 previousReverse = this.getPrepaidMovementEJB11().getPrepaidMovementForReverse(prepaidCard.getId(),
       withdrawRequest.getTransactionId(), PrepaidMovementType.WITHDRAW,
       tipoFacReverse);
 
@@ -1080,14 +1065,6 @@ public class PrepaidEJBBean10 extends PrepaidBaseEJBBean10 implements PrepaidEJB
     }
 
     return prepaidWithdraw;
-  }
-
-  public void reverseWithdrawUserBalanceOld(Map<String, Object> headers, NewPrepaidWithdraw10 withdrawRequest, Boolean fromEndPoint) throws Exception {
-    PrepaidUser10 prepaidUser10 = getPrepaidUserEJB10().findByNumDoc(headers,withdrawRequest.getRut().toString());
-    if(prepaidUser10 == null ){
-      throw new NotFoundException(CLIENTE_NO_TIENE_PREPAGO);
-    }
-    reverseWithdrawUserBalance(headers,prepaidUser10.getUuid(),withdrawRequest,fromEndPoint);
   }
 
   @Override
