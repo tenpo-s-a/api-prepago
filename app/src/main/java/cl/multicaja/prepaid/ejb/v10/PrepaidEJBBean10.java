@@ -355,7 +355,7 @@ public class PrepaidEJBBean10 extends PrepaidBaseEJBBean10 implements PrepaidEJB
     // Si viene internamente no se verifica, puesto que podria ser el movimiento contrario de una reversa
     // Verificar con Negocio o Desarrollo
     if(fromEndPoint) {
-      PrepaidMovement10 previousReverse = this.getPrepaidMovementEJB11().getPrepaidMovementForReverse(prepaidCard.getId(),
+      PrepaidMovement10 previousReverse = this.getPrepaidMovementEJB11().getPrepaidMovementForReverse(prepaidCard == null ? 0:prepaidCard.getId(),
         topupRequest.getTransactionId(), PrepaidMovementType.TOPUP,
         tipoFacReverse);
 
@@ -485,7 +485,7 @@ public class PrepaidEJBBean10 extends PrepaidBaseEJBBean10 implements PrepaidEJB
           // se trunca el pan
           prepaidCard.setPan(Utils.replacePan(datosTarjetaDTO.getPan()));
 
-          // se encripta el Pan FIXME: Encriptar el pan con el keyvault de azure "cuando este desplegado en los clusters", en test se debe usar el AES.
+          // se encripta el Pan
           prepaidCard.setEncryptedPan(getEncryptHelper().encryptPan(datosTarjetaDTO.getPan()));
 
           // se guarda un hash del pan utilizando como secret el accountNumber (contrato)
