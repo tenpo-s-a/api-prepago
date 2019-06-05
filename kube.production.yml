@@ -159,14 +159,4 @@ spec:
         host: api-prepaid
         port:
           number: 80
-  - match:
-    - uri:
-        exact: /prepaid/1.0/prepaid/fake_call
-    rewrite:
-      uri: /api-prepaid-1.0/1.0/prepaid/fake_call
-    route:
-    - destination:
-        host: api-prepaid
-        port:
-          number: 80
 ---
