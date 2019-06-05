@@ -211,27 +211,4 @@ public final class PrepaidResource10 extends BaseResource {
     return Response.accepted().build();
   }
 
-  @POST
-  @Path("/processor/notification")
-  public Response callNotificationTecnocom(NotificationTecnocom notificationTecnocom,@Context HttpHeaders headers) throws Exception {
-    Response returnResponse = null;
-
-    String textLogBase = "TestHelperResource-callNotification: ";
-    NotificationTecnocom notificationTecnocomResponse;
-    try{
-
-      notificationTecnocomResponse = this.prepaidEJBBean10.setNotificationCallback(null,notificationTecnocom);
-      returnResponse = Response.ok(notificationTecnocomResponse).status(202).build();
-      log.info(textLogBase+notificationTecnocomResponse.toString());
-
-    }catch(Exception ex){
-      log.error(textLogBase+ex.toString());
-      ex.printStackTrace();
-      returnResponse = Response.ok(ex).build();
-    }
-
-    return returnResponse;
-
-  }
-
 }

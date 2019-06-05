@@ -6,6 +6,7 @@ import cl.multicaja.accounting.model.v10.ClearingData10;
 import cl.multicaja.cdt.model.v10.CdtTransaction10;
 import cl.multicaja.core.exceptions.BadRequestException;
 import cl.multicaja.core.exceptions.BaseException;
+import cl.multicaja.core.exceptions.ValidationException;
 import cl.multicaja.core.utils.KeyValue;
 import cl.multicaja.prepaid.async.v10.KafkaEventDelegate10;
 import cl.multicaja.prepaid.ejb.v10.PrepaidMovementEJBBean10;
@@ -1603,6 +1604,18 @@ public class PrepaidMovementEJBBean11 extends PrepaidMovementEJBBean10 {
       }
     }
     return null;
+  }
+
+  public PrepaidMovement10 updateMovementCardId(Long movementId, Long cardId) throws Exception {
+    log.info(String.format("[updatePrepaidCardId] Mov Id [%s] Card Id[%s] ",movementId,cardId));
+    String query = String.format("UPDATE %s.prp_movimiento SET id_tarjeta = ? WHERE id = ",getSchema());
+
+    int resp = getDbUtils().getJdbcTemplate().update(query, cardId, movementId);
+    if(resp == 0) {
+      log.error(String.format("[updatePrepaidCard] Tarjeta [id: %d] no existe", cardId));
+      throw new ValidationException(5959,"Movimiento no encontrado");
+    }
+    return getPrepaidMovementById(movementId);
   }
 
 }

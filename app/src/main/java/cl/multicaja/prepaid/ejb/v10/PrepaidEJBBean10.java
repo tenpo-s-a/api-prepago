@@ -407,7 +407,7 @@ public class PrepaidEJBBean10 extends PrepaidBaseEJBBean10 implements PrepaidEJB
     if(!fromEndPoint){
       prepaidMovement.setConSwitch(ReconciliationStatusType.RECONCILED);
     }
-    prepaidMovement = getPrepaidMovementEJB10().addPrepaidMovement(null, prepaidMovement);
+    prepaidMovement = getPrepaidMovementEJB11().addPrepaidMovement(null, prepaidMovement);
     prepaidTopup.setTimestamps(new Timestamps(prepaidMovement.getFechaCreacion().toLocalDateTime(),
       prepaidMovement.getFechaActualizacion().toLocalDateTime()));
 
@@ -443,8 +443,16 @@ public class PrepaidEJBBean10 extends PrepaidBaseEJBBean10 implements PrepaidEJB
           prepaidCard.setStatus(PrepaidCardStatus.PENDING);
           prepaidCard.setProcessorUserId(altaClienteDTO.getContrato());
           prepaidCard.setUuid(UUID.randomUUID().toString());
-
           prepaidCard = getPrepaidCardEJB11().createPrepaidCard(null, prepaidCard);
+          //Solo para la primera carga se actualiza el id de la tarjeta al creado.
+          try{
+          prepaidMovement = getPrepaidMovementEJB11().updateMovementCardId(prepaidMovement.getId(),prepaidCard.getId());
+          if(prepaidMovement != null){
+            log.info("Id Tarjeta Movimiento Actualizado correctamente");
+          }}catch (Exception e){
+            log.info(e);
+            e.printStackTrace();
+          }
         } else {
           log.error(String.format("[topupUserBalance] Error realizando alta de cliente [%s] [%s]", altaClienteDTO.getRetorno(), altaClienteDTO.getDescRetorno()));
           throw new RunTimeValidationException(TARJETA_ERROR_GENERICO_$VALUE).setData(new KeyValue("value", "Error realizando alta de cliente"));
@@ -2067,82 +2075,6 @@ public class PrepaidEJBBean10 extends PrepaidBaseEJBBean10 implements PrepaidEJB
     }
   }
 
-  //Todo: esto esta en el servicio de notificaciones, revisar si se elimina de este proyecto
-  @Deprecated
-  public NotificationTecnocom setNotificationCallback(Map<String, Object> headers, NotificationTecnocom notificationTecnocom) throws Exception {
-
-    String committedFields = null;
-    BadRequestException badRequestException = null;
-
-    if(notificationTecnocom.getHeader() == null){
-      throw new BaseException(PARAMETRO_FALTANTE_$VALUE).setData(new KeyValue("value", "header"));
-    }
-
-    if(notificationTecnocom.getBody() == null){
-      throw new BaseException(PARAMETRO_FALTANTE_$VALUE).setData(new KeyValue("value", "body"));
-    }
-
-    if(notificationTecnocom.getBase64Data() == null){
-      throw new BadRequestException(PARAMETRO_FALTANTE_$VALUE).setData(new KeyValue("value", "base64Data"));
-    }
-
-    Boolean isBase64;
-    if(notificationTecnocom.getBase64Data() != null){
-      isBase64 = this.validateBase64(notificationTecnocom.getBase64Data());
-
-      if(isBase64 == false){
-        throw new ValidationException(PARAMETRO_NO_CUMPLE_FORMATO_$VALUE).setData(new KeyValue("value", "base64Data"));
-      }
-
-      String[] mandatoryFieldsHeader = {
-        NotificationTecnocomHeader.class.getDeclaredField("centroAlta").getName(),
-        NotificationTecnocomHeader.class.getDeclaredField("cuenta").getName(),
-        NotificationTecnocomHeader.class.getDeclaredField("entidad").getName(),
-        NotificationTecnocomHeader.class.getDeclaredField("pan").getName()
-      };
-      HashMap<String,Object> fieldsOnNullFromHeader = notificationTecnocom.getHeader().checkNull(mandatoryFieldsHeader);
-
-      String [] mandatoryFieldsBody = {
-        NotificationTecnocomBody.class.getDeclaredField("sdCurrencyCode").getName(),
-        NotificationTecnocomBody.class.getDeclaredField("sdValue").getName(),
-        NotificationTecnocomBody.class.getDeclaredField("ilCurrencyCode").getName(),
-        NotificationTecnocomBody.class.getDeclaredField("ilValue").getName(),
-        NotificationTecnocomBody.class.getDeclaredField("idCurrencyCode").getName(),
-        NotificationTecnocomBody.class.getDeclaredField("idValue").getName(),
-        NotificationTecnocomBody.class.getDeclaredField("tipoTx").getName(),
-        NotificationTecnocomBody.class.getDeclaredField("idMensaje").getName(),
-        NotificationTecnocomBody.class.getDeclaredField("merchantCode").getName(),
-        NotificationTecnocomBody.class.getDeclaredField("merchantName").getName(),
-        NotificationTecnocomBody.class.getDeclaredField("countryIso3266Code").getName(),
-        NotificationTecnocomBody.class.getDeclaredField("countryDescription").getName(),
-        NotificationTecnocomBody.class.getDeclaredField("placeName").getName(),
-        NotificationTecnocomBody.class.getDeclaredField("resolucionTx").getName()
-      };
-      HashMap<String,Object> fieldsOnNullFromBody = notificationTecnocom.getBody().checkNull(mandatoryFieldsBody);
-
-      if((fieldsOnNullFromHeader.size() >= 1 || fieldsOnNullFromBody.size() >= 1) && isBase64 == true) {
-
-        if (fieldsOnNullFromBody.size() >= 1 && fieldsOnNullFromHeader.size() == 0) {
-          committedFields = " These body fields are null or empty: " + fieldsOnNullFromBody.keySet();
-        } else if (fieldsOnNullFromBody.size() == 0 && fieldsOnNullFromHeader.size() >= 1) {
-          committedFields = " These header fields are null or empty: " + fieldsOnNullFromHeader.keySet();
-        } else if (fieldsOnNullFromBody.size() >= 1 && fieldsOnNullFromHeader.size() >= 1) {
-          committedFields = " These fields are null or empty, " + "By Headers: " + fieldsOnNullFromHeader.keySet()
-            + ", By Body: " + fieldsOnNullFromBody.keySet();
-        }
-        throw new BadRequestException(PARAMETRO_FALTANTE_$VALUE).setData(new KeyValue("value", committedFields));
-      }
-
-      if(fieldsOnNullFromHeader.size() == 0 && fieldsOnNullFromBody.size() == 0 && isBase64 == true){ // accepted
-        log.info("=== PROCESOR NOTIFICATION ===");
-        log.info(notificationTecnocom.toString());
-        log.info("=== PROCESOR NOTIFICATION ===");
-      }
-      //prepaidInvoiceDelegate10.sendInvoice(prepaidInvoiceDelegate10.buildInvoiceData(prepaidMovement10,null));
-    }
-
-    return notificationTecnocom;
-  }
 
   public PrepaidBalance10 getAccountBalance(Map<String, Object> headers, String userUuid, String accountUuid) throws Exception {
     if(StringUtils.isAllBlank(userUuid)){

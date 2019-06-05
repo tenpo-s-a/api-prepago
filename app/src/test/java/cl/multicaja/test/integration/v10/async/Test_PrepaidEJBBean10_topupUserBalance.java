@@ -1484,6 +1484,7 @@ public class Test_PrepaidEJBBean10_topupUserBalance extends TestBaseUnitAsync {
     Assert.assertNotNull("debe tener un movimiento", topup);
     Assert.assertEquals("debe tener status -> PROCESS_OK", PrepaidMovementStatus.PROCESS_OK, topup.getEstado());
     Assert.assertEquals("debe tener estado negocio -> CONFIRMED", BusinessStatusType.CONFIRMED, topup.getEstadoNegocio());
+    Assert.assertNotEquals("Debe tener el id de tarjeta asignado", 0,topup.getCardId().intValue());
 
     boolean dataFound = waitForClearingToExist();
 
