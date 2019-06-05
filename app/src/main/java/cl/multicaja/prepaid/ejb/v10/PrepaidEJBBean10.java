@@ -100,9 +100,6 @@ public class PrepaidEJBBean10 extends PrepaidBaseEJBBean10 implements PrepaidEJB
   private CdtEJBBean10 cdtEJB10;
 
   @EJB
-  private PrepaidMovementEJBBean10 prepaidMovementEJB10;
-
-  @EJB
   private PrepaidMovementEJBBean11 prepaidMovementEJB11;
 
   @EJB
@@ -183,13 +180,6 @@ public class PrepaidEJBBean10 extends PrepaidBaseEJBBean10 implements PrepaidEJB
     this.cdtEJB10 = cdtEJB10;
   }
 
-  public PrepaidMovementEJBBean10 getPrepaidMovementEJB10() {
-    return prepaidMovementEJB10;
-  }
-
-  public void setPrepaidMovementEJB10(PrepaidMovementEJBBean10 prepaidMovementEJB10) {
-    this.prepaidMovementEJB10 = prepaidMovementEJB10;
-  }
 
   public PrepaidMovementEJBBean11 getPrepaidMovementEJB11() {
     return prepaidMovementEJB11;
@@ -365,7 +355,7 @@ public class PrepaidEJBBean10 extends PrepaidBaseEJBBean10 implements PrepaidEJB
     // Si viene internamente no se verifica, puesto que podria ser el movimiento contrario de una reversa
     // Verificar con Negocio o Desarrollo
     if(fromEndPoint) {
-      PrepaidMovement10 previousReverse = this.getPrepaidMovementEJB10().getPrepaidMovementForReverse(user.getId(),
+      PrepaidMovement10 previousReverse = this.getPrepaidMovementEJB11().getPrepaidMovementForReverse(user.getId(),
         topupRequest.getTransactionId(), PrepaidMovementType.TOPUP,
         tipoFacReverse);
 
@@ -377,7 +367,7 @@ public class PrepaidEJBBean10 extends PrepaidBaseEJBBean10 implements PrepaidEJB
         prepaidMovement.setEstadoNegocio(BusinessStatusType.REVERSED);
         prepaidMovement.setConTecnocom(ReconciliationStatusType.RECONCILED);
         prepaidMovement.setConSwitch(ReconciliationStatusType.RECONCILED);
-        prepaidMovement = getPrepaidMovementEJB10().addPrepaidMovement(headers, prepaidMovement);
+        prepaidMovement = getPrepaidMovementEJB11().addPrepaidMovement(headers, prepaidMovement);
 
         throw new RunTimeValidationException(REVERSA_MOVIMIENTO_REVERSADO);
       }
@@ -449,6 +439,8 @@ public class PrepaidEJBBean10 extends PrepaidBaseEJBBean10 implements PrepaidEJB
           prepaidMovement = getPrepaidMovementEJB11().updateMovementCardId(prepaidMovement.getId(),prepaidCard.getId());
           if(prepaidMovement != null){
             log.info("Id Tarjeta Movimiento Actualizado correctamente");
+          }else {
+            log.error("");
           }
 
         } else {
@@ -547,7 +539,7 @@ public class PrepaidEJBBean10 extends PrepaidBaseEJBBean10 implements PrepaidEJB
     // Responde OK
     if (inclusionMovimientosDTO.isRetornoExitoso()) {
 
-      getPrepaidMovementEJB10().updatePrepaidMovement(null,
+      getPrepaidMovementEJB11().updatePrepaidMovement(null,
         prepaidMovement.getId(),
         prepaidCard.getPan(),
         inclusionMovimientosDTO.getCenalta(),
@@ -577,7 +569,7 @@ public class PrepaidEJBBean10 extends PrepaidBaseEJBBean10 implements PrepaidEJB
     }
     else if(CodigoRetorno._1020.equals(inclusionMovimientosDTO.getRetorno())) {
       log.info("Error Timeout Response");
-      getPrepaidMovementEJB10().updatePrepaidMovementStatus(headers, prepaidMovement.getId(), PrepaidMovementStatus.ERROR_TIMEOUT_RESPONSE);
+      getPrepaidMovementEJB11().updatePrepaidMovementStatus(headers, prepaidMovement.getId(), PrepaidMovementStatus.ERROR_TIMEOUT_RESPONSE);
       //Inicia la reversa del movimiento
 
       // Agrego la reversa al cdt
@@ -594,7 +586,7 @@ public class PrepaidEJBBean10 extends PrepaidBaseEJBBean10 implements PrepaidEJB
       prepaidMovementReverse.setCuenta(prepaidMovement.getCuenta());
       prepaidMovementReverse.setTipofac(tipoFacReverse);
       prepaidMovementReverse.setIndnorcor(IndicadorNormalCorrector.fromValue(tipoFacReverse.getCorrector()));
-      prepaidMovementReverse = getPrepaidMovementEJB10().addPrepaidMovement(headers, prepaidMovementReverse);
+      prepaidMovementReverse = getPrepaidMovementEJB11().addPrepaidMovement(headers, prepaidMovementReverse);
 
       String messageId = this.getDelegate().sendPendingTopupReverse(prepaidTopup, prepaidCard, user, prepaidMovementReverse);
 
@@ -609,8 +601,8 @@ public class PrepaidEJBBean10 extends PrepaidBaseEJBBean10 implements PrepaidEJB
       getPrepaidMovementEJB11().publishTransactionRejectedEvent(user.getUuid(), account.getUuid(), prepaidCard.getUuid(), prepaidMovement, prepaidTopup.getFeeList(), TransactionType.CASH_IN_MULTICAJA);
 
       //Colocar el movimiento en error
-      getPrepaidMovementEJB10().updatePrepaidMovementStatus(null, prepaidMovement.getId(), PrepaidMovementStatus.REJECTED);
-      getPrepaidMovementEJB10().updatePrepaidBusinessStatus(headers, prepaidMovement.getId(), BusinessStatusType.REJECTED);
+      getPrepaidMovementEJB11().updatePrepaidMovementStatus(null, prepaidMovement.getId(), PrepaidMovementStatus.REJECTED);
+      getPrepaidMovementEJB11().updatePrepaidBusinessStatus(headers, prepaidMovement.getId(), BusinessStatusType.REJECTED);
 
       //Confirmar la carga en CDT
       cdtTransaction.setTransactionType(prepaidTopup.getCdtTransactionTypeConfirm());
@@ -859,15 +851,6 @@ public class PrepaidEJBBean10 extends PrepaidBaseEJBBean10 implements PrepaidEJB
     }
   }
 
-  public PrepaidWithdraw10 withdrawUserBalanceDeprecated(Map<String, Object> headers, NewPrepaidWithdraw10 withdrawRequest , Boolean fromEndPoint) throws Exception {
-    PrepaidUser10 prepaidUser10 =   getPrepaidUserEJB10().findByNumDoc(headers,withdrawRequest.getRut().toString());
-    if(prepaidUser10 == null ){
-      throw new NotFoundException(CLIENTE_NO_TIENE_PREPAGO);
-    }
-   return withdrawUserBalance(headers, prepaidUser10.getUuid(), withdrawRequest, fromEndPoint);
-  }
-
-
   @Override
   public PrepaidWithdraw10 withdrawUserBalance(Map<String, Object> headers, String externalUserId, NewPrepaidWithdraw10 withdrawRequest , Boolean fromEndPoint) throws Exception {
 
@@ -929,7 +912,7 @@ public class PrepaidEJBBean10 extends PrepaidBaseEJBBean10 implements PrepaidEJB
     TipoFactura tipoFacReverse = TransactionOriginType.WEB.equals(withdrawRequest.getTransactionOriginType()) ? TipoFactura.ANULA_RETIRO_TRANSFERENCIA : TipoFactura.ANULA_RETIRO_EFECTIVO_COMERCIO_MULTICJA;
 
     // Se verifica si ya se tiene una reversa con los mismos datos
-    PrepaidMovement10 previousReverse = this.getPrepaidMovementEJB10().getPrepaidMovementForReverse(prepaidUser.getId(),
+    PrepaidMovement10 previousReverse = this.getPrepaidMovementEJB11().getPrepaidMovementForReverse(prepaidUser.getId(),
       withdrawRequest.getTransactionId(), PrepaidMovementType.WITHDRAW,
       tipoFacReverse);
 
@@ -939,8 +922,9 @@ public class PrepaidEJBBean10 extends PrepaidBaseEJBBean10 implements PrepaidEJB
       prepaidMovement.setEstado(PrepaidMovementStatus.PROCESS_OK);
       prepaidMovement.setEstadoNegocio(BusinessStatusType.REVERSED);
       prepaidMovement.setConTecnocom(ReconciliationStatusType.RECONCILED);
+
       //TODO: deberia tambien ser conciliada con swtich asi se responda error?
-      prepaidMovement = getPrepaidMovementEJB10().addPrepaidMovement(headers, prepaidMovement);
+      prepaidMovement = getPrepaidMovementEJB11().addPrepaidMovement(headers, prepaidMovement);
 
       throw new RunTimeValidationException(REVERSA_MOVIMIENTO_REVERSADO);
     }
@@ -977,7 +961,7 @@ public class PrepaidEJBBean10 extends PrepaidBaseEJBBean10 implements PrepaidEJB
       prepaidMovement.setConSwitch(ReconciliationStatusType.RECONCILED);
     }
 
-    prepaidMovement = getPrepaidMovementEJB10().addPrepaidMovement(headers, prepaidMovement);
+    prepaidMovement = getPrepaidMovementEJB11().addPrepaidMovement(headers, prepaidMovement);
     prepaidWithdraw.setTimestamps(new Timestamps(prepaidMovement.getFechaCreacion().toLocalDateTime(),
       prepaidMovement.getFechaActualizacion().toLocalDateTime()));
 
@@ -1005,7 +989,7 @@ public class PrepaidEJBBean10 extends PrepaidBaseEJBBean10 implements PrepaidEJB
       Integer clamone = inclusionMovimientosDTO.getClamone();
       PrepaidMovementStatus status = PrepaidMovementStatus.PROCESS_OK;
 
-      getPrepaidMovementEJB10().updatePrepaidMovement(null,
+      getPrepaidMovementEJB11().updatePrepaidMovement(null,
         prepaidMovement.getId(),
         prepaidCard.getPan(),
         centalta,
@@ -1034,7 +1018,7 @@ public class PrepaidEJBBean10 extends PrepaidBaseEJBBean10 implements PrepaidEJB
         cdtTransaction.setGloss(cdtTransaction.getTransactionType().getName() + " " + withdrawRequest.getAmount().getValue());
         cdtTransaction = getCdtEJB10().addCdtTransaction(null, cdtTransaction);
 
-        getPrepaidMovementEJB10().updatePrepaidBusinessStatus(headers, prepaidMovement.getId(), BusinessStatusType.CONFIRMED);
+        getPrepaidMovementEJB11().updatePrepaidBusinessStatus(headers, prepaidMovement.getId(), BusinessStatusType.CONFIRMED);
       }
       // Se envia informacion a accounting/clearing
       this.getDelegate().sendMovementToAccounting(prepaidMovement, userAccount);
@@ -1045,7 +1029,7 @@ public class PrepaidEJBBean10 extends PrepaidBaseEJBBean10 implements PrepaidEJB
     }
     else if(CodigoRetorno._1020.equals(inclusionMovimientosDTO.getRetorno())) {
       log.info("Error Timeout Response");
-      getPrepaidMovementEJB10().updatePrepaidMovementStatus(headers, prepaidMovement.getId(), PrepaidMovementStatus.ERROR_TIMEOUT_RESPONSE);
+      getPrepaidMovementEJB11().updatePrepaidMovementStatus(headers, prepaidMovement.getId(), PrepaidMovementStatus.ERROR_TIMEOUT_RESPONSE);
       //Inicia la reversa del movimiento
 
       // Agrego la reversa al cdt
@@ -1064,7 +1048,7 @@ public class PrepaidEJBBean10 extends PrepaidBaseEJBBean10 implements PrepaidEJB
       prepaidMovementReverse.setCuenta(prepaidMovement.getCuenta());
       prepaidMovementReverse.setTipofac(tipoFacReverse);
       prepaidMovementReverse.setIndnorcor(IndicadorNormalCorrector.fromValue(tipoFacReverse.getCorrector()));
-      prepaidMovementReverse = getPrepaidMovementEJB10().addPrepaidMovement(headers, prepaidMovementReverse);
+      prepaidMovementReverse = getPrepaidMovementEJB11().addPrepaidMovement(headers, prepaidMovementReverse);
 
       String messageId = this.getDelegate().sendPendingWithdrawReversal(reverse,prepaidUser,prepaidMovementReverse);
 
@@ -1074,8 +1058,8 @@ public class PrepaidEJBBean10 extends PrepaidBaseEJBBean10 implements PrepaidEJB
     else {
       log.info("Error no reintentable");
       //Colocar el movimiento en error
-      getPrepaidMovementEJB10().updatePrepaidMovementStatus(null, prepaidMovement.getId(), PrepaidMovementStatus.REJECTED);
-      getPrepaidMovementEJB10().updatePrepaidBusinessStatus(headers, prepaidMovement.getId(), BusinessStatusType.REJECTED);
+      getPrepaidMovementEJB11().updatePrepaidMovementStatus(null, prepaidMovement.getId(), PrepaidMovementStatus.REJECTED);
+      getPrepaidMovementEJB11().updatePrepaidBusinessStatus(headers, prepaidMovement.getId(), BusinessStatusType.REJECTED);
 
       //Confirmar el retiro en CDT
       cdtTransaction.setTransactionType(prepaidWithdraw.getCdtTransactionTypeConfirm());
@@ -1658,7 +1642,7 @@ public class PrepaidEJBBean10 extends PrepaidBaseEJBBean10 implements PrepaidEJB
   public SimulationTopup10 topupSimulation(Map<String,Object> headers,PrepaidUser10 prepaidUser10, SimulationNew10 simulationNew) throws Exception {
 
     SimulationTopup10 simulationTopup = new SimulationTopup10();
-    Boolean isFirstTopup = this.getPrepaidMovementEJB10().isFirstTopup(prepaidUser10.getId());
+    Boolean isFirstTopup = this.getPrepaidMovementEJB11().isFirstTopup(prepaidUser10.getId());
     simulationTopup.setFirstTopup(isFirstTopup);
 
     BigDecimal amountValue = simulationNew.getAmount().getValue();
@@ -1892,7 +1876,7 @@ public class PrepaidEJBBean10 extends PrepaidBaseEJBBean10 implements PrepaidEJB
     prepaidUser.setHasPrepaidCard(prepaidCard != null);
 
     // verifica si el usuario ha realizado cargas anteriormente
-    prepaidUser.setHasPendingFirstTopup(getPrepaidMovementEJB10().isFirstTopup(prepaidUser.getId()));
+    prepaidUser.setHasPendingFirstTopup(getPrepaidMovementEJB11().isFirstTopup(prepaidUser.getId()));
 
     return prepaidUser;
   }
@@ -1934,7 +1918,7 @@ public class PrepaidEJBBean10 extends PrepaidBaseEJBBean10 implements PrepaidEJB
         if (data == null) {
           throw new ValidationException(ERROR_DATA_NOT_FOUND);
         }
-        PrepaidMovement10  prepaidMovement10 = getPrepaidMovementEJB10().getPrepaidMovementById(data.getData().getPrepaidMovement10().getId());
+        PrepaidMovement10  prepaidMovement10 = getPrepaidMovementEJB11().getPrepaidMovementById(data.getData().getPrepaidMovement10().getId());
         if (!ReconciliationStatusType.PENDING.equals(prepaidMovement10.getConTecnocom())&&!ReconciliationStatusType.PENDING.equals(prepaidMovement10.getConSwitch())) {
           messageId = "";
           break;
@@ -1988,7 +1972,7 @@ public class PrepaidEJBBean10 extends PrepaidBaseEJBBean10 implements PrepaidEJB
         if(data == null) {
           throw new ValidationException(ERROR_DATA_NOT_FOUND);
         }
-        PrepaidMovement10  prepaidMovement10 =getPrepaidMovementEJB10().getPrepaidMovementById(data.getData().getPrepaidMovementReverse().getId());
+        PrepaidMovement10  prepaidMovement10 =getPrepaidMovementEJB11().getPrepaidMovementById(data.getData().getPrepaidMovementReverse().getId());
         if(!ReconciliationStatusType.PENDING.equals(prepaidMovement10.getConTecnocom())&&!ReconciliationStatusType.PENDING.equals(prepaidMovement10.getConSwitch())){
           messageId = "";
           break;
@@ -2005,7 +1989,7 @@ public class PrepaidEJBBean10 extends PrepaidBaseEJBBean10 implements PrepaidEJB
         if(data == null) {
           throw new ValidationException(ERROR_DATA_NOT_FOUND);
         }
-        PrepaidMovement10  prepaidMovement10 =getPrepaidMovementEJB10().getPrepaidMovementById(data.getData().getPrepaidMovement10().getId());
+        PrepaidMovement10  prepaidMovement10 =getPrepaidMovementEJB11().getPrepaidMovementById(data.getData().getPrepaidMovement10().getId());
         if(!ReconciliationStatusType.PENDING.equals(prepaidMovement10.getConTecnocom())&&!ReconciliationStatusType.PENDING.equals(prepaidMovement10.getConSwitch())){
           messageId = "";
           break;
@@ -2028,7 +2012,7 @@ public class PrepaidEJBBean10 extends PrepaidBaseEJBBean10 implements PrepaidEJB
       throw new NotFoundException(CLIENTE_NO_TIENE_PREPAGO);
     }
 
-    PrepaidMovement10 prepaidMovement = getPrepaidMovementEJB10().getPrepaidMovementByIdPrepaidUserAndIdMovement(userPrepagoId, movementId);
+    PrepaidMovement10 prepaidMovement = getPrepaidMovementEJB11().getPrepaidMovementByIdPrepaidUserAndIdMovement(userPrepagoId, movementId);
     if (prepaidMovement == null) {
       log.error("Error on processRefundMovement: prepaid movement not found by using userPrepagoId:" + userPrepagoId + " & movementId:" + movementId);
       throw new NotFoundException(TRANSACCION_ERROR_GENERICO_$VALUE);
@@ -2039,7 +2023,7 @@ public class PrepaidEJBBean10 extends PrepaidBaseEJBBean10 implements PrepaidEJB
       throw new NotFoundException(TRANSACCION_ERROR_GENERICO_$VALUE);
     }
 
-    getPrepaidMovementEJB10().updatePrepaidBusinessStatus(null, prepaidMovement.getId(), BusinessStatusType.REFUND_OK);
+    getPrepaidMovementEJB11().updatePrepaidBusinessStatus(null, prepaidMovement.getId(), BusinessStatusType.REFUND_OK);
 
     List<CdtTransaction10> transaction10s = getCdtEJB10().buscaListaMovimientoByIdExterno(null, prepaidMovement.getIdTxExterno());
 
