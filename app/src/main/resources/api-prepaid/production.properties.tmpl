@@ -19,7 +19,6 @@
 {{ $azure_keyvault_key_name := key "apps/prepaid/production/output/keyvault/key-name" }}
 
 {{ $tecnocom_api_key := key "apps/prepaid/production/output/tecnocom/api-key" }}
-{{ $tecnocom_api_url := key "apps/prepaid/production/output/tecnocom/api-url" }}
 {{ $tecnocom_cod_ent := key "apps/prepaid/production/output/tecnocom/cod-entity" }}
 {{ $tecnocom_channel := key "apps/prepaid/production/output/tecnocom/channel" }}
 {{ $tecnocom_order := key "apps/prepaid/production/output/tecnocom/order" }}
@@ -44,7 +43,7 @@ prepaid.appname=PREPAGO
 
 #tecnocom-gateway
 tecnocom.apiKey={{ $tecnocom_api_key }}
-tecnocom.apiUrl={{ $tecnocom_api_url }}
+tecnocom.apiUrl=https://procemisorchile
 tecnocom.codEntity={{ $tecnocom_cod_ent }}
 tecnocom.channel={{ $tecnocom_channel }}
 tecnocom.order={{ $tecnocom_order }}

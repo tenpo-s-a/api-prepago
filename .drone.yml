@@ -75,6 +75,7 @@ pipeline:
       - /bin/consul-template -template "./app/src/main/resources/api-prepaid/staging.properties.tmpl:./app/src/main/resources/api-prepaid/staging.properties" -once
       - /bin/consul-template -template "./app/src/main/resources/api-prepaid/uat.properties.tmpl:./app/src/main/resources/api-prepaid/uat.properties" -once
       - /bin/consul-template -template "./app/src/main/resources/api-prepaid/uat_mock.properties.tmpl:./app/src/main/resources/api-prepaid/uat_mock.properties" -once
+      - /bin/consul-template -template "./consul_template/cert_uat.tmpl:./cert" -once
     secrets:
       - consul_http_addr
       - consul_http_token
@@ -86,6 +87,7 @@ pipeline:
     image: hashicorp/consul-template:alpine
     commands:
       - /bin/consul-template -template "./app/src/main/resources/api-prepaid/production.properties.tmpl:./app/src/main/resources/api-prepaid/production.properties" -once
+      - /bin/consul-template -template "./consul_template/cert_production.tmpl:./cert" -once
     secrets:
       - consul_http_addr
       - consul_http_token
@@ -118,7 +120,10 @@ pipeline:
     tags:
       - ${DRONE_COMMIT_SHA}
       - latest
+    build_args:
+      - TECNOCOM_CERT_NAME=procemisorqachile
     secrets: [ docker_username, docker_password ]
+    custom_dns: [168.63.129.16]
     when:
       event: [ push ]
       branch: master
@@ -132,6 +137,9 @@ pipeline:
       - ${DRONE_TAG}
       - latest
     secrets: [ docker_username, docker_password ]
+    build_args:
+      - TECNOCOM_CERT_NAME=procemisorchile
+    custom_dns: [168.63.129.16]
     when:
       event: [ tag ]
       ref: refs/tags/prod-*

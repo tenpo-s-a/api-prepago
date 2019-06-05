@@ -1,4 +1,15 @@
+FROM openjdk:8u171-jdk AS build-env
+
+ARG TECNOCOM_CERT_NAME
+COPY ./cert cert
+RUN apt-get update && apt-get install ca-certificates
+RUN cat ./cert | base64 -d > ${TECNOCOM_CERT_NAME}.crt && \
+  cp ${TECNOCOM_CERT_NAME}.crt /usr/local/share/ca-certificates && \
+  update-ca-certificates
+
 FROM payara/server-full:5.181
+
+COPY --from=build-env /etc/ssl/certs /etc/ssl/certs
 
 # Setup Configuration
 USER payara
