@@ -291,25 +291,6 @@ public class PrepaidEJBBean10 extends PrepaidBaseEJBBean10 implements PrepaidEJB
     return this.topupUserBalance(headers, user.getUuid(), topupRequest, Boolean.FALSE);
   }
 
-  //TODO: eliminr luego
-  @Deprecated
-  public String fakeCall() throws Exception {
-      log.info("[fakeCall] executing fakeCall");
-      try {
-        ConsultaDatosPersonaDTO consultaDatosPersonaDTO = getTecnocomServiceHelper().getTecnocomService().consultaDatosPersona("07300001000000000022", "48222573-K", TipoDocumento.RUT);
-        if(consultaDatosPersonaDTO.isRetornoExitoso()) {
-          log.info("[fakeCall] success");
-          return String.format("%s - %s", consultaDatosPersonaDTO.getRetorno(), consultaDatosPersonaDTO.getDescRetorno());
-        } else {
-          log.error(String.format("[fakeCall] error response [retorno: %s, descretorno: %s]", consultaDatosPersonaDTO.getRetorno(), consultaDatosPersonaDTO.getDescRetorno()));
-          return String.format("%s - %s", consultaDatosPersonaDTO.getRetorno(), consultaDatosPersonaDTO.getDescRetorno());
-        }
-      } catch(Exception ex) {
-        log.error("[fakeCall] Exception calling tecnocom", ex);
-        throw ex;
-      }
-  }
-
   /**
    * V2 Con id de usuario Tempo
    * @param headers
