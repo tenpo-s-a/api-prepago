@@ -117,7 +117,7 @@ spec:
   hosts:
   - "users.uat.multicajadigital"
   addresses:
-  - "40.70.68.63"
+  - "${TENPO_USER_API_HOST}"
   location: MESH_EXTERNAL
   ports:
   - number: 8080
