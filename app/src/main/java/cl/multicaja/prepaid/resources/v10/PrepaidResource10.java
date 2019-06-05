@@ -76,33 +76,6 @@ public final class PrepaidResource10 extends BaseResource {
   }
 
   @POST
-  @Path("/topup")
-  public Response topupUserBalanceV1(NewPrepaidTopup10 topupRequest, @Context HttpHeaders headers) throws Exception {
-    PrepaidTopup10 prepaidTopup = this.prepaidEJBBean10.topupUserBalanceV1(headersToMap(headers), topupRequest);
-    return Response.ok(prepaidTopup).status(201).build();
-  }
-
-
-  @POST
-  @Path("/topup/reverse")
-  public Response reverseTopupUserBalance(NewPrepaidTopup10 topupRequest, @Context HttpHeaders headers) throws Exception {
-    this.prepaidEJBBean10.reverseTopupUserBalanceTmp(headersToMap(headers), topupRequest,true);
-    return Response.status(201).build();
-  }
-
-
-  /*
-    Prepaid withdraw
-   */
-
-  @POST
-  @Path("/withdrawal")
-  public Response withdrawUserBalance( NewPrepaidWithdraw10 withdrawRequest, @Context HttpHeaders headers) throws Exception {
-    PrepaidWithdraw10 withdrawTopup = this.prepaidEJBBean10.withdrawUserBalanceDeprecated(headersToMap(headers), withdrawRequest,true);
-    return Response.ok(withdrawTopup).status(201).build();
-  }
-
-  @POST
   @Path("/{user_id}/cash_out")
   public Response withdrawUserBalance(@PathParam("user_id") String extUserId, NewPrepaidWithdraw10 withdrawRequest, @Context HttpHeaders headers) throws Exception {
     if(withdrawRequest != null && withdrawRequest.WEB_MERCHANT_CODE.equals(withdrawRequest.getMerchantCode())){
@@ -120,14 +93,6 @@ public final class PrepaidResource10 extends BaseResource {
     }
     PrepaidWithdraw10 withdrawTopup = this.prepaidEJBBean10.withdrawUserBalance(headersToMap(headers), extUserId, withdrawRequest,true);
     return Response.ok(withdrawTopup).status(201).build();
-  }
-
-
-  @POST
-  @Path("/withdrawal/reverse")
-  public Response reverseWithdrawUserBalance(NewPrepaidWithdraw10 withdrawRequest, @Context HttpHeaders headers) throws Exception {
-    this.prepaidEJBBean10.reverseWithdrawUserBalanceOld(headersToMap(headers), withdrawRequest,true);
-    return Response.status(201).build();
   }
 
   @POST
@@ -214,26 +179,4 @@ public final class PrepaidResource10 extends BaseResource {
     return Response.accepted().build();
   }
 
-  @POST
-  @Path("/processor/notification")
-  public Response callNotificationTecnocom(NotificationTecnocom notificationTecnocom,@Context HttpHeaders headers) throws Exception {
-    Response returnResponse = null;
-
-    String textLogBase = "TestHelperResource-callNotification: ";
-    NotificationTecnocom notificationTecnocomResponse;
-    try{
-
-      notificationTecnocomResponse = this.prepaidEJBBean10.setNotificationCallback(null,notificationTecnocom);
-      returnResponse = Response.ok(notificationTecnocomResponse).status(202).build();
-      log.info(textLogBase+notificationTecnocomResponse.toString());
-
-    }catch(Exception ex){
-      log.error(textLogBase+ex.toString());
-      ex.printStackTrace();
-      returnResponse = Response.ok(ex).build();
-    }
-
-    return returnResponse;
-
-  }
 }
