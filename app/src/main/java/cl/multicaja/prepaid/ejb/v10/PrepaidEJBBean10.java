@@ -445,14 +445,12 @@ public class PrepaidEJBBean10 extends PrepaidBaseEJBBean10 implements PrepaidEJB
           prepaidCard.setUuid(UUID.randomUUID().toString());
           prepaidCard = getPrepaidCardEJB11().createPrepaidCard(null, prepaidCard);
           //Solo para la primera carga se actualiza el id de la tarjeta al creado.
-          try{
+
           prepaidMovement = getPrepaidMovementEJB11().updateMovementCardId(prepaidMovement.getId(),prepaidCard.getId());
           if(prepaidMovement != null){
             log.info("Id Tarjeta Movimiento Actualizado correctamente");
-          }}catch (Exception e){
-            log.info(e);
-            e.printStackTrace();
           }
+
         } else {
           log.error(String.format("[topupUserBalance] Error realizando alta de cliente [%s] [%s]", altaClienteDTO.getRetorno(), altaClienteDTO.getDescRetorno()));
           throw new RunTimeValidationException(TARJETA_ERROR_GENERICO_$VALUE).setData(new KeyValue("value", "Error realizando alta de cliente"));

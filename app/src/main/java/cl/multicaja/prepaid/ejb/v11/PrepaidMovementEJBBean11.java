@@ -1608,7 +1608,7 @@ public class PrepaidMovementEJBBean11 extends PrepaidMovementEJBBean10 {
 
   public PrepaidMovement10 updateMovementCardId(Long movementId, Long cardId) throws Exception {
     log.info(String.format("[updatePrepaidCardId] Mov Id [%s] Card Id[%s] ",movementId,cardId));
-    String query = String.format("UPDATE %s.prp_movimiento SET id_tarjeta = ? WHERE id = ",getSchema());
+    String query = String.format("UPDATE %s.prp_movimiento SET id_tarjeta = ? WHERE id =?",getSchema());
 
     int resp = getDbUtils().getJdbcTemplate().update(query, cardId, movementId);
     if(resp == 0) {
