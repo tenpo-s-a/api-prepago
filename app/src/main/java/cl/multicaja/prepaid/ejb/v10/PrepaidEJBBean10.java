@@ -411,7 +411,6 @@ public class PrepaidEJBBean10 extends PrepaidBaseEJBBean10 implements PrepaidEJB
 
     prepaidTopup.setId(prepaidMovement.getId());
 
-
     //Obtiene Cuenta Usuario
     Account account = getAccountEJBBean10().findByUserId(user.getId());
 
