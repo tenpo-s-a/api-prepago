@@ -9,7 +9,7 @@ import java.util.UUID;
 
 public class TestUserById {
 
-  private static final String URL = "http://40.70.68.63:8080/v1/user-management/";
+  private static final String URL = "http://40.70.68.63:8080/v1/user-management";
 
   @Test
   public void testSuccess() throws Exception {
