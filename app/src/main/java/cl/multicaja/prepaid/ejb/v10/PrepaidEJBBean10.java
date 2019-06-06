@@ -653,15 +653,13 @@ public class PrepaidEJBBean10 extends PrepaidBaseEJBBean10 implements PrepaidEJB
       TenpoUser tenpoUser = getTenpoApiCall().getUserById(UUID.fromString(userId));
       if(tenpoUser != null){
 
-        tenpoUser.setUserId(tenpoUser.getId()); // se situa el valor de Uuid en la variable correspondiente.
-
         prepaidUser10 = new PrepaidUser10();
 
         prepaidUser10.setDocumentNumber(tenpoUser.getTributaryIdentifier());
         prepaidUser10.setDocumentType(DocumentType.DNI_CL); // REVISAR QUE VALORES VENDRAN ACA Y AGREGAR AL ENUM
         prepaidUser10.setName(tenpoUser.getFirstName());
         prepaidUser10.setLastName(tenpoUser.getLastName());
-        prepaidUser10.setUuid(tenpoUser.getUserId().toString());
+        prepaidUser10.setUuid(tenpoUser.getId().toString());
         prepaidUser10.setTimestamps(new Timestamps(LocalDateTime.now(ZoneOffset.UTC),LocalDateTime.now(ZoneOffset.UTC)));
         prepaidUser10.setUserLevel(PrepaidUserLevel.valueOfEnum(tenpoUser.getLevel().name()));
         prepaidUser10.setStatus(getUserStatusFromTenpoStatus(tenpoUser.getState()));
