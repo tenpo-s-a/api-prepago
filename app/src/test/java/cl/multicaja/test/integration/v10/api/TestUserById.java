@@ -13,11 +13,6 @@ import java.util.UUID;
 public class TestUserById {
 
   private static final String URL = "http://40.70.68.63:8080/v1/user-management";
-  private PrepaidEJBBean10 prepaidEJBBean10 = new PrepaidEJBBean10();
-
-  public PrepaidEJBBean10 getPrepaidEJBBean10() {
-    return prepaidEJBBean10;
-  }
 
   @Test
   public void testSuccess() throws Exception {
@@ -42,13 +37,15 @@ public class TestUserById {
   @Ignore
   @Test
   public void validateTenpoUser() throws Exception {
+    PrepaidEJBBean10 prepaidEJBBean10 = new PrepaidEJBBean10();
+
     String uuid = "894d0db8-3da2-4ddd-b3bf-3c64cd2247de";
     UUID id = UUID.fromString(uuid);
     TenpoApiCall tenpoApiCall = TenpoApiCall.getInstance();
     tenpoApiCall.setApiUrl(URL);
 
     TenpoUser tenpoUser = tenpoApiCall.getUserById(id);
-    PrepaidUser10 prepaidUser10 = getPrepaidEJBBean10().validateTempoUser(uuid);
+    PrepaidUser10 prepaidUser10 = prepaidEJBBean10.validateTempoUser(uuid);
 
     Assert.assertEquals("Los uuid son iguales",id,tenpoUser.getId());
     Assert.assertEquals("Los uuid son iguales",id,UUID.fromString(prepaidUser10.getUuid()));
