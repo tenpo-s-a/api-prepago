@@ -1,19 +1,13 @@
 package cl.multicaja.prepaid.async.v10.processors;
 
-import cl.multicaja.camel.CamelFactory;
 import cl.multicaja.core.exceptions.ValidationException;
 import cl.multicaja.core.model.Errors;
-import cl.multicaja.core.utils.ConfigUtils;
 import cl.multicaja.prepaid.async.v10.routes.BaseRoute10;
 import cl.multicaja.prepaid.model.v10.ReconciliationFile10;
-import org.apache.camel.ConsumerTemplate;
 import org.apache.camel.Exchange;
 import org.apache.camel.Processor;
-import org.apache.camel.component.file.GenericFile;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
-
-import java.io.InputStream;
 import java.util.List;
 
 public class PendingConciliationMcRed10 extends BaseProcessor10  {
