@@ -657,7 +657,11 @@ public class PrepaidEJBBean10 extends PrepaidBaseEJBBean10 implements PrepaidEJB
       //FIXME: Implementar integracion con servicio de usuarios.
       TenpoUser tenpoUser = getTenpoApiCall().getUserById(UUID.fromString(userId));
       if(tenpoUser != null){
+
+        tenpoUser.setUserId(tenpoUser.getId()); // se situa el valor de Uuid en la variable correspondiente.
+
         prepaidUser10 = new PrepaidUser10();
+
         prepaidUser10.setDocumentNumber(tenpoUser.getTributaryIdentifier());
         prepaidUser10.setDocumentType(DocumentType.DNI_CL); // REVISAR QUE VALORES VENDRAN ACA Y AGREGAR AL ENUM
         prepaidUser10.setName(tenpoUser.getFirstName());
