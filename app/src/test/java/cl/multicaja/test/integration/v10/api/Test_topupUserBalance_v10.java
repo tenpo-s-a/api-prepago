@@ -5,7 +5,6 @@ import cl.multicaja.prepaid.model.v10.*;
 import cl.multicaja.tecnocom.constants.CodigoMoneda;
 import cl.multicaja.tecnocom.constants.IndicadorNormalCorrector;
 import cl.multicaja.tecnocom.constants.TipoFactura;
-import org.apache.commons.lang3.StringUtils;
 import org.junit.*;
 
 import java.math.BigDecimal;
@@ -13,9 +12,11 @@ import java.util.List;
 import java.util.Map;
 
 import static cl.multicaja.core.model.Errors.*;
-import static cl.multicaja.core.model.Errors.TRANSACCION_ERROR_GENERICO_$VALUE;
 
+//TODO: Esto verifica el endopint antiguo
+@Ignore
 public class Test_topupUserBalance_v10 extends TestBaseUnitApi {
+
 
   private HttpResponse topupUserBalanceLocal(NewPrepaidTopup10 newPrepaidTopup10) {
     HttpResponse respHttp = apiPOST("/1.0/prepaid/topup", toJson(newPrepaidTopup10));

@@ -1,20 +1,11 @@
 package cl.multicaja.test.db;
 
-import cl.multicaja.core.utils.db.NullParam;
-import cl.multicaja.core.utils.db.OutParam;
 import cl.multicaja.test.TestDbBasePg;
 import org.junit.AfterClass;
-import org.junit.Assert;
 import org.junit.BeforeClass;
-import org.junit.Test;
+import org.junit.Ignore;
 
-import java.sql.SQLException;
-import java.sql.Types;
-import java.util.List;
-import java.util.Map;
-
-import static cl.multicaja.test.db.Test_20180523092338_create_sp_mc_prp_crea_movimiento_v10.insertRandomMovement;
-
+@Ignore
 public class Test_20180925141529_create_sp_mc_prp_actualiza_movimiento_estado_switch_v10 extends TestDbBasePg {
 
   private static final String SP_NAME = SCHEMA + ".mc_prp_actualiza_movimiento_estado_switch_v10";
@@ -25,7 +16,7 @@ public class Test_20180925141529_create_sp_mc_prp_actualiza_movimiento_estado_sw
     dbUtils.getJdbcTemplate().execute(String.format("truncate %s.prp_movimiento cascade",SCHEMA));
     dbUtils.getJdbcTemplate().execute(String.format("truncate %s.prp_usuario cascade", SCHEMA));
   }
-
+/*
   @Test
   public void updateMovementsOk() throws SQLException {
 
@@ -88,6 +79,7 @@ public class Test_20180925141529_create_sp_mc_prp_actualiza_movimiento_estado_sw
 
   private List searchMovement(Object idMovimiento)  {
     return dbUtils.getJdbcTemplate().queryForList(String.format("SELECT * FROM %s.prp_movimiento WHERE ID = %s", SCHEMA, idMovimiento.toString()));
-  }
+  } */
+
 }
 

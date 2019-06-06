@@ -347,7 +347,6 @@ public class Test_AccountEJBBean10_getPrepaidUserBalance {
 
     PrepaidCard10 prepaidCard10 = new PrepaidCard10();
     prepaidCard10.setStatus(PrepaidCardStatus.ACTIVE);
-    prepaidCard10.setProcessorUserId("1");
 
     Response response = new Response();
     response.getRunServiceResponse().getReturn().setRetorno("000");
