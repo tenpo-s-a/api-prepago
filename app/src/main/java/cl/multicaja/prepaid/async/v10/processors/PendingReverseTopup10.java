@@ -90,7 +90,7 @@ public class PendingReverseTopup10 extends BaseProcessor10 {
           }
           else if (PrepaidMovementStatus.ERROR_TECNOCOM_REINTENTABLE.equals(originalMovement.getEstado()) || PrepaidMovementStatus.ERROR_TIMEOUT_RESPONSE.equals(originalMovement.getEstado()) ){
             log.debug("********** Reintentando movimiento original **********");
-            log.info(String.format("LLamando reversa mov original %s", prepaidCard.getProcessorUserId()));
+            log.info(String.format("LLamando reversa mov original %d", originalMovement.getId()));
 
               // Se intenta realizar nuevamente la inclusion del movimiento original .
             InclusionMovimientosDTO inclusionMovimientosDTO = getRoute().getTecnocomServiceHelper().topup(contrato, pan, originalMovement.getCodcom(), originalMovement);
@@ -135,7 +135,7 @@ public class PendingReverseTopup10 extends BaseProcessor10 {
           }
           else if(PrepaidMovementStatus.PROCESS_OK.equals(originalMovement.getEstado())) {
             log.debug("********** Realizando reversa de carga **********");
-            log.info(String.format("LLamando reversa %s", prepaidCard.getProcessorUserId()));
+            log.info(String.format("LLamando reversa %d", originalMovement.getId()));
 
             // Se intenta realizar reversa del movimiento.
             InclusionMovimientosDTO inclusionMovimientosDTO = getRoute().getTecnocomServiceHelper().reverse(contrato, pan, originalMovement.getCodcom(), prepaidMovementReverse);

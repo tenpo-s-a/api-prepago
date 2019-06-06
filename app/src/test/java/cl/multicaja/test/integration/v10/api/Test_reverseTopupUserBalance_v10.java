@@ -36,15 +36,6 @@ public class Test_reverseTopupUserBalance_v10 extends TestBaseUnitApi {
     return respHttp;
   }
 
-  private HttpResponse reverseTopupUserBalanceTmp(NewPrepaidTopup10 newPrepaidTopup10) {
-    HttpHeader[] headers = new HttpHeader[]{
-      new HttpHeader("Content-Type", "application/json"),
-      new HttpHeader(Constants.HEADER_USER_TIMEZONE, "America/Santiago")
-    };
-    HttpResponse respHttp = apiPOST("/1.0/prepaid/topup/reverse", toJson(newPrepaidTopup10), headers);
-    System.out.println("respHttp: " + respHttp);
-    return respHttp;
-  }
 
   private void updateCreationDate(Long id) {
     getDbUtils().getJdbcTemplate().execute(String.format("UPDATE %s.prp_movimiento set fecha_creacion = ((fecha_creacion - INTERVAL '1 DAY')) WHERE id = %s", getSchema(), id));
@@ -616,53 +607,5 @@ public class Test_reverseTopupUserBalance_v10 extends TestBaseUnitApi {
 
     Assert.assertNull("No debe tener movimiento de reversa", movement);
   }
-  
-  /**
-   * Test que verifica el manejo del endpoint antiguo
-   * @throws Exception
-   */
-  @Test
-  public void shouldReturn201_ReverseTmpAccepted_POS() throws Exception {
-
-    PrepaidUser10 prepaidUser = buildPrepaidUserv2(PrepaidUserLevel.LEVEL_2);
-    prepaidUser = createPrepaidUserV2(prepaidUser);
-
-    Account account = buildAccountFromTecnocom(prepaidUser);
-    account = createAccount(account.getUserId(),account.getAccountNumber());
-    Assert.assertNotNull("La Cuenta debe ser != null ", account);
-
-
-    PrepaidCard10 prepaidCard10 = buildPrepaidCardWithTecnocomData(prepaidUser, account);
-    prepaidCard10 = createPrepaidCardV2(prepaidCard10);
-    Assert.assertNotNull("La tarjeta debe ser != null ", prepaidCard10);
-
-    NewPrepaidTopup10 prepaidTopup = buildNewPrepaidTopup10();
-    prepaidTopup.setMerchantCode(getRandomNumericString(15));
-    prepaidTopup.getAmount().setValue(BigDecimal.valueOf(500));
-    prepaidTopup.setRut(Integer.parseInt(prepaidUser.getDocumentNumber()));
-
-
-    PrepaidMovement10 originalTopup = buildPrepaidMovement11(prepaidUser, new PrepaidTopup10(prepaidTopup),prepaidCard10);
-    originalTopup.setIdTxExterno(prepaidTopup.getTransactionId());
-    originalTopup.setMonto(prepaidTopup.getAmount().getValue());
-    originalTopup = createPrepaidMovement11(originalTopup);
-
-    Assert.assertNotNull("Debe tener id", originalTopup.getId());
-    Assert.assertTrue("Debe tener id", originalTopup.getId() > 0);
-
-    HttpResponse resp = reverseTopupUserBalanceTmp(prepaidTopup);
-
-    Assert.assertEquals("status 201", 201, resp.getStatus());
-
-    // Se verifica que se tenga un registro de reversa
-
-    List<PrepaidMovement10> movement = getPrepaidMovementEJBBean11().getPrepaidMovements(null, null,
-      prepaidUser.getId(), prepaidTopup.getTransactionId(), PrepaidMovementType.TOPUP, PrepaidMovementStatus.PENDING, null, null, IndicadorNormalCorrector.CORRECTORA, TipoFactura.ANULA_CARGA_EFECTIVO_COMERCIO_MULTICAJA, null, null);
-
-    Assert.assertNotNull("Debe tener movimientos de reversa", movement);
-    Assert.assertEquals("Debe tener movimientos de reversa", 1,movement.size());
-  }
-
-
 
 }

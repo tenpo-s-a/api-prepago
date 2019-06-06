@@ -499,8 +499,6 @@ public final class TestHelpersResource10 extends BaseResource {
     DatosTarjetaDTO datosTarjetaDTO = TecnocomServiceHelper.getInstance().getTecnocomService().datosTarjeta(contrato);
 
     PrepaidCard10 prepaidCard = new PrepaidCard10();
-    prepaidCard.setIdUser(prepaidUser.getId());
-    prepaidCard.setProcessorUserId(contrato);
     prepaidCard.setPan(Utils.replacePan(datosTarjetaDTO.getPan()));
     prepaidCard.setEncryptedPan(encryptUtil.encrypt(datosTarjetaDTO.getPan()));
     prepaidCard.setStatus(PrepaidCardStatus.ACTIVE);
@@ -562,6 +560,7 @@ public final class TestHelpersResource10 extends BaseResource {
     return cdtTransaction;
   }
 
+  @Deprecated
   public PrepaidMovement10 buildPrepaidMovement10(PrepaidUser10 prepaidUser, NewPrepaidBaseTransaction10 prepaidTopup, PrepaidCard10 prepaidCard, CdtTransaction10 cdtTransaction, PrepaidMovementType type) {
 
     String codent = null;
@@ -590,10 +589,7 @@ public final class TestHelpersResource10 extends BaseResource {
 
     String centalta = "";
     String cuenta = "";
-    if(prepaidCard != null && !StringUtils.isBlank(prepaidCard.getProcessorUserId())) {
-      centalta = prepaidCard.getProcessorUserId().substring(4, 8);
-      cuenta = prepaidCard.getProcessorUserId().substring(12);
-    }
+
 
     PrepaidMovement10 prepaidMovement = new PrepaidMovement10();
     prepaidMovement.setIdMovimientoRef(cdtTransaction != null ? cdtTransaction.getTransactionReference() : getUniqueLong());
@@ -886,12 +882,10 @@ public final class TestHelpersResource10 extends BaseResource {
     String pan = getRandomNumericString(16);
 
     PrepaidCard10 prepaidCard = new PrepaidCard10();
-    prepaidCard.setIdUser(prepaidUser != null ? prepaidUser.getId() : null);
     prepaidCard.setPan(Utils.replacePan(pan));
     prepaidCard.setEncryptedPan(EncryptUtil.getInstance().encrypt(pan));
     prepaidCard.setExpiration(expiryDate);
     prepaidCard.setStatus(PrepaidCardStatus.ACTIVE);
-    prepaidCard.setProcessorUserId(getRandomNumericString(20));
     prepaidCard.setNameOnCard("Tarjeta de: " + getRandomString(5));
     prepaidCard.setProducto(getRandomNumericString(2));
     prepaidCard.setNumeroUnico(getRandomNumericString(8));
@@ -1020,8 +1014,6 @@ public final class TestHelpersResource10 extends BaseResource {
     TipoAlta tipoAlta = prepaidUser.getUserLevel() == PrepaidUserLevel.LEVEL_2 ? TipoAlta.NIVEL2 : TipoAlta.NIVEL1;
     AltaClienteDTO altaClienteDTO = tc.getTecnocomService().altaClientes(prepaidUser.getName(), prepaidUser.getLastName(), "", prepaidUser.getDocumentNumber(), TipoDocumento.RUT, tipoAlta);
     PrepaidCard10 prepaidCard10 = new PrepaidCard10();
-    prepaidCard10.setProcessorUserId(altaClienteDTO.getContrato());
-    prepaidCard10.setIdUser(prepaidUser.getId());
     prepaidCard10.setStatus(PrepaidCardStatus.PENDING);
     prepaidCard10 = prepaidCardEJBBean11.createPrepaidCard(null, prepaidCard10);
 
@@ -1119,7 +1111,7 @@ public final class TestHelpersResource10 extends BaseResource {
     tc.getTecnocomService().setRetorno(null);
 
 
-    PrepaidUser10 prepaidUser = buildPrepaidUser10();
+    PrepaidUser10 prepaidUser = buildPrepaidUserV2();
     prepaidUser = prepaidUserEJBBean10.createPrepaidUser(null, prepaidUser);
     log.info("prepaidUser: " + prepaidUser);
 
@@ -1129,9 +1121,8 @@ public final class TestHelpersResource10 extends BaseResource {
 
     TipoAlta tipoAlta = prepaidUser.getUserLevel() == PrepaidUserLevel.LEVEL_2 ? TipoAlta.NIVEL2 : TipoAlta.NIVEL1;
     AltaClienteDTO altaClienteDTO = tc.getTecnocomService().altaClientes(prepaidUser.getName(), prepaidUser.getLastName(), "", prepaidUser.getDocumentNumber(), TipoDocumento.RUT, tipoAlta);
-    prepaidCard.setProcessorUserId(altaClienteDTO.getContrato());
 
-    DatosTarjetaDTO datosTarjetaDTO = tc.getTecnocomService().datosTarjeta(prepaidCard.getProcessorUserId());
+    DatosTarjetaDTO datosTarjetaDTO = tc.getTecnocomService().datosTarjeta(altaClienteDTO.getContrato());
     prepaidCard.setPan(datosTarjetaDTO.getPan());
     prepaidCard.setExpiration(datosTarjetaDTO.getFeccadtar());
     prepaidCard.setEncryptedPan(EncryptUtil.getInstance().encrypt(prepaidCard.getPan()));
@@ -1148,8 +1139,8 @@ public final class TestHelpersResource10 extends BaseResource {
     prepaidMovementEJBBean10.updatePrepaidMovement(null,
       prepaidMovement.getId(),
       prepaidCard.getPan(),
-      prepaidCard.getProcessorUserId().substring(4, 8),
-      prepaidCard.getProcessorUserId().substring(12),
+      altaClienteDTO.getContrato().substring(4, 8),
+      altaClienteDTO.getContrato().substring(12),
       123,
       123,
       152,

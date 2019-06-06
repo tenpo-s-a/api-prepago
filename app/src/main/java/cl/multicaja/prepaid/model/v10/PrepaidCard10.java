@@ -11,16 +11,11 @@ import java.util.Objects;
 public class PrepaidCard10 extends BaseModel {
 
   private Long id;
-  //Id Interno de prepago
-  @JsonIgnore
-  private Long idUser; //TODO: Eliminar campo, ya que la relacion es por accountId
-  @Deprecated
-  private String processorUserId; //TODO: Eliminar campo
-  private String pan; // Este es el pan truncado
+  private String pan;
   @JsonIgnore
   private String encryptedPan;
-  private Integer expiration; //TODO: Eliminar campo
-  private String nameOnCard; //TODO: verificar si se va a eliminar campo
+  private Integer expiration;
+  private String nameOnCard;
   private PrepaidCardStatus status;
   private Timestamps timestamps;
   @JsonIgnore
@@ -49,22 +44,6 @@ public class PrepaidCard10 extends BaseModel {
 
   public void setId(Long id) {
     this.id = id;
-  }
-
-  public Long getIdUser() {
-    return idUser;
-  }
-
-  public void setIdUser(Long idUser) {
-    this.idUser = idUser;
-  }
-
-  public String getProcessorUserId() {
-    return processorUserId;
-  }
-
-  public void setProcessorUserId(String processorUserId) {
-    this.processorUserId = processorUserId;
   }
 
   public String getPan() {
@@ -175,8 +154,6 @@ public class PrepaidCard10 extends BaseModel {
     if (!(o instanceof PrepaidCard10)) return false;
     PrepaidCard10 that = (PrepaidCard10) o;
     return Objects.equals(getId(), that.getId()) &&
-      Objects.equals(getIdUser(), that.getIdUser()) &&
-      Objects.equals(getProcessorUserId(), that.getProcessorUserId()) &&
       Objects.equals(getPan(), that.getPan()) &&
       Objects.equals(getEncryptedPan(), that.getEncryptedPan()) &&
       Objects.equals(getExpiration(), that.getExpiration()) &&
@@ -191,7 +168,7 @@ public class PrepaidCard10 extends BaseModel {
 
   @Override
   public int hashCode() {
-    return Objects.hash(getId(), getIdUser(), getProcessorUserId(), getPan(), getEncryptedPan(), getExpiration(), getNameOnCard(), getStatus());
+    return Objects.hash(getId(), getPan(), getEncryptedPan(), getExpiration(), getNameOnCard(), getStatus());
   }
   @JsonIgnore
   public boolean isActive(){

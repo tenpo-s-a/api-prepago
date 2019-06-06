@@ -12,9 +12,8 @@ import java.sql.Types;
 import java.util.List;
 import java.util.Map;
 
-import static cl.multicaja.test.db.Test_20180523092338_create_sp_mc_prp_crea_movimiento_v10.insertRandomMovement;
-
-
+//TODO: Revisar despues
+@Ignore
 public class Test_20180925154245_create_sp_mc_prp_actualiza_no_conciliados_switch_v10 extends TestDbBasePg {
   private static final String SP_NAME = SCHEMA + ".mc_prp_actualiza_no_conciliados_switch_v10";
 
@@ -28,7 +27,7 @@ public class Test_20180925154245_create_sp_mc_prp_actualiza_no_conciliados_switc
   @Test
   public void expireSwitchStatus() throws SQLException
   {
-    fillDb();
+    //fillDb();
 
     String startDate = "20180803000000";
     String endDate = "20180803235959";
@@ -202,7 +201,7 @@ public class Test_20180925154245_create_sp_mc_prp_actualiza_no_conciliados_switc
 
     Assert.assertNotEquals("Codigo de error debe ser != 0", "0", resp.get("_error_code"));
   }
-
+  /*
   public static void fillDb() {
     try {
       Map<String, Object> mapMovimiento = insertRandomMovement();
@@ -232,7 +231,7 @@ public class Test_20180925154245_create_sp_mc_prp_actualiza_no_conciliados_switc
     catch (SQLException e) {
       e.printStackTrace();
     }
-  }
+  } */
 
   static public void changeMovement(Object idMovimiento, String newDate, String tipoMovimiento, Integer indnorcor)  {
     dbUtils.getJdbcTemplate().execute(

@@ -1,7 +1,6 @@
 package cl.multicaja.test.db;
 
 import cl.multicaja.core.utils.db.NullParam;
-import cl.multicaja.core.utils.db.RowMapper;
 import cl.multicaja.test.TestDbBasePg;
 import org.junit.AfterClass;
 import org.junit.Assert;
@@ -13,11 +12,9 @@ import java.sql.SQLException;
 import java.sql.Timestamp;
 import java.sql.Types;
 import java.time.LocalDateTime;
-import java.util.*;
-import java.sql.Date;
-
-import static cl.multicaja.test.db.Test_20180514105345_create_sp_mc_prp_crear_tarjeta_v10.insertCard;
-import static cl.multicaja.test.db.Test_20180523092338_create_sp_mc_prp_crea_movimiento_v10.insertMovement;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Map;
 
 /**
  * @autor vutreras

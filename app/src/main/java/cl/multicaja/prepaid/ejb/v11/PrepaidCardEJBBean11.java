@@ -169,8 +169,8 @@ public class PrepaidCardEJBBean11 extends PrepaidBaseEJBBean10 implements Prepai
   private static String INSERT_PREPAID_CARD = "INSERT INTO prepago.prp_tarjeta(\n" +
     "            pan, pan_encriptado, estado, \n" +
     "            nombre_tarjeta, producto, numero_unico, fecha_creacion, fecha_actualizacion, \n" +
-    "            uuid, pan_hash, id_cuenta,contrato,expiracion, id_usuario)\n" +
-    "    VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?);";
+    "            uuid, pan_hash, id_cuenta,expiracion)\n" +
+    "    VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?);";
 
   private static String SEARCH_BY_ACCOUNT_ID = String.format("SELECT * FROM %s.prp_tarjeta where id_cuenta = ?",getSchema());
 
@@ -254,9 +254,7 @@ public class PrepaidCardEJBBean11 extends PrepaidBaseEJBBean10 implements Prepai
       ps.setString(9, !StringUtils.isAllBlank(prepaidCard10.getUuid()) ? prepaidCard10.getUuid() : ""); //uuid
       ps.setString(10, !StringUtils.isAllBlank(prepaidCard10.getHashedPan()) ? prepaidCard10.getHashedPan() : ""); //pan_hash
       ps.setLong(11, prepaidCard10.getAccountId()); //id_cuenta
-      ps.setString(12,"");//contrato TODO: hay que borrarlo
-      ps.setInt(13, prepaidCard10.getExpiration() != null ? prepaidCard10.getExpiration() : 0); //expiracion
-      ps.setLong(14, prepaidCard10.getIdUser() != null ? prepaidCard10.getIdUser() : 0); //id_usuario TODO: hay que borrarlo
+      ps.setInt(12, prepaidCard10.getExpiration() != null ? prepaidCard10.getExpiration() : 0); //expiracion
       return ps;
     }, keyHolder);
     try{
@@ -476,11 +474,7 @@ public class PrepaidCardEJBBean11 extends PrepaidBaseEJBBean10 implements Prepai
         .append(prepaidCard.getEncryptedPan())
         .append("', ");
     }
-    if(!StringUtils.isAllBlank(prepaidCard.getProcessorUserId())) {
-      sb.append("contrato = '")
-        .append(prepaidCard.getProcessorUserId())
-        .append("', ");
-    }
+
     if(prepaidCard.getExpiration() != null && prepaidCard.getExpiration() > 0) {
       sb.append("expiracion = ")
         .append(prepaidCard.getExpiration())
@@ -649,42 +643,6 @@ public class PrepaidCardEJBBean11 extends PrepaidBaseEJBBean10 implements Prepai
       return null;
     }
   }
-
-  /*
-  public PrepaidCard10 insertPrepaidCard(Map<String, Object> headers, PrepaidCard10 prepaidCard10)  throws Exception {
-    if(prepaidCard10 == null){
-      throw new BadRequestException(PARAMETRO_FALTANTE_$VALUE).setData(new KeyValue("value", "prepaidCard10"));
-    }
-
-    log.info(String.format("[insertPrepaidCard] Guardando tarjeta "));
-
-    KeyHolder keyHolder = new GeneratedKeyHolder();
-
-    getDbUtils().getJdbcTemplate().update(connection -> {
-      PreparedStatement ps = connection
-        .prepareStatement(INSERT_PREPAID_CARD, new String[] {"id"});
-      ps.setString(1, !StringUtils.isAllBlank(prepaidCard10.getPan()) ? prepaidCard10.getPan() : ""); //pan
-      ps.setString(2, !StringUtils.isAllBlank(prepaidCard10.getEncryptedPan()) ? prepaidCard10.getEncryptedPan() : ""); //pan_encriptado
-      ps.setString(3, prepaidCard10.getStatus().name()); //estado
-      ps.setString(4, !StringUtils.isAllBlank(prepaidCard10.getNameOnCard()) ? prepaidCard10.getNameOnCard() : ""); //nombre_tarjeta
-      ps.setString(5, !StringUtils.isAllBlank(prepaidCard10.getProducto()) ? prepaidCard10.getProducto() : ""); //producto
-      ps.setString(6, !StringUtils.isAllBlank(prepaidCard10.getNumeroUnico()) ? prepaidCard10.getNumeroUnico() : ""); //numero_unico
-      ps.setTimestamp(7,Timestamp.valueOf(LocalDateTime.ofInstant(Instant.now(), ZoneId.of("UTC")))); //fecha_creacion
-      ps.setTimestamp(8, Timestamp.valueOf(LocalDateTime.ofInstant(Instant.now(), ZoneId.of("UTC")))); //fecha_actualizacion
-      ps.setString(9, prepaidCard10.getUuid()); //uuid
-      ps.setString(10, !StringUtils.isAllBlank(prepaidCard10.getHashedPan()) ? prepaidCard10.getHashedPan() : ""); //pan_hash
-      ps.setLong(11, prepaidCard10.getAccountId()); //id_cuenta
-      ps.setString(12,"");//contrato TODO: hay que borrarlo
-      ps.setInt(13, prepaidCard10.getExpiration() != null ? prepaidCard10.getExpiration() : 0); //expiracion
-      ps.setLong(14, prepaidCard10.getIdUser() != null ? prepaidCard10.getIdUser() : 0); //id_usuario TODO: hay que borrarlo
-      return ps;
-    }, keyHolder);
-    try{
-      return  this.getPrepaidCardById(headers,(long) keyHolder.getKey());
-    }catch (Exception e){
-      return null;
-    }
-  }*/
 
   public PrepaidCard10 getPrepaidCardByPanAndUserId(String pan, Long userId)  throws Exception {
     try {
