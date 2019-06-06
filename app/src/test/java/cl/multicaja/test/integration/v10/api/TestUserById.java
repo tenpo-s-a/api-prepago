@@ -39,7 +39,7 @@ public class TestUserById {
   }
 
   //On Demand
-  //@Ignore
+  @Ignore
   @Test
   public void validateTenpoUser() throws Exception {
     String uuid = "894d0db8-3da2-4ddd-b3bf-3c64cd2247de";
