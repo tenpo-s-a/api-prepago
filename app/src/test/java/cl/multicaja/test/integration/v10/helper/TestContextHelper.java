@@ -69,6 +69,10 @@ public class TestContextHelper extends TestBaseUnit {
       tecnocomReconciliationRoute10.setTecnocomReconciliationEJBBean10(getTecnocomReconciliationEJBBean10());
       tecnocomReconciliationRoute10.setAccountEJBBean10(getAccountEJBBean10());
 
+      ConciliationMcRedRoute10 conciliationMcRedRoute10 = new ConciliationMcRedRoute10();
+      conciliationMcRedRoute10.setMcRedReconciliationEJBBean10(getMcRedReconciliationEJBBean10());
+      conciliationMcRedRoute10.setReconciliationFilesEJBBean10(getReconciliationFilesEJBBean10());
+
       ProductChangeRoute10 productChangeRoute10 = new ProductChangeRoute10();
       productChangeRoute10.setMailPrepaidEJBBean10(getMailPrepaidEJBBean10());
       productChangeRoute10.setPrepaidUserEJBBean10(getPrepaidUserEJBBean10());
@@ -84,7 +88,7 @@ public class TestContextHelper extends TestBaseUnit {
       kafkaEventsRoute10.setAccountEJBBean10(getAccountEJBBean10());
 
       camelFactory.startCamelContextWithRoutes(true,
-        prepaidTopupRoute10, transactionReversalRoute10, productChangeRoute10, mailRoute10,invoiceRoute10, kafkaEventsRoute10);
+        prepaidTopupRoute10, transactionReversalRoute10, productChangeRoute10, mailRoute10, invoiceRoute10, kafkaEventsRoute10, conciliationMcRedRoute10);
     }
     simpleNamingContextBuilder.deactivate();
   }
