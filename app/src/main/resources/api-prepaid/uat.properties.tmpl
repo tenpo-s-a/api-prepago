@@ -106,13 +106,13 @@ kafka.enabled=true
 kafka.host={{ $kafka_host }}
 
 #Crypto Config
-azure.client.enabled=false
+azure.client.enabled=true
 azure.client.id={{ $azure_keyvault_client_id }}
 azure.client.secret={{ $azure_keyvault_client_secret }}
 azure.vault.uri={{ $azure_keyvault_url }}
 
 # Cuando se habilita Azure se tiene que poner el nombre del Secreto
-crypt.password=00multicajaPrepago2019X#
+crypt.password={{ $$azure_keyvault_key_name }}
 
 #FreshDesk
 freshdesk.enabled=true

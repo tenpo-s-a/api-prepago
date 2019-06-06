@@ -20,7 +20,7 @@ public class EncryptHelper {
   private static final String AZURE_KEYVAULT_CLIENT_ID = "AZURE_KEYVAULT_CLIENT_ID";
   private static final String AZURE_KEYVAULT_CLIENT_SECRET = "AZURE_KEYVAULT_CLIENT_SECRET";
   private static final String AZURE_KEYVAULT_URL = "AZURE_KEYVAULT_URL";
-  private static final String AZURE_KEYVAULT_ENABLED = "AZURE_KEYVAULT_ENABLED";
+  private static final String AZURE_KEYVAULT_ENABLED = "AZURE_KEYVAULT_KEY_NAME";
 
   public static EncryptHelper getInstance() {
     if (instance == null) {
@@ -36,20 +36,26 @@ public class EncryptHelper {
     return this.configUtils;
   }
 
-  public String encryptPan(String data){
-   return  getCryptCardUtil().encryptPan(data,getConfigUtils().getProperty("encrypt.password",""));
+  public String encryptPan(String data) {
+    ConfigUtils config = getConfigUtils();
+    String encryptPassword = EnvironmentUtil.getVariable(AZURE_KEYVAULT_CLIENT_ID, () ->
+      config.getProperty("encrypt.password",""));
+   return  getCryptCardUtil().encryptPan(data,encryptPassword);
   }
 
   public String decryptPan(String data){
-    return  getCryptCardUtil().decryptPan(data,getConfigUtils().getProperty("encrypt.password",""));
+    ConfigUtils config = getConfigUtils();
+    String encryptPassword = EnvironmentUtil.getVariable(AZURE_KEYVAULT_CLIENT_ID, () ->
+      config.getProperty("encrypt.password",""));
+    return  getCryptCardUtil().decryptPan(data,encryptPassword);
   }
 
   private synchronized EncryptCardUtil getCryptCardUtil() {
     if (encryptCardUtil == null) {
       ConfigUtils config = getConfigUtils();
+
       String useAzure = EnvironmentUtil.getVariable(AZURE_KEYVAULT_ENABLED, () ->
         config.getProperty("azure.client.enabled", "false"));
-
       if (Boolean.valueOf(useAzure)) {
         String azureClientId = EnvironmentUtil.getVariable(AZURE_KEYVAULT_CLIENT_ID, () ->
           config.getProperty("azure.client.id",""));
