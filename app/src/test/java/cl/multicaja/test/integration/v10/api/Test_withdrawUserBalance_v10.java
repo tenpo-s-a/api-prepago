@@ -700,7 +700,6 @@ public class Test_withdrawUserBalance_v10 extends TestBaseUnitApi {
     Account account = createRandomAccount(prepaidUser);
 
     PrepaidCard10 prepaidCard10 = buildPrepaidCard10();
-    prepaidCard10.setIdUser(prepaidUser.getId());
     prepaidCard10.setAccountId(account.getId());
     prepaidCard10.setUuid(UUID.randomUUID().toString());
     prepaidCard10.setHashedPan(getRandomString(20));

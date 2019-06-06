@@ -45,7 +45,6 @@ public class Test_PrepaidCardEJBBean11_updatePrepaidCard extends TestBaseUnit {
     String producto = getRandomNumericString(2);
     String numeroUnico = getRandomNumericString(8);
 
-    prepaidCard10.setIdUser(Long.MAX_VALUE);
     prepaidCard10.setStatus(cardStatus);
     prepaidCard10.setExpiration(cardExpiration);
     prepaidCard10.setNameOnCard(nameOnCard);

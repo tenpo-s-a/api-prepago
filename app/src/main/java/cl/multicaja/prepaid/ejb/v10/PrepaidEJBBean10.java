@@ -428,9 +428,7 @@ public class PrepaidEJBBean10 extends PrepaidBaseEJBBean10 implements PrepaidEJB
 
           prepaidCard = new PrepaidCard10();
           prepaidCard.setAccountId(account.getId());
-          prepaidCard.setIdUser(user.getId());
           prepaidCard.setStatus(PrepaidCardStatus.PENDING);
-          prepaidCard.setProcessorUserId(altaClienteDTO.getContrato());
           prepaidCard.setUuid(UUID.randomUUID().toString());
           prepaidCard = getPrepaidCardEJB11().createPrepaidCard(null, prepaidCard);
           //Solo para la primera carga se actualiza el id de la tarjeta al creado.

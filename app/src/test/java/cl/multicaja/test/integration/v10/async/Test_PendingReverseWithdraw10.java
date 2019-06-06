@@ -62,7 +62,7 @@ public class Test_PendingReverseWithdraw10 extends TestBaseUnitAsync {
     prepaidMovement = createPrepaidMovement11(prepaidMovement);
 
     String messageId = sendPendingWithdrawReversal(withdraw10, prepaidUser, prepaidMovement, 4);
-
+    Thread.sleep(3000);
     {
       //se verifica que el mensaje haya sido procesado por el proceso asincrono y lo busca en la cola de procesados
       Queue qResp = camelFactory.createJMSQueue(TransactionReversalRoute10.PENDING_REVERSAL_WITHDRAW_RESP);

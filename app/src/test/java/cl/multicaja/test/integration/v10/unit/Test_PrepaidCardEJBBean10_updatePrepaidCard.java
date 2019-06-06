@@ -26,7 +26,7 @@ public class Test_PrepaidCardEJBBean10_updatePrepaidCard extends TestBaseUnit {
     card.setStatus(PrepaidCardStatus.PENDING);
     card = createPrepaidCardV2(card);
     Long cardId = card.getId();
-    Long userId = card.getIdUser();
+    Long userId = account.getUserId();
     PrepaidCardStatus status = card.getStatus();
 
     card.setStatus(PrepaidCardStatus.ACTIVE);

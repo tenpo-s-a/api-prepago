@@ -13,6 +13,7 @@ import cl.multicaja.core.utils.db.InParam;
 import cl.multicaja.core.utils.db.NullParam;
 import cl.multicaja.core.utils.db.OutParam;
 import cl.multicaja.core.utils.db.RowMapper;
+import cl.multicaja.prepaid.ejb.v10.AccountEJBBean10;
 import cl.multicaja.prepaid.ejb.v10.MailPrepaidEJBBean10;
 import cl.multicaja.prepaid.ejb.v10.PrepaidBaseEJBBean10;
 import cl.multicaja.prepaid.ejb.v11.PrepaidCardEJBBean11;
@@ -20,6 +21,7 @@ import cl.multicaja.prepaid.ejb.v11.PrepaidMovementEJBBean11;
 import cl.multicaja.prepaid.helpers.CalculationsHelper;
 import cl.multicaja.prepaid.helpers.EncryptHelper;
 import cl.multicaja.prepaid.model.v10.*;
+import cl.multicaja.prepaid.model.v11.Account;
 import cl.multicaja.prepaid.model.v11.PrepaidMovementFeeType;
 import cl.multicaja.tecnocom.constants.*;
 import com.opencsv.CSVWriter;
@@ -76,6 +78,9 @@ public class PrepaidAccountingEJBBean10 extends PrepaidBaseEJBBean10 implements 
   @EJB
   private PrepaidCardEJBBean11 prepaidCardEJBBean11;
 
+  @EJB
+  private AccountEJBBean10 accountEJBBean10;
+
   private EncryptHelper encryptHelper;
 
   public MailPrepaidEJBBean10 getMailPrepaidEJBBean10() {
@@ -116,6 +121,14 @@ public class PrepaidAccountingEJBBean10 extends PrepaidBaseEJBBean10 implements 
 
   public void setPrepaidCardEJBBean11(PrepaidCardEJBBean11 prepaidCardEJBBean11) {
     this.prepaidCardEJBBean11 = prepaidCardEJBBean11;
+  }
+
+  public AccountEJBBean10 getAccountEJBBean10() {
+    return accountEJBBean10;
+  }
+
+  public void setAccountEJBBean10(AccountEJBBean10 accountEJBBean10) {
+    this.accountEJBBean10 = accountEJBBean10;
   }
 
   public EncryptHelper getEncryptHelper() {
@@ -964,7 +977,7 @@ public class PrepaidAccountingEJBBean10 extends PrepaidBaseEJBBean10 implements 
     return ipmFile;
   }
 
-  //FIXME: Ya no procesamos las transacciones del ipm de esta forma. ACTION: Borrar este método.
+  //FIXME: Ya no procesamos las transacciones del ipm de esta forma. ACTION: Borrar este mï¿½todo.
   @Override
   @Deprecated
   public void processIpmFileTransactions(Map<String, Object> headers, IpmFile ipmFile) throws Exception {
@@ -1078,11 +1091,15 @@ public class PrepaidAccountingEJBBean10 extends PrepaidBaseEJBBean10 implements 
 
       // Si el movimiento no existe en nuestra BD se agrega  como uno nuevo, si no  se actualiza.
       if(prepaidMovement10 == null) {
+
         //Se busca la tarjeta correspondiente al movimiento
         PrepaidCard10 prepaidCard10 = getPrepaidCardEJBBean11().getPrepaidCardByEncryptedPan(null, getEncryptHelper().encryptPan(trx.getPan()));
+        //getAccount ById
+        Account account = getAccountEJBBean10().findById(prepaidCard10.getId());
+
         // Se agrega movimiento solo si existe la tarjeta.
         if(prepaidCard10 != null){
-          PrepaidMovement10 mov = buildMovementAut(prepaidCard10.getIdUser(), prepaidCard10 ,trx,getTipoMovimientoFromAccTxType(acc.getType()),getTipoFacFromAccTxType(acc.getType()));
+          PrepaidMovement10 mov = buildMovementAut(account, prepaidCard10, trx, getTipoMovimientoFromAccTxType(acc.getType()), getTipoFacFromAccTxType(acc.getType()));
           movement10s.add(mov);
         }else{
           //TODO: Que se hace cuando cae en este caso ?
@@ -1103,7 +1120,7 @@ public class PrepaidAccountingEJBBean10 extends PrepaidBaseEJBBean10 implements 
         getPrepaidMovementEJBBean11().updatePrepaidMovementStatus(headers,prepaidMovement10.getId(),PrepaidMovementStatus.PROCESS_OK);
       }
     }
-    // Se añaden los movimientos que no llegaron desde un Archivo de operaciones diarias.
+    // Se aï¿½aden los movimientos que no llegaron desde un Archivo de operaciones diarias.
     this.getPrepaidMovementEJBBean11().addPrepaidMovement(headers,movement10s);
     // Se guarda data en Accounting
     this.saveAccountingData(null, transactions);
@@ -1139,20 +1156,20 @@ public class PrepaidAccountingEJBBean10 extends PrepaidBaseEJBBean10 implements 
     }
     return tipoFactura;
   }
-  private PrepaidMovement10 buildMovementAut(Long userId, PrepaidCard10 prepaidCard, IpmMessage batchTrx,PrepaidMovementType prepaidMovementType, TipoFactura tipoFactura) {
+  private PrepaidMovement10 buildMovementAut(Account account, PrepaidCard10 prepaidCard, IpmMessage batchTrx,PrepaidMovementType prepaidMovementType, TipoFactura tipoFactura) {
 
     PrepaidMovement10 prepaidMovement = new PrepaidMovement10();
 
     prepaidMovement.setIdMovimientoRef(0L);
-    prepaidMovement.setIdPrepaidUser(userId);
+    prepaidMovement.setIdPrepaidUser(account.getUserId());
     prepaidMovement.setIdTxExterno(batchTrx.getApprovalCode().toString());
     prepaidMovement.setTipoMovimiento(prepaidMovementType);
     prepaidMovement.setMonto(getNumberUtils().toBigDecimal(batchTrx.getCardholderBillingAmount()));
     prepaidMovement.setEstado(PrepaidMovementStatus.PENDING);
     prepaidMovement.setEstadoNegocio(BusinessStatusType.IN_PROCESS);
 
-    String centalta = prepaidCard.getProcessorUserId().substring(4, 8);
-    String cuenta = prepaidCard.getProcessorUserId().substring(8, 20);
+    String centalta = account.getAccountNumber().substring(4, 8);
+    String cuenta = account.getAccountNumber().substring(8, 20);
 
     prepaidMovement.setCodent("");//Desde tarjeta Contrato
     prepaidMovement.setCentalta(centalta);//Desde tarjeta Contrato
