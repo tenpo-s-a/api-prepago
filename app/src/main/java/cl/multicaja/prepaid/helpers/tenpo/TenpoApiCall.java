@@ -97,6 +97,7 @@ public class TenpoApiCall {
     LOG.info("response: " + httpResponse.getResp());
 
     if(HttpError.TIMEOUT_CONNECTION.equals(httpResponse.getHttpError()) || HttpError.TIMEOUT_RESPONSE.equals(httpResponse.getHttpError())) {
+      LOG.error(httpResponse.getHttpError());
       throw new TimeoutException();
     }
     LOG.info(String.format("Status: %d", httpResponse.getStatus()));

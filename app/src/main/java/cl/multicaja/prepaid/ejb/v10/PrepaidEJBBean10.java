@@ -51,6 +51,7 @@ import java.text.NumberFormat;
 import java.time.LocalDateTime;
 import java.time.ZoneOffset;
 import java.util.*;
+import java.util.concurrent.TimeoutException;
 
 import static cl.multicaja.core.model.Errors.*;
 
@@ -674,13 +675,15 @@ public class PrepaidEJBBean10 extends PrepaidBaseEJBBean10 implements PrepaidEJB
         prepaidUser10.setUserPlan(UserPlanType.valueOfEnum(tenpoUser.getPlan().name()));
         prepaidUser10 = getPrepaidUserEJB10().createUser(null,prepaidUser10);
       }
-    } catch (NotFoundException e){
+    } catch (NotFoundException e) {
       log.error(e);
       throw new NotFoundException(CLIENTE_NO_TIENE_PREPAGO);
-    }catch (Exception e) {//TODO: Por mientras si no funcioa se enviara Usuario no encontrado.
+    }catch (TimeoutException e){
+      log.error(e);
+      //throw new TimeoutException(ERROR_TIME_OUT_COMUNICACION_CON_SERVICIO_WEB_EXTERNO);
+    }catch (Exception e) {
       e.printStackTrace();
       log.error(e);
-      throw new NotFoundException(CLIENTE_NO_TIENE_PREPAGO);
     }
     return prepaidUser10;
   }
