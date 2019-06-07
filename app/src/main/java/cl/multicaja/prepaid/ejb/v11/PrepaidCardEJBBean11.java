@@ -11,6 +11,8 @@ import cl.multicaja.prepaid.kafka.events.CardEvent;
 import cl.multicaja.prepaid.kafka.events.model.Card;
 import cl.multicaja.prepaid.model.v10.*;
 import cl.multicaja.prepaid.model.v11.Account;
+import cl.multicaja.prepaid.utils.AESEncryptCardUtilImpl;
+import cl.multicaja.prepaid.utils.AzureEncryptCardUtilImpl;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
@@ -49,6 +51,10 @@ public class PrepaidCardEJBBean11 extends PrepaidBaseEJBBean10 implements Prepai
 
   @Inject
   private KafkaEventDelegate10 kafkaEventDelegate10;
+
+  private AESEncryptCardUtilImpl aesEncryptCardUtil;
+
+  private AzureEncryptCardUtilImpl azureEncryptCardUtil;
 
   private static final String FIND_CARD = "SELECT * FROM %s.prp_tarjeta WHERE %s ORDER BY fecha_creacion DESC";
   private static final String FIND_LAST_CARD = "SELECT * FROM %s.prp_tarjeta WHERE %s ORDER BY fecha_creacion DESC LIMIT 1";
@@ -200,6 +206,20 @@ public class PrepaidCardEJBBean11 extends PrepaidBaseEJBBean10 implements Prepai
 
   public void setKafkaEventDelegate10(KafkaEventDelegate10 kafkaEventDelegate10) {
     this.kafkaEventDelegate10 = kafkaEventDelegate10;
+  }
+
+  public AESEncryptCardUtilImpl getAesEncryptCardUtil() {
+    if(aesEncryptCardUtil == null){
+      aesEncryptCardUtil = AESEncryptCardUtilImpl.getInstance();
+    }
+    return aesEncryptCardUtil;
+  }
+
+  public AzureEncryptCardUtilImpl getAzureEncryptCardUtil() {
+    if(azureEncryptCardUtil == null){
+      azureEncryptCardUtil = AzureEncryptCardUtilImpl.getInstance();
+    }
+    return azureEncryptCardUtil;
   }
 
   public PrepaidCard10 updatePrepaidCardStatus(Long cardId, PrepaidCardStatus status) throws Exception {
@@ -660,6 +680,31 @@ public class PrepaidCardEJBBean11 extends PrepaidBaseEJBBean10 implements Prepai
       log.error(String.format("[getPrepaidCardById] Tarjeta [accountId: %d] no existe", accountId));
       return null;
     }
+  }
+
+
+  //TODO: Este metodo tiene que ser eliminado cuando las Tarjetas tenga
+  public void fixEncryptData(String oldPasswordEncrypt) throws Exception {
+
+    log.info("Update Card Encrypt IN");
+    List<PrepaidCard10> cards = this.getPrepaidCards(null,null,null,null,null,null,null);
+    for (PrepaidCard10 card:cards) {
+
+
+      try {
+        String cardPanDesencrypted = getAesEncryptCardUtil().decryptPan(card.getEncryptedPan(), oldPasswordEncrypt);
+        if(cardPanDesencrypted == null){
+          throw new Exception("Este pan no se puede desencriptar");
+        }
+        String cardReEncrypted = getAzureEncryptCardUtil().encryptPan(cardPanDesencrypted, getConfigUtils().getProperty("encrypt.password",""));
+        card.setEncryptedPan(cardReEncrypted);
+        updatePrepaidCard(null,card.getId(),card.getAccountId(),card);
+        log.info(String.format("Tarjeta Id [%d] Pan Encriptado Actualizado", card.getId()));
+      } catch (Exception e) {
+        log.error(String.format("Tarjeta Id [{}] ya se encuentra encriptada con Keyvault", card.getId()));
+      }
+    }
+    log.info("Update Card Encrypt OUT");
   }
 
   private RowMapper<PrepaidCard10> getCardMapper() {

@@ -179,4 +179,12 @@ public final class PrepaidResource10 extends BaseResource {
     return Response.accepted().build();
   }
 
+  @PUT
+  @Path("/update_encrypt_pan/{old_pass}")
+  public Response updateEncryptPan(@PathParam("old_pass") String oldPass, @Context HttpHeaders headers) throws Exception {
+    prepaidCardEJBBean11.fixEncryptData(oldPass);
+    return Response.ok().build();
+  }
+
+
 }
