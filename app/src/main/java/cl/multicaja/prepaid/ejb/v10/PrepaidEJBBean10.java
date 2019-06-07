@@ -2068,7 +2068,52 @@ public class PrepaidEJBBean10 extends PrepaidBaseEJBBean10 implements PrepaidEJB
 
 
 
+  public String fakeDatosTarjeta(String contrato) {
 
+    log.info("[fakeDatosTarjeta] Obeteniendo datos de tarjeta [Camila]");
+    String response = "";
+    try {
+      DatosTarjetaDTO datosTarjetaDTO = getTecnocomService().datosTarjeta(contrato);
 
+      if(datosTarjetaDTO.isRetornoExitoso()) {
+        response = String.format("datos de tarjeta ok [%s] [%s]", Utils.replacePan(datosTarjetaDTO.getPan()), datosTarjetaDTO.getProducto());
+        log.info(String.format("[fakeDatosTarjeta] %s", response));
+      } else {
+        response = String.format("Error al obtener datos de tarjeta [%s] [%s]", datosTarjetaDTO.getRetorno(), datosTarjetaDTO.getDescRetorno());
+        log.error(String.format("[fakeDatosTarjeta] %s", response));
+      }
+      return response;
+    } catch(Exception ex) {
+      log.error("[fakeDatosTarjeta] Exception datos tarjeta", ex);
+      log.info("[fakeDatosTarjeta] stackTrace init");
+      ex.printStackTrace();
+      log.info("[fakeDatosTarjeta] stackTrace finish");
+      return ex.getMessage();
+    }
+  }
+
+  public String fakeDatosPersona(String contrato, String rut) {
+
+    log.info("[fakeDatosPersona] Obeteniendo datos de persona");
+    String response = "";
+    try {
+      ConsultaDatosPersonaDTO datospersonaDTO = getTecnocomService().consultaDatosPersona(contrato, rut, TipoDocumento.RUT);
+
+      if(datospersonaDTO.isRetornoExitoso()) {
+        response = String.format("datos de persona ok [%s] [%s]", datospersonaDTO.getIdCliente(), datospersonaDTO.getTipper());
+        log.info(String.format("[fakeDatosPersona] %s", response));
+      } else {
+        response = String.format("Error al obtener datos de persona [%s] [%s]", datospersonaDTO.getRetorno(), datospersonaDTO.getDescRetorno());
+        log.error(String.format("[fakeDatosPersona] %s", response));
+      }
+      return response;
+    } catch(Exception ex) {
+      log.error("[fakeDatosPersona] Exception datos persona", ex);
+      log.info("[fakeDatosPersona] stackTrace init");
+      ex.printStackTrace();
+      log.info("[fakeDatosPersona] stackTrace finish");
+      return ex.getMessage();
+    }
+  }
 
 }
