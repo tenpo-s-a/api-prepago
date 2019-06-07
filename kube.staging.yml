@@ -124,6 +124,8 @@ metadata:
 spec:
   hosts:
   - "40.70.68.63"
+  addresses:
+  - "40.70.68.63"
   location: MESH_EXTERNAL
   ports:
   - number: 8080
