@@ -448,6 +448,9 @@ public class PrepaidEJBBean10 extends PrepaidBaseEJBBean10 implements PrepaidEJB
         }
       } catch(Exception ex) {
         log.error("[topupUserBalance] Exception realizando alta de cliente", ex);
+        log.error("[topupUserBalance] Stacktrace init");
+        ex.printStackTrace();
+        log.error("[topupUserBalance] Stacktrace finish");
         getPrepaidMovementEJB11().updatePrepaidMovementStatus(null, prepaidMovement.getId(), PrepaidMovementStatus.ERROR_IN_PROCESS_EMISSION_CARD);
         //Confirmar la carga en CDT
         cdtTransaction.setTransactionType(prepaidTopup.getCdtTransactionTypeConfirm());
@@ -512,6 +515,9 @@ public class PrepaidEJBBean10 extends PrepaidBaseEJBBean10 implements PrepaidEJB
         }
       } catch (Exception ex) {
         log.error("[topupUserBalance] Exception consultando datos de tarjeta", ex);
+        log.error("[topupUserBalance] Stacktrace init");
+        ex.printStackTrace();
+        log.error("[topupUserBalance] Stacktrace finish");
         getPrepaidMovementEJB11().updatePrepaidMovementStatus(null, prepaidMovement.getId(), PrepaidMovementStatus.ERROR_IN_PROCESS_CREATE_CARD);
         //Confirmar la carga en CDT
         cdtTransaction.setTransactionType(prepaidTopup.getCdtTransactionTypeConfirm());
