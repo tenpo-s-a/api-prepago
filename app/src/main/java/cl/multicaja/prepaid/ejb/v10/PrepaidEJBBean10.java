@@ -680,6 +680,7 @@ public class PrepaidEJBBean10 extends PrepaidBaseEJBBean10 implements PrepaidEJB
       throw new NotFoundException(CLIENTE_NO_TIENE_PREPAGO);
     }catch (TimeoutException e){
       log.error(e);
+      //TODO: Descomentar cuando el despliegue de Multicaja-Base que contiene este error funcione.
       //throw new TimeoutException(ERROR_TIME_OUT_COMUNICACION_CON_SERVICIO_WEB_EXTERNO);
     }catch (Exception e) {
       e.printStackTrace();
