@@ -180,7 +180,7 @@ public final class PrepaidResource10 extends BaseResource {
     return Response.accepted().build();
   }
 
-  @GET
+  @POST
   @Path("/fake/datos")
   public Response datos1(Map<String, Object> body) {
     if(body == null){
@@ -196,7 +196,7 @@ public final class PrepaidResource10 extends BaseResource {
     return Response.ok(r).build();
   }
 
-  @GET
+  @POST
   @Path("/fake/card")
   public Response datos2(Map<String, Object> body) {
     if(body == null){
