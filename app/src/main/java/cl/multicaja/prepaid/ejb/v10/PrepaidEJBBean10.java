@@ -422,6 +422,7 @@ public class PrepaidEJBBean10 extends PrepaidBaseEJBBean10 implements PrepaidEJB
         AltaClienteDTO altaClienteDTO = getTecnocomService().altaClientes(user.getName(), user.getLastName(), "", user.getDocumentNumber(), TipoDocumento.RUT, TipoAlta.NIVEL2);
 
         if (altaClienteDTO.isRetornoExitoso()) {
+          log.info("[topupUserBalance] alta cliente realizado exitosamente");
 
           // guarda la informacion de la cuenta
           account = getAccountEJBBean10().insertAccount(user.getId(), altaClienteDTO.getContrato());
@@ -435,16 +436,19 @@ public class PrepaidEJBBean10 extends PrepaidBaseEJBBean10 implements PrepaidEJB
 
           prepaidMovement = getPrepaidMovementEJB11().updateMovementCardId(prepaidMovement.getId(),prepaidCard.getId());
           if(prepaidMovement != null){
-            log.info("Id Tarjeta Movimiento Actualizado correctamente");
+            log.info("[topupUserBalance]  Actualizado Id Tarjeta en el movimiento");
           }else {
-            log.error("");
+            log.info("[topupUserBalance]  Error actualizado Id Tarjeta en el movimiento");
           }
-
         } else {
           log.error(String.format("[topupUserBalance] Error realizando alta de cliente [%s] [%s]", altaClienteDTO.getRetorno(), altaClienteDTO.getDescRetorno()));
           throw new RunTimeValidationException(TARJETA_ERROR_GENERICO_$VALUE).setData(new KeyValue("value", "Error realizando alta de cliente"));
         }
       } catch(Exception ex) {
+        log.error("[topupUserBalance] Exception realizando alta de cliente", ex);
+        log.error("[topupUserBalance] Stacktrace init");
+        ex.printStackTrace();
+        log.error("[topupUserBalance] Stacktrace finish");
         getPrepaidMovementEJB11().updatePrepaidMovementStatus(null, prepaidMovement.getId(), PrepaidMovementStatus.ERROR_IN_PROCESS_EMISSION_CARD);
         //Confirmar la carga en CDT
         cdtTransaction.setTransactionType(prepaidTopup.getCdtTransactionTypeConfirm());
@@ -461,7 +465,7 @@ public class PrepaidEJBBean10 extends PrepaidBaseEJBBean10 implements PrepaidEJB
         cdtTransaction.setTransactionType(CdtTransactionType.REVERSA_CARGA_CONF);
         cdtTransaction.setGloss(cdtTransaction.getTransactionType().getName() + " " + topupRequest.getAmount().getValue());
         cdtTransaction = this.getCdtEJB10().addCdtTransaction(null, cdtTransaction);
-        log.error(ex);
+
         throw new RunTimeValidationException(TARJETA_ERROR_GENERICO_$VALUE).setData(new KeyValue("value", "Error realizando alta de cliente"));
       }
     }
@@ -474,6 +478,8 @@ public class PrepaidEJBBean10 extends PrepaidBaseEJBBean10 implements PrepaidEJB
         DatosTarjetaDTO datosTarjetaDTO = getTecnocomService().datosTarjeta(account.getAccountNumber());
 
         if (datosTarjetaDTO.isRetornoExitoso()) {
+          log.info("[topupUserBalance] datos de tarjeta obtenidos exitosamente");
+
           prepaidCard.setNameOnCard(user.getName() + " " + user.getLastName());
           prepaidCard.setStatus(PrepaidCardStatus.PENDING);
           prepaidCard.setExpiration(datosTarjetaDTO.getFeccadtar());
@@ -496,9 +502,9 @@ public class PrepaidEJBBean10 extends PrepaidBaseEJBBean10 implements PrepaidEJB
               prepaidCard);
           } catch(Exception ex) {
 
-            log.error("[topupUserBalance] Error al actualizar tarjeta", ex);
+            log.error("[topupUserBalance] Error al actualizar tarjeta en BD", ex);
 
-            throw new RunTimeValidationException(TARJETA_ERROR_GENERICO_$VALUE).setData(new KeyValue("value", "Error al actualizar tarjeta"));
+            throw new RunTimeValidationException(TARJETA_ERROR_GENERICO_$VALUE).setData(new KeyValue("value", "Error al actualizar tarjeta en BD"));
           }
 
         } else {
@@ -506,7 +512,10 @@ public class PrepaidEJBBean10 extends PrepaidBaseEJBBean10 implements PrepaidEJB
           throw new RunTimeValidationException(TARJETA_ERROR_GENERICO_$VALUE).setData(new KeyValue("value", "Error consultando datos de tarjeta"));
         }
       } catch (Exception ex) {
-        log.error(ex);
+        log.error("[topupUserBalance] Exception consultando datos de tarjeta", ex);
+        log.error("[topupUserBalance] Stacktrace init");
+        ex.printStackTrace();
+        log.error("[topupUserBalance] Stacktrace finish");
         getPrepaidMovementEJB11().updatePrepaidMovementStatus(null, prepaidMovement.getId(), PrepaidMovementStatus.ERROR_IN_PROCESS_CREATE_CARD);
         //Confirmar la carga en CDT
         cdtTransaction.setTransactionType(prepaidTopup.getCdtTransactionTypeConfirm());
@@ -524,17 +533,19 @@ public class PrepaidEJBBean10 extends PrepaidBaseEJBBean10 implements PrepaidEJB
         cdtTransaction.setGloss(cdtTransaction.getTransactionType().getName() + " " + topupRequest.getAmount().getValue());
         cdtTransaction = this.getCdtEJB10().addCdtTransaction(null, cdtTransaction);
 
-        log.error(ex);
         throw new RunTimeValidationException(TARJETA_ERROR_GENERICO_$VALUE).setData(new KeyValue("value", "Error consultando datos de tarjeta"));
       }
     }
 
     String pan = getEncryptHelper().decryptPan(prepaidCard.getEncryptedPan());
 
+    log.info(String.format("[topupUserBalance] Realizando inclusion de movimientos [id_tx_ext: %s]", prepaidMovement.getIdTxExterno()));
+
     InclusionMovimientosDTO inclusionMovimientosDTO = getTecnocomServiceHelper().topup(account.getAccountNumber(), pan, prepaidTopup.getMerchantName(), prepaidMovement);
 
     // Responde OK
     if (inclusionMovimientosDTO.isRetornoExitoso()) {
+      log.error("[topupUserBalance] Inclusion de movimientos OK");
 
       getPrepaidMovementEJB11().updatePrepaidMovement(null,
         prepaidMovement.getId(),
@@ -565,7 +576,7 @@ public class PrepaidEJBBean10 extends PrepaidBaseEJBBean10 implements PrepaidEJB
       getAccountEJBBean10().expireBalanceCache(account.getId());
     }
     else if(CodigoRetorno._1020.equals(inclusionMovimientosDTO.getRetorno())) {
-      log.info("Error Timeout Response");
+      log.error("[topupUserBalance] Inclusion de movimientos Error Timeout Response");
       getPrepaidMovementEJB11().updatePrepaidMovementStatus(headers, prepaidMovement.getId(), PrepaidMovementStatus.ERROR_TIMEOUT_RESPONSE);
       //Inicia la reversa del movimiento
 
@@ -652,12 +663,14 @@ public class PrepaidEJBBean10 extends PrepaidBaseEJBBean10 implements PrepaidEJB
       //FIXME: Implementar integracion con servicio de usuarios.
       TenpoUser tenpoUser = getTenpoApiCall().getUserById(UUID.fromString(userId));
       if(tenpoUser != null){
+
         prepaidUser10 = new PrepaidUser10();
+
         prepaidUser10.setDocumentNumber(tenpoUser.getTributaryIdentifier());
         prepaidUser10.setDocumentType(DocumentType.DNI_CL); // REVISAR QUE VALORES VENDRAN ACA Y AGREGAR AL ENUM
         prepaidUser10.setName(tenpoUser.getFirstName());
         prepaidUser10.setLastName(tenpoUser.getLastName());
-        prepaidUser10.setUuid(tenpoUser.getUserId().toString());
+        prepaidUser10.setUuid(tenpoUser.getId().toString());
         prepaidUser10.setTimestamps(new Timestamps(LocalDateTime.now(ZoneOffset.UTC),LocalDateTime.now(ZoneOffset.UTC)));
         prepaidUser10.setUserLevel(PrepaidUserLevel.valueOfEnum(tenpoUser.getLevel().name()));
         prepaidUser10.setStatus(getUserStatusFromTenpoStatus(tenpoUser.getState()));
@@ -2055,7 +2068,52 @@ public class PrepaidEJBBean10 extends PrepaidBaseEJBBean10 implements PrepaidEJB
 
 
 
+  public String fakeDatosTarjeta(String contrato) {
 
+    log.info("[fakeDatosTarjeta] Obeteniendo datos de tarjeta [Camila]");
+    String response = "";
+    try {
+      DatosTarjetaDTO datosTarjetaDTO = getTecnocomService().datosTarjeta(contrato);
 
+      if(datosTarjetaDTO.isRetornoExitoso()) {
+        response = String.format("datos de tarjeta ok [%s] [%s]", Utils.replacePan(datosTarjetaDTO.getPan()), datosTarjetaDTO.getProducto());
+        log.info(String.format("[fakeDatosTarjeta] %s", response));
+      } else {
+        response = String.format("Error al obtener datos de tarjeta [%s] [%s]", datosTarjetaDTO.getRetorno(), datosTarjetaDTO.getDescRetorno());
+        log.error(String.format("[fakeDatosTarjeta] %s", response));
+      }
+      return response;
+    } catch(Exception ex) {
+      log.error("[fakeDatosTarjeta] Exception datos tarjeta", ex);
+      log.info("[fakeDatosTarjeta] stackTrace init");
+      ex.printStackTrace();
+      log.info("[fakeDatosTarjeta] stackTrace finish");
+      return ex.getMessage();
+    }
+  }
+
+  public String fakeDatosPersona(String contrato, String rut) {
+
+    log.info("[fakeDatosPersona] Obeteniendo datos de persona");
+    String response = "";
+    try {
+      ConsultaDatosPersonaDTO datospersonaDTO = getTecnocomService().consultaDatosPersona(contrato, rut, TipoDocumento.RUT);
+
+      if(datospersonaDTO.isRetornoExitoso()) {
+        response = String.format("datos de persona ok [%s] [%s]", datospersonaDTO.getIdCliente(), datospersonaDTO.getTipper());
+        log.info(String.format("[fakeDatosPersona] %s", response));
+      } else {
+        response = String.format("Error al obtener datos de persona [%s] [%s]", datospersonaDTO.getRetorno(), datospersonaDTO.getDescRetorno());
+        log.error(String.format("[fakeDatosPersona] %s", response));
+      }
+      return response;
+    } catch(Exception ex) {
+      log.error("[fakeDatosPersona] Exception datos persona", ex);
+      log.info("[fakeDatosPersona] stackTrace init");
+      ex.printStackTrace();
+      log.info("[fakeDatosPersona] stackTrace finish");
+      return ex.getMessage();
+    }
+  }
 
 }
