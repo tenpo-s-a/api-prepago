@@ -66,14 +66,14 @@ public class Test_PrepaidEJBBean10_validateTempoUser {
   private TenpoUser getTempoUser(){
     TenpoUser tenpoUser = new TenpoUser();
     tenpoUser.setDocumentNumber("1111111");
-    tenpoUser.setDocumentType("XXX");
+    //tenpoUser.setDocumentType("XXX");
     tenpoUser.setFirstName("ajsfkalksjf");
     tenpoUser.setLastName("asdasdas");
     tenpoUser.setTributaryIdentifier("16616881-3");
     tenpoUser.setLevel(Level.LEVEL_1);
     tenpoUser.setState(State.ACTIVE);
     tenpoUser.setId(UUID.randomUUID());
-    tenpoUser.setUserId(UUID.randomUUID());
+    //tenpoUser.setUserId(UUID.randomUUID());
     tenpoUser.setPlan(Plan.FREE);
     return tenpoUser;
   }

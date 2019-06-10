@@ -1,8 +1,11 @@
 package cl.multicaja.test.integration.v10.api;
 
+import cl.multicaja.prepaid.ejb.v10.PrepaidEJBBean10;
 import cl.multicaja.prepaid.helpers.tenpo.TenpoApiCall;
 import cl.multicaja.prepaid.helpers.tenpo.model.TenpoUser;
+import cl.multicaja.prepaid.model.v10.PrepaidUser10;
 import org.junit.Assert;
+import org.junit.Ignore;
 import org.junit.Test;
 
 import java.util.UUID;
@@ -28,6 +31,25 @@ public class TestUserById {
     UUID id = UUID.fromString("956c767f-7a8c-4ddb-ada5-f01886ffa451");
     TenpoUser tenpoUser = tenpoApiCall.getUserById(id);
     Assert.assertNull("Objeto tiene que ser null", tenpoUser);
+  }
+
+  //On Demand
+  @Ignore
+  @Test
+  public void validateTenpoUser() throws Exception {
+    PrepaidEJBBean10 prepaidEJBBean10 = new PrepaidEJBBean10();
+
+    String uuid = "894d0db8-3da2-4ddd-b3bf-3c64cd2247de";
+    UUID id = UUID.fromString(uuid);
+    TenpoApiCall tenpoApiCall = TenpoApiCall.getInstance();
+    tenpoApiCall.setApiUrl(URL);
+
+    TenpoUser tenpoUser = tenpoApiCall.getUserById(id);
+    PrepaidUser10 prepaidUser10 = prepaidEJBBean10.validateTempoUser(uuid);
+
+    Assert.assertEquals("Los uuid son iguales",id,tenpoUser.getId());
+    Assert.assertEquals("Los uuid son iguales",id,UUID.fromString(prepaidUser10.getUuid()));
+
   }
 
 }

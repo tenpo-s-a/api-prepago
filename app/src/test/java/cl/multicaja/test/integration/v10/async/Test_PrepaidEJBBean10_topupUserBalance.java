@@ -1649,14 +1649,14 @@ public class Test_PrepaidEJBBean10_topupUserBalance extends TestBaseUnitAsync {
 
     TenpoUser tenpoUser = new TenpoUser();
     tenpoUser.setDocumentNumber(prepaidUser10.getDocumentNumber());
-    tenpoUser.setDocumentType(prepaidUser10.getDocumentType().name());
+    //tenpoUser.setDocumentType(prepaidUser10.getDocumentType().name());
     tenpoUser.setFirstName(prepaidUser10.getName());
     tenpoUser.setLastName(prepaidUser10.getLastName());
     tenpoUser.setTributaryIdentifier(prepaidUser10.getDocumentNumber());
     tenpoUser.setLevel(Level.LEVEL_1);
     tenpoUser.setState(State.ACTIVE);
     tenpoUser.setId(UUID.fromString(prepaidUser10.getUuid()));
-    tenpoUser.setUserId(UUID.fromString(prepaidUser10.getUuid()));
+    //tenpoUser.setUserId(UUID.fromString(prepaidUser10.getUuid()));
     tenpoUser.setPlan(Plan.FREE);
     return tenpoUser;
   }

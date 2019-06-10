@@ -298,7 +298,6 @@ public class PrepaidUserEJBBean10 extends PrepaidBaseEJBBean10 implements Prepai
     }
   }
 
-
   @Override
   public void updatePrepaidUserStatus(Map<String, Object> headers, Long userId, PrepaidUserStatus status) throws Exception {
 
@@ -323,7 +322,6 @@ public class PrepaidUserEJBBean10 extends PrepaidBaseEJBBean10 implements Prepai
       throw new BaseException(ERROR_DE_COMUNICACION_CON_BBDD);
     }
   }
-
 
   public void updatePrepaidUserLevel(Long userId, PrepaidUserLevel level) throws BaseException {
     if(userId == null) {
@@ -376,7 +374,6 @@ public class PrepaidUserEJBBean10 extends PrepaidBaseEJBBean10 implements Prepai
 
     return this.findByExtId(null,user.getUuid());
   }
-
 
   public org.springframework.jdbc.core.RowMapper<PrepaidUser10> getUserRowMapper() {
     return (ResultSet rs, int rowNum) -> {
