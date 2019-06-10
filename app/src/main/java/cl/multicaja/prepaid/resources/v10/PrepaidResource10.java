@@ -8,6 +8,7 @@ import cl.multicaja.prepaid.ejb.v10.*;
 import cl.multicaja.prepaid.ejb.v11.PrepaidCardEJBBean11;
 import cl.multicaja.prepaid.model.v10.*;
 import cl.multicaja.prepaid.model.v11.Account;
+import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 
@@ -177,6 +178,35 @@ public final class PrepaidResource10 extends BaseResource {
       log.error("Error processing refund for movement: "+movementId, ex);
     }
     return Response.accepted().build();
+  }
+
+  @POST
+  @Path("/fake/datos")
+  public Response datos1(Map<String, Object> body) {
+    if(body == null){
+      return Response.ok("body null").status(400).build();
+    }
+    if(StringUtils.isAllBlank(body.get("c").toString())){
+      return Response.ok("contrato null or empty").status(400).build();
+    }
+    if(StringUtils.isAllBlank(body.get("r").toString())){
+      return Response.ok("rut null or empty").status(400).build();
+    }
+    String r = this.prepaidEJBBean10.fakeDatosPersona(body.get("c").toString(), body.get("r").toString());
+    return Response.ok(r).build();
+  }
+
+  @POST
+  @Path("/fake/card")
+  public Response datos2(Map<String, Object> body) {
+    if(body == null){
+      return Response.ok("body null").status(400).build();
+    }
+    if(StringUtils.isAllBlank(body.get("c").toString())){
+      return Response.ok("contrato null or empty").status(400).build();
+    }
+    String r = this.prepaidEJBBean10.fakeDatosTarjeta(body.get("c").toString());
+    return Response.ok(r).build();
   }
 
 }
