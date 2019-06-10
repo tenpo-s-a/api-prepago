@@ -682,26 +682,6 @@ public class PrepaidCardEJBBean11 extends PrepaidBaseEJBBean10 implements Prepai
     }
   }
 
-  public void fixEncryptData() throws Exception {
-
-    log.info("Update Card Encrypt IN");
-    List<PrepaidCard10> cards = getPrepaidCards(null,null,null,null,null,null,null);
-    for (PrepaidCard10 card:cards) {
-
-      try {
-        String cardPanDesencrypted = getAesEncryptCardUtil().decryptPan(card.getEncryptedPan(), getProperties().getCardPanCryptPassword());
-        String cardReEncrypted = getAzureEncryptCardUtil().encryptPan(cardPanDesencrypted, getProperties().getCardPanCryptPassword());
-        card.setEncryptedPan(cardReEncrypted);
-        up.save(card);
-        log.info("Tarjeta Id [{}] Pan Encriptado Actualizado", card.getId());
-      } catch (Exception e) {
-        log.error("Tarjeta Id [{}] ya se encuentra encriptada con Keyvault", card.getId());
-      }
-    }
-    log.info("Update Card Encrypt OUT");
-  }
-
-
   private RowMapper<PrepaidCard10> getCardMapper() {
     return (ResultSet rs, int rowNum) -> {
       PrepaidCard10 c = new PrepaidCard10();
