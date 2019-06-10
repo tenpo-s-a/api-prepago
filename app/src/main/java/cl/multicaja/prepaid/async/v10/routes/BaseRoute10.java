@@ -57,6 +57,9 @@ public abstract class BaseRoute10 extends CamelRouteBuilder {
   private McRedReconciliationEJBBean10 mcRedReconciliationEJBBean10;
 
   @EJB
+  private ReconciliationFilesEJBBean10 reconciliationFilesEJBBean10;
+
+  @EJB
   private MastercardCurrencyUpdateEJBBean10 mastercardCurrencyUpdateEJBBean10;
 
   @EJB
@@ -219,6 +222,12 @@ public abstract class BaseRoute10 extends CamelRouteBuilder {
 
   public void setMcRedReconciliationEJBBean10(McRedReconciliationEJBBean10 mcRedReconciliationEJBBean10) {
     this.mcRedReconciliationEJBBean10 = mcRedReconciliationEJBBean10;
+  }
+
+  public ReconciliationFilesEJBBean10 getReconciliationFilesEJBBean10() { return reconciliationFilesEJBBean10; }
+
+  public void setReconciliationFilesEJBBean10(ReconciliationFilesEJBBean10 reconciliationFilesEJBBean10) {
+    this.reconciliationFilesEJBBean10 = reconciliationFilesEJBBean10;
   }
 
   public MastercardCurrencyUpdateEJBBean10 getMastercardCurrencyUpdateEJBBean10() {

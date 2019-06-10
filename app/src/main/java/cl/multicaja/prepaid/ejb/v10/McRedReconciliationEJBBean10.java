@@ -175,7 +175,11 @@ public class McRedReconciliationEJBBean10 extends PrepaidBaseEJBBean10 implement
         break;
       }
     }
+    // Se expiran todos los movimientos que hayan llegado hace varios archivos
     getPrepaidMovementEJBBean10().expireNotReconciledMovements(reconciliationFile10.getType());
+    // Se borran los movimientos de la tabla temporal una vez procesados
+    deleteFileMovementsByFileId(null, reconciliationFile10.getId());
+
     log.info("[processSwitchData OUT]");
   }
 
@@ -364,7 +368,6 @@ public class McRedReconciliationEJBBean10 extends PrepaidBaseEJBBean10 implement
 
   public List<McRedReconciliationFileDetail> getFileMovements(Map<String,Object> header, Long fileId, Long movementId, String mcId) throws Exception {
     return getFileMovements(header, "prp_movimiento_switch", fileId, movementId, mcId);
-    //return getFileMovements(header, "prp_movimiento_switch_hist", fileId, movementId, mcId);
   }
 
   public List<McRedReconciliationFileDetail> getFileMovementsHist(Map<String,Object> header, Long fileId, Long movementId, String mcId) throws Exception {
