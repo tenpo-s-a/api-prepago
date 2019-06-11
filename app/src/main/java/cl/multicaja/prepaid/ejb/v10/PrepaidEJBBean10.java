@@ -470,8 +470,7 @@ public class PrepaidEJBBean10 extends PrepaidBaseEJBBean10 implements PrepaidEJB
       }
     }
 
-    //TODO: si no hay tarjeta o la info esta incompleta, se realiza la consulta de datos
-    if(PrepaidCardStatus.PENDING.equals(prepaidCard.getStatus())) {
+    if(StringUtils.isAllBlank(prepaidCard.getHashedPan())) {
       try {
         log.info(String.format("[topupUserBalance] Obeteniendo datos de tarjeta %s", prepaidCard.getUuid()));
 
@@ -635,13 +634,16 @@ public class PrepaidEJBBean10 extends PrepaidBaseEJBBean10 implements PrepaidEJB
       // Activa la tarjeta luego de realizado el cobro de emision
       prepaidCard = getPrepaidCardEJB11().updatePrepaidCardStatus(prepaidCard.getId(),PrepaidCardStatus.ACTIVE);
 
+      //TODO: se comenta la publicacion de evento de tarjeta creada ya que se estan generando en Nivel 2.
+      // el evento se publica al realizar upgrade de tarjeta.
+
       // publica evento de tarjeta creada
-      getPrepaidCardEJB11().publishCardEvent(
-        user.getUuid(),
-        account.getUuid(),
-        prepaidCard.getId(),
-        KafkaEventsRoute10.SEDA_CARD_CREATED_EVENT
-      );
+      //getPrepaidCardEJB11().publishCardEvent(
+      //  user.getUuid(),
+      //  account.getUuid(),
+      //  prepaidCard.getId(),
+      //  KafkaEventsRoute10.SEDA_CARD_CREATED_EVENT
+      //);
 
       // publica evento de contrato/cuenta creada
       getAccountEJBBean10().publishAccountCreatedEvent(user.getUuid(), account);

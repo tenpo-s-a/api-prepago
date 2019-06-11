@@ -92,7 +92,8 @@ public class WebApp implements ServletContextListener  {
           mailRoute10,
           invoiceRoute10,
           kafkaEventsRoute10,
-          tecnocomReconciliationRoute10
+          tecnocomReconciliationRoute10,
+          conciliationMcRedRoute10
           );
         log.info("==== Apache camel iniciado ====");
       }

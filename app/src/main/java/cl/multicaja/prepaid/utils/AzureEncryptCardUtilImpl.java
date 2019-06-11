@@ -5,8 +5,11 @@ import cl.multicaja.prepaid.util.CryptCard;
 
 
 public class AzureEncryptCardUtilImpl implements EncryptCardUtil {
-    private CryptCard cryptCard = CryptCardAzureImpl.getInstance();
+  private CryptCard cryptCard = CryptCardAzureImpl.getInstance();
 
+  public AzureEncryptCardUtilImpl(){
+    super();
+  }
   public AzureEncryptCardUtilImpl(String clientId, String clientKey, String vaulturi) {
     super();
     if (cryptCard instanceof CryptCardAzureImpl) {
