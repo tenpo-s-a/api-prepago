@@ -48,11 +48,7 @@ public class PrepaidCardEJBBean11 extends PrepaidBaseEJBBean10 implements Prepai
 
   @EJB
   private AccountEJBBean10 accountEJBBean10;
-
-  private AESEncryptCardUtilImpl aesEncryptCardUtil;
-
-  private AzureEncryptCardUtilImpl azureEncryptCardUtil;
-
+  
   @Inject
   private KafkaEventDelegate10 kafkaEventDelegate10;
 

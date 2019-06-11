@@ -1,7 +1,6 @@
 package cl.multicaja.prepaid.helpers;
 
 import cl.multicaja.core.utils.ConfigUtils;
-import cl.multicaja.prepaid.helpers.tecnocom.TecnocomServiceHelper;
 import cl.multicaja.prepaid.utils.AESEncryptCardUtilImpl;
 import cl.multicaja.prepaid.utils.AzureEncryptCardUtilImpl;
 import cl.multicaja.prepaid.utils.EncryptCardUtil;
@@ -11,7 +10,7 @@ import org.apache.commons.logging.LogFactory;
 
 public class EncryptHelper {
 
-  private static Log log = LogFactory.getLog(TecnocomServiceHelper.class);
+  private static Log log = LogFactory.getLog(EncryptHelper.class);
 
   private ConfigUtils configUtils;
   private static EncryptHelper instance;
