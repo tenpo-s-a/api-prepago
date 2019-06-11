@@ -125,3 +125,20 @@ spec:
     protocol: TCP
   resolution: NONE
 ---
+
+apiVersion: networking.istio.io/v1alpha3
+kind: ServiceEntry
+metadata:
+  name: api-prepaid-keyvault
+  namespace: prepaid
+spec:
+  hosts:
+  - vault.azure.net
+  - "*.vault.azure.net"
+  location: MESH_EXTERNAL
+  ports:
+  - number: 443
+    name: tcp-api-prepaid-keyvault
+    protocol: TCP
+  resolution: NONE
+---

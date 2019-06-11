@@ -141,8 +141,8 @@ metadata:
   namespace: prepaid
 spec:
   hosts:
-   - dev-nqjglc-kv.vault.azure.net/
-   - "*.dev-nqjglc-kv.vault.azure.net/"
+  - vault.azure.net
+  - "*.vault.azure.net"
   location: MESH_EXTERNAL
   ports:
   - number: 443
