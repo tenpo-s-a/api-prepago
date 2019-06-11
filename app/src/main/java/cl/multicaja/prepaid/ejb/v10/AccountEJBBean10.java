@@ -38,6 +38,9 @@ import java.sql.Types;
 import java.time.Instant;
 import java.time.LocalDateTime;
 import java.time.ZoneId;
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.List;
 import java.util.Map;
 
 import static cl.multicaja.core.model.Errors.*;
@@ -70,6 +73,8 @@ public class AccountEJBBean10 extends PrepaidBaseEJBBean10 {
   private static final String FIND_ACCOUNT_BY_NUMBER_AND_USER_SQL = String.format("SELECT * FROM %s.prp_cuenta WHERE id_usuario = ? AND cuenta = ?", getSchema());
 
   private static final String UPDATE_ACCOUNT_STATUS = String.format("UPDATE %s.prp_cuenta SET estado = ? where id = ?",getSchema());
+
+  private static final String LIST_ACCOUNT_SQL = String.format("SELECT * FROM %s.prp_cuenta", getSchema());
 
   @Inject
   private KafkaEventDelegate10 kafkaEventDelegate10;
@@ -204,6 +209,19 @@ public class AccountEJBBean10 extends PrepaidBaseEJBBean10 {
     return  this.findById((long) keyHolder.getKey());
     }catch (Exception e){
       return null;
+    }
+  }
+
+  @Deprecated
+  public List<Account> listAccounts() throws Exception {
+
+    log.info("[listAccounts] Buscando cuentas");
+    try {
+      List<Account> accounts = getDbUtils().getJdbcTemplate()
+        .query(LIST_ACCOUNT_SQL, this.getAccountMapper());
+      return accounts;
+    } catch (EmptyResultDataAccessException ex) {
+      return Collections.emptyList();
     }
   }
 

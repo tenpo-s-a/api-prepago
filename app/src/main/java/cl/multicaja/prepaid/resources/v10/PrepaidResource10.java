@@ -20,6 +20,7 @@ import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
 
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 
 import static cl.multicaja.core.model.Errors.CLIENTE_NO_TIENE_PREPAGO;
@@ -208,5 +209,18 @@ public final class PrepaidResource10 extends BaseResource {
     String r = this.prepaidEJBBean10.fakeDatosTarjeta(body.get("c").toString());
     return Response.ok(r).build();
   }
+
+  @GET
+  @Path("/fix/account_event")
+  public Response accountsEvent() {
+    try {
+      List<Account> accountList = this.prepaidEJBBean10.generateAccountEvents();
+
+      return Response.ok(accountList).build();
+    } catch (Exception ex) {
+      return Response.serverError().build();
+    }
+  }
+
 
 }

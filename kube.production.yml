@@ -179,4 +179,14 @@ spec:
         host: api-prepaid
         port:
           number: 80
+  - match:
+    - uri:
+        exact: /prepaid/1.0/prepaid/fix/account_event
+    rewrite:
+      uri: /api-prepaid-1.0/1.0/prepaid/fix/account_event
+    route:
+    - destination:
+        host: api-prepaid
+        port:
+          number: 80
 ---

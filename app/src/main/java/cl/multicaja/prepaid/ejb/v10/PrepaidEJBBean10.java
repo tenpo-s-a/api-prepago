@@ -2067,7 +2067,7 @@ public class PrepaidEJBBean10 extends PrepaidBaseEJBBean10 implements PrepaidEJB
   }
 
 
-
+  @Deprecated
   public String fakeDatosTarjeta(String contrato) {
 
     log.info("[fakeDatosTarjeta] Obeteniendo datos de tarjeta [Camila]");
@@ -2092,6 +2092,7 @@ public class PrepaidEJBBean10 extends PrepaidBaseEJBBean10 implements PrepaidEJB
     }
   }
 
+  @Deprecated
   public String fakeDatosPersona(String contrato, String rut) {
 
     log.info("[fakeDatosPersona] Obeteniendo datos de persona");
@@ -2114,6 +2115,21 @@ public class PrepaidEJBBean10 extends PrepaidBaseEJBBean10 implements PrepaidEJB
       log.info("[fakeDatosPersona] stackTrace finish");
       return ex.getMessage();
     }
+  }
+
+
+  @Deprecated
+  public List<Account> generateAccountEvents() throws Exception {
+    List<Account> accounts = getAccountEJBBean10().listAccounts();
+
+    for (Account a: accounts) {
+      PrepaidUser10 u = getPrepaidUserEJB10().findById(null, a.getUserId());
+
+      // publica evento de contrato/cuenta creada
+      getAccountEJBBean10().publishAccountCreatedEvent(u.getUuid(), a);
+    }
+
+    return accounts;
   }
 
 }
