@@ -48,7 +48,7 @@ public class PrepaidCardEJBBean11 extends PrepaidBaseEJBBean10 implements Prepai
 
   @EJB
   private AccountEJBBean10 accountEJBBean10;
-  
+
   @Inject
   private KafkaEventDelegate10 kafkaEventDelegate10;
 
