@@ -51,8 +51,6 @@ tecnocom.channel={{ $tecnocom_channel }}
 tecnocom.order={{ $tecnocom_order }}
 tecnocom.service.mock=false
 
-# Cuando se habilita Azure se tiene que poner el nombre del Secreto
-encrypt.password={{ $azure_keyvault_key_name }}
 
 #sftp server config - Mastercard T057 file (Sonda)
 sftp.mastercard.host={{ $sftp_host }}
@@ -112,7 +110,7 @@ azure.client.secret={{ $azure_keyvault_client_secret }}
 azure.vault.uri={{ $azure_keyvault_url }}
 
 # Cuando se habilita Azure se tiene que poner el nombre del Secreto
-crypt.password={{ $azure_keyvault_key_name }}
+encrypt.password={{ $azure_keyvault_key_name }}
 
 #FreshDesk
 freshdesk.enabled=true
