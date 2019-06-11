@@ -112,7 +112,7 @@ azure.client.secret={{ $azure_keyvault_client_secret }}
 azure.vault.uri={{ $azure_keyvault_url }}
 
 # Cuando se habilita Azure se tiene que poner el nombre del Secreto
-crypt.password={{ $$azure_keyvault_key_name }}
+crypt.password={{ $azure_keyvault_key_name }}
 
 #FreshDesk
 freshdesk.enabled=true
