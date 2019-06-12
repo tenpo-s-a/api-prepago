@@ -23,6 +23,7 @@ $ sudo apt-get install postgresql-9.6
 ```
 
 
+
 # Configuración de postgresql
 
 ## Cambiar clave de usuario postgres:
