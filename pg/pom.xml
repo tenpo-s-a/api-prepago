@@ -14,7 +14,7 @@
     <java.version>1.8</java.version>
     <skipTests>true</skipTests>
     <junit.version>4.12</junit.version>
-    <postgresql.version>42.2.1</postgresql.version>
+    <postgresql.version>42.3.3</postgresql.version>
 	</properties>
 
 	<repositories>
